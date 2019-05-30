@@ -1,0 +1,16 @@
+<mat-toolbar color="primary" class="mat-elevation-z10">
+  <a rel="noreferrer" target="_blank" href="https://sas.clemson.edu:8343/SASVisualAnalytics/report?location=%2FShared%20Data%2FCEVAC%2FWatt%20Dive&type=Report.BI&section=vi1080">
+	<span>Controlboard</span>
+  </a>
+</mat-toolbar>
+<mat-sidenav-container>
+  <mat-sidenav mode="side" opened="true" disableClose="true" fixedInViewport="false">
+  </mat-sidenav>
+  <mat-sidenav-content>
+	<app-mapview></app-mapview>
+  </mat-sidenav-content>
+  <mat-sidenav mode="side" position="end" opened="true" disableClose="true" fixedInViewport="false">
+	<app-alertbox></app-alertbox>
+  </mat-sidenav>
+</mat-sidenav-container>
+<router-outlet></router-outlet>
