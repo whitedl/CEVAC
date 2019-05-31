@@ -140,3 +140,12 @@ approximately 5 minutes, 10 seconds
 		* WAP 203 is less intuitive. Perhaps there has been a class in that room this
 		week?
 		* WAP 303 might also be offices
+* On 06/03, to determine just how waps work, we'll be conducting the following:
+  1. A second pass through the building
+	   * Was the first pass an anomaly?
+	2. Walking around the outside of the building (mainly testing the porch)
+		 * Curious about RSSI
+	3. Turning the wifi on and off at different locations
+	   * We can check the IP address of the connected router via our phones: are
+		 they different before and after connection? How often do they change throughout
+		 the Watt center?

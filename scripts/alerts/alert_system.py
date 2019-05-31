@@ -16,11 +16,16 @@ CONFIG_PATH = "//130.127.219.170/Watt/Watt Staff/Building/WAP/config/"
 COLUMNS = {
 	"Alert" : 0,
 	"Measure" : 1,
-	"Time" : 2,
-	"Date" : 3,
-	"Condition" : 4,
-	"Note" : 5,
+	"Database" : 2,
+	"Time" : 3,
+	"Day" : 4,
+	"Month" : 5,
+	"Condition" : 6,
+	"Operation" : 7,
+	"Note" : 8,
 }
+
+
 
 # Definitions
 
@@ -29,9 +34,9 @@ def import_conditions(fname):
 	with csv.reader(open(CONDITIONS_FPATH+fname)) as csvfile:
 		next(csvfile)
 		for row in csvfile:
-			if row["condition"][0] in [">","<"]:
+			if row[COLUMNS["Condition"]][0] in [">","<"]:
 				alerts[row["Alert"]] = {
-
+					## TODO after regex defined
 				}
 	return alerts
 
@@ -40,6 +45,15 @@ def get_config(fname):
    config = json.loads(fp.read())
    fp.close()
    return config
+
+ def send_email(email_address,content):
+	 ## TODO after email set up
+	 pass
+
+def send_email_list(email_address_list,content):
+	for email_address in email_address_list:
+		send_email(email_address,content)
+
 
 
 # Script
@@ -69,7 +83,9 @@ connection = pypyodbc.connect(
 
 ## Check alerts
 for alert in alerts:
-	pass
+	## TODO after regex defined
+	if False:
+		send_email_list(emails,{})
 
 
 logging.shutdown()
