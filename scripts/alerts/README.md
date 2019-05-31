@@ -13,5 +13,5 @@ For instance:
 ```
 Alert, Measure, Database,          Time,        Day, Month,   Condition, Operation, Note
 1,     Water,   X_WATT_WATER_HIST, 00:00-06:00, any, any,     >10,       Warning,   .
-2,     Steam    X_WATT_STEAM_HIST, any,         any, apr-nov, >200,000,  Alert,     .
+2,     Steam,   X_WATT_STEAM_HIST, any,         any, apr-nov, >200,000,  Alert,     .
 ```

@@ -1,5 +1,4 @@
 import os, sys
-from stat import *
 import csv
 import pypyodbc
 import json
@@ -46,7 +45,9 @@ def get_config(fname):
 # Script
 
 ## Initialize logging
-## *TODO*
+datestring = str(datetime.datetime.now().date())
+log_file = os.path.join(LOGGING_PATH, datestring + '.log')
+logging.basicConfig(filename=log_file, format=FORMAT, level=logging.INFO)
 
 ## Parse emails
 fname = "phone_numbers.txt"
@@ -69,3 +70,6 @@ connection = pypyodbc.connect(
 ## Check alerts
 for alert in alerts:
 	pass
+
+
+logging.shutdown()
