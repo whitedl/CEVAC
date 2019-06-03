@@ -172,3 +172,9 @@ approximately 5 minutes, 10 seconds
 			 4. The connections we connected to are along the path we travelled
 			 5. WAP logs rooms in/beside locations we are at for more than 5 minutes
 			 (we eventually connect to a location we are at for a decent amount of time)
+
+### 06/04
+* Now that data can be filtered more easily, we would like to test how accurate
+it is in measuring occupancy
+  * Room 106 has 2 WAPS and 64 seats, we're going to be counting how many people
+	are in the room and comparing it to the wap data
