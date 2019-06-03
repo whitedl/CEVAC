@@ -8,8 +8,11 @@ import scipy
 import datetime
 import time
 
+# read in the data
 df = pd.read_csv('WAP_TOTAL_PREDICTED2.csv')
 
+
+# turns the string of the month into a number
 def fixFormat(arg, type):
     if type == 'month':
         months = {
@@ -47,7 +50,7 @@ def fixFormat(arg, type):
 
         return days[arg]
 
-
+# formats the date in a way that we can introduce to the array for training
 def formatDate():
 
     # define our information dictionary
@@ -60,6 +63,7 @@ def formatDate():
 
     # seperate the date and omit the year
     for row in df.time:
+
         # calculate month, day, year, hour
         monthStr = fixFormat(row[2:5], 'month')[1]
         month = fixFormat(row[2:5], 'month')[0]
@@ -76,9 +80,12 @@ def formatDate():
         info['hour'].append(hour)
         info['day'].append(day)
 
+    # append our new lists to the dataframe
     for key in info:
         df[key] = info[key]
+    return df
 
+# create our lists
 def theLists():
     temp = []
     x = []
@@ -102,15 +109,11 @@ trainingLabels = []
 
 testingData = []
 testingLabels = []
-#
-# for i, el in enumerate(x):
-#     print(el, i)
 
 # this is the dimension of our training dataset
 tDim = int(len(x) * .9)
 
 for i in range(0, tDim):
-# for i, elem in enumerate(x):
     size = len(x)
     num = random.randint(0,size - 1)
     xSelection = x[num]
@@ -124,15 +127,14 @@ for i, element in enumerate(x):
     testingData.append(element)
     testingLabels.append(y[i])
 
-for i, elem in enumerate(trainingData):
-    print(elem, trainingLabels[i])
+## Saves out numpy arrays so they are not lost in the void
 # np.save('trainingData.npy', trainingData)
 # np.save('trainingLabels.npy', trainingLabels)
 # np.save('testingData.npy', testingData)
 # np.save('testingLabels.npy', testingLabels)
 
-
-print('TESTING DATA:\t\t{} ENTRIES'.format(len(testingData)))
-print('TESTING LABELS:\t\t{} ENTRIES'.format(len(testingLabels)))
-print('TRAINING DATA:\t\t{} ENTRIES'.format(len(trainingData)))
-print('TRAINING LABELS:\t{} ENTRIES'.format(len(trainingLabels)))
+## Debugging nonsense
+# print('TESTING DATA:\t\t{} ENTRIES'.format(len(testingData)))
+# print('TESTING LABELS:\t\t{} ENTRIES'.format(len(testingLabels)))
+# print('TRAINING DATA:\t\t{} ENTRIES'.format(len(trainingData)))
+# print('TRAINING LABELS:\t{} ENTRIES'.format(len(trainingLabels)))
