@@ -149,3 +149,26 @@ approximately 5 minutes, 10 seconds
 	   * We can check the IP address of the connected router via our phones: are
 		 they different before and after connection? How often do they change throughout
 		 the Watt center?
+  4. Results
+	   * Both Drew (2 devices) and Harrison (1 device) toured the building to test
+		 the wap data, the room we stayed at for over 6 minutes was room 308
+		   * The WAP data only picked up 2 locations per device
+			   * Harrison's phone (actively connected and reconnected)
+				   1. Room 203
+					 2. Room 308
+				 * Drew's phone (passively connected)
+				   1. Room 106 south east
+					 2. Room 308
+				 * Drew's laptop (streaming the whole time)
+				   1. Room 110 (note: this wasn't him coming to work, this was leaving for
+					 the experiment)
+					 2. Room 308
+		 * What we found was as follows
+		   1. WAP does not record each connection and disconnection
+			    * Laptop theory is falsified
+			 2. WAP *probably* does record which room you were in for over 5 minutes
+			 3. WAP *probably* does not record the actual amount of time we were in the building
+			    * We don't exactly know as we can't see readings from the basement
+			 4. The connections we connected to are along the path we travelled
+			 5. WAP logs rooms in/beside locations we are at for more than 5 minutes
+			 (we eventually connect to a location we are at for a decent amount of time)

@@ -180,24 +180,32 @@ def ingest_file_fail(fname, dbc):
 			if hour in hours.keys():
 				if name in hours[hour].keys():
 					if SSID in hours[hour][name].keys():
-						hours[hour][name][SSID] += td
-						hours[hour][name]["users"][username] = None
+						hours[hour][name][SSID]["time"] += td
+						hours[hour][name][SSID]["users"][username] = None
 					else:
-						hours[hour][name][SSID] = td
-						hours[hour][name]["users"][username] = None
+						hours[hour][name][SSID] = {
+							"time" : td,
+							"users" : {
+								username : None,
+							}
+						}
 				else:
 					hours[hour][name] = {
-						SSID : td,
-						"users" : {
-							username : None,
+						SSID : {
+							"time" : td,
+							"users" : {
+								username : None,
+							}
 						}
 					}
 			else:
 				hours[hour] = {
 					name : {
-						SSID : td,
-						"users" : {
-							username : None,
+						SSID : {
+							"time": td,
+							"users" : {
+								username : None,
+							}
 						}
 					}
 				}
@@ -205,10 +213,9 @@ def ingest_file_fail(fname, dbc):
 		for hour in hours:
 			for name in hours[hour]:
 				for SSID in hours[hour][name]:
-					if SSID != "users":
-						total_duration = hours[hour][name][SSID]
-						unique_users = len(hours[hour][name]["users"].keys())
-						cursor.execute(insert_sql, [hour, name, SSID, int(total_duration), total_duration/60, unique_users])
+					total_duration = hours[hour][name][SSID]["time"]
+					unique_users = len(hours[hour][name][SSID]["users"].keys())
+					cursor.execute(insert_sql, [hour, name, SSID, int(total_duration), total_duration/60, unique_users])
 
 		#commit insertions
 		dbc.commit()
