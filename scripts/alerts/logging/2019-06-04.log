@@ -1,0 +1,10 @@
+2019-06-04 16:14:57,827 ERROR:Issue importing conditions 23
+2019-06-04 16:14:57,828 ERROR:Issue importing conditions 24
+2019-06-04 16:14:57,828 ERROR:Issue importing conditions 25
+2019-06-04 16:14:57,828 ERROR:Issue importing conditions 26
+2019-06-04 16:14:57,828 ERROR:Issue importing conditions 27
+2019-06-04 16:14:57,828 ERROR:Issue importing conditions 28
+2019-06-04 16:14:57,828 ERROR:Issue importing conditions 29
+2019-06-04 16:14:59,547 INFO:Checked {'type': 'CO2', 'message': '<alias>  reads > 1000 ppm', 'database': 'CEVAC_WATT_IAQ_LATEST', 'column': 'ActualValue', 'num_entries': 1, 'hour': '*', 'day': '*', 'month': '*', 'condition': '>', 'value': 1000.0, 'operation': 'warning', 'aliases': '*', 'sort_column': 'UTCDateTime'}
+2019-06-04 16:14:59,609 INFO:Checked {'type': 'CO2', 'message': '<alias> reads > 2000 ppm', 'database': 'CEVAC_WATT_IAQ_LATEST', 'column': 'ActualValue', 'num_entries': 1, 'hour': '*', 'day': '*', 'month': '*', 'condition': '>', 'value': 2000.0, 'operation': 'alert', 'aliases': '*', 'sort_column': 'UTCDateTime'}
+2019-06-04 16:15:01,155 INFO:Checked {'type': 'Power', 'message': 'The building emergency power > 80 kW', 'database': 'CEVAC_WATT_POWER_LATEST', 'column': 'ActualValue', 'num_entries': 1, 'hour': '*', 'day': '*', 'month': '*', 'condition': '>', 'value': 80.0, 'operation': 'alert', 'aliases': ['Building Emergency'], 'sort_column': 'UTCDateTime'}
