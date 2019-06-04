@@ -14,15 +14,18 @@ PHONE_PATH = "C:\\Users\\hchall\\Documents\\GitHub\\CEVAC\\scripts\\alerts\\"
 CONFIG_PATH = "//130.127.219.170/Watt/Watt Staff/Building/WAP/config/"
 
 COLUMNS = {
-	"Alert" : 0,
-	"Measure" : 1,
-	"Database" : 2,
-	"Time" : 3,
-	"Day" : 4,
-	"Month" : 5,
-	"Condition" : 6,
-	"Operation" : 7,
-	"Note" : 8,
+	"alert_name" : 0,
+	"type" : 1,
+	"message" : 2,
+	"databse" : 3,
+	"column" : 4,
+	"num_entries" : 5,
+	"hour" : 6,
+	"day" : 7,
+	"month" : 8,
+	"condition" : 9,
+	"value" : 10,
+	"operation" : 11, 
 }
 
 
