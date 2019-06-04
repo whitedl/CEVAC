@@ -1,7 +1,7 @@
 # Alerts
 The alerts csv should follow the following format:
 ```
-alert_name, type, unit, message, building, database, column, sort_column, num_entries, hour, day, month, condition, value, operation,
+alert_name, type, alias, unit, message, building, database, column, sort_column, num_entries, hour, day, month, condition, value, operation,
 ```
 For instance:
 ```
@@ -11,17 +11,18 @@ watt steam, steam, kbtu, The steam usage..., WFIC,     CEVAC_WATT_STEAM_LATEST, 
 
 ## Types
 * `alert_name` is a string describing the name of the alert
-* `type` is a string describing the name of the alert
-* `unit` is a string describing the name of the alert
-* `message` is a string describing the name of the alert
-* `building` is a string describing the name of the alert
-* `database` is a string describing the name of the alert
-* `column` is a string describing the name of the alert
-* `sort_column` is a string describing the name of the alert
-* `num_entries` is a string describing the name of the alert
-* `hour` is a string describing the name of the alert
-* `day` is a string describing the name of the alert
-* `month` is a string describing the name of the alert
-* `condition` is a string describing the name of the alert
-* `value` is a string describing the name of the alert
-* `operation` is a string describing the name of the alert
+* `type` is a string describing the type of the alert
+* `unit` is a string describing the units of the value
+* `message` is a string describing the alert message
+* `building` is a string describing the building for the alert
+* `database` is a string describing database to check
+* `column` is a string describing the column of the value
+* `sort_column` is a string describing the column for the data to be sorted by
+* `num_entries` is a string describing the number of entries to check
+* `hour` is a string describing the hour(s) to check
+* `day` is a string describing the day(s) to check
+* `month` is a string describing the month(s) to check
+* `condition` is a string describing the conditional
+* `value` is a string describing the value for the conditional
+* `operation` is a string describing the operation for the alert to accomplish
+* `alias` is TODO
