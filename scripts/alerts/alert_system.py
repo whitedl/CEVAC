@@ -16,31 +16,58 @@ CONFIG_PATH = "//130.127.219.170/Watt/Watt Staff/Building/WAP/config/"
 COLUMNS = {
 	"alert_name" : 0,
 	"type" : 1,
-	"message" : 2,
-	"databse" : 3,
-	"column" : 4,
-	"num_entries" : 5,
-	"hour" : 6,
-	"day" : 7,
-	"month" : 8,
-	"condition" : 9,
-	"value" : 10,
-	"operation" : 11, 
+	"unit" : 2,
+	"message" : 3,
+	"building" : 4,
+	"database" : 5,
+	"column" : 6,
+	"sort_column" : 7,
+	"num_entries" : 8,
+	"hour" : 9,
+	"day" : 10,
+	"month" : 11,
+	"condition" : 12,
+	"value" : 13,
+	"operation" : 14,
 }
 
 
 
 # Definitions
 
+def regex_to_list(regex_string):
+	if regex_string == "*":
+		return regex_string
+	else:
+		regex_list = [([int(y)] if len(y.split("-")) == 1 else list(range(int(y.split("-")[0]),int(y.split("-")[1])+1))) for y in regex_string.split("&")]
+		return_list = []
+		for num_list in regex_list:
+			for num in num_list:
+				return_list.append(num)
+		return return_list
+
 def import_conditions(fname):
 	alerts = {}
 	with csv.reader(open(CONDITIONS_FPATH+fname)) as csvfile:
 		next(csvfile)
-		for row in csvfile:
-			if row[COLUMNS["Condition"]][0] in [">","<"]:
-				alerts[row["Alert"]] = {
-					## TODO after regex defined
-				}
+		for i,row in enumerate(csvfile):
+			try:
+				if (i > 0):
+					alerts[COLUMN["alert_name"]] = {
+						"type" : row[COLUMNS["type"]],
+						"message" : row[COLUMNS["message"]],
+						"database" : row[COLUMNS["database"]],
+						"column" : int(row[COLUMNS["column"]]),
+						"num_entries" : int(row[COLUMNS["num_entries"]]),
+						"hour" : list(range(24)) if regex_to_list(row[COLUMNS["hour"]]), #EST
+						"day" : list(range(24)) if regex_to_list(row[COLUMNS["day"]]), #EST
+						"month" : list(range(24)) if regex_to_list(row[COLUMNS["month"]]), #EST
+						"condition" : row[COLUMNS["condition"]],
+						"value" : int(row[COLUMNS["value"]]),
+						"operation" : row[COLUMNS["operation"]],
+					}
+			except:
+				pass #LOG TODO
 	return alerts
 
 def get_config(fname):
@@ -49,9 +76,9 @@ def get_config(fname):
    fp.close()
    return config
 
- def send_email(email_address,content):
-	 ## TODO after email set up
-	 pass
+def send_email(email_address,content):
+	## TODO after email set up
+	return
 
 def send_email_list(email_address_list,content):
 	for email_address in email_address_list:
@@ -83,12 +110,31 @@ connection = pypyodbc.connect(
 	'Database=' + dbconfig['database'] + ';'
 	'uid=' + dbconfig['uid'] + ';'
 	'pwd=' + dbconfig['pwd'])
+cursor = connection.cursor()
 
 ## Check alerts
-for alert in alerts:
-	## TODO after regex defined
-	if False:
-		send_email_list(emails,{})
+for alert in import_conditions(CONDITIONS_FPATH):
+	for i,alert in enumerate(alerts):
+		try:
+			now = datetime.datetime.now()
+			if (now.isoweekday() in alert["day"]) and (now.hour in alert["hour"]) and (now.month in alert["month"]):
+				selection_command = "SELECT top "+str(alert["num_entries"]) + " " + alerts["column"] + " FROM " + str(alerts["database"] + " ORDER BY " + alerts["sort"] + " RowNum DESC"
+				data = cursor.execute(selection_command)
+				data_list = [row[0] for row in data]
+				avg_data = sum(data_list)/len(data_list)
+				send_alert = False
+				if alert["condition"] == ">":
+					send_alert = (avg_data > alert["value"])
+				elif alert["condition"] == "<":
+					send_alert = (avg_data < alert["value"])
+				if send_alert:
+					## TODO check operation
+					insert_sql = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertMessage,AlertType, Metric,BLDG,BeginTime)VALUES(?, ?,?,?,GETUTCDATE())"
+					cursor.execute(insert_sql, [alert["message"],alert["type"],avg_data,alert["building"]])
+				print("checked",alert,"\n\n")
+		except:
+			print("Issue on alert",i,"\n",alert,"\n\n")
+
 
 
 logging.shutdown()
