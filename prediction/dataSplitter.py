@@ -87,54 +87,106 @@ def formatDate():
 
 # create our lists
 def theLists():
-    temp = []
+    tempx = []
+    tempy = []
     x = []
     y = []
+
     for index, row in df.iterrows():
-        temp.append(float(row['assoc_count']))
-        temp.append(float(row['auth_count']))
-        temp.append(row['day'])
-        temp.append(float(row['month']))
-        temp.append(float(row['hour']))
-        x.append(temp)
-        y.append(row['occupancy'])
-        temp = []
+        # temp.append(float(row['assoc_count']))
+        tempx.append(float(row['auth_count']))
+        tempx.append(float(row['day']))
+        tempx.append(float(row['month']))
+        tempx.append(float(row['hour']))
+        x.append(tempx)
+        tempy = [0 for i in range(0,500)]
+        tempy[row['occupancy']] = 1
+        y.append(tempy)
+        tempx = []
     return x, y
 
-x, y = theLists()
+# populate our numpy arrays
+def makeArrays():
 
-# empty list of the training and testing sets that we are going to make
-trainingData = []
-trainingLabels = []
+    # call our lists
+    x, y = theLists()
+    # empty list of the training and testing sets that we are going to make
+    trainingData = []
+    trainingLabels = []
+    # # #
+    testingData = []
+    testingLabels = []
 
-testingData = []
-testingLabels = []
+    # this is the dimension of our training dataset
+    tDim = int(len(x) * .9)
 
-# this is the dimension of our training dataset
-tDim = int(len(x) * .9)
+    for i in range(0, tDim):
+        size = len(x)
+        num = random.randint(0,size - 1)
+        xSelection = x[num]
+        ySelection = y[num]
+        x.pop(num)
+        y.pop(num)
+        trainingData.append(xSelection)
+        trainingLabels.append(ySelection)
 
-for i in range(0, tDim):
-    size = len(x)
-    num = random.randint(0,size - 1)
-    xSelection = x[num]
-    ySelection = y[num]
-    x.pop(num)
-    y.pop(num)
-    trainingData.append(xSelection)
-    trainingLabels.append(ySelection)
+    for i, element in enumerate(x):
+        testingData.append(element)
+        testingLabels.append(y[i])
 
-for i, element in enumerate(x):
-    testingData.append(element)
-    testingLabels.append(y[i])
+    return trainingData, trainingLabels, testingData, testingLabels
 
-## Saves out numpy arrays so they are not lost in the void
-# np.save('trainingData.npy', trainingData)
-# np.save('trainingLabels.npy', trainingLabels)
-# np.save('testingData.npy', testingData)
-# np.save('testingLabels.npy', testingLabels)
+# make our test arrays to see if kpa is functioning correctly
+def testArrays():
 
-## Debugging nonsense
-# print('TESTING DATA:\t\t{} ENTRIES'.format(len(testingData)))
-# print('TESTING LABELS:\t\t{} ENTRIES'.format(len(testingLabels)))
-# print('TRAINING DATA:\t\t{} ENTRIES'.format(len(trainingData)))
-# print('TRAINING LABELS:\t{} ENTRIES'.format(len(trainingLabels)))
+    # empty list of the training and testing sets that we are going to make
+    trainingData = []
+    trainingLabels = []
+    # # #
+    testingData = []
+    testingLabels = []
+
+    x = []
+    y = []
+
+    for i in range(0,200):
+        tempx = random.randint(0,100)
+        tempy = tempx * 2
+        tempx = [tempx, tempx * 3]
+        x.append(tempx)
+        y.append(tempy)
+    # this is the dimension of our training dataset
+    tDim = int(len(x) * .9)
+
+    for i in range(0, tDim):
+        size = len(x)
+        num = random.randint(0,size - 1)
+        xSelection = x[num]
+        ySelection = y[num]
+        trainingData.append(xSelection)
+        trainingLabels.append(ySelection)
+        x.pop(num)
+        y.pop(num)
+
+    for i, element in enumerate(x):
+        testingData.append(element)
+        testingLabels.append(y[i])
+
+    return trainingData, trainingLabels, testingData, testingLabels
+
+if __name__ == '__main__':
+
+    # trainingData, trainingLabels, testingData, testingLabels = testArrays()
+    trainingData, trainingLabels, testingData, testingLabels = makeArrays()
+
+    # Saves out numpy arrays so they are not lost in the void
+    np.save('trainingData.npy', trainingData)
+    np.save('trainingLabels.npy', trainingLabels)
+    np.save('testingData.npy', testingData)
+    np.save('testingLabels.npy', testingLabels)
+
+    # Debugging nonsense
+    print('TESTING DATA:\t\t{} ENTRIES'.format(len(testingData)))
+    print('TESTING LABELS:\t\t{} ENTRIES'.format(len(testingLabels)))
+    print('TRAINING DATA:\t\t{} ENTRIES'.format(len(trainingData)))
+    print('TRAINING LABELS:\t{} ENTRIES'.format(len(trainingLabels)))
