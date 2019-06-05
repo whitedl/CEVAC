@@ -2,7 +2,8 @@
 
 ### TODO: special
 
-import os, sys
+import os
+import sys
 import csv
 import pypyodbc
 import json
@@ -54,6 +55,7 @@ def regex_to_numlist(regex_string):
 				return_list.append(num)
 		return return_list
 
+
 def alias_to_list(regex_string):
 	"""
 	Returns a list of strings that were originally seperated by hyphens
@@ -61,6 +63,7 @@ def alias_to_list(regex_string):
 	if regex_string == "*":
 		return "*"
 	return regex_string.split("-")
+
 
 def angle_brackets_replace(regex_string,alert):
 	try:
@@ -74,7 +77,11 @@ def angle_brackets_replace(regex_string,alert):
 
 
 def import_conditions(fname,logger):
+	"""
+	Moves CSV file to dict of alert condtions
+	"""
 	alerts = {}
+	unique_databases = {}
 	with open(CONDITIONS_FPATH+fname) as csvfile:
 		csvfile = csv.reader(csvfile)
 		next(csvfile)
@@ -97,19 +104,26 @@ def import_conditions(fname,logger):
 						"sort_column" : row[COLUMNS["sort_column"]],
 						"building" : row[COLUMNS["building"]],
 					}
+					unique_databases[row[COLUMNS["database"]]] = None
 			except:
 				logger.error("Issue importing conditions "+str(i))
-	return alerts
+	return (alerts,unique_databases)
+
 
 def get_config(fname):
-   fp = open(fname, "r")
-   config = json.loads(fp.read())
-   fp.close()
-   return config
+	"""
+	Returns json of database connection configuration file
+	"""
+	fp = open(fname, "r")
+	config = json.loads(fp.read())
+	fp.close()
+	return config
+
 
 def send_email(email_address,content):
 	## TODO after email set up
 	return
+
 
 def send_email_list(email_address_list,content):
 	for email_address in email_address_list:
@@ -124,6 +138,7 @@ FORMAT = '%(asctime)s %(levelname)s:%(message)s'
 datestring = str(datetime.datetime.now().date())
 log_file = os.path.join(LOGGING_PATH, datestring + '.log')
 logging.basicConfig(filename=log_file, format=FORMAT, level=logging.INFO)
+logging.info("NEW JOB\n---")
 
 ## Parse emails
 fname = "phone_numbers.txt"
@@ -131,7 +146,7 @@ emails = [email.replace("\n","") for email in open(PHONE_PATH+fname)]
 
 ## Get alert conditions
 fname = "Alert Parameters (Working).csv"
-alerts = import_conditions(fname,logging)
+alerts, unique_databases = import_conditions(fname,logging)
 
 ## Connect to database
 fname = "dbconfig2.json"
@@ -144,11 +159,27 @@ connection = pypyodbc.connect(
 	'pwd=' + dbconfig['pwd'])
 cursor = connection.cursor()
 
+## Update database cache
+db_string = ""
+for i,item in enumerate(list(unique_databases)):
+	if i == 0:
+		db_string += item + ","
+	elif i == len(list(unique_databases))-1:
+		db_string += item
+	else:
+		db_string += item + ","
+update_sql = "EXEC CEVAC_CACHE @tables='" + db_string + "'"
+print(update_sql)
+#cursor.execute(update_sql)
+#print("COMMAND EXECUTED")
+input("PRESS ENTER")
+
 ## Check alerts
 total_issues = 0
 for i,a in enumerate(alerts):
 	alert = alerts[a]
-	insert_sql = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertMessage,AlertType, Metric,BLDG,BeginTime) VALUES(?,?,?,?,GETUTCDATE())"
+	insert_sql = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType, AlertMessage, Metric,BLDG,BeginTime) VALUES(?,?,?,?,GETUTCDATE())"
+	alert["database"] += "_CACHE"
 	try:
 		now = datetime.datetime.now()
 		if (((str(now.isoweekday()) in alert["day"]) or (str(alert["day"]) == "*"))
@@ -174,7 +205,10 @@ for i,a in enumerate(alerts):
 				if send_alert:
 					total_issues += 1
 					logging.info("ISSUE"+str(alert))
-					cursor.execute(insert_sql, [alert["message"],alert["operation"],avg_data,alert["building"]])
+					x = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType, AlertMessage, Metric,BLDG,BeginTime) VALUES('"+alert["operation"]+"','"+alert["message"]+"','"+str(avg_data)+"','"+alert["building"]+"',GETUTCDATE())"
+					#cursor.execute(x)
+					print(x)
+					#cursor.execute(insert_sql, [alert["operation"],alert["message"],str(avg_data),alert["building"]])
 					logging.info("An alert was sent for "+str(alert))
 				logging.info("Checked "+str(alert))
 
@@ -235,7 +269,10 @@ for i,a in enumerate(alerts):
 					if send_alert:
 						total_issues += 1
 						logging.info("ISSUE"+str(alert))
-						cursor.execute(insert_sql, [alert["message"],alert["operation"],str(room) + " " + str(room_vals[Alias_Temp]),alert["building"]])
+						x = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType, AlertMessage, Metric,BLDG,BeginTime) VALUES('"+alert["operation"]+"','"+alert["message"]+"','"+str(room) + " " + str(room_vals[Alias_Temp])+"','"+alert["building"]+"',GETUTCDATE())"
+						#cursor.execute(x)
+						print(x)
+						#cursor.execute(insert_sql, [alert["operation"],alert["message"],str(room) + " " + str(room_vals[Alias_Temp]),alert["building"]])
 						logging.info("An alert was sent for "+str(alert))
 					logging.info("Checked "+str(alert))
 
@@ -253,9 +290,9 @@ for i,a in enumerate(alerts):
 		logging.error("Issue on alert "+str(i)+" "+str(alert))
 
 if total_issues == 0:
-	insert_sql = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertMessage,AlertType, Metric,BLDG,BeginTime) VALUES('All Clear','N/A','','All',GETUTCDATE())"
-else:
-	logging.info(str(datetime.datetime.now())+" TOTAL ISSUES: "+str(total_issues)
+	#insert_sql = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType,Metric,BLDG,BeginTime) VALUES('All Clear','','All',GETUTCDATE())"
+	pass
 
-
+cursor.close()
+logging.info(str(datetime.datetime.now())+" TOTAL ISSUES: "+str(total_issues))
 logging.shutdown()

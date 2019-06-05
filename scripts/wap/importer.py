@@ -177,7 +177,7 @@ def ingest_file_fail(fname, dbc):
 			td = ((dissoc_time - assoc_time).total_seconds()/60) % 60
 
 			## Add count of unique people per wap
-			if (hour in hours.keys()) and (td > 6):
+			if (hour in hours.keys()) and (td > 1):
 				if name in hours[hour].keys():
 					if SSID in hours[hour][name].keys():
 						hours[hour][name][SSID]["time"] += td
@@ -198,7 +198,7 @@ def ingest_file_fail(fname, dbc):
 							}
 						}
 					}
-			elif (td > 6):
+			elif (td > 1):
 				hours[hour] = {
 					name : {
 						SSID : {
