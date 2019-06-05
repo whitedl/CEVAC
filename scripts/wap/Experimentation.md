@@ -178,3 +178,23 @@ approximately 5 minutes, 10 seconds
 it is in measuring occupancy
   * Room 106 has 2 WAPS and 64 seats, we're going to be counting how many people
 	are in the room and comparing it to the wap data
+* Harrison and Drew met with Tim Howard and Dr. White and discussed the future
+of the wap data
+  * A per floor per hour count would be more enlightening
+	* A unique per day
+	* Morrison network devices are used for devices that can't do the modern protocols
+
+### 06/05
+* We counted the total occupancy of the building at ~10:45 on 06/04
+  * When we filtered the data, we realized our count had only been 11% off of
+	the filtered data (93 counted, 104 filtered)
+	  * Upon further analysis, we realized that the filtered count for the entire
+		building was probably more accurate than our actual count
+		  * People may have left the building right before our count, or been in the
+			bathroom, or even changed floors
+		* The breakdown by floor is less accurate
+	* We decided we will build more databases
+	  * Our current database will exist to have the breakdown of unique IDs per
+		room per hour
+		* A new table of unique IDs in the building per hour, broken down by floor
+		* A new table of unique IDs in the building per day
