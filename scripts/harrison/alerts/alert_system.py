@@ -13,10 +13,10 @@ import pytz
 import logging
 import urllib.request
 
-CONDITIONS_FPATH = "C:\\Users\\hchall\\Downloads\\"
-LOGGING_PATH = "C:\\Users\\hchall\\Documents\\GitHub\\CEVAC\\scripts\\alerts\\logging\\"
-PHONE_PATH = "C:\\Users\\hchall\\Documents\\GitHub\\CEVAC\\scripts\\alerts\\"
-CONFIG_PATH = "//130.127.219.170/Watt/Watt Staff/Building/WAP/config/"
+CONDITIONS_FPATH = "/home/bmeares/cron/alerts/"
+LOGGING_PATH = "/home/bmeares/cron/alerts/"
+PHONE_PATH = "/home/bmeares/cron/alerts/"
+CONFIG_PATH = "/home/bmeares/cron/alerts/"
 
 COLUMNS = {
 	"alert_name" : 0,
@@ -141,11 +141,11 @@ logging.basicConfig(filename=log_file, format=FORMAT, level=logging.INFO)
 logging.info("NEW JOB\n---")
 
 ## Parse emails
-fname = "phone_numbers.txt"
-emails = [email.replace("\n","") for email in open(PHONE_PATH+fname)]
+#  fname = "phone_numbers.txt"
+#  emails = [email.replace("\n","") for email in open(PHONE_PATH+fname)]
 
 ## Get alert conditions
-fname = "Alert Parameters (Working).csv"
+fname = "alert_parameters.csv"
 alerts, unique_databases = import_conditions(fname,logging)
 
 ## Connect to database
