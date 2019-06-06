@@ -198,3 +198,26 @@ of the wap data
 		room per hour
 		* A new table of unique IDs in the building per hour, broken down by floor
 		* A new table of unique IDs in the building per day
+
+### 06/06
+* We worked on filtering data per network per day, giving a unique user count for
+the entire building. From our rote counts we found that this number is accurate
++/- 10%, but splitting this up by floor may yield less accurate results.
+  * Our initial results for the past few weeks of data are:
+	```
+	date					edu  guest total
+	2019-05-24    62   3    65
+	2019-05-25    9    2    11
+	2019-05-26    10    1    11
+	2019-05-27    16    1    17
+	2019-05-28    231    16    247
+	2019-05-29    220    18    238
+	2019-05-30    315    17    332
+	2019-05-31    196    9    205
+	2019-06-01    12    0    12
+	2019-06-02    9    0    9
+	2019-06-03    289    16    305
+	2019-06-04    329    31    360
+	2019-06-05    281    9    290
+	2019-06-06    44    8    52
+	```
