@@ -5,7 +5,7 @@
 import os
 import sys
 import csv
-import pypyodbc
+#import pypyodbc
 import json
 import datetime
 import time
@@ -129,7 +129,9 @@ def send_email_list(email_address_list,content):
 	for email_address in email_address_list:
 		send_email(email_address,content)
 
-
+def command_to_query(command):
+	req = "http://130.127.218.148/requests/query.php?q="
+	return req + command.replace(" ","%20")
 
 # Script
 
@@ -148,16 +150,6 @@ logging.info("NEW JOB\n---")
 fname = "alert_parameters.csv"
 alerts, unique_databases = import_conditions(fname,logging)
 
-## Connect to database
-fname = "dbconfig2.json"
-dbconfig = get_config(CONFIG_PATH+fname)
-connection = pypyodbc.connect(
-	'Driver=' + dbconfig['driver'] + ';'
-	'Server=' + dbconfig['server'] + ';'
-	'Database=' + dbconfig['database'] + ';'
-	'uid=' + dbconfig['uid'] + ';'
-	'pwd=' + dbconfig['pwd'])
-cursor = connection.cursor()
 
 ## Update database cache
 db_string = ""
@@ -196,8 +188,12 @@ for i,a in enumerate(alerts):
 					selection_command += " ORDER BY " + alert["sort_column"] + " DESC"
 				else:
 					selection_command += " WHERE " + "Alias" + " IN (" + str(alert["aliases"]).replace("[","").replace("]","") + ") ORDER BY " + alert["sort_column"] + " DESC"
-				data = cursor.execute(selection_command)
-				data_list = [row[0] for row in data]
+				#data = cursor.execute(selection_command)
+				data = urllib.request.urlopen(command_to_query(selection_command)).read().replace("}{","} {").split(" ")
+				dict_list = [json.loads(d) for d in data]
+				data_list = [sd[list(sd.keys())[0]] for sd in dict_list]
+
+				#data_list = [row[0] for row in data]
 				avg_data = sum(data_list)/len(data_list)
 				send_alert = False
 				if alert["condition"] == ">":
@@ -215,8 +211,12 @@ for i,a in enumerate(alerts):
 			# Temperature custom measure
 			elif ("Temp" in alert["value"]):
 				selection_command = "SELECT Alias, " + alert["column"] + " FROM " + alert["database"] + " ORDER BY " + alert["sort_column"]
-				data = cursor.execute(selection_command)
-				data_list = [[row[0],row[1]] for row in data]
+				#data = cursor.execute(selection_command)
+				data = urllib.request.urlopen(command_to_query(selection_command)).read().replace("}{","} {").split(" ")
+				dict_list = [json.loads(d) for d in data]
+				data_list = [[sd[list(sd.keys())[0]],sd[list(sd.keys())[1]]] for sd in dict_list]
+
+				#data_list = [[row[0],row[1]] for row in data]
 				temps = {}
 				for row in data_list:
 					room = row[0].split()[0]
@@ -293,10 +293,8 @@ if total_issues == 0:
 	pass
 
 #print(insert_sql_total)
-cursor.execute(insert_sql_total)
-cursor.commit()
+#cursor.execute(insert_sql_total)
+urllib.request.urlopen(command_to_query(insert_sql_total)).read()
 
-cursor.close()
-connection.close()
 logging.info(str(datetime.datetime.now())+" TOTAL ISSUES: "+str(total_issues))
 logging.shutdown()
