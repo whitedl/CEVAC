@@ -30,7 +30,6 @@ def get_config(fname):
    return config
 
 
-
 # Script
 ## Setup logging
 FORMAT = '%(asctime)s %(levelname)s:%(message)s'
@@ -98,9 +97,13 @@ for file in yesterdays_files:
 # Push to database
 eduroam = 0 if "eduroam" not in network else len(network["eduroam"])
 clemsonguest = 0 if "clemsonguest" not in network else len(network["clemsonguest"])
-print(yesterday,eduroam,clemsonguest)
+#print(yesterday,eduroam,clemsonguest)
 
+cursor = connection.cursor()
+cursor.execute("INSERT INTO CEVAC_WATT_WAP_DAILY(Hour, Clemson, Guest) VALUES(?,?,?)",[yesterday, eduroam, clemsonguest])
+cursor.commit()
 
+cursor.close()
 connection.close()
 
 if errors == 0:
