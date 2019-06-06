@@ -1,6 +1,6 @@
 # alert_system.py
 
-### TODO: special
+### TODO: angle bracket replation, time-based alert conditionals
 
 import os
 import sys
@@ -10,7 +10,6 @@ import json
 import datetime
 import time
 import pytz
-import csv
 import logging
 
 CONDITIONS_FPATH = "C:\\Users\\hchall\\Downloads\\"
@@ -169,12 +168,13 @@ for i,item in enumerate(list(unique_databases)):
 	else:
 		db_string += item + ","
 update_sql = "EXEC CEVAC_CACHE @tables='" + db_string + "'"
-print(update_sql)
+#print(update_sql)
 #cursor.execute(update_sql)
 #print("COMMAND EXECUTED")
 input("PRESS ENTER")
 
 ## Check alerts
+insert_sql_total = ""
 total_issues = 0
 for i,a in enumerate(alerts):
 	alert = alerts[a]
@@ -205,10 +205,8 @@ for i,a in enumerate(alerts):
 				if send_alert:
 					total_issues += 1
 					logging.info("ISSUE"+str(alert))
-					x = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType, AlertMessage, Metric,BLDG,BeginTime) VALUES('"+alert["operation"]+"','"+alert["message"]+"','"+str(avg_data)+"','"+alert["building"]+"',GETUTCDATE())"
-					#cursor.execute(x)
-					print(x)
-					#cursor.execute(insert_sql, [alert["operation"],alert["message"],str(avg_data),alert["building"]])
+					com = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType, AlertMessage, Metric,BLDG,BeginTime) VALUES('"+alert["operation"]+"','"+alert["message"]+"','"+str(avg_data)+"','"+alert["building"]+"',GETUTCDATE())"
+					insert_sql_total += com + "; "
 					logging.info("An alert was sent for "+str(alert))
 				logging.info("Checked "+str(alert))
 
@@ -232,6 +230,7 @@ for i,a in enumerate(alerts):
 					for key in temps[room].keys():
 						if (key != "Cooling SP" and key != "Heating SP"):
 							Alias_Temp = key
+
 					# Modify value
 					room_vals = temps[room]
 					try:
@@ -269,10 +268,8 @@ for i,a in enumerate(alerts):
 					if send_alert:
 						total_issues += 1
 						logging.info("ISSUE"+str(alert))
-						x = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType, AlertMessage, Metric,BLDG,BeginTime) VALUES('"+alert["operation"]+"','"+alert["message"]+"','"+str(room) + " " + str(room_vals[Alias_Temp])+"','"+alert["building"]+"',GETUTCDATE())"
-						#cursor.execute(x)
-						print(x)
-						#cursor.execute(insert_sql, [alert["operation"],alert["message"],str(room) + " " + str(room_vals[Alias_Temp]),alert["building"]])
+						com = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType, AlertMessage, Metric,BLDG,BeginTime) VALUES('"+alert["operation"]+"','"+alert["message"]+"','"+str(room) + " " + str(room_vals[Alias_Temp])+"','"+alert["building"]+"',GETUTCDATE())"
+						insert_sql_total += com + "; "
 						logging.info("An alert was sent for "+str(alert))
 					logging.info("Checked "+str(alert))
 
@@ -290,9 +287,14 @@ for i,a in enumerate(alerts):
 		logging.error("Issue on alert "+str(i)+" "+str(alert))
 
 if total_issues == 0:
-	#insert_sql = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType,Metric,BLDG,BeginTime) VALUES('All Clear','','All',GETUTCDATE())"
+	insert_sql = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType,Metric,BLDG,BeginTime) VALUES('All Clear','','All',GETUTCDATE())"
 	pass
 
+print(insert_sql_total)
+cursor.execute(insert_sql_total)
+cursor.commit()
+
 cursor.close()
+connection.close()
 logging.info(str(datetime.datetime.now())+" TOTAL ISSUES: "+str(total_issues))
 logging.shutdown()
