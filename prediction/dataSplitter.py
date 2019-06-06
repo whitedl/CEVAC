@@ -179,11 +179,14 @@ if __name__ == '__main__':
     # trainingData, trainingLabels, testingData, testingLabels = testArrays()
     trainingData, trainingLabels, testingData, testingLabels = makeArrays()
 
-    # Saves out numpy arrays so they are not lost in the void
-    np.save('trainingData.npy', trainingData)
-    np.save('trainingLabels.npy', trainingLabels)
-    np.save('testingData.npy', testingData)
-    np.save('testingLabels.npy', testingLabels)
+    print(trainingData)
+    # print(trainingLabels)
+
+    # # Saves out numpy arrays so they are not lost in the void
+    # np.save('trainingData.npy', trainingData)
+    # np.save('trainingLabels.npy', trainingLabels)
+    # np.save('testingData.npy', testingData)
+    # np.save('testingLabels.npy', testingLabels)
 
     # Debugging nonsense
     print('TESTING DATA:\t\t{} ENTRIES'.format(len(testingData)))

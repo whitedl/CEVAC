@@ -31,6 +31,7 @@ class SimpleMLP(keras.Model):
 
         self.dense1 = keras.layers.Dense(256, activation='relu')
         self.dense2 = keras.layers.Dense(num_classes, activation='softmax')
+        self.dense3 = keras.layers.Dense(256, activation='relu')
         if self.use_dp:
             self.dp = keras.layers.Dropout(0.3)
         if self.use_bn:
@@ -45,7 +46,7 @@ class SimpleMLP(keras.Model):
         return self.dense2(x)
 
 
-
+# read in our data
 def loadData():
 
 	train_data = np.load("trainingData.npy")
@@ -59,6 +60,7 @@ def loadData():
 
 	return train_data, train_labels, test_data, test_labels
 
+# use our custom keras model
 def customAlg():
 
 	# make a model instanace
@@ -67,11 +69,12 @@ def customAlg():
 	model.compile(optimizer='adam',loss=losses.categorical_crossentropy, metrics=['accuracy'])
 	return model
 
-
+# prediction with the built-in keras model
 def predAlg(buildingOccupancy):
 	# the capacity of the building
 	class_names = [i for i in range(0,buildingOccupancy)]	#these are your possible outputs (number of devices on the wifi
 
+	# create the keras instance
 	model = keras.Sequential([
 		keras.layers.Dense(256, activation=tf.nn.relu), #64 was basically a random number for me. I'd experiment with bigger and smaller
 		keras.layers.Dropout(0.25),		# makes sure you aren't overfitting and killing your test accuracy. This is a pretty high dropout rate, so make lower as needed (esp if you need a bigger training set)
@@ -79,7 +82,7 @@ def predAlg(buildingOccupancy):
 	])
 
 	# if changes are going to be made to increase accuracy it should be done here
-	model.compile(optimizer='adam',loss=losses.categorical_crossentropy, metrics=['accuracy'])
+	model.compile(optimizer='sgd',loss=losses.categorical_crossentropy, metrics=['accuracy'])
 	return model
 
 def train(model):
@@ -88,12 +91,12 @@ def train(model):
 	train_data, train_labels, test_data, test_labels = loadData()
 
 	# stops the model when the loss is no longer decreasing
-	early_stopping = EarlyStopping(monitor='loss', patience=50)
+	early_stopping = EarlyStopping(monitor='loss', patience=500)
 
 	#more epochs = more work training ~= higher accuracy
-	model.fit(train_data, train_labels, epochs=10000, verbose=0, callbacks=[early_stopping])
+	model.fit(train_data, train_labels, epochs=100000, verbose=1, callbacks=[early_stopping])
 
-	#for making re-running faster, toggle this to re-run with the same weights from the previous run
+	# for making re-running faster, toggle this to re-run with the same weights from the previous run
 	model.save_weights("./checkpoints/weights")
 	# model.load_weights("./checkpoints/weights")	# works in reverse)
 
@@ -101,24 +104,5 @@ def train(model):
 
 	print('Test accuracy:', test_acc)
 
-	# print('GUESS:	{}'.format(model.predict((325.0, 2.0, 9.0, 18.0))))
-	# print('GUESS:	{}'.format(model.predict((393.0, 4.0, 9.0, 18.0))))
-	# print('GUESS:	{}'.format(model.predict((119.0, 5.0, 9.0, 20.0))))
-
-def predict(buildingOccupancy):
-
-	model = keras.Sequential([
-		# keras.layers.Flatten(input_shape=(NUM_ATTRIBUTES,1)), # you probably don't need this line bc your input data for each hour is already flat (aka one of your dims is 1)
-		keras.layers.Dense(512, activation=tf.nn.relu), #64 was basically a random number for me. I'd experiment with bigger and smaller
-		keras.layers.Dropout(0.25),		# makes sure you aren't overfitting and killing your test accuracy. This is a pretty high dropout rate, so make lower as needed (esp if you need a bigger training set)
-		keras.layers.Dense(buildingOccupancy, activation=tf.nn.relu) #number of neurons in final layer should equal number of classes
-	])
-
-	model.load_weights("./checkpoints/weights")
-
-
-
 if __name__ == '__main__':
-	# predAlg(500)
-	# customAlg()
 	train(customAlg())
