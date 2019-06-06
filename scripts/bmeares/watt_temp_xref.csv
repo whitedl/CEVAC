@@ -1,0 +1,258 @@
+PointSliceID,Room,RoomType,ObjecName,BLG,Floor,ReadingType,Alias
+8555,102,Project Room,WATT-CENTER/FC-1.UF1-7.ZN-T,Watt,1st Floor,Temp,102 Temp
+8726,103,Kitchen,WATT-CENTER/FC-1.UF1-6.ZN-T,Watt,1st Floor,Temp,103 Temp
+8742,104,Bathroom,WATT-CENTER/FC-1.RADIANT-1.ZN-T,Watt,1st Floor,Temp,104 Temp
+8208,106,Classroom,WATT-CENTER/FC-1.UF1-11 ZN-T,Watt,1st Floor,Temp,106 Temp
+8747,108,Classroom,WATT-CENTER/FC-1.UF1-12-1.ZN-T,Watt,1st Floor,Temp,108 Temp
+8309,110,Project Room,WATT-CENTER/FC-1.UF1-17.ZN-T,Watt,1st Floor,Temp,110 Temp
+8808,112,Project Room,WATT-CENTER/FC-1.UF1-15.ZN-T,Watt,1st Floor,Temp,112 Temp
+8698,113,Office,WATT-CENTER/FC-1.UF1-14.ZN-T,Watt,1st Floor,Temp,113 Temp
+8867,201,Office,WATT-CENTER/FC-2.012014FE.ZN-T,Watt,2nd Floor,Temp,201 Temp
+8215,203,Classroom,WATT-CENTER/FC-2.UF2-6.ZN-T,Watt,2nd Floor,Temp,203 Temp
+9146,204,Bathroom,WATT-CENTER/FC-2.RADIANT-2.ZN-T,Watt,2nd Floor,Temp,204 Temp
+8857,205,Project Room,WATT-CENTER/FC-2.UF2-5.ZN-T,Watt,2nd Floor,Temp,205 Temp
+8619,206,Dataroom,WATT-CENTER/FC-2.FCU-7.ZN-T,Watt,2nd Floor,Temp,206 Temp
+8436,L110U,Mechanical Room,WATT-CENTER/FC-1.AHU-3.EFFCLG-SP,Watt,Basement,Cooling SP,Air Handler 3 Cooling SP
+8460,L110U,Mechanical Room,WATT-CENTER/FC-1.AHU-3.EFFHTG-SP,Watt,Basement,Heating SP,Air Handler 3 Heating SP
+8851,207,Project Room,WATT-CENTER/FC-2.UF2-4.ZN-T,Watt,2nd Floor,Temp,207 Temp
+8628,208,Classroom,WATT-CENTER/FC-2.012017FE.ZN-T,Watt,2nd Floor,Temp,208 Temp
+8845,209,Project Room,WATT-CENTER/FC-2.UF2-3.ZN-T,Watt,2nd Floor,Temp,209 Temp
+8499,L101B,Mechanical Room,WATT-CENTER/FC-1.FCU-10.EFFCLG-SP,Watt,Basement,Cooling SP,L101B Cooling SP
+8461,L102,Classroom,WATT-CENTER/FC-1.FCU-12.EFFCLG-SP,Watt,Basement,Cooling SP,L102 Cooling SP
+8411,L102,Classroom,WATT-CENTER/FC-1.FCU-12.EFFHTG-SP,Watt,Basement,Heating SP,L102 Heating SP
+8328,116U2,Dataroom,WATT-CENTER/FC-1.FCU-5.EFFCLG-SP,Watt,1st Floor,Cooling SP,116U2 Cooling SP
+8452,116U2,Dataroom,WATT-CENTER/FC-1.FCU-5.EFFHTG-SP,Watt,1st Floor,Heating SP,116U2 Heating SP
+8584,104,Bathroom,WATT-CENTER/FC-1.RADIANT-1.EFFCLG-SP,Watt,1st Floor,Cooling SP,104 Cooling SP
+8625,104,Bathroom,WATT-CENTER/FC-1.RADIANT-1.EFFHTG-SP,Watt,1st Floor,Heating SP,104 Heating SP
+8545,100V3,Vestibule,WATT-CENTER/FC-1.UF1-1.EFFCLG-SP,Watt,1st Floor,Cooling SP,100V3 Cooling SP
+8733,100V3,Vestibule,WATT-CENTER/FC-1.UF1-1.EFFHTG-SP,Watt,1st Floor,Heating SP,100V3 Heating SP
+8839,211,Project Room,WATT-CENTER/FC-2.UF2-2.ZN-T,Watt,2nd Floor,Temp,211 Temp
+8672,106,Classroom,WATT-CENTER/FC-1.UF1-11.EFFCLG-SP,Watt,1st Floor,Cooling SP,106 Cooling SP
+8562,106,Classroom,WATT-CENTER/FC-1.UF1-11.EFFHTG-SP,Watt,1st Floor,Heating SP,106 Heating SP
+8553,108,Classroom,WATT-CENTER/FC-1.UF1-12-1.EFFCLG-SP,Watt,1st Floor,Cooling SP,108 Cooling SP
+8667,108,Classroom,WATT-CENTER/FC-1.UF1-12-1.EFFHTG-SP,Watt,1st Floor,Heating SP,108 Heating SP
+8730,100E,Corridor,WATT-CENTER/FC-1.UF1-13.EFFCLG-SP,Watt,1st Floor,Cooling SP,100E Cooling SP
+8541,100E,Corridor,WATT-CENTER/FC-1.UF1-13.EFFHTG-SP,Watt,1st Floor,Heating SP,100E Heating SP
+8807,113,Office,WATT-CENTER/FC-1.UF1-14.EFFCLG-SP,Watt,1st Floor,Cooling SP,113 Cooling SP
+8546,113,Office,WATT-CENTER/FC-1.UF1-14.EFFHTG-SP,Watt,1st Floor,Heating SP,113 Heating SP
+8589,113,Office,WATT-CENTER/FC-1.UF1-14.ZN-SP,Watt,1st Floor,Temp,113 Temp
+8552,112,Project Room,WATT-CENTER/FC-1.UF1-15.EFFCLG-SP,Watt,1st Floor,Cooling SP,112 Cooling SP
+8325,L101,Mechanical Room,WATT-CENTER/FC-1.FCU-10.ZN1-T,Watt,Basement,Temp,L101 Temp
+8211,212,Comm Studio,WATT-CENTER/FC-2.012019FE.ZN-T,Watt,2nd Floor,Temp,212 Temp
+8580,110,Project Room,WATT-CENTER/FC-1.UF1-17.EFFCLG-SP,Watt,1st Floor,Cooling SP,110 Cooling SP
+8616,110,Project Room,WATT-CENTER/FC-1.UF1-17.EFFHTG-SP,Watt,1st Floor,Heating SP,110 Heating SP
+8564,L103,Dataroom,WATT-CENTER/FC-1.UF1-2-1.EFFCLG-SP,Watt,Basement,Cooling SP,L103 Cooling SP
+8673,L103,Dataroom,WATT-CENTER/FC-1.UF1-2-1.EFFHTG-SP,Watt,Basement,Heating SP,L103 Heating SP
+8572,214,Dataroom,WATT-CENTER/FC-2.FCU-6.ZN-T,Watt,2nd Floor,Temp,214 Temp
+8674,100V2,Vestibule,WATT-CENTER/FC-1.UF1-3.EFFCLG-SP,Watt,1st Floor,Cooling SP,100V2 Cooling SP
+8583,100V1,Vestibule,WATT-CENTER/FC-1.UF1-5.EFFCLG-SP,Watt,1st Floor,Cooling SP,100V1 Cooling SP
+8767,103,Kitchen,WATT-CENTER/FC-1.UF1-6.EFFCLG-SP,Watt,1st Floor,Cooling SP,103 Cooling SP
+8833,216,Office,WATT-CENTER/FC-2.012021FE.ZN-T,Watt,2nd Floor,Temp,216 Temp
+8789,216,Office,WATT-CENTER/FC-1.UF1-7.EFFCLG-SP,Watt,2nd Floor,Cooling SP,216 Cooling SP
+8598,216,Office,WATT-CENTER/FC-1.UF1-7.EFFHTG-SP,Watt,2nd Floor,Heating SP,216 Heating SP
+8682,218,Classroom,WATT-CENTER/FC-2.012015FE.ZN-T,Watt,2nd Floor,Temp,218 Temp
+8592,200D,Corridor,WATT-CENTER/FC-2.012008FE.EFFCLG-SP,Watt,2nd Floor,Cooling SP,200D Cooling SP
+8717,200D,Corridor,WATT-CENTER/FC-2.012008FE.EFFHTG-SP,Watt,2nd Floor,Heating SP,200D Heating SP
+9174,301,Office,WATT-CENTER/FC-2.012054FE.ZN-T,Watt,3rd Floor,Temp,301 Temp
+8863,201,Office,WATT-CENTER/FC-2.012014FE.EFFCLG-SP,Watt,3rd Floor,Cooling SP,201 Cooling SP
+8864,201,Office,WATT-CENTER/FC-2.012014FE.EFFHTG-SP,Watt,3rd Floor,Heating SP,201 Heating SP
+8989,303,Office,WATT-CENTER/FC-2.012053FE.ZN-T,Watt,3rd Floor,Temp,303 Temp
+8814,218,Classroom,WATT-CENTER/FC-2.012015FE.EFFCLG-SP,Watt,2nd Floor,Cooling SP,218 Cooling SP
+8815,218,Classroom,WATT-CENTER/FC-2.012015FE.EFFHTG-SP,Watt,2nd Floor,Heating SP,218 Heating SP
+9132,304,Bathroom,WATT-CENTER/FC-2.RADIANT-3.ZN-T,Watt,3rd Floor,Temp,304 Temp
+8804,200S,Corridor,WATT-CENTER/FC-2.012016FE.EFFCLG-SP,Watt,2nd Floor,Cooling SP,200S Cooling SP
+8617,200S,Corridor,WATT-CENTER/FC-2.012016FE.EFFHTG-SP,Watt,2nd Floor,Heating SP,200S Heating SP
+8626,306,Dataroom,WATT-CENTER/FC-2.FCU-9.ZN-T,Watt,3rd Floor,Temp,306 Temp
+8624,208,Classroom,WATT-CENTER/FC-2.012017FE.EFFCLG-SP,Watt,2nd Floor,Cooling SP,208 Cooling SP
+8735,208,Classroom,WATT-CENTER/FC-2.012017FE.EFFHTG-SP,Watt,2nd Floor,Heating SP,208 Heating SP
+8950,307,Project Room,WATT-CENTER/FC-2.012052FE.ZN-T,Watt,3rd Floor,Temp,307 Temp
+8810,212,Comm Studio,WATT-CENTER/FC-2.012019FE.EFFCLG-SP,Watt,2nd Floor,Cooling SP,212 Cooling SP
+8816,212,Comm Studio,WATT-CENTER/FC-2.012019FE.EFFHTG-SP,Watt,2nd Floor,Heating SP,212 Heating SP
+9163,308,Project Room,WATT-CENTER/FC-2.012050FE.ZN-T,Watt,3rd Floor,Temp,308 Temp
+8820,216B,Comm Studio,WATT-CENTER/FC-2.012020FE.EFFCLG-SP,Watt,2nd Floor,Cooling SP,216B Cooling SP
+8821,216B,Comm Studio,WATT-CENTER/FC-2.012020FE.EFFHTG-SP,Watt,2nd Floor,Heating SP,216B Heating SP
+9074,310,Classroom,WATT-CENTER/FC-2.012049FE.ZN-T,Watt,3rd Floor,Temp,310 Temp
+8827,216,Office,WATT-CENTER/FC-2.012021FE.EFFCLG-SP,Watt,2nd Floor,Cooling SP,216 Cooling SP
+8828,216,Office,WATT-CENTER/FC-2.012021FE.EFFHTG-SP,Watt,2nd Floor,Heating SP,216 Heating SP
+8952,313,Classroom,WATT-CENTER/FC-2.012045FE.ZN-T,Watt,3rd Floor,Temp,313 Temp
+8868,200N,Corridor,WATT-CENTER/FC-2.012022FE.EFFCLG-SP,Watt,2nd Floor,Cooling SP,200N Cooling SP
+8869,200N,Corridor,WATT-CENTER/FC-2.012022FE.EFFHTG-SP,Watt,2nd Floor,Heating SP,200N Heating SP
+8741,314,Dataroom,WATT-CENTER/FC-2.FCU-8.ZN-T,Watt,3rd Floor,Temp,314 Temp
+8874,344G,Office,WATT-CENTER/FC-2.012026FE.EFFCLG-SP,Watt,3rd Floor,Cooling SP,344G Cooling SP
+8875,344G,Office,WATT-CENTER/FC-2.012026FE.EFFHTG-SP,Watt,3rd Floor,Heating SP,344G Heating SP
+8979,315,Project Room,WATT-CENTER/FC-2.012046FE.ZN-T,Watt,3rd Floor,Temp,315 Temp
+8943,344F,Office,WATT-CENTER/FC-2.012027FE.EFFCLG-SP,Watt,3rd Floor,Cooling SP,344F Cooling SP
+8944,344F,Office,WATT-CENTER/FC-2.012027FE.EFFHTG-SP,Watt,3rd Floor,Heating SP,344F Heating SP
+9076,316,Classroom,WATT-CENTER/FC-2.012048FE.ZN-T,Watt,3rd Floor,Temp,316 Temp
+9125,344E,Office,WATT-CENTER/FC-2.012028FE.EFFCLG-SP,Watt,3rd Floor,Cooling SP,344E Cooling SP
+9080,344E,Office,WATT-CENTER/FC-2.012028FE.EFFHTG-SP,Watt,3rd Floor,Heating SP,344E Heating SP
+8941,321,Project Room,WATT-CENTER/FC-2.012044FE.ZN-T,Watt,3rd Floor,Temp,321 Temp
+9160,344C,Conference Room,WATT-CENTER/FC-2.012029FE.EFFCLG-SP,Watt,3rd Floor,Cooling SP,344C Cooling SP
+9053,344C,Conference Room,WATT-CENTER/FC-2.012029FE.EFFHTG-SP,Watt,3rd Floor,Heating SP,344C Heating SP
+8930,323,Classroom,WATT-CENTER/FC-2.012042FE.ZN-T,Watt,3rd Floor,Temp,323 Temp
+9057,344B,Breakroom,WATT-CENTER/FC-2.012030FE.EFFCLG-SP,Watt,3rd Floor,Cooling SP,344B Cooling SP
+9135,344B,Breakroom,WATT-CENTER/FC-2.012030FE.EFFHTG-SP,Watt,3rd Floor,Heating SP,344B Heating SP
+8935,325,Project Room,WATT-CENTER/FC-2.012043FE.ZN-T,Watt,3rd Floor,Temp,325 Temp
+9120,344,Corridor,WATT-CENTER/FC-2.012031FE.EFFCLG-SP,Watt,3rd Floor,Cooling SP,344 Cooling SP
+9072,344,Corridor,WATT-CENTER/FC-2.012031FE.EFFHTG-SP,Watt,3rd Floor,Heating SP,344 Heating SP
+8921,329,Project Room,WATT-CENTER/FC-2.012041FE.ZN-T,Watt,3rd Floor,Temp,329 Temp
+8879,344A,Corridor,WATT-CENTER/FC-2.012032FE.EFFCLG-SP,Watt,3rd Floor,Cooling SP,344A Cooling SP
+8880,344A,Corridor,WATT-CENTER/FC-2.012032FE.EFFHTG-SP,Watt,3rd Floor,Heating SP,344A Heating SP
+8916,331,Classroom,WATT-CENTER/FC-2.012040FE.ZN-T,Watt,3rd Floor,Temp,331 Temp
+8909,333,Office,WATT-CENTER/FC-2.012039FE.ZN-T,Watt,3rd Floor,Temp,333 Temp
+9164,339E,Office,WATT-CENTER/FC-2.012034FE.EFFCLG-SP,Watt,3rd Floor,Cooling SP,339E Cooling SP
+9078,339E,Office,WATT-CENTER/FC-2.012034FE.EFFHTG-SP,Watt,3rd Floor,Heating SP,339E Heating SP
+9103,344,Corridor,WATT-CENTER/FC-2.012031FE.ZN-T,Watt,3rd Floor,Temp,344 Temp
+9147,344,Office,WATT-CENTER/FC-2.012033FE.ZN-T,Watt,3rd Floor,Temp,344 Temp
+8892,339A,Office,WATT-CENTER/FC-2.012036FE.EFFCLG-SP,Watt,3rd Floor,Cooling SP,339A Cooling SP
+8893,339A,Office,WATT-CENTER/FC-2.012036FE.EFFHTG-SP,Watt,3rd Floor,Heating SP,339A Heating SP
+41443,408,Office,WATT-CENTER/FC-2.UF-4-1-10.ZN-T,Watt,4th Floor,Temp,408 Temp
+45080,408,Office,WATT-CENTER/FC-2.UF-4-1-10.EFFCLG-SP,Watt,4th Floor,Cooling SP,408 Cooling SP
+45093,408,Office,WATT-CENTER/FC-2.UF-4-1-10.EFFHTG-SP,Watt,4th Floor,Heating SP,408 Heating SP
+8896,344H,Office,WATT-CENTER/FC-2.012037FE.EFFCLG-SP,Watt,3rd Floor,Cooling SP,344H Cooling SP
+8897,344H,Office,WATT-CENTER/FC-2.012037FE.EFFHTG-SP,Watt,3rd Floor,Heating SP,344H Heating SP
+41462,410,Office,WATT-CENTER/FC-2.UF-4-1-13.ZN-T,Watt,4th Floor,Temp,410 Temp
+45078,410,Office,WATT-CENTER/FC-2.UF-4-1-13.EFFCLG-SP,Watt,4th Floor,Cooling SP,410 Cooling SP
+45099,410,Office,WATT-CENTER/FC-2.UF-4-1-13.EFFHTG-SP,Watt,4th Floor,Heating SP,410 Heating SP
+8967,300N,Corridor,WATT-CENTER/FC-2.012038FE.EFFCLG-SP,Watt,2nd Floor,Cooling SP,300N Cooling SP
+41456,413,Corridor,WATT-CENTER/FC-2.UF-4-1-9.ZN-T,Watt,4th Floor,Temp,413 Temp
+45077,413,Corridor,WATT-CENTER/FC-2.UF-4-1-9.EFFCLG-SP,Watt,4th Floor,Cooling SP,413 Cooling SP
+45082,413,Corridor,WATT-CENTER/FC-2.UF-4-1-9.EFFHTG-SP,Watt,4th Floor,Heating SP,413 Heating SP
+41474,416,Project Room,WATT-CENTER/FC-2.UF-4-1-11.ZN-T,Watt,4th Floor,Temp,416 Temp
+45070,416,Project Room,WATT-CENTER/FC-2.UF-4-1-11.EFFCLG-SP,Watt,4th Floor,Cooling SP,416 Cooling SP
+45083,416,Project Room,WATT-CENTER/FC-2.UF-4-1-11.EFFHTG-SP,Watt,4th Floor,Heating SP,416 Heating SP
+8911,331,Classroom,WATT-CENTER/FC-2.012040FE.EFFCLG-SP,Watt,3rd Floor,Cooling SP,331 Cooling SP
+8912,331,Classroom,WATT-CENTER/FC-2.012040FE.EFFHTG-SP,Watt,3rd Floor,Heating SP,331 Heating SP
+41396,418,Office,WATT-CENTER/FC-2.UF-4-1-1.ZN-T,Watt,4th Floor,Temp,418 Temp
+45084,418,Office,WATT-CENTER/FC-2.UF-4-1-1.EFFCLG-SP,Watt,4th Floor,Cooling SP,418 Cooling SP
+45087,418,Office,WATT-CENTER/FC-2.UF-4-1-1.EFFHTG-SP,Watt,4th Floor,Heating SP,418 Heating SP
+8917,329,Project Room,WATT-CENTER/FC-2.012041FE.EFFCLG-SP,Watt,3rd Floor,Cooling SP,329 Cooling SP
+8918,329,Project Room,WATT-CENTER/FC-2.012041FE.EFFHTG-SP,Watt,3rd Floor,Heating SP,329 Heating SP
+41419,423,Classroom,WATT-CENTER/FC-2.UF-4-1-8.ZN-T,Watt,4th Floor,Temp,423 Temp
+45086,423,Classroom,WATT-CENTER/FC-2.UF-4-1-8.EFFCLG-SP,Watt,4th Floor,Cooling SP,423 Cooling SP
+45090,423,Classroom,WATT-CENTER/FC-2.UF-4-1-8.EFFHTG-SP,Watt,4th Floor,Heating SP,423 Heating SP
+8924,323,Classroom,WATT-CENTER/FC-2.012042FE.EFFCLG-SP,Watt,3rd Floor,Cooling SP,323 Cooling SP
+8925,323,Classroom,WATT-CENTER/FC-2.012042FE.EFFHTG-SP,Watt,3rd Floor,Heating SP,323 Heating SP
+41435,433,Conference Room,WATT-CENTER/FC-2.UF-4-1-6.ZN-T,Watt,4th Floor,Temp,433 Temp
+45100,433,Conference Room,WATT-CENTER/FC-2.UF-4-1-6.EFFCLG-SP,Watt,4th Floor,Cooling SP,433 Cooling SP
+45081,433,Conference Room,WATT-CENTER/FC-2.UF-4-1-6.EFFHTG-SP,Watt,4th Floor,Heating SP,433 Heating SP
+41410,444,Breakroom,WATT-CENTER/FC-2.UF-4-1-4.ZN-T,Watt,4th Floor,Temp,444 Temp
+45094,444,Breakroom,WATT-CENTER/FC-2.UF-4-1-4.EFFCLG-SP,Watt,4th Floor,Cooling SP,444 Cooling SP
+45098,444,Breakroom,WATT-CENTER/FC-2.UF-4-1-4.EFFHTG-SP,Watt,4th Floor,Heating SP,444 Heating SP
+9281,100B,Corridor,WATT-CENTER/FC-1.UF1-2-3.ZN-T,Watt,4th Floor,Temp,100B Temp
+8612,100E,Corridor,WATT-CENTER/FC-1.UF1-13.ZN-T,Watt,1st Floor,Temp,100E Temp
+8687,100H2,Corridor,WATT-CENTER/FC-1.UF1-16.ZN-T,Watt,1st Floor,Temp,100H2 Temp
+9099,316A,Storage,WATT-CENTER/FC-2.012047FE.EFFCLG-SP,Watt,3rd Floor,Cooling SP,316A Cooling SP
+9162,316A,Storage,WATT-CENTER/FC-2.012047FE.EFFHTG-SP,Watt,3rd Floor,Heating SP,316A Heating SP
+8209,100V1,Vestibule,WATT-CENTER/FC-1.UF1-5.ZN-T,Watt,1st Floor,Temp,100V1 Temp
+9165,316,Classroom,WATT-CENTER/FC-2.012048FE.EFFCLG-SP,Watt,3rd Floor,Cooling SP,316 Cooling SP
+9088,316,Classroom,WATT-CENTER/FC-2.012048FE.EFFHTG-SP,Watt,3rd Floor,Heating SP,316 Heating SP
+8803,100V2,Vestibule,WATT-CENTER/FC-1.UF1-3.ZN-T,Watt,1st Floor,Temp,100V2 Temp
+9138,310,Classroom,WATT-CENTER/FC-2.012049FE.EFFCLG-SP,Watt,3rd Floor,Cooling SP,310 Cooling SP
+9060,310,Classroom,WATT-CENTER/FC-2.012049FE.EFFHTG-SP,Watt,3rd Floor,Heating SP,310 Heating SP
+8802,100V3,Vestibule,WATT-CENTER/FC-1.UF1-1.ZN-T,Watt,1st Floor,Temp,100V3 Temp
+8507,116U2,Dataroom,WATT-CENTER/FC-1.FCU-5.ZN-T,Watt,1st Floor,Temp,116U2 Temp
+9087,300S,Corridor,WATT-CENTER/FC-2.012051FE.EFFCLG-SP,Watt,2nd Floor,Cooling SP,300S Cooling SP
+9133,300S,Corridor,WATT-CENTER/FC-2.012051FE.EFFHTG-SP,Watt,2nd Floor,Heating SP,300S Heating SP
+8210,200D,Corridor,WATT-CENTER/FC-2.012008FE.ZN-T,Watt,2nd Floor,Temp,200D Temp
+8992,307,Project Room,WATT-CENTER/FC-2.012052FE.EFFCLG-SP,Watt,3rd Floor,Cooling SP,307 Cooling SP
+8969,307,Project Room,WATT-CENTER/FC-2.012052FE.EFFHTG-SP,Watt,3rd Floor,Heating SP,307 Heating SP
+8872,200N,Corridor,WATT-CENTER/FC-2.012022FE.ZN-T,Watt,2nd Floor,Temp,200N Temp
+8987,303,Office,WATT-CENTER/FC-2.012053FE.EFFCLG-SP,Watt,3rd Floor,Cooling SP,303 Cooling SP
+8955,303,Office,WATT-CENTER/FC-2.012053FE.EFFHTG-SP,Watt,3rd Floor,Heating SP,303 Heating SP
+8693,200S,Corridor,WATT-CENTER/FC-2.012016FE.ZN-T,Watt,2nd Floor,Temp,200S Temp
+9171,301,Office,WATT-CENTER/FC-2.012054FE.EFFCLG-SP,Watt,3rd Floor,Cooling SP,301 Cooling SP
+9061,301,Office,WATT-CENTER/FC-2.012054FE.EFFHTG-SP,Watt,3rd Floor,Heating SP,301 Heating SP
+8660,200SN,Stairwell,WATT-CENTER/FC-2.FCU-2.ZN-T,Watt,2nd Floor,Temp,200SN Temp
+8520,200SS,Stairwell,WATT-CENTER/FC-2.FCU-1.ZN-T,Watt,2nd Floor,Temp,200SS Temp
+8558,400U,Mechanical Room,WATT-CENTER/FC-2.012058FE.EFFCLG-SP,Watt,4th Floor,Cooling SP,400U Cooling SP
+8595,400U,Mechanical Room,WATT-CENTER/FC-2.012058FE.EFFHTG-SP,Watt,4th Floor,Heating SP,400U Heating SP
+8825,216B,Comm Studio,WATT-CENTER/FC-2.012020FE.ZN-T,Watt,2nd Floor,Temp,216B Temp
+11597,300N,Corridor,WATT-CENTER/FC-2.012038FE.ZN-T,Watt,2nd Floor,Temp,300N Temp
+8728,200SS,Stairwell,WATT-CENTER/FC-2.FCU-1.EFFCLG-SP,Watt,2nd Floor,Cooling SP,200SS Cooling SP
+8543,200SS,Stairwell,WATT-CENTER/FC-2.FCU-1.EFFHTG-SP,Watt,2nd Floor,Heating SP,200SS Heating SP
+9077,300S,Corridor,WATT-CENTER/FC-2.012051FE.ZN-T,Watt,2nd Floor,Temp,300S Temp
+8777,200SN,Stairwell,WATT-CENTER/FC-2.FCU-2.EFFCLG-SP,Watt,2nd Floor,Cooling SP,200SN Cooling SP
+8588,200SN,Stairwell,WATT-CENTER/FC-2.FCU-2.EFFHTG-SP,Watt,2nd Floor,Heating SP,200SN Heating SP
+9069,316A,Storage,WATT-CENTER/FC-2.012047FE.ZN-T,Watt,3rd Floor,Temp,316A Temp
+8573,400SS,Stairwell,WATT-CENTER/FC-2.FCU-3.EFFCLG-SP,Watt,4th Floor,Cooling SP,400SS Cooling SP
+8605,400SS,Stairwell,WATT-CENTER/FC-2.FCU-3.EFFHTG-SP,Watt,4th Floor,Heating SP,400SS Heating SP
+8214,339A,Office,WATT-CENTER/FC-2.012036FE.ZN-T,Watt,3rd Floor,Temp,339A Temp
+8560,400SN,Stairwell,WATT-CENTER/FC-2.FCU-4.EFFCLG-SP,Watt,4th Floor,Cooling SP,400SN Cooling SP
+8668,400SN,Stairwell,WATT-CENTER/FC-2.FCU-4.EFFHTG-SP,Watt,4th Floor,Heating SP,400SN Heating SP
+26853,339B,Office,WATT-CENTER/FC-2.RM-339B UF3-30.ZN-T,Watt,3rd Floor,Temp,339B Temp
+9155,339E,Office,WATT-CENTER/FC-2.012034FE.ZN-T,Watt,3rd Floor,Temp,339E Temp
+8604,214,Dataroom,WATT-CENTER/FC-2.FCU-6.EFFCLG-SP,Watt,2nd Floor,Cooling SP,214 Cooling SP
+8707,214,Dataroom,WATT-CENTER/FC-2.FCU-6.EFFHTG-SP,Watt,2nd Floor,Heating SP,214 Heating SP
+9157,339F,Office,WATT-CENTER/FC-2.012035FE.ZN-T,Watt,3rd Floor,Temp,339F Temp
+8718,206,Dataroom,WATT-CENTER/FC-2.FCU-7.EFFCLG-SP,Watt,2nd Floor,Cooling SP,206 Cooling SP
+8534,206,Dataroom,WATT-CENTER/FC-2.FCU-7.EFFHTG-SP,Watt,2nd Floor,Heating SP,206 Heating SP
+9170,339G,Office,WATT-CENTER/FC-2.UF3-10.ZN-T,Watt,3rd Floor,Temp,339G Temp
+8561,314,Dataroom,WATT-CENTER/FC-2.FCU-8.EFFCLG-SP,Watt,3rd Floor,Cooling SP,314 Cooling SP
+8669,314,Dataroom,WATT-CENTER/FC-2.FCU-8.EFFHTG-SP,Watt,3rd Floor,Heating SP,314 Heating SP
+9106,344B,Breakroom,WATT-CENTER/FC-2.012030FE.ZN-T,Watt,3rd Floor,Temp,344B Temp
+8736,306,Dataroom,WATT-CENTER/FC-2.FCU-9.EFFCLG-SP,Watt,3rd Floor,Cooling SP,306 Cooling SP
+8775,306,Dataroom,WATT-CENTER/FC-2.FCU-9.EFFHTG-SP,Watt,3rd Floor,Heating SP,306 Heating SP
+9117,344C,Conference Room,WATT-CENTER/FC-2.012029FE.ZN-T,Watt,3rd Floor,Temp,344C Temp
+9065,204,Bathroom,WATT-CENTER/FC-2.RADIANT-2.EFFCLG-SP,Watt,2nd Floor,Cooling SP,204 Cooling SP
+9142,204,Bathroom,WATT-CENTER/FC-2.RADIANT-2.EFFHTG-SP,Watt,2nd Floor,Heating SP,204 Heating SP
+8213,344E,Office,WATT-CENTER/FC-2.012028FE.ZN-T,Watt,3rd Floor,Temp,344E Temp
+9101,304,Bathroom,WATT-CENTER/FC-2.RADIANT-3.EFFCLG-SP,Watt,3rd Floor,Cooling SP,304 Cooling SP
+9114,304,Bathroom,WATT-CENTER/FC-2.RADIANT-3.EFFHTG-SP,Watt,3rd Floor,Heating SP,304 Heating SP
+8947,344F,Office,WATT-CENTER/FC-2.012027FE.ZN-T,Watt,3rd Floor,Temp,344F Temp
+8212,344G,Office,WATT-CENTER/FC-2.012026FE.ZN-T,Watt,3rd Floor,Temp,344G Temp
+8834,211,Project Room,WATT-CENTER/FC-2.UF2-2.EFFCLG-SP,Watt,2nd Floor,Cooling SP,211 Cooling SP
+8835,211,Project Room,WATT-CENTER/FC-2.UF2-2.EFFHTG-SP,Watt,2nd Floor,Heating SP,211 Heating SP
+8900,344H,Office,WATT-CENTER/FC-2.012037FE.ZN-T,Watt,3rd Floor,Temp,344H Temp
+8840,209,Project Room,WATT-CENTER/FC-2.UF2-3.EFFCLG-SP,Watt,2nd Floor,Cooling SP,209 Cooling SP
+8841,209,Project Room,WATT-CENTER/FC-2.UF2-3.EFFHTG-SP,Watt,2nd Floor,Heating SP,209 Heating SP
+41453,400N,Corridor,WATT-CENTER/FC-2.UF-4-1-5.ZN-T,Watt,4th Floor,Temp,400N Temp
+8846,207,Project Room,WATT-CENTER/FC-2.UF2-4.EFFCLG-SP,Watt,2nd Floor,Cooling SP,207 Cooling SP
+8847,207,Project Room,WATT-CENTER/FC-2.UF2-4.EFFHTG-SP,Watt,2nd Floor,Heating SP,207 Heating SP
+8676,400SN,Stairwell,WATT-CENTER/FC-2.FCU-4.ZN-T,Watt,4th Floor,Temp,400SN Temp
+8852,205,Project Room,WATT-CENTER/FC-2.UF2-5.EFFCLG-SP,Watt,2nd Floor,Cooling SP,205 Cooling SP
+8853,205,Project Room,WATT-CENTER/FC-2.UF2-5.EFFHTG-SP,Watt,2nd Floor,Heating SP,205 Heating SP
+8632,400SS,Stairwell,WATT-CENTER/FC-2.FCU-3.ZN-T,Watt,4th Floor,Temp,400SS Temp
+8858,203,Classroom,WATT-CENTER/FC-2.UF2-6.EFFCLG-SP,Watt,2nd Floor,Cooling SP,203 Cooling SP
+8859,203,Classroom,WATT-CENTER/FC-2.UF2-6.EFFHTG-SP,Watt,2nd Floor,Heating SP,203 Heating SP
+8755,400U,Mechanical Room,WATT-CENTER/FC-2.012058FE.ZN-T,Watt,4th Floor,Temp,400U Temp
+9062,339G,Office,WATT-CENTER/FC-2.UF3-10.EFFCLG-SP,Watt,3rd Floor,Cooling SP,339G Cooling SP
+9109,339G,Office,WATT-CENTER/FC-2.UF3-10.EFFHTG-SP,Watt,3rd Floor,Heating SP,339G Heating SP
+41432,406S,Corridor,WATT-CENTER/FC-2.UF-4-1-12.ZN-T,Watt,4th Floor,Temp,406S Temp
+45096,406S,Corridor,WATT-CENTER/FC-2.UF-4-1-12.EFFCLG-SP,Watt,4th Floor,Cooling SP,406S Cooling SP
+45074,406S,Corridor,WATT-CENTER/FC-2.UF-4-1-12.EFFHTG-SP,Watt,4th Floor,Heating SP,406S Heating SP
+31935,439A,Office,WATT-CENTER/FC-2.UF-4-1-2.ZN-T,Watt,4th Floor,Temp,439A Temp
+45071,439A,Office,WATT-CENTER/FC-2.UF-4-1-2.EFFCLG-SP,Watt,4th Floor,Cooling SP,439A Cooling SP
+45091,439A,Office,WATT-CENTER/FC-2.UF-4-1-2.EFFHTG-SP,Watt,4th Floor,Heating SP,439A Heating SP
+41418,439B,Office,WATT-CENTER/FC-2.UF-4-1-3.ZN-T,Watt,4th Floor,Temp,439B Temp
+45102,439B,Office,WATT-CENTER/FC-2.UF-4-1-3.EFFCLG-SP,Watt,4th Floor,Cooling SP,439B Cooling SP
+45072,439B,Office,WATT-CENTER/FC-2.UF-4-1-3.EFFHTG-SP,Watt,4th Floor,Heating SP,439B Heating SP
+41390,439C,Office,WATT-CENTER/FC-2.UF-4-1-7.ZN-T,Watt,4th Floor,Temp,439C Temp
+45095,439C,Office,WATT-CENTER/FC-2.UF-4-1-7.EFFCLG-SP,Watt,4th Floor,Cooling SP,439C Cooling SP
+45073,439C,Office,WATT-CENTER/FC-2.UF-4-1-7.EFFHTG-SP,Watt,4th Floor,Heating SP,439C Heating SP
+8356,L102,Classroom,WATT-CENTER/FC-1.FCU-12.ZN-T,Watt,Basement,Temp,L102 Temp
+8453,L110U,Mechanical Room,WATT-CENTER/FC-1.AHU-3.ZN-T,Watt,Basement,Temp,Air Handler 3 Temp
+8474,L101B,Mechanical Room,WATT-CENTER/FC-1.FCU-10.ZN-T,Watt,Basement,Temp,L101B Temp
+8680,L103,Dataroom,WATT-CENTER/FC-1.UF1-2-1.ZN-T,Watt,Basement,Temp,L103 Temp
+8884,344A,Corridor,WATT-CENTER/FC-2.012032FE.ZN-T,Watt,3rd Floor,Temp,344A Temp
+45097,401U1,Dataroom,WATT-CENTER/FC-2.FCU4-2.SOUTH-DATA-ZNT,Watt,4th Floor,Temp,401U1 Temp
+45076,401U2,Dataroom,WATT-CENTER/FC-2.FCU4-1.DATA-ZNT,Watt,4th Floor,Temp,401U2 Temp
+8931,325,Project Room,WATT-CENTER/FC-2.012043FE.EFFCLG-SP,Watt,3rd Floor,Cooling SP,325 Cooling SP
+8932,325,Project Room,WATT-CENTER/FC-2.012043FE.EFFHTG-SP,Watt,3rd Floor,Heating SP,325 Heating SP
+8937,321,Project Room,WATT-CENTER/FC-2.012044FE.EFFCLG-SP,Watt,3rd Floor,Cooling SP,321 Cooling SP
+8938,321,Project Room,WATT-CENTER/FC-2.012044FE.EFFHTG-SP,Watt,3rd Floor,Heating SP,321 Heating SP
+8983,313,Classroom,WATT-CENTER/FC-2.012045FE.EFFCLG-SP,Watt,3rd Floor,Cooling SP,313 Cooling SP
+8991,313,Classroom,WATT-CENTER/FC-2.012045FE.EFFHTG-SP,Watt,3rd Floor,Heating SP,313 Heating SP
+8994,315,Project Room,WATT-CENTER/FC-2.012046FE.EFFCLG-SP,Watt,3rd Floor,Cooling SP,315 Cooling SP
+8953,315,Project Room,WATT-CENTER/FC-2.012046FE.EFFHTG-SP,Watt,3rd Floor,Heating SP,315 Heating SP
+9168,308,Project Room,WATT-CENTER/FC-2.012050FE.EFFCLG-SP,Watt,3rd Floor,Cooling SP,308 Cooling SP
+9054,308,Project Room,WATT-CENTER/FC-2.012050FE.EFFHTG-SP,Watt,3rd Floor,Heating SP,308 Heating SP
+8903,333,Office,WATT-CENTER/FC-2.012039FE.EFFCLG-SP,Watt,3rd Floor,Cooling SP,333 Cooling SP
+8904,333,Office,WATT-CENTER/FC-2.012039FE.EFFHTG-SP,Watt,3rd Floor,Heating SP,333 Heating SP
+9081,339F,Office,WATT-CENTER/FC-2.012035FE.EFFCLG-SP,Watt,3rd Floor,Cooling SP,339F Cooling SP
+9098,339F,Office,WATT-CENTER/FC-2.012035FE.EFFHTG-SP,Watt,3rd Floor,Heating SP,339F Heating SP
+9000,300N,Corridor,WATT-CENTER/FC-2.012038FE.EFFHTG-SP,Watt,2nd Floor,Heating SP,300N Heating SP
+8569,103,Kitchen,WATT-CENTER/FC-1.UF1-6.EFFHTG-SP,Watt,1st Floor,Heating SP,103 Heating SP
+8623,100V1,Vestibule,WATT-CENTER/FC-1.UF1-5.EFFHTG-SP,Watt,1st Floor,Heating SP,100V1 Heating SP
+8565,100V2,Vestibule,WATT-CENTER/FC-1.UF1-3.EFFHTG-SP,Watt,1st Floor,Heating SP,100V2 Heating SP
+8666,112,Project Room,WATT-CENTER/FC-1.UF1-15.EFFHTG-SP,Watt,1st Floor,Heating SP,112 Heating SP

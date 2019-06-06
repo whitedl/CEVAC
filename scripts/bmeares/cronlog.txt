@@ -1,0 +1,75 @@
+Updating latest power sum for WATT...
+
+Executing query:
+ 
+  SET NOCOUNT ON
+  SELECT SUM(ActualValue) AS SUM
+  FROM CEVAC_WATT_POWER_LATEST
+Raw data is: Msg 1205, Level 13, State 56, Server CLEMSONADX, Procedure sp_tables_info_90_rowset_64, Line 9 Transaction (Process ID 117) was deadlocked on lock resources with another process and has been chosen as the deadlock victim. Rerun the transaction. OLE DB provider "SQLNCLI11" for linked server "130.127.238.129" returned message "Unspecified error".
+
+Output is:1205 13 56 90 64 9 117 11 130.127 238.129
+
+Uploading to CEVAC_STATS...Msg 8114, Level 16, State 5, Server WFIC-UTIL-SQL, Line 3
+Error converting data type varchar to float.
+
+Finished
+Updating latest power sum for ASC...
+
+Executing query:
+ 
+  SET NOCOUNT ON
+  SELECT SUM(ActualValue) AS SUM
+  FROM CEVAC_ASC_POWER_LATEST
+Raw data is: Msg 1205, Level 13, State 18, Server CLEMSONADX, Procedure sp_indexes_100_rowset, Line 9 Transaction (Process ID 117) was deadlocked on lock resources with another process and has been chosen as the deadlock victim. Rerun the transaction. OLE DB provider "SQLNCLI11" for linked server "130.127.238.129" returned message "Unspecified error".
+
+Output is:1205 13 18 100 9 117 11 130.127 238.129
+
+Uploading to CEVAC_STATS...Msg 8114, Level 16, State 5, Server WFIC-UTIL-SQL, Line 3
+Error converting data type varchar to float.
+
+Finished
+Updating latest air quality for WATT...
+
+Executing query:
+ 
+  SET NOCOUNT ON
+  SELECT AVG(ActualValue) AS AVG
+    FROM CEVAC_WATT_IAQ_LATEST AS LATEST
+    INNER JOIN CEVAC_WATT_IAQ_XREF AS XREF
+      ON XREF.Alias = LATEST.Alias
+      WHERE ReadingType = 'CO2'
+  
+Raw data is AVG ------------------------ 406.48922596807063
+
+Output is:406.48922596807063
+
+Uploading to CEVAC_STATS...
+Finished
+Updating latest average temperature for WATT...
+
+Executing query:
+ 
+  SET NOCOUNT ON
+  SELECT AVG(ActualValue) AS AVG
+  FROM CEVAC_WATT_TEMP_LATEST
+Raw output: Msg 1934, Level 16, State 1, Server WFIC-UTIL-SQL, Line 3 SELECT failed because the following SET options have incorrect settings: 'QUOTED_IDENTIFIER'. Verify that SET options are correct for use with indexed views and/or indexes on computed columns and/or filtered indexes and/or query notifications and/or XML data type methods and/or spatial index operations.
+
+Extracted result is: 1934 16 1 3
+
+Uploading to CEVAC_STATS...Msg 8114, Level 16, State 5, Server WFIC-UTIL-SQL, Line 3
+Error converting data type varchar to float.
+
+Finished
+Updating latest average temperature for ASC...
+
+Executing query:
+ 
+  SET NOCOUNT ON
+  SELECT AVG(ActualValue) AS AVG
+  FROM CEVAC_ASC_TEMP_LATEST
+Raw output: AVG ------------------------ 71.878898234307016
+
+Extracted result is: 71.878898234307016
+
+Uploading to CEVAC_STATS...
+Finished
