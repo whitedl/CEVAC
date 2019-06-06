@@ -167,10 +167,8 @@ for i,item in enumerate(list(unique_databases)):
 		db_string += item
 	else:
 		db_string += item + ","
-update_sql = "EXEC CEVAC_CACHE @tables='" + db_string + "'"
-#print(update_sql)
-#cursor.execute(update_sql)
-#print("COMMAND EXECUTED")
+update_sql = "EXEC CEVAC_CACHE_INIT @tables='" + db_string + "'"
+cursor.execute(update_sql)
 input("PRESS ENTER")
 
 ## Check alerts
