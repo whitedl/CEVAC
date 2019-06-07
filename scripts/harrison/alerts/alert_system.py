@@ -162,9 +162,9 @@ for i,item in enumerate(list(unique_databases)):
                 db_string += item + ","
 update_sql = "EXEC CEVAC_CACHE_INIT @tables='" + db_string + "'"
 req = "http://130.127.218.148/requests/query.php?q="
-#print(req+update_sql.replace(" ","%20"))
+print(req+update_sql.replace(" ","%20"))
 
-#  na = urllib.request.urlopen(req+update_sql.replace(" ","%20")).read()
+na = urllib.request.urlopen(req+update_sql.replace(" ","%20")).read()
 
 #cursor.execute(update_sql)
 #cursor.commit()

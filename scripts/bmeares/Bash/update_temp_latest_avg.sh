@@ -1,6 +1,6 @@
 #! /bin/sh
 # This script queries the latest average temperature
-./seperator.sh
+/home/bmeares/scripts/seperator.sh
 
 if [ -z $1 ]; then
   echo Error: Please specify a building

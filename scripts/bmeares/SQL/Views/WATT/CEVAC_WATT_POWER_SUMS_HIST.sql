@@ -14,5 +14,5 @@ CREATE VIEW CEVAC_WATT_POWER_SUMS_HIST AS
 SELECT UTCDateTime,  SUM(ActualValue) AS Total_Usage, DATEPART(year, UTCDateTime) AS Year, DATEPART(month, UTCDateTime) AS Month, DATEPART(day, UTCDateTime) AS Day
 FROM
 (SELECT * FROM CEVAC_WATT_POWER_HIST
- WHERE Alias LIKE 'Building%')
+ WHERE Alias LIKE 'Building%') AS building_sums
 GROUP BY UTCDateTime
