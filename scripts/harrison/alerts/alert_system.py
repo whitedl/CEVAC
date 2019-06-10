@@ -188,8 +188,10 @@ for i,a in enumerate(alerts):
                         # Check basic value
                         if str.isdigit(alert["value"]):
                                 alert["value"] = float(alert["value"])
+                                print(type(alert["value"]))
 
                                 selection_command = "SELECT top "+str(alert["num_entries"]) + " " + alert["column"] + " FROM " + str(alert["database"])
+                                print(selection_command)
                                 if str(alert["aliases"]) == "*":
                                         selection_command += " ORDER BY " + alert["sort_column"] + " DESC"
                                 else:
@@ -197,7 +199,6 @@ for i,a in enumerate(alerts):
                                 #data = cursor.execute(selection_command)
                                 url_command = command_to_query(selection_command)
                                 print(url_command)
-                                print(selection_command)
                                 data = urllib.request.urlopen(command_to_query(selection_command))
                                 print(data)
                                 data2 = data.read()
@@ -211,7 +212,7 @@ for i,a in enumerate(alerts):
                                 print(dict_list)
                                 data_list = [sd[list(sd.keys())[0]] for sd in dict_list]
                                 print(data_list)
-                                
+
                                 #data_list = [row[0] for row in data]
                                 avg_data = sum(data_list)/len(data_list)
                                 send_alert = False
