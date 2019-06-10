@@ -8,6 +8,7 @@ import pytz
 import csv
 import logging
 import safe_move
+import random
 
 ######################################
 # Config Variables
@@ -251,7 +252,7 @@ def ingest_file_floor(fname, dbc, xref):
 
 	with open(fname, "r") as csvfile:
 		reader = csv.reader(csvfile)
-		insert_sql = "INSERT INTO  CEVAC_WATT_WAP_HIST_FLOOR (hour, floor, guest, clemson) VALUES (?,?,?,?)"
+		insert_sql = "INSERT INTO  CEVAC_WATT_WAP_FLOOR_HIST (UTCDateTime, floor, guest_count, clemson_count) VALUES (?,?,?,?)"
 
 		#move reader to 'Client Sessions' line
 		try:
@@ -269,8 +270,13 @@ def ingest_file_floor(fname, dbc, xref):
 		hours = {}
 		for row in reader:
 			name = row[5]
-			floor = xref[name][0]
+            if name in xref:
+                floor = xref[name][0]
+            else:
+                floor = "outside"
 			username = row[0]
+            if username == "test":
+                username = str(random.randint(0,10000000))
 			SSID = row[7]
 			hour = custom_datestring_to_datetime(row[3]).replace(minute=0,second=0)
 			assoc_time = custom_datestring_to_datetime(row[3])
@@ -321,11 +327,15 @@ def ingest_file_floor(fname, dbc, xref):
 				}
 
 		for hour in hours:
-			for name in hours[hour]:
-				for SSID in hours[hour][name]:
-					total_duration = hours[hour][name][SSID]["time"]
-					unique_users = len(hours[hour][name][SSID]["users"].keys())
-					cursor.execute(insert_sql, [hour, name, SSID, int(total_duration), total_duration/60, unique_users])
+			for floor in hours[hour]:
+                clemson = 0
+                guest = 0
+                if "eduroam" in hours[hour][floor]:
+                    clemson += len(hours[hour][floor]["eduroam"]["users"])
+                if "clemsonguest" in hours[hour][floor]:
+                    guest += len(hours[hour][floor]["clemsonguest"]["users"])
+
+				cursor.execute(insert_sql, [hour, floor, guest, clemson])
 
 		#commit insertions
 		dbc.commit()

@@ -110,8 +110,7 @@ def import_conditions(fname,logger):
                     }
                     unique_databases[row[COLUMNS["database"]]] = None
             except:
-                if LOG:
-                    logger.error("Issue importing conditions "+str(i))
+                safe_log("Issue importing conditions "+str(i),"error")
     return (alerts,unique_databases)
 
 
@@ -133,6 +132,41 @@ def command_to_query(command):
     return req + urllib.parse.quote_plus(command)
 
 
+def request_to_list_single(query):
+    '''
+    Returns a list of data from a query
+    '''
+    data = urllib.request.urlopen(query)
+    data_readable = data.read().decode('utf-8').replace("}{","} {")
+    data_list = data_readable.split(" ")
+    dict_list = [json.loads(d) for d in data_list]
+    data_list = [sd[list(sd.keys())[0]] for sd in dict_list]
+    return data_list
+
+
+def request_to_list_multiple(query, num_args):
+    '''
+    Returns a list of lists (with length up to num_args) of data from a query
+    '''
+    data = urllib.request.urlopen(query)
+    data_readable = data.read().decode('utf-8').replace("}{","} {")
+    data_list = data_readable.split(" ")
+    dict_list = [json.loads(d) for d in data_list]
+    data_list = []
+    for sd in dict_list:
+        dl = []
+        for i in range(num_args):
+            dl.append(sd[list[sd.keys()]][i])
+        data_list.append(ds)
+    return data_list
+
+
+def safe_log(message,type):
+    if LOG:
+        if type == "error":
+            logging.error(message)
+        else:
+            logging.info(message)
 
 # Script
 
@@ -163,8 +197,7 @@ req = "http://wfic-cevac1/requests/query.php?q="
 req_parse = req + urllib.parse.quote_plus(update_sql)
 
 append_tables_url = "http://wfic-cevac1/requests/script.php?s=append_tables.sh"
-print(append_tables_url)
-na = urllib.request.urlopen(append_tables_url).read()
+urllib.request.urlopen(append_tables_url).read()
 
 ## Check alerts
 insert_sql_total = ""
@@ -175,12 +208,11 @@ for i,a in enumerate(alerts):
     try:
         # Check time conditional
         now = datetime.datetime.now()
-        print(alert["day"],alert["month"],alert["hour"])
         correct_day = ( (str(now.isoweekday()) in alert["day"]) or (alert["day"] == ["*"]) )
         correct_hour = ( (str(now.hour) in alert["hour"]) or (alert["hour"] == ["*"]) )
         correct_month = ( (str(now.month) in alert["month"]) or (alert["month"] == ["*"]) )
         if not correct_day or not correct_hour or not correct_month:
-            logging.info("Not time for alert #"+str(i+1)) if LOG else None
+            safe_log("Not time for alert #"+str(i+1),"info")
             continue
 
         # Check basic value
@@ -193,14 +225,9 @@ for i,a in enumerate(alerts):
             else:
                 selection_command += " WHERE " + "Alias" + " IN (" + str(alert["aliases"]).replace("[","").replace("]","") + ") ORDER BY " + alert["sort_column"] + " DESC"
 
-            url_command = command_to_query(selection_command)
-            data = urllib.request.urlopen(command_to_query(selection_command))
-            data_readable = data.read().decode('utf-8').replace("}{","} {")
-            data_list = data_readable.split(" ")
-            dict_list = [json.loads(d) for d in data_list]
-            data_list = [sd[list(sd.keys())[0]] for sd in dict_list]
-
+            data_list = command_to_query(command_to_query(selection_command))
             avg_data = sum(data_list)/len(data_list)
+
             send_alert = False
             if alert["condition"] == ">":
                 send_alert = (avg_data > alert["value"])
@@ -208,26 +235,24 @@ for i,a in enumerate(alerts):
                 send_alert = (avg_data < alert["value"])
             if send_alert:
                 total_issues += 1
-                if LOG:
-                    logging.info("ISSUE"+str(alert))
+                safe_log("An alert was sent for "+str(alert),"info")
                 com = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType, AlertMessage, Metric,BLDG,BeginTime) VALUES('"+alert["operation"]+"','"+alert["message"]+"','"+str(avg_data)+"','"+alert["building"]+"',GETUTCDATE())"
                 insert_sql_total += com + "; "
-                if LOG:
-                    logging.info("An alert was sent for "+str(alert))
-            if LOG:
-                logging.info("Checked "+str(alert))
+                "ISSUE"+str(alert)
+            safe_log("Checked "+str(i+1),"info")
 
         # Temperature custom measure
         elif ("Temp" in alert["value"]):
             selection_command = "SELECT Alias, " + alert["column"] + " FROM " + alert["database"] + " ORDER BY " + alert["sort_column"]
             url_command = command_to_query(selection_command)
-            print(selection_command)
-            print(url_command)
             data = urllib.request.urlopen(url_command)
+            print(data)
             data_readable = data.read().decode('utf-8').replace("}{","} {")
             data_list = data_readable.split(" ")
+            print(data_list)
             dict_list = [json.loads(d) for d in data_list]
             data_list = [[sd[list(sd.keys())[0]],sd[list(sd.keys())[1]]] for sd in dict_list]
+            print(data_list)
 
             #data_list = [[row[0],row[1]] for row in data]
             temps = {}
@@ -282,36 +307,27 @@ for i,a in enumerate(alerts):
 
                 if send_alert:
                     total_issues += 1
-                    if LOG:
-                        logging.info("ISSUE"+str(alert))
                     com = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType, AlertMessage, Metric,BLDG,BeginTime) VALUES('"+alert["operation"]+"','"+alert["message"]+"','"+str(room) + " " + str(room_vals[Alias_Temp])+"','"+alert["building"]+"',GETUTCDATE())"
                     insert_sql_total += com + "; "
-                    if LOG:
-                        logging.info("An alert was sent for "+str(alert))
-
-                if LOG:
-                    logging.info("Checked "+str(alert))
+                    safe_log("An alert was sent for "+str(alert),"info")
+                safe_log("Checked "+str(i+1),"info")
 
         # Time custom measure
         elif ("<now>" in alert["value"]):
             #local_dt = local.localize(naive, is_dst=None)
             #utc_dt = local_dt.astimezone(pytz.utc)
-            if LOG:
-                logging.error("<now> not yet ready in script")
+            safe_log("<now> not yet ready in script","info")
 
         else:
-            if LOG:
-                logging.error("Could not find valid condition/value for "+str(alert))
+            safe_log("Could not find valid condition/value for "+str(alert),"info")
 
     except:
-        if LOG:
-            logging.error("Issue on alert "+str(i+1)+" "+str(alert))
+        safe_log("Issue on alert "+str(i+1)+" "+str(alert),"info")
 
 if total_issues == 0:
-    insert_sql_total = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType,Metric,BLDG,BeginTime) VALUES('All Clear','','All',GETUTCDATE())"
+    insert_sql_total = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType,AlertMessage,Metric,BLDG,BeginTime) VALUES('All Clear','All Clear','N/A','All',GETUTCDATE())"
 
 # Insert into CEVAC_WATT_ALERT_HIST
-print(insert_sql_total)
 urllib.request.urlopen(command_to_query(insert_sql_total)).read()
 
 if LOG:
