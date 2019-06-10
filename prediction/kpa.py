@@ -7,10 +7,6 @@ from keras import losses
 from tensorflow.keras.callbacks import EarlyStopping
 from keras.utils import plot_model
 
-
-# local libs
-import dataSplitter
-
 # Helper libraries
 import numpy as np
 import matplotlib.pyplot as plt
@@ -65,8 +61,10 @@ def customAlg():
 
 	# make a model instanace
 	model = SimpleMLP()
-	# stops the model when the loss is no longer decreasing
+
+    # compiles the model
 	model.compile(optimizer='adam',loss=losses.categorical_crossentropy, metrics=['accuracy'])
+
 	return model
 
 # prediction with the built-in keras model
@@ -104,13 +102,17 @@ def train(model):
 
 	print('Test accuracy:', test_acc)
 
-    # model.predict([])
-
-def predict():
+def predict(inq):
     # make a model instanace
-    model = SimpleMLP()
-    model.load_weights("./checkpoints/weights")	# works in reverse)
+    model = keras.Sequential([
+		keras.layers.Dense(512, input_shape=(3,), activation=tf.nn.relu), #64 was basically a random number for me. I'd experiment with bigger and smaller
+		keras.layers.Dropout(0.5),		# makes sure you aren't overfitting and killing your test accuracy. This is a pretty high dropout rate, so make lower as needed (esp if you need a bigger training set)
+		keras.layers.Dense(300, activation=tf.nn.relu) #number of neurons in final layer should equal number of classes
+	])
+    model.compile(optimizer='sgd',loss=losses.categorical_crossentropy, metrics=['accuracy'])
+    model.load_weights('powerModel.h5')
+    model.predict(inq)
 
 if __name__ == '__main__':
 	train(customAlg())
-    # predict()
+    # predict([10, 10, 5])

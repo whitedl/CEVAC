@@ -28,10 +28,12 @@ def insertData():
         intSum = int(row['Sum'])
         info['Hour'].append(h)
         info['dayOfWeek'].append(d)
-        info['intSum'] = intSum
+        info['intSum'].append(intSum)
 
     for key in info:
         df[key] = info[key]
+
+    print(df.describe)
 
     return df
 
@@ -59,6 +61,7 @@ def makeArrays():
     # # #
     testingData = []
     testingLabels = []
+
 
     # this is the dimension of our training dataset
     tDim = int(len(x) * .9)
