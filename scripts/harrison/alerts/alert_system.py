@@ -202,7 +202,7 @@ for i,a in enumerate(alerts):
                                 data = urllib.request.urlopen(command_to_query(selection_command)).read().replace("}{","} {").split(" ")
                                 print(data)
                                 dict_list = [json.loads(d) for d in data]
-                                                                print(dict_list)
+                                print(dict_list)
                                 data_list = [sd[list(sd.keys())[0]] for sd in dict_list]
                                 print(data_list)
 
