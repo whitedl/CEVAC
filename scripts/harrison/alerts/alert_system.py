@@ -207,7 +207,7 @@ for i,a in enumerate(alerts):
                                 print(data3)
                                 data4 = data3.split(" ")
                                 print(data4)
-                                dict_list = [json.loads(d) for d in data]
+                                dict_list = [json.loads(d) for d in data4]
                                 print(dict_list)
                                 data_list = [sd[list(sd.keys())[0]] for sd in dict_list]
                                 print(data_list)
