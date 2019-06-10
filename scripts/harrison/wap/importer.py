@@ -19,6 +19,7 @@ import_dir = prefix + "/to_import"
 processed_dir = prefix + "/processed"
 failed_dir = prefix + "/failed"
 log_dir = prefix + "/logs"
+xref_dir = prefix + "/xref"
 
 #######################################
 # Function Definitions
@@ -48,6 +49,22 @@ def custom_datestring_to_datetime(datestring):
 	local_dt = local.localize(naive, is_dst=dst)
 	utc_dt = local_dt.astimezone (pytz.utc)
 	return utc_dt
+
+# Convert xref to dictionary of psid to floor
+def xref_to_dict(fname):
+	psid_to_floor = {}
+	with csv.reader(open(fname,'r')) as csvreader:
+		#read past header
+		headers = csvreader.next()
+
+		for row in csvreader:
+			try:
+				psid_to_floor[row[0]] = str(row[1])[0]
+			except:
+				pass
+
+		return psid_to_floor
+
 
 # import data from a wireless usage csv to the wireless_usage table in the database.
 def ingest_file(fname, dbc):
@@ -136,6 +153,7 @@ def ingest_file(fname, dbc):
 	del cursor
 	return errorCount == 0
 
+# Used for the new dataset that will fail at ingest_file
 def ingest_file_fail(fname, dbc):
 	cursor = dbc.cursor()
 	errorCount = 0
@@ -201,6 +219,98 @@ def ingest_file_fail(fname, dbc):
 			elif (td > 1):
 				hours[hour] = {
 					name : {
+						SSID : {
+							"time": td,
+							"users" : {
+								username : None,
+							}
+						}
+					}
+				}
+
+		for hour in hours:
+			for name in hours[hour]:
+				for SSID in hours[hour][name]:
+					total_duration = hours[hour][name][SSID]["time"]
+					unique_users = len(hours[hour][name][SSID]["users"].keys())
+					cursor.execute(insert_sql, [hour, name, SSID, int(total_duration), total_duration/60, unique_users])
+
+		#commit insertions
+		dbc.commit()
+
+
+	# close cursor
+	cursor.close()
+	del cursor
+	return errorCount == 0
+
+# Used to insert by floor
+def ingest_file_floor(fname, dbc, xref):
+	cursor = dbc.cursor()
+	errorCount = 0
+
+	with open(fname, "r") as csvfile:
+		reader = csv.reader(csvfile)
+		insert_sql = "INSERT INTO  CEVAC_WATT_WAP_HIST_FLOOR (hour, floor, guest, clemson) VALUES (?,?,?,?)"
+
+		#move reader to 'Client Sessions' line
+		try:
+			while reader.next()[0] != 'Client Sessions':
+				pass
+		except StopIteration as e:
+			logging.error("Couldn't find 'Client Sessions' line in %s. Unable to injest file.", fname)
+			cursor.close()
+			del cursor
+			return False
+
+		#read past header
+		headers = next(reader)
+
+		hours = {}
+		for row in reader:
+			name = row[5]
+			floor = xref[name][0]
+			username = row[0]
+			SSID = row[7]
+			hour = custom_datestring_to_datetime(row[3]).replace(minute=0,second=0)
+			assoc_time = custom_datestring_to_datetime(row[3])
+			try:
+				dissoc_time = custom_datestring_to_datetime(row[10])
+			except:
+				dst = False
+				local = pytz.timezone ("America/New_York")
+				dissoc_time = datetime.datetime.now()
+				dissoc_time = local.localize(dissoc_time, is_dst=dst)
+				dissoc_time = dissoc_time.astimezone (pytz.utc)
+			snr_db = row[11]
+			rssi_dbm = row[12]
+			td = ((dissoc_time - assoc_time).total_seconds()/60) % 60
+
+			## Add count of unique people per wap
+			if (hour in hours.keys()) and (td > 1):
+				if floor in hours[hour].keys():
+					if SSID in hours[hour][name].keys():
+						hours[hour][floor][SSID]["time"] += td
+						hours[hour][floor][SSID]["users"][username] = None
+					else:
+						hours[hour][floor][SSID] = {
+							"time" : td,
+							"users" : {
+								username : None,
+							}
+						}
+				else:
+					hours[hour][floor] = {
+						SSID : {
+							"time" : td,
+							"users" : {
+								username : None,
+							}
+						}
+					}
+			elif (td > 1):
+				hours[hour] = {
+					floor : {
 						SSID : {
 							"time": td,
 							"users" : {
@@ -316,7 +426,7 @@ for fname in file_list:
 connection.close()
 
 # Connect to second database
-logging.info("Connecting to second database")
+logging.info("Connecting to CEVAC_WATT_WAP_HIST and CEVAC_WATT_WAP_HIST_FLOOR")
 
 file_list = []
 try:
@@ -352,7 +462,12 @@ for fname in file_list:
 	success = False
 	logging.info("Running for "+str(fpath))
 	try:
-		success = ingest_file_fail(fpath, connection)
+		xref = xref_to_dict(os.path.join(xref_dir, "CEVAC_WATT_WAP_XREF.csv"))
+		if len(xref) > 0:
+			success = (ingest_file_fail(fpath, connection) and ingest_file_floor(fpath,connection,xref))
+		else:
+			success = ingest_file_fail(fpath, connection)
+			logging.error("Unable to read xref, append to CEVAC_WATT_WAP_HIST_FLOOR")
 	except csv.Error as e:
 		logging.error("Failed to read %s as a csv file.", fpath)
 	except Exception as e:
@@ -371,6 +486,7 @@ for fname in file_list:
 			safe_move.safe_move(fpath, os.path.join(failed_dir, fname))
 		except WindowsError as e:
 			logging.exception("Failed to move %s to %s", fname, failed_dir)
+
 
 connection.close()
 
