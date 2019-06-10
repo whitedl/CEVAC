@@ -107,7 +107,9 @@ CREATE TABLE #cevac_vars(
 CREATE TABLE #cevac_metric_params(Params nvarchar(100))
 
 -- Generate table names
-SET @Table_name = CONCAT('CEVAC_', @Building, '_', @Metric, '_', @Age);
+IF @Age = 'HIST' SET @Table_name = CONCAT('CEVAC_', @Building, '_', @Metric, '_', @Age, '_VIEW')
+ELSE SET @Table_name = CONCAT('CEVAC_', @Building, '_', @Metric, '_', @Age);
+SELECT @Table_name AS 'Table_name init';
 SET @XREF = CONCAT('CEVAC_', @Building, '_', @Metric, '_XREF');
 IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = @XREF) SET @XREF = NULL;
 
@@ -131,7 +133,10 @@ IF EXISTS(
 ) BEGIN
 	-- Drop view if it exists
 	DECLARE @ExecSQL NVARCHAR(300);
-	SET @ExecSQL = CONCAT('DROP VIEW ', @Table_name);
+	SET @ExecSQL = 'DROP VIEW ' + @Table_name;
+	SELECT @Table_name AS 'Table_name before drop';
+
+	SELECT @ExecSQL AS 'DROP_view';
 	EXEC(@ExecSQL);
 
 END
@@ -179,8 +184,11 @@ IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = @XREF)
 
 -- build view query
 DECLARE @Create_View nvarchar(4000);
-IF @Age NOT LIKE '%LATEST%' BEGIN
-	-- Building HIST or DAY
+
+
+-- HIST
+IF @Age = 'HIST' BEGIN
+	-- HIST
 	SET @Create_View = '
 		CREATE VIEW ' + @Table_name + ' AS
 		SELECT
@@ -208,10 +216,20 @@ IF @Age NOT LIKE '%LATEST%' BEGIN
 		 ( PointName LIKE ' + @building_key + ')
 	 		 ' + isnull(@unitOfMeasureID_query, '') + '
 		)' + isnull(@Age_query, '');
+
+-- DAY
+END ELSE IF @Age = 'DAY' BEGIN
+	SET @Create_View = '
+	CREATE VIEW ' + @Table_name + ' AS
+	SELECT * FROM ' + REPLACE(@Table_name, 'DAY', 'HIST_CACHE') + '
+	WHERE UTCDateTime <= GETUTCDATE() AND UTCDateTime >= DATEADD(day, -1, GETUTCDATE())
+	';
+	 
+-- LATEST and LATEST_FULL
 END ELSE BEGIN
 	-- Determine data source for _LATEST
 	DECLARE @Latest_source NVARCHAR(30);
-	IF @Age LIKE '%FULL%' SET @Latest_source = 'CEVAC_' + @Building + '_' + @Metric + '_HIST';
+	IF @Age LIKE '%FULL%' SET @Latest_source = 'CEVAC_' + @Building + '_' + @Metric + '_HIST_CACHE';
 	ELSE SET @Latest_source = 'CEVAC_' + @Building + '_' + @Metric + '_DAY';
 	-- Build LATEST
 	SET @Create_View = '
@@ -236,6 +254,30 @@ END
 -- Execute to create the view
 EXEC(@Create_View)
 
+-- Make _HIST view as alias for _HIST_CACHE
+IF @Age = 'HIST' BEGIN
+	DECLARE @Drop_API NVARCHAR(100);
+	SET @Drop_API = 'DROP VIEW ' + REPLACE(@Table_name, '_VIEW', '');
+	IF OBJECT_ID(REPLACE(@Table_name, '_VIEW', ''), 'U') IS NOT NULL BEGIN
+	SELECT @Drop_API AS 'DROP _HIST API View'
+	EXEC(@Drop_API);
+	END
+
+
+	DECLARE @_HIST_source NVARCHAR(60);
+	DECLARE @Create_API_View NVARCHAR(100);
+	-- _HIST selects from _VIEW if _CACHE does not exist
+	IF OBJECT_ID(REPLACE(@Table_name, '_VIEW', '_CACHE'), 'U') IS NOT NULL SET @_HIST_source = REPLACE(@Table_name, '_VIEW', '_CACHE');
+	ELSE SET @_HIST_source = @Table_name;
+
+	SET @Create_API_View = '
+	CREATE VIEW ' + REPLACE(@Table_name, '_VIEW', '') + '
+	AS 
+	SELECT * FROM ' + @_HIST_source;
+	SELECT @Create_API_View AS '_HIST_API';
+	EXEC(@Create_API_View);
+
+END
 
 -- Cleanup
 DROP TABLE #cevac_vars
