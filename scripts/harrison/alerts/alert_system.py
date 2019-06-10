@@ -183,9 +183,9 @@ for i,a in enumerate(alerts):
         try:
                 now = datetime.datetime.now()
                 print(alert["day"],alert["month"],alert["hour"])
-                correct_day = ((str(now.isoweekday()) in alert["day"]) or (str(alert["day"]) == ["*"]))
-                correct_hour = ((str(now.hour) in alert["hour"]) or (str(alert["hour"]) == ["*"]))
-                correct_month = ((str(now.month) in alert["month"]) or (str(alert["month"]) == ["*"]))
+                correct_day = ((str(now.isoweekday()) in alert["day"]) or (alert["day"] == ["*"]))
+                correct_hour = ((str(now.hour) in alert["hour"]) or (alert["hour"] == ["*"]))
+                correct_month = ((str(now.month) in alert["month"]) or (alert["month"] == ["*"]))
 
                 if correct_day and correct_hour and correct_month:
                         # Check basic value
@@ -195,7 +195,7 @@ for i,a in enumerate(alerts):
 
                                 selection_command = "SELECT top "+str(alert["num_entries"]) + " " + alert["column"] + " FROM " + str(alert["database"])
                                 print(selection_command)
-                                if str(alert["aliases"]) == "*":
+                                if str(alert["aliases"]) == ["*"]:
                                         selection_command += " ORDER BY " + alert["sort_column"] + " DESC"
                                 else:
                                         selection_command += " WHERE " + "Alias" + " IN (" + str(alert["aliases"]).replace("[","").replace("]","") + ") ORDER BY " + alert["sort_column"] + " DESC"
