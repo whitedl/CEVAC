@@ -206,18 +206,25 @@ the entire building. From our rote counts we found that this number is accurate
   * Our initial results for the past few weeks of data are:
 	```
 	date					edu  guest total
-	2019-05-24    62   3    65
-	2019-05-25    9    2    11
-	2019-05-26    10    1    11
-	2019-05-27    16    1    17
-	2019-05-28    231    16    247
-	2019-05-29    220    18    238
-	2019-05-30    315    17    332
-	2019-05-31    196    9    205
-	2019-06-01    12    0    12
-	2019-06-02    9    0    9
-	2019-06-03    289    16    305
-	2019-06-04    329    31    360
-	2019-06-05    281    9    290
-	2019-06-06    44    8    52
+	2019-05-24    62   3     65
+	2019-05-25    9    2     11
+	2019-05-26    10   1     11
+	2019-05-27    16   1     17
+	2019-05-28    231  16    247
+	2019-05-29    220  18    238
+	2019-05-30    315  17    332
+	2019-05-31    196  9     205
+	2019-06-01    12   0     12
+	2019-06-02    9    0     9
+	2019-06-03    289  16    305
+	2019-06-04    329  31    360
+	2019-06-05    281  9     290
+	2019-06-06    44   8     52
 	```
+
+## 06/10
+* When doing our daily count, we noticed that guest vs clemson count didn't
+correlate well with the data we received
+  * Very few guests were apparently connected to the internet
+  * This may be what "test" connections are used for, so I added them to our
+  new CEVAC_WATT_WAP_FLOOR_HIST database
