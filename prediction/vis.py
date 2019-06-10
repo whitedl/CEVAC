@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import matplotlib.pylab as plb
 
 # read in the data
-df = pd.read_csv('CEVAC_WATT_POWER_SUM_HIST_CACHE.csv')
+df = pd.read_csv('CEVAC_WATT_POWER_SUMS_HIST_CACHE.csv')
 
 def insertData():
     info = {
@@ -44,7 +44,6 @@ def makeArrays():
     y = []
 
     for index, row in df.iterrows():
-        tempx.append(row['Year'])
         tempx.append(row['Month'])
         tempx.append(row['Hour'])
         tempx.append(row['dayOfWeek'])
@@ -77,6 +76,8 @@ def makeArrays():
     for i, element in enumerate(x):
         testingData.append(element)
         testingLabels.append(y[i])
+
+    print(trainingData)
 
     # save our numpy arrays
     np.save('powerTrainingData.npy', trainingData)

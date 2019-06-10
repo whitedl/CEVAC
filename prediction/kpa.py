@@ -77,7 +77,7 @@ def predAlg(buildingOccupancy):
 	# create the keras instance
 	model = keras.Sequential([
 		keras.layers.Dense(256, activation=tf.nn.relu), #64 was basically a random number for me. I'd experiment with bigger and smaller
-		keras.layers.Dropout(0.25),		# makes sure you aren't overfitting and killing your test accuracy. This is a pretty high dropout rate, so make lower as needed (esp if you need a bigger training set)
+		keras.layers.Dropout(0.5),		# makes sure you aren't overfitting and killing your test accuracy. This is a pretty high dropout rate, so make lower as needed (esp if you need a bigger training set)
 		keras.layers.Dense(buildingOccupancy, activation=tf.nn.relu) #number of neurons in final layer should equal number of classes
 	])
 
@@ -91,18 +91,26 @@ def train(model):
 	train_data, train_labels, test_data, test_labels = loadData()
 
 	# stops the model when the loss is no longer decreasing
-	early_stopping = EarlyStopping(monitor='loss', patience=500)
+	early_stopping = EarlyStopping(monitor='loss', patience=2)
 
 	#more epochs = more work training ~= higher accuracy
-	model.fit(train_data, train_labels, epochs=10000, verbose=1, callbacks=[early_stopping])
+	model.fit(train_data, train_labels, epochs=10, verbose=1, callbacks=[early_stopping])
 
 	# for making re-running faster, toggle this to re-run with the same weights from the previous run
-	model.save_weights("./checkpoints/weights")
+	model.save_weights('powerModel.h5')
 	# model.load_weights("./checkpoints/weights")	# works in reverse)
 
 	test_loss, test_acc = model.evaluate(test_data, test_labels)
 
 	print('Test accuracy:', test_acc)
 
+    # model.predict([])
+
+def predict():
+    # make a model instanace
+    model = SimpleMLP()
+    model.load_weights("./checkpoints/weights")	# works in reverse)
+
 if __name__ == '__main__':
 	train(customAlg())
+    # predict()
