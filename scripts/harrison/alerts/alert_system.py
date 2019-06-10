@@ -1,7 +1,7 @@
 # alert_system.py
 
 ### TODO: angle bracket replation, time-based alert conditionals
-
+import urllib.parse
 import os
 import sys
 import csv
@@ -131,7 +131,7 @@ def send_email_list(email_address_list,content):
 
 def command_to_query(command):
         req = "http://130.127.218.148/requests/query.php?q="
-        return req + command.replace(" ","%20")
+        return req + urllib.parse.quote_plus(command)
 
 # Script
 
@@ -162,7 +162,9 @@ for i,item in enumerate(list(unique_databases)):
                 db_string += item + ","
 update_sql = "EXEC CEVAC_CACHE_INIT @tables='" + db_string + "'"
 req = "http://130.127.218.148/requests/query.php?q="
-print(req+update_sql.replace(" ","%20"))
+req_parse = req + urllib.parse.quote_plus(update_sql)
+print(update_sql)
+print(req_parse)
 
 na = urllib.request.urlopen(req+update_sql.replace(" ","%20")).read()
 
@@ -193,6 +195,7 @@ for i,a in enumerate(alerts):
                                 #data = cursor.execute(selection_command)
                                 url_command = command_to_query(selection_command)
                                 print(url_command)
+                                print(selection_command)
                                 data = urllib.request.urlopen(command_to_query(selection_command)).read().replace("}{","} {").split(" ")
                                 dict_list = [json.loads(d) for d in data]
                                 data_list = [sd[list(sd.keys())[0]] for sd in dict_list]
@@ -218,6 +221,7 @@ for i,a in enumerate(alerts):
                                 selection_command = "SELECT Alias, " + alert["column"] + " FROM " + alert["database"] + " ORDER BY " + alert["sort_column"]
                                 #data = cursor.execute(selection_command)
                                 url_command = command_to_query(selection_command)
+                                print(selection_command)
                                 print(url_command)
                                 data = urllib.request.urlopen(command_to_query(selection_command)).read().replace("}{","} {").split(" ")
                                 dict_list = [json.loads(d) for d in data]

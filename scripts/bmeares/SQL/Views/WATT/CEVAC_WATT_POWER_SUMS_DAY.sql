@@ -11,10 +11,7 @@ GO
 
 CREATE VIEW CEVAC_WATT_POWER_SUMS_DAY AS
 
-SELECT UTCDateTime,  SUM(ActualValue) AS Total_Usage, DATEPART(year, UTCDateTime) AS Year, DATEPART(month, UTCDateTime) AS Month, DATEPART(day, UTCDateTime) AS DAY
-FROM
-(SELECT * FROM CEVAC_WATT_POWER_DAY
- WHERE Alias LIKE 'Building%') AS building_sums
---WHERE UTCDateTime <= GETUTCDATE() AND UTCDateTime >= DATEADD(day, -1, GETUTCDATE())
+SELECT UTCDateTime,  SUM(ActualValue) AS Total_Usage, DATEPART(year, UTCDateTime) AS Year, DATEPART(month, UTCDateTime) AS Month, DATEPART(day, UTCDateTime) AS Day FROM CEVAC_WATT_POWER_HIST
+WHERE UTCDateTime <= GETUTCDATE() AND UTCDateTime >= DATEADD(day, -1, GETUTCDATE())
 GROUP BY UTCDateTime
 

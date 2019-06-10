@@ -1,19 +1,11 @@
 #! /bin/sh
-# ./seperator.sh
-
-building=$1
-metric=$2
-age=$3
-keys_list=$4
-
-
-query=$(cat demo.txt)
-echo "$query" | sed "s/#BUILDING#/$building/1"
-# filtered=$(sed "s/#BUILDING#/$building/1" $query)
-# filtered=$(sed "s/#METRIC#/$metric/1" $filtered)
-# filtered=$(sed "s/#AGE#/$age/1" $filtered)
-# filtered=$(sed "s/#KEYS_LIST#/$keys_list/1" $filtered)
-
-# echo "$filtered"
+#
+# test.sh
+# Copyright (C) 2019 bmeares <bmeares@wfic-temp1>
+#
+# Distributed under terms of the MIT license.
+#
 
 
+
+echo Hello, World!
