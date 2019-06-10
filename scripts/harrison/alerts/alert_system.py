@@ -181,31 +181,20 @@ for i,a in enumerate(alerts):
         # Check basic value
         if str.isdigit(alert["value"]):
             alert["value"] = float(alert["value"])
-            print(type(alert["value"]))
 
             selection_command = "SELECT top "+str(alert["num_entries"]) + " " + alert["column"] + " FROM " + str(alert["database"])
-            print(selection_command)
             if alert["aliases"] == ["*"]:
                 selection_command += " ORDER BY " + alert["sort_column"] + " DESC"
             else:
                 selection_command += " WHERE " + "Alias" + " IN (" + str(alert["aliases"]).replace("[","").replace("]","") + ") ORDER BY " + alert["sort_column"] + " DESC"
-            url_command = command_to_query(selection_command)
-            print(url_command)
-            data = urllib.request.urlopen(command_to_query(selection_command))
-            print(data)
-            data2 = data.read()
-            print(data2)
-            data2 = data2.decode('utf-8')
-            data3 = data2.replace("}{","} {")
-            print(data3)
-            data4 = data3.split(" ")
-            print(data4)
-            dict_list = [json.loads(d) for d in data4]
-            print(dict_list)
-            data_list = [sd[list(sd.keys())[0]] for sd in dict_list]
-            print(data_list)
 
-            #data_list = [row[0] for row in data]
+            url_command = command_to_query(selection_command)
+            data = urllib.request.urlopen(command_to_query(selection_command))
+            data_readable = data.read().decode('utf-8').replace("}{","} {")
+            data_list = data_readable.split(" ")
+            dict_list = [json.loads(d) for d in data_list]
+            data_list = [sd[list(sd.keys())[0]] for sd in dict_list]
+
             avg_data = sum(data_list)/len(data_list)
             send_alert = False
             if alert["condition"] == ">":
@@ -226,8 +215,10 @@ for i,a in enumerate(alerts):
             url_command = command_to_query(selection_command)
             print(selection_command)
             print(url_command)
-            data = urllib.request.urlopen(command_to_query(selection_command)).read().decode('utf-8').replace("}{","} {").split(" ")
-            dict_list = [json.loads(d) for d in data]
+            data = urllib.request.urlopen(url_command)
+            data_readable = data.read().decode('utf-8').replace("}{","} {")
+            data_list = data_readable.split(" ")
+            dict_list = [json.loads(d) for d in data_list]
             data_list = [[sd[list(sd.keys())[0]],sd[list(sd.keys())[1]]] for sd in dict_list]
 
             #data_list = [[row[0],row[1]] for row in data]
