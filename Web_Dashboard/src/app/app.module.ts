@@ -30,9 +30,9 @@ import { InMemoryDataService }  from 'src/app/in-memory-data.service';
     AppRoutingModule,
 	
     //remove when real api is ready
-    HttpClientInMemoryWebApiModule.forRoot(
+    /*HttpClientInMemoryWebApiModule.forRoot(
       InMemoryDataService, { dataEncapsulation: false }
-    )
+    )*/
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -11,7 +11,7 @@ import { Alert } from 'src/app/alert';
 })
 export class AlertService {
 	
-	private alertsUrl = 'api/alerts';
+	private alertsUrl = '../requests/query.php?q=SELECT%20ALL%20FROM%20CEVAC_ALL_ALERTS_HIST';
 	
 	constructor(private http: HttpClient) {}
 
