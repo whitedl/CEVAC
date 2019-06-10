@@ -28,8 +28,8 @@
             ],
             "styles": [
               "src/styles.scss",
-			  "src/assets/leaflet.css",
-			  "src/app/mat_theming.scss"
+			        "src/assets/leaflet.css",
+			        "src/app/mat_theming.scss"
             ],
             "scripts": [
 			  "src/assets/leaflet.js"
@@ -44,8 +44,8 @@
                   "with": "src/environments/environment.prod.ts"
                 }
               ],
-			  "outputPath": "build",
-			  "deleteOutputPath": false,
+			        "outputPath": "build",
+			        "deleteOutputPath": false,
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
