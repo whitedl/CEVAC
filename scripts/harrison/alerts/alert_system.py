@@ -52,7 +52,7 @@ def regex_to_numlist(regex_string):
                 return_list = []
                 for num_list in regex_list:
                         for num in num_list:
-                                return_list.append(num)
+                                return_list.append(str(num))
                 return return_list
 
 
@@ -182,6 +182,7 @@ for i,a in enumerate(alerts):
         insert_sql = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType, AlertMessage, Metric,BLDG,BeginTime) VALUES(?,?,?,?,GETUTCDATE())"
         try:
                 now = datetime.datetime.now()
+                print(alert["day"],alert["month"],alert["hour"])
                 if (((str(now.isoweekday()) in alert["day"]) or (str(alert["day"]) == "*"))
                 and ((str(now.hour) in alert["hour"]) or (str(alert["hour"]) == "*"))
                 and ((str(now.month) in alert["month"]) or (str(alert["month"]) == "*"))):
