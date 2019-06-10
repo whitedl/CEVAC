@@ -202,7 +202,7 @@ for i,a in enumerate(alerts):
                                 print(data)
                                 data2 = data.read()
                                 print(data2)
-								data2 = data2.decode('utf-8')
+                                data2 = data2.decode('utf-8')
                                 data3 = data2.replace("}{","} {")
                                 print(data3)
                                 data4 = data3.split(" ")
@@ -211,7 +211,7 @@ for i,a in enumerate(alerts):
                                 print(dict_list)
                                 data_list = [sd[list(sd.keys())[0]] for sd in dict_list]
                                 print(data_list)
-
+                                
                                 #data_list = [row[0] for row in data]
                                 avg_data = sum(data_list)/len(data_list)
                                 send_alert = False
