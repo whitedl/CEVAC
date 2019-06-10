@@ -202,6 +202,7 @@ for i,a in enumerate(alerts):
                                 print(data)
                                 data2 = data.read()
                                 print(data2)
+								data2 = data2.decode('utf-8')
                                 data3 = data2.replace("}{","} {")
                                 print(data3)
                                 data4 = data3.split(" ")
