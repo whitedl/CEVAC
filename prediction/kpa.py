@@ -23,13 +23,13 @@ import os
 
 class SimpleMLP(keras.Model):
 
-    def __init__(self, use_bn=False, use_dp=False, num_classes=500):
+    def __init__(self, use_bn=False, use_dp=False, num_classes=300):
         super(SimpleMLP, self).__init__(name='mlp')
         self.use_bn = use_bn
         self.use_dp = use_dp
         self.num_classes = num_classes
 
-        self.dense1 = keras.layers.Dense(256, activation='relu')
+        self.dense1 = keras.layers.Dense(512, activation='relu')
         # self.dense2 = keras.layers.Dense(256, activation='relu')
         self.dense2 = keras.layers.Dense(num_classes, activation='softmax')
         if self.use_dp:
@@ -49,11 +49,11 @@ class SimpleMLP(keras.Model):
 # read in our data
 def loadData():
 
-	train_data = np.load("trainingData.npy")
-	train_labels = np.load("trainingLabels.npy")
+	train_data = np.load("powerTrainingData.npy")
+	train_labels = np.load("powerTrainingLabels.npy")
 
-	test_data = np.load("testingData.npy")
-	test_labels = np.load("testingLabels.npy")
+	test_data = np.load("powerTestingData.npy")
+	test_labels = np.load("powerTestingLabels.npy")
 
 	train_data = train_data / train_data.max()
 	test_data = test_data / test_data.max()
@@ -94,7 +94,7 @@ def train(model):
 	early_stopping = EarlyStopping(monitor='loss', patience=500)
 
 	#more epochs = more work training ~= higher accuracy
-	model.fit(train_data, train_labels, epochs=100000, verbose=0, callbacks=[early_stopping])
+	model.fit(train_data, train_labels, epochs=10000, verbose=0, callbacks=[early_stopping])
 
 	# for making re-running faster, toggle this to re-run with the same weights from the previous run
 	model.save_weights("./checkpoints/weights")
