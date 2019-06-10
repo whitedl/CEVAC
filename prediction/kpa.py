@@ -89,10 +89,10 @@ def train(model):
 	train_data, train_labels, test_data, test_labels = loadData()
 
 	# stops the model when the loss is no longer decreasing
-	early_stopping = EarlyStopping(monitor='loss', patience=2)
+	early_stopping = EarlyStopping(monitor='loss', patience=10)
 
 	#more epochs = more work training ~= higher accuracy
-	model.fit(train_data, train_labels, epochs=10, verbose=1, callbacks=[early_stopping])
+	model.fit(train_data, train_labels, epochs=1000, verbose=1, callbacks=[early_stopping])
 
 	# for making re-running faster, toggle this to re-run with the same weights from the previous run
 	model.save_weights('powerModel.h5')
