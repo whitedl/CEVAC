@@ -180,7 +180,6 @@ total_issues = 0
 for i,a in enumerate(alerts):
         alert = alerts[a]
         insert_sql = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType, AlertMessage, Metric,BLDG,BeginTime) VALUES(?,?,?,?,GETUTCDATE())"
-        alert["database"] += "_CACHE"
         try:
                 now = datetime.datetime.now()
                 if (((str(now.isoweekday()) in alert["day"]) or (str(alert["day"]) == "*"))
@@ -200,13 +199,13 @@ for i,a in enumerate(alerts):
                                 print(url_command)
                                 print(selection_command)
                                 data = urllib.request.urlopen(command_to_query(selection_command))
-								print(data)
-								data2 = data.read()
-								print(data2)
-								data3 = data2.replace("}{","} {")
-								print(data3)
-								data4 = data3.split(" ")
-								print(data4)
+                                print(data)
+                                data2 = data.read()
+                                print(data2)
+                                data3 = data2.replace("}{","} {")
+                                print(data3)
+                                data4 = data3.split(" ")
+                                print(data4)
                                 dict_list = [json.loads(d) for d in data]
                                 print(dict_list)
                                 data_list = [sd[list(sd.keys())[0]] for sd in dict_list]
