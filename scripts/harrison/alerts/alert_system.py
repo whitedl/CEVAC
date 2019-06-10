@@ -130,7 +130,7 @@ def send_email_list(email_address_list,content):
                 send_email(email_address,content)
 
 def command_to_query(command):
-        req = "http://130.127.218.148/requests/query.php?q="
+        req = "http://wfic-cevac1/requests/query.php?q="
         return req + urllib.parse.quote_plus(command)
 
 # Script
@@ -161,12 +161,15 @@ for i,item in enumerate(list(unique_databases)):
         else:
                 db_string += item + ","
 update_sql = "EXEC CEVAC_CACHE_INIT @tables='" + db_string + "'"
-req = "http://130.127.218.148/requests/query.php?q="
+req = "http://wfic-cevac1/requests/query.php?q="
 req_parse = req + urllib.parse.quote_plus(update_sql)
-print(update_sql)
-print(req_parse)
+#  print(update_sql)
+#  print(req_parse)
 
-na = urllib.request.urlopen(req+update_sql.replace(" ","%20")).read()
+#  na = urllib.request.urlopen(req+update_sql.replace(" ","%20")).read()
+append_tables_url = 'http://wfic-cevac1/requests/script.php?s=append_tables.sh';
+print(append_tables_url)
+na = urllib.request.urlopen(append_tables_url).read()
 
 #cursor.execute(update_sql)
 #cursor.commit()
