@@ -46,7 +46,7 @@ def regex_to_numlist(regex_string):
         Returns a list of numbers following expressions similar to "1-5 & 9-10" to [1,2,3,4,5,9,10]
         """
         if regex_string == "*":
-                return regex_string
+                return [regex_string]
         else:
                 regex_list = [([int(y)] if len(y.split("-")) == 1 else list(range(int(y.split("-")[0]),int(y.split("-")[1])+1))) for y in regex_string.replace(" ","").split("&")]
                 return_list = []
@@ -61,7 +61,7 @@ def alias_to_list(regex_string):
         Returns a list of strings that were originally seperated by hyphens
         """
         if regex_string == "*":
-                return "*"
+                return ["*"]
         return regex_string.split("-")
 
 
@@ -183,9 +183,11 @@ for i,a in enumerate(alerts):
         try:
                 now = datetime.datetime.now()
                 print(alert["day"],alert["month"],alert["hour"])
-                if (((str(now.isoweekday()) in alert["day"]) or (str(alert["day"]) == "*"))
-                and ((str(now.hour) in alert["hour"]) or (str(alert["hour"]) == "*"))
-                and ((str(now.month) in alert["month"]) or (str(alert["month"]) == "*"))):
+                correct_day = ((str(now.isoweekday()) in alert["day"]) or (str(alert["day"]) == ["*"]))
+                correct_hour = ((str(now.hour) in alert["hour"]) or (str(alert["hour"]) == ["*"]))
+                correct_month = ((str(now.month) in alert["month"]) or (str(alert["month"]) == ["*"]))
+
+                if correct_day and correct_hour and correct_month:
                         # Check basic value
                         if str.isdigit(alert["value"]):
                                 alert["value"] = float(alert["value"])
