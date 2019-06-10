@@ -199,8 +199,14 @@ for i,a in enumerate(alerts):
                                 url_command = command_to_query(selection_command)
                                 print(url_command)
                                 print(selection_command)
-                                data = urllib.request.urlopen(command_to_query(selection_command)).read().replace("}{","} {").split(" ")
-                                print(data)
+                                data = urllib.request.urlopen(command_to_query(selection_command))
+								print(data)
+								data2 = data.read()
+								print(data2)
+								data3 = data2.replace("}{","} {")
+								print(data3)
+								data4 = data3.split(" ")
+								print(data4)
                                 dict_list = [json.loads(d) for d in data]
                                 print(dict_list)
                                 data_list = [sd[list(sd.keys())[0]] for sd in dict_list]
