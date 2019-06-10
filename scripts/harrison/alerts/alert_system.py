@@ -171,11 +171,11 @@ for i,a in enumerate(alerts):
         # Check time conditional
         now = datetime.datetime.now()
         print(alert["day"],alert["month"],alert["hour"])
-        correct_day = ((str(now.isoweekday()) in alert["day"]) or (alert["day"] == ["*"]))
-        correct_hour = ((str(now.hour) in alert["hour"]) or (alert["hour"] == ["*"]))
-        correct_month = ((str(now.month) in alert["month"]) or (alert["month"] == ["*"]))
+        correct_day = ( (str(now.isoweekday()) in alert["day"]) or (alert["day"] == ["*"]) )
+        correct_hour = ( (str(now.hour) in alert["hour"]) or (alert["hour"] == ["*"]) )
+        correct_month = ( (str(now.month) in alert["month"]) or (alert["month"] == ["*"]) )
         if not correct_day or not correct_hour or not correct_month:
-            logging.info(alert["alert_name"]+"Not time")
+            logging.info("Not time for alert #"+str(i+1))
             continue
 
         # Check basic value
