@@ -3,14 +3,6 @@
 	<span>Controlboard</span>
   </a>
 </mat-toolbar>
-<mat-sidenav-container>
-  <mat-sidenav mode="side" opened="true" disableClose="false" fixedInViewport="false">
-  </mat-sidenav>
-  <mat-sidenav-content>
-    <app-mapview></app-mapview>
-  </mat-sidenav-content>
-  <mat-sidenav mode="side" position="end" opened="true" disableClose="true" fixedInViewport="false">
-    <app-alertbox></app-alertbox>
-  </mat-sidenav>
-</mat-sidenav-container>
-<router-outlet></router-outlet>
+<div style='height: 100%'> <!--required for flex and router-outlets-->
+  <router-outlet></router-outlet>
+</div>
