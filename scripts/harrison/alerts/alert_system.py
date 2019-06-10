@@ -17,6 +17,8 @@ LOGGING_PATH = "/home/bmeares/cron/alerts/"
 PHONE_PATH = "/home/bmeares/cron/alerts/"
 CONFIG_PATH = "/home/bmeares/cron/alerts/"
 
+LOG = True
+
 COLUMNS = {
         "alert_name" : 0,
         "type" : 1,
@@ -108,7 +110,8 @@ def import_conditions(fname,logger):
                     }
                     unique_databases[row[COLUMNS["database"]]] = None
             except:
-                logger.error("Issue importing conditions "+str(i))
+                if LOG:
+                    logger.error("Issue importing conditions "+str(i))
     return (alerts,unique_databases)
 
 
@@ -134,11 +137,13 @@ def command_to_query(command):
 # Script
 
 ## Initialize logging
-FORMAT = '%(asctime)s %(levelname)s:%(message)s'
-datestring = str(datetime.datetime.now().date())
-log_file = os.path.join(LOGGING_PATH, datestring + '.log')
-logging.basicConfig(filename=log_file, format=FORMAT, level=logging.INFO)
-logging.info("NEW JOB\n---")
+if LOG:
+    FORMAT = '%(asctime)s %(levelname)s:%(message)s'
+    datestring = str(datetime.datetime.now().date())
+    log_file = os.path.join(LOGGING_PATH, datestring + '.log')
+    logging.basicConfig(filename=log_file, format=FORMAT, level=logging.INFO)
+    logging.info("NEW JOB\n---")
+
 
 ## Get alert conditions
 fname = "alert_parameters.csv"
@@ -175,7 +180,7 @@ for i,a in enumerate(alerts):
         correct_hour = ( (str(now.hour) in alert["hour"]) or (alert["hour"] == ["*"]) )
         correct_month = ( (str(now.month) in alert["month"]) or (alert["month"] == ["*"]) )
         if not correct_day or not correct_hour or not correct_month:
-            logging.info("Not time for alert #"+str(i+1))
+            logging.info("Not time for alert #"+str(i+1)) if LOG else None
             continue
 
         # Check basic value
@@ -203,11 +208,14 @@ for i,a in enumerate(alerts):
                 send_alert = (avg_data < alert["value"])
             if send_alert:
                 total_issues += 1
-                logging.info("ISSUE"+str(alert))
+                if LOG:
+                    logging.info("ISSUE"+str(alert))
                 com = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType, AlertMessage, Metric,BLDG,BeginTime) VALUES('"+alert["operation"]+"','"+alert["message"]+"','"+str(avg_data)+"','"+alert["building"]+"',GETUTCDATE())"
                 insert_sql_total += com + "; "
-                logging.info("An alert was sent for "+str(alert))
-            logging.info("Checked "+str(alert))
+                if LOG:
+                    logging.info("An alert was sent for "+str(alert))
+            if LOG:
+                logging.info("Checked "+str(alert))
 
         # Temperature custom measure
         elif ("Temp" in alert["value"]):
@@ -274,24 +282,30 @@ for i,a in enumerate(alerts):
 
                 if send_alert:
                     total_issues += 1
-                    logging.info("ISSUE"+str(alert))
+                    if LOG:
+                        logging.info("ISSUE"+str(alert))
                     com = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType, AlertMessage, Metric,BLDG,BeginTime) VALUES('"+alert["operation"]+"','"+alert["message"]+"','"+str(room) + " " + str(room_vals[Alias_Temp])+"','"+alert["building"]+"',GETUTCDATE())"
                     insert_sql_total += com + "; "
-                    logging.info("An alert was sent for "+str(alert))
+                    if LOG:
+                        logging.info("An alert was sent for "+str(alert))
 
-                logging.info("Checked "+str(alert))
+                if LOG:
+                    logging.info("Checked "+str(alert))
 
-            # Time custom measure
+        # Time custom measure
         elif ("<now>" in alert["value"]):
             #local_dt = local.localize(naive, is_dst=None)
             #utc_dt = local_dt.astimezone(pytz.utc)
-            logging.error("<now> not yet ready in script")
+            if LOG:
+                logging.error("<now> not yet ready in script")
 
         else:
+            if LOG:
                 logging.error("Could not find valid condition/value for "+str(alert))
 
     except:
-        logging.error("Issue on alert "+str(i+1)+" "+str(alert))
+        if LOG:
+            logging.error("Issue on alert "+str(i+1)+" "+str(alert))
 
 if total_issues == 0:
     insert_sql_total = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType,Metric,BLDG,BeginTime) VALUES('All Clear','','All',GETUTCDATE())"
@@ -300,5 +314,6 @@ if total_issues == 0:
 print(insert_sql_total)
 urllib.request.urlopen(command_to_query(insert_sql_total)).read()
 
-logging.info(str(datetime.datetime.now())+" TOTAL ISSUES: "+str(total_issues))
-logging.shutdown()
+if LOG:
+    logging.info(str(datetime.datetime.now())+" TOTAL ISSUES: "+str(total_issues))
+    logging.shutdown()
