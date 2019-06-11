@@ -28,11 +28,11 @@
             ],
             "styles": [
               "src/styles.scss",
-			        "src/assets/leaflet.css",
+			        "node_modules/leaflet/dist/leaflet.css",
 			        "src/app/mat_theming.scss"
             ],
             "scripts": [
-			  "src/assets/leaflet.js"
+              "node_modules/leaflet/dist/leaflet.js",
 			],
             "es5BrowserSupport": true
           },
