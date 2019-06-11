@@ -14,6 +14,13 @@ import matplotlib.pylab as plb
 pdf = pd.read_csv('CEVAC_WATT_POWER_SUMS_HIST_CACHE.csv')
 tdf = pd.read_csv('H_WEATHER_TEMP.csv')
 
+# dictionary of dimensions I want to add to the array
+dfDict =    {
+    'temp' : pd.read_csv('H_WEATHER_TEMP.csv'),
+    'clouds' : pd.read_csv('H_WEATHER_CLOUDS.csv'),
+    'humidity' : pd.read_csv('H_WEATHER_HUMIDITY.csv')
+    }
+
 cJSON = {}
 
 # use this to change the month from a string to num
@@ -55,9 +62,8 @@ def insertData(df):
 
     return df
 
-# format our temperature data
-def formatTemp(df):
-
+# format our weather data
+def formatConditions(df, condition):
     for index, row in df.iterrows():
         date = row['time'][0:12]
         year = str(date[5:9])
@@ -66,7 +72,10 @@ def formatTemp(df):
         hour = str(date[10:12])
         key = '-'.join((year, month, day))
         key = key + ' ' + hour
-        cJSON[key] = {'temp': row['value_celsius']}
+        isDict = cJSON.get(key)
+        if isDict == None:
+            cJSON[key] = {}
+        cJSON[key][condition] = row['value']
 
     with open('combinedData.json', 'w') as f:
         json.dump(cJSON, f)
@@ -74,15 +83,26 @@ def formatTemp(df):
 def makeArrays(df):
     df = insertData(df)
 
+    # temporary x and temporary y lists for each loop
     tempx = []
     tempy = []
+    # actual x and y lists of lists
     x = []
     y = []
 
+    # read in our json file
+    with open('combinedData.json') as f:
+        cJSON = json.load(f)
+
+    # populate each array for every row that has all of the attributes
     for index, row in df.iterrows():
-        temperature = cJSON.get(row['Date'][0:13])
-        if temperature != None:
-            temperature = temperature['temp']
+        weatherData = cJSON.get(row['Date'][0:13])
+        if weatherData != None:
+            temperature = weatherData['temp']
+            humidity = weatherData['humidity']
+            clouds = weatherData['clouds']
+            tempx.append(humidity)
+            tempx.append(clouds)
             tempx.append(temperature)
             tempx.append(row['Month'])
             tempx.append(row['Hour'])
@@ -99,7 +119,6 @@ def makeArrays(df):
     # # #
     testingData = []
     testingLabels = []
-
 
     # this is the dimension of our training dataset
     tDim = int(len(x) * .9)
@@ -133,5 +152,6 @@ def makeArrays(df):
     print('TRAINING LABELS:\t{} ENTRIES'.format(len(trainingLabels)))
 
 if __name__ =='__main__':
-    formatTemp(tdf)
+    # for key in dfDict:
+    #     formatConditions(dfDict[key], key)
     makeArrays(pdf)
