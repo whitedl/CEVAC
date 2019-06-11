@@ -22,6 +22,8 @@ failed_dir = prefix + "/failed"
 log_dir = prefix + "/logs"
 xref_dir = prefix + "/xref"
 
+DEBUG = False
+
 #######################################
 # Function Definitions
 #######################################
@@ -254,10 +256,11 @@ def ingest_file_floor(fname, dbc, xref):
     cursor = dbc.cursor()
     errorCount = 0
 
+    logging.info("opening file")
     with open(fname, "r") as csvfile:
         reader = csv.reader(csvfile)
         insert_sql = "INSERT INTO  CEVAC_WATT_WAP_FLOOR_HIST (UTCDateTime, floor, guest_count, clemson_count) VALUES (?,?,?,?)"
-
+        logging.info("Got csv reader")
         #move reader to 'Client Sessions' line
         try:
             while reader.next()[0] != 'Client Sessions':
@@ -270,66 +273,74 @@ def ingest_file_floor(fname, dbc, xref):
 
         #read past header
         headers = next(reader)
-
+        logging.info("starting each row")
         hours = {}
         for row in reader:
-            name = row[5]
-            if name in xref:
-                floor = xref[name][0]
-            else:
-                floor = "outside"
-            username = row[0]
-            if username == "test":
-                username = str(random.randint(0,10000000))
-            SSID = row[7]
-            hour = custom_datestring_to_datetime(row[3]).replace(minute=0,second=0)
-            assoc_time = custom_datestring_to_datetime(row[3])
             try:
-                dissoc_time = custom_datestring_to_datetime(row[10])
-            except:
-                dst = False
-                local = pytz.timezone ("America/New_York")
-                dissoc_time = datetime.datetime.now()
-                dissoc_time = local.localize(dissoc_time, is_dst=dst)
-                dissoc_time = dissoc_time.astimezone (pytz.utc)
-            snr_db = row[11]
-            rssi_dbm = row[12]
-            td = ((dissoc_time - assoc_time).total_seconds()/60) % 60
-
-            ## Add count of unique people per wap
-            if (hour in hours.keys()) and (td > 1):
-                if floor in hours[hour].keys():
-                    if SSID in hours[hour][name].keys():
-                        hours[hour][floor][SSID]["time"] += td
-                        hours[hour][floor][SSID]["users"][username] = None
-                    else:
-                        hours[hour][floor][SSID] = {
-                            "time" : td,
-                            "users" : {
-                                username : None,
-                            }
-                        }
+                name = row[5]
+                if name in xref:
+                    floor = xref[name]
                 else:
-                    hours[hour][floor] = {
-                        SSID : {
-                            "time" : td,
-                            "users" : {
-                                username : None,
-                            }
-                        }
-                    }
-            elif (td > 1):
-                hours[hour] = {
-                    floor : {
-                        SSID : {
-                            "time": td,
-                            "users" : {
-                                username : None,
-                            }
-                        }
-                    }
-                }
+                    floor = "outside"
+                username = row[0]
+                if username == "test":
+                    username = str(random.randint(0,10000000))
+                SSID = row[7]
+                logging.info("passed random test")
+                hour = custom_datestring_to_datetime(row[3]).replace(minute=0,second=0)
+                assoc_time = custom_datestring_to_datetime(row[3])
+                try:
+                    dissoc_time = custom_datestring_to_datetime(row[10])
+                except:
+                    dst = False
+                    local = pytz.timezone ("America/New_York")
+                    dissoc_time = datetime.datetime.now()
+                    dissoc_time = local.localize(dissoc_time, is_dst=dst)
+                    dissoc_time = dissoc_time.astimezone (pytz.utc)
+                snr_db = row[11]
+                rssi_dbm = row[12]
+                td = ((dissoc_time - assoc_time).total_seconds()/60) % 60
 
+                ## Add count of unique people per wap
+                logging.info("adding by hour")
+                if (hour in hours.keys()) and (td > 1):
+                    debug_log("hour in  keys",LOG)
+                    if floor in hours[hour].keys():
+                        if SSID in hours[hour][floor].keys():
+                            hours[hour][floor][SSID]["time"] += td
+                            hours[hour][floor][SSID]["users"][username] = None
+                        else:
+                            hours[hour][floor][SSID] = {
+                                "time" : td,
+                                "users" : {
+                                    username : None,
+                                }
+                            }
+                    else:
+                        hours[hour][floor] = {
+                            SSID : {
+                                "time" : td,
+                                "users" : {
+                                    username : None,
+                                }
+                            }
+                        }
+                elif (td > 1):
+                    hours[hour] = {
+                        floor : {
+                            SSID : {
+                                "time": td,
+                                "users" : {
+                                    username : None,
+                                }
+                            }
+                        }
+                    }
+                debug_log("success insert",LOG)
+            except:
+                logging.error("router not in xref")
+
+        logging.info("inserting")
         for hour in hours:
             for floor in hours[hour]:
                 clemson = 0
@@ -361,6 +372,11 @@ def cleanup():
             fpath = os.path.join(directory, fname)
             if S_ISREG(os.stat(fpath).st_mode) and os.path.getatime(fpath) < cutoff:
                 os.remove(fpath)
+
+# Logging during debug
+def debug_log(message, LOG):
+    if LOG:
+        logging.info(message)
 
 
 ######################################
@@ -481,7 +497,10 @@ for fname in file_list:
         logging.info("Finished xref")
         if len(xref) > 0:
             logging.info("xref > 0")
-            success = (ingest_file_fail(fpath, connection) and ingest_file_floor(fpath,connection,xref))
+            success_a = ingest_file_fail(fpath, connection)
+            logging.info("success_b")
+            success_b = ingest_file_floor(fpath,connection,xref)
+            success = (success_a and success_b)
             logging.info("Passed both")
         else:
             success = ingest_file_fail(fpath, connection)
