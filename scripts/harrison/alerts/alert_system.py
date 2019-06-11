@@ -238,7 +238,7 @@ for i,a in enumerate(alerts):
                 safe_log("An alert was sent for "+str(alert),"info")
                 print(alert["type"])
                 com = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType, AlertMessage, Metric,BLDG,BeginTime) VALUES('"
-                com += alert["operation"]+"','"+alert["message"]"','"+alert["type"]+"','"+alert["building"]+"',GETUTCDATE())"
+                com += alert["operation"]+"','"+alert["message"]+"','"+alert["type"]+"','"+alert["building"]+"',GETUTCDATE())"
                 insert_sql_total += com + "; "
             safe_log("Checked "+str(i+1),"info")
 
