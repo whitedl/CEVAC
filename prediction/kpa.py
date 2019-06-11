@@ -37,7 +37,7 @@ def predAlg(numClasses):
 
 	# create the keras instance
     model = keras.Sequential()
-    model.add(Dense(128, input_dim=4))
+    model.add(Dense(128, input_dim=6))
     model.add(Activation('relu'))
     model.add(Dropout(0.35))
     model.add(Dense(256))
