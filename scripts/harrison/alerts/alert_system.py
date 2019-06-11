@@ -19,7 +19,7 @@ CONFIG_PATH = "/home/bmeares/cron/alerts/"
 alert_fname = "alert_parameters.csv"
 
 LOG = True
-DEBUG = True
+DEBUG = False
 if DEBUG:
     CONDITIONS_FPATH = "C:\\Users\\hchall\\Downloads\\"
     LOGGING_PATH = "C:\\Users\\hchall\\Downloads\\"
