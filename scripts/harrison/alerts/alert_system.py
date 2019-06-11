@@ -157,7 +157,7 @@ def request_to_list_multiple(query, num_args):
         dl = []
         for i in range(num_args):
             dl.append(sd[list[sd.keys()]][i])
-        data_list.append(ds)
+        data_list.append(dl)
     return data_list
 
 
@@ -236,23 +236,15 @@ for i,a in enumerate(alerts):
             if send_alert:
                 total_issues += 1
                 safe_log("An alert was sent for "+str(alert),"info")
-                com = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType, AlertMessage, Metric,BLDG,BeginTime) VALUES('"+alert["operation"]+"','"+alert["message"]+"','"+str(avg_data)+"','"+alert["building"]+"',GETUTCDATE())"
+                com = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType, AlertMessage, Metric,BLDG,BeginTime) VALUES('"+alert["operation"]+"','"+alert["message"]+" "+str(avg_data)"','"+alert["type"]+"','"+alert["building"]+"',GETUTCDATE())"
                 insert_sql_total += com + "; "
-                "ISSUE"+str(alert)
             safe_log("Checked "+str(i+1),"info")
 
         # Temperature custom measure
         elif ("Temp" in alert["value"]):
             selection_command = "SELECT Alias, " + alert["column"] + " FROM " + alert["database"] + " ORDER BY " + alert["sort_column"]
-            url_command = command_to_query(selection_command)
-            data = urllib.request.urlopen(url_command)
-            print(data)
-            data_readable = data.read().decode('utf-8').replace("}{","} {")
-            data_list = data_readable.split(" ")
-            print(data_list)
-            dict_list = [json.loads(d) for d in data_list]
-            data_list = [[sd[list(sd.keys())[0]],sd[list(sd.keys())[1]]] for sd in dict_list]
-            print(data_list)
+            data_list = request_to_list_multiple(command_to_query(selection_command))
+            logging.log(data_list)
 
             #data_list = [[row[0],row[1]] for row in data]
             temps = {}
@@ -307,7 +299,8 @@ for i,a in enumerate(alerts):
 
                 if send_alert:
                     total_issues += 1
-                    com = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType, AlertMessage, Metric,BLDG,BeginTime) VALUES('"+alert["operation"]+"','"+alert["message"]+"','"+str(room) + " " + str(room_vals[Alias_Temp])+"','"+alert["building"]+"',GETUTCDATE())"
+                    com = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType, AlertMessage, Metric,BLDG,BeginTime) VALUES('"+alert["operation"]+"','"+alert["message"]+" "+str(avg_data)"','"+alert["type"]+"','"+alert["building"]+"',GETUTCDATE())"
+                    com = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType, AlertMessage, Metric,BLDG,BeginTime) VALUES('"+alert["operation"]+"','"+alert["message"]+"','"+alert["type"]+"','"+alert["building"]+"',GETUTCDATE())"
                     insert_sql_total += com + "; "
                     safe_log("An alert was sent for "+str(alert),"info")
                 safe_log("Checked "+str(i+1),"info")
