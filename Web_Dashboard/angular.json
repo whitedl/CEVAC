@@ -33,7 +33,8 @@
             ],
             "scripts": [
               "node_modules/leaflet/dist/leaflet.js",
-			],
+              "node_modules/chroma-js/chroma.js"
+			      ],
             "es5BrowserSupport": true
           },
           "configurations": {
