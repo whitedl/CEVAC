@@ -29,7 +29,7 @@ class SimpleMLP(keras.Model):
         # self.dense2 = keras.layers.Dense(256, activation='relu')
         self.dense2 = keras.layers.Dense(num_classes, activation='softmax')
         if self.use_dp:
-            self.dp = keras.layers.Dropout(0.35)
+            self.dp = keras.layers.Dropout(0.30)
         if self.use_bn:
             self.bn = keras.layers.BatchNormalization(axis=-1)
 
@@ -74,8 +74,8 @@ def predAlg(buildingOccupancy):
 
 	# create the keras instance
 	model = keras.Sequential([
-		keras.layers.Dense(256, activation=tf.nn.relu), #64 was basically a random number for me. I'd experiment with bigger and smaller
-		keras.layers.Dropout(0.5),		# makes sure you aren't overfitting and killing your test accuracy. This is a pretty high dropout rate, so make lower as needed (esp if you need a bigger training set)
+		keras.layers.Dense(512, activation=tf.nn.relu), #64 was basically a random number for me. I'd experiment with bigger and smaller
+		keras.layers.Dropout(0.3),	# makes sure you aren't overfitting and killing your test accuracy. This is a pretty high dropout rate, so make lower as needed (esp if you need a bigger training set)
 		keras.layers.Dense(buildingOccupancy, activation=tf.nn.relu) #number of neurons in final layer should equal number of classes
 	])
 
@@ -89,10 +89,10 @@ def train(model):
 	train_data, train_labels, test_data, test_labels = loadData()
 
 	# stops the model when the loss is no longer decreasing
-	early_stopping = EarlyStopping(monitor='loss', patience=10)
+	early_stopping = EarlyStopping(monitor='loss', patience=100)
 
 	#more epochs = more work training ~= higher accuracy
-	model.fit(train_data, train_labels, epochs=1000, verbose=1, callbacks=[early_stopping])
+	model.fit(train_data, train_labels, epochs=10000, verbose=1, callbacks=[early_stopping])
 
 	# for making re-running faster, toggle this to re-run with the same weights from the previous run
 	model.save_weights('powerModel.h5')
