@@ -42,8 +42,8 @@ EXEC CEVAC_VIEW @Building = $building, @Metric = $metric, @Age = $age, @keys_lis
 
 echo -e "Executing query:\n$query"
 
-/opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$query"\
-  && echo Created CEVAC_"$building"_"$metric"_"$age"\
-  || echo Error! Views could not be created.
+/opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$query"
+  # && echo Created CEVAC_"$building"_"$metric"_"$age"\
+  # || echo Error! Views could not be created.
 
 
