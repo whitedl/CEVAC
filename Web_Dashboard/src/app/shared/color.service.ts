@@ -10,16 +10,19 @@ export class ColorService {
     ClemsonPalette: {
       ClemsonOrange: '#F66733',
       Regalia: '#522D80',
+      HartwellMoon: '#D4C99E',
+      HowardsRock: '#685C53',
+      BlueRidge: '#3A4958',
       Innovation: '#86898C'
     },
     ClemsonComplementary: {
-      ClemsonOrange: '#F66733',
+      //ClemsonOrange: '#F66733',
       Regalia: '#522D80',
       Complementary1: '#33e9f6',
       Complementary2: '#80692d'
     },
     ClemsonTetradic: {
-      ClemsonOrange: '#F66733',
+      //ClemsonOrange: '#F66733',
       Regalia: '#522D80',
       Tetradic1: '#57ebf6',
       Tetradic2: '#f6bf33'
@@ -28,25 +31,27 @@ export class ColorService {
 
   constructor() { }
 
-  getComplementarySet() {
-    return Object.values(this.colors.ClemsonComplementary);
+  //If name is not passed, assumes first color (ClemsonPalette).
+  //If pos is passed, will return color at position in chosen set
+  //If pos is not passed, will return requested set
+  getColor(name = Object.keys(this.colors)[0], pos?: number) {
+    var set = Object.values(this.colors[name]);
+    return (typeof pos !== "undefined") ? set[pos % set.length] : set;
   }
 
-  getTetradicSet() {
-    return Object.values(this.colors.ClemsonTetradic);
+  getComplementary(pos?: number) {
+    return this.getColor("ClemsonComplementary", pos);
   }
 
-  getColorSet(name: string) {
-    if(name in this.colors)
-      return Object.values(this.colors[name]);
-    else return Object.values(this.colors.ClemsonPalette)
+  getTetradic(pos?: number) {
+    return this.getColor("ClemsonTetradic", pos);
   }
 
   getActive() {
     return this.colors.ClemsonPalette.ClemsonOrange;
   }
   getPassive() {
-    return this.colors.ClemsonPalette.Regalia;
+    return this.colors.ClemsonPalette.BlueRidge;
   }
   getUnnamed() {
     return this.colors.ClemsonPalette.Innovation;

@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { ColorService } from 'src/app/shared/color.service';
 
 declare let L;
 var geodata = require('src/assets/CU_Building_Footprints.json');
@@ -7,8 +8,6 @@ var geodata = require('src/assets/CU_Building_Footprints.json');
 
 export class MapdataService {
 
-  constructor() { }
-  
   map;
   tracked;
   untracked;
@@ -16,7 +15,10 @@ export class MapdataService {
 	  minZoom: 15,
 	  maxZoom: 20
   }
-  untrackedColor = '#c51b8a';
+  categories = {};
+  functions = {};
+
+  constructor(private colorService: ColorService) {}
   
   getMap () {
     if(!this.map) this.initMap();
@@ -49,37 +51,54 @@ export class MapdataService {
 	  });
   }
   
-  isActive(feature) {
-	switch(feature.properties.Short_Name) {
-			case 'ASC': //ASC
-				return true;
-			case 'Watt': //Watt
-				return true;
-			default:
-				return false;
-		}
-  }
-  
   styleUntracked = (feature) => {
     var style = {};
-    if(this.isActive(feature)) {
-      style['opacity'] = 0;
-      style['fillOpacity'] = 0;
-    } else {
-      style['color'] = this.untrackedColor;
-    }
-    if(feature.properties.Short_Name == " ") style['color'] = '#666';
+    var funcCol = [];
+    var catCol;
+    style['fill'] = true;
+    style['fillColor'] = this.colorService.getPassive();
+    style['opacity'] = 1;
+    style['fillOpacity'] = 0.8;
+    if(feature.properties.Short_Name == " ") style['fillColor'] = this.colorService.getUnnamed();
+    if(feature.properties.Function)
+      for(let func of feature.properties.Function){
+        if(!(func in this.functions))
+          this.functions[func] = this.colorService.getComplementary(Object.keys(this.functions).length);
+        funcCol.push(this.functions[func]);
+      }
+    else funcCol.push(this.colorService.getUnnamed());
+    if(feature.properties.BLDG_Class){
+      if(!(feature.properties.BLDG_Class in this.categories))
+        this.categories[feature.properties.BLDG_Class] = this.colorService.getComplementary(Object.keys(this.categories).length);
+      catCol = this.categories[feature.properties.BLDG_Class];
+    } else catCol = this.colorService.getUnnamed();
+    style['color'] = catCol;
     return style;
   }
+
   styleTracked = (feature) => {
     var style = {};
-    if(this.isActive(feature)){
-      style['opacity'] = 0.8;
-      style['fillOpacity'] = 0.8;
-    } else {
-      style['opacity'] = 0;
-      style['fillOpacity'] = 0;
-    }
+    var funcCol = [];
+    var catCol;
+    style['fill'] = true;
+    style['fillColor'] = this.colorService.getActive();
+    style['weight'] = 4;
+    style['opacity'] = 1;
+    style['fillOpacity'] = 0.8;
+    if(feature.properties.Function)
+      for(let func of feature.properties.Function){
+        if(!(func in this.functions))
+          this.functions[func] = this.colorService.getComplementary(Object.keys(this.functions).length);
+        funcCol.push(this.functions[func]);
+      }
+    else funcCol.push(this.colorService.getUnnamed());
+    if(feature.properties.BLDG_Class){
+      if(!(feature.properties.BLDG_Class in this.categories)){
+        this.categories[feature.properties.BLDG_Class] = this.colorService.getComplementary(Object.keys(this.categories).length);
+      }
+      catCol = this.categories[feature.properties.BLDG_Class];
+    } else catCol = this.colorService.getUnnamed();
+    style['color'] = catCol;
     return style;
   }
   
@@ -117,11 +136,20 @@ export class MapdataService {
   
   untrackedOptions = {
     style: this.styleUntracked,
-    onEachFeature: this.onEachFeat
+    onEachFeature: this.onEachFeat,
+    filter: function(feature, layer) {
+      return (
+        !feature.properties.Status || 
+        feature.properties.Status !== "Active"
+      );
+    }
   }
   
   trackedOptions = {
     style: this.styleTracked,
-    onEachFeature: this.onEachFeat
+    onEachFeature: this.onEachFeat,
+    filter: function(feature, layer) {
+      return feature.properties.Status === "Active";
+    }
   }
 }
