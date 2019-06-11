@@ -302,9 +302,9 @@ def ingest_file_floor(fname, dbc, xref):
                 td = ((dissoc_time - assoc_time).total_seconds()/60) % 60
 
                 ## Add count of unique people per wap
-                logging.info("adding by hour")
+                #debug_log("okay",LOG)
                 if (hour in hours.keys()) and (td > 1):
-                    debug_log("hour in  keys",LOG)
+                    #debug_log("hour in  keys",LOG)
                     if floor in hours[hour].keys():
                         if SSID in hours[hour][floor].keys():
                             hours[hour][floor][SSID]["time"] += td
@@ -326,6 +326,7 @@ def ingest_file_floor(fname, dbc, xref):
                             }
                         }
                 elif (td > 1):
+                    #debug_log("here",LOG)
                     hours[hour] = {
                         floor : {
                             SSID : {
@@ -336,7 +337,7 @@ def ingest_file_floor(fname, dbc, xref):
                             }
                         }
                     }
-                debug_log("success insert",LOG)
+                #debug_log("success insert",LOG)
             except:
                 logging.error("router not in xref")
 
