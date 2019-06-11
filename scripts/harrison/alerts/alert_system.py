@@ -346,7 +346,8 @@ if total_issues == 0:
     insert_sql_total = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType,AlertMessage,Metric,BLDG,BeginTime) VALUES('All Clear','All Clear','N/A','All',GETUTCDATE())"
 
 # Insert into CEVAC_WATT_ALERT_HIST
-#urllib.request.urlopen(command_to_query(insert_sql_total)).read()
+if not DEBUG:
+    urllib.request.urlopen(command_to_query(insert_sql_total)).read()
 
 if LOG:
     logging.info(str(datetime.datetime.now())+" TOTAL ISSUES: "+str(total_issues))
