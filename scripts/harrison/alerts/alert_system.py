@@ -16,8 +16,16 @@ CONDITIONS_FPATH = "/home/bmeares/cron/alerts/"
 LOGGING_PATH = "/home/bmeares/cron/alerts/"
 PHONE_PATH = "/home/bmeares/cron/alerts/"
 CONFIG_PATH = "/home/bmeares/cron/alerts/"
+alert_fname = "alert_parameters.csv"
 
 LOG = True
+DEBUG = True
+if DEBUG:
+    CONDITIONS_FPATH = "C:\\Users\\hchall\\Downloads\\"
+    LOGGING_PATH = "C:\\Users\\hchall\\Downloads\\"
+    PHONE_PATH = "/home/bmeares/cron/alerts/"
+    CONFIG_PATH = "//130.127.219.170/Watt/Watt Staff/Building/WAP/config/"
+    alert_fname = "Alert Parameters (working).csv"
 
 COLUMNS = {
         "alert_name" : 0,
@@ -150,14 +158,23 @@ def request_to_list_multiple(query, num_args):
     '''
     data = urllib.request.urlopen(query)
     data_readable = data.read().decode('utf-8').replace("}{","} {")
-    data_list = data_readable.split(" ")
-    dict_list = [json.loads(d) for d in data_list]
+    data_list = data_readable.split("} {")
+    dict_list = []
+    for i,d in enumerate(data_list):
+        d = d if d[0] == "{" else "{" + d
+        d = d if d[-1] == "}" else d + "}"
+        dict_list.append(json.loads(d))
+
+
     data_list = []
     for sd in dict_list:
-        dl = []
-        for i in range(num_args):
-            dl.append(sd[list[sd.keys()]][i])
-        data_list.append(dl)
+        try:
+            dl = []
+            for k in sd:
+                dl.append(sd[k])
+            data_list.append(dl)
+        except:
+            pass
     return data_list
 
 
@@ -180,8 +197,7 @@ if LOG:
 
 
 ## Get alert conditions
-fname = "alert_parameters.csv"
-alerts, unique_databases = import_conditions(fname,logging)
+alerts, unique_databases = import_conditions(alert_fname,logging)
 
 ## Update database cache
 db_string = ""
@@ -225,7 +241,7 @@ for i,a in enumerate(alerts):
             else:
                 selection_command += " WHERE " + "Alias" + " IN (" + str(alert["aliases"]).replace("[","").replace("]","") + ") ORDER BY " + alert["sort_column"] + " DESC"
 
-            data_list = command_to_query(command_to_query(selection_command))
+            data_list = request_to_list_single(command_to_query(selection_command))
             avg_data = sum(data_list)/len(data_list)
 
             send_alert = False
@@ -245,67 +261,74 @@ for i,a in enumerate(alerts):
         # Temperature custom measure
         elif ("Temp" in alert["value"]):
             selection_command = "SELECT Alias, " + alert["column"] + " FROM " + alert["database"] + " ORDER BY " + alert["sort_column"]
-            data_list = request_to_list_multiple(command_to_query(selection_command))
-            logging.log(data_list)
+            print(selection_command)
+            data_list = request_to_list_multiple(command_to_query(selection_command),2)
 
             #data_list = [[row[0],row[1]] for row in data]
             temps = {}
+            ec = 0
             for row in data_list:
-                room = row[0].split()[0]
-                if room in temps:
-                    temps[room][row[0][row[0].find(" ")+1:]] = float(row[1])
-                else:
-                    temps[room] = {
-                        row[0][row[0].find(" ")+1:] : float(row[1])
-                    }
+                try:
+                    room = row[0].split()[0]
+                    if room in temps:
+                        temps[room][row[0][row[0].find(" ")+1:]] = float(row[1])
+                    else:
+                        temps[room] = {
+                            row[0][row[0].find(" ")+1:] : float(row[1])
+                        }
+                except:
+                    ec += 1
 
             for room in temps:
-                Alias_Temp = "Temp"
-                for key in temps[room].keys():
-                    if (key != "Cooling SP" and key != "Heating SP"):
-                        Alias_Temp = key
-
-                # Modify value
-                room_vals = temps[room]
                 try:
-                    if "+" in alert["value"].split()[-1]:
-                        val_str = alert["value"].split()[-1]
-                        val = float(val_str[val_str.find("+")+1:])
-                        room_vals["Cooling SP"] += val
-                        room_val["Heating SP"] += val
-                    elif "-" in alert["value"].split()[-1]:
-                        val_str = alert["value"].split()[-1]
-                        val = float(val_str[val_str.find("-")+1:])
-                        room_vals["Cooling SP"] -= val
-                        room_vals["Heating SP"] -= val
+                    Alias_Temp = "Temp"
+                    for key in temps[room].keys():
+                        if (key != "Cooling SP" and key != "Heating SP"):
+                            Alias_Temp = key
+
+                    # Modify value
+                    room_vals = temps[room]
+                    try:
+                        if "+" in alert["value"].split()[-1]:
+                            val_str = alert["value"].split()[-1]
+                            val = float(val_str[val_str.find("+")+1:])
+                            room_vals["Cooling SP"] += val
+                            room_val["Heating SP"] += val
+                        elif "-" in alert["value"].split()[-1]:
+                            val_str = alert["value"].split()[-1]
+                            val = float(val_str[val_str.find("-")+1:])
+                            room_vals["Cooling SP"] -= val
+                            room_vals["Heating SP"] -= val
+                    except:
+                        pass
+
+                    # Check value
+                    send_alert = False
+
+                    if ">" in alert["condition"]:
+                        if "Cooling SP" in alert["value"]:
+                            if "Cooling SP" in room_vals:
+                                send_alert = (room_vals["Cooling SP"] < room_vals[Alias_Temp])
+                        if "Heating SP" in alert["value"]:
+                            if "Heating SP" in room_vals:
+                                send_alert = (room_vals["Heating SP"] < room_vals[Alias_Temp])
+                    elif "<" in alert["condition"]:
+                        if "Cooling SP" in alert["value"]:
+                            if "Cooling SP" in room_vals:
+                                send_alert = (room_vals["Cooling SP"] > room_vals[Alias_Temp])
+                        if "Heating SP" in alert["value"]:
+                            if "Heating SP" in room_vals:
+                                send_alert = (room_vals["Heating SP"] > room_vals[Alias_Temp])
+
+                    if send_alert:
+                        total_issues += 1
+                        com = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType, AlertMessage, Metric,BLDG,BeginTime) VALUES('"+alert["operation"]+"','"+alert["message"]+"','"+alert["type"]+"','"+alert["building"]+"',GETUTCDATE())"
+                        insert_sql_total += com + "; "
+                        safe_log("An alert was sent for "+str(alert),"info")
                 except:
                     pass
 
-                # Check value
-                send_alert = False
-
-                if ">" in alert["condition"]:
-                    if "Cooling SP" in alert["value"]:
-                        if "Cooling SP" in room_vals:
-                            send_alert = (room_vals["Cooling SP"] < room_vals[Alias_Temp])
-                    if "Heating SP" in alert["value"]:
-                        if "Heating SP" in room_vals:
-                            send_alert = (room_vals["Heating SP"] < room_vals[Alias_Temp])
-                elif "<" in alert["condition"]:
-                    if "Cooling SP" in alert["value"]:
-                        if "Cooling SP" in room_vals:
-                            send_alert = (room_vals["Cooling SP"] > room_vals[Alias_Temp])
-                    if "Heating SP" in alert["value"]:
-                        if "Heating SP" in room_vals:
-                            send_alert = (room_vals["Heating SP"] > room_vals[Alias_Temp])
-
-                if send_alert:
-                    total_issues += 1
-                    #com = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType, AlertMessage, Metric,BLDG,BeginTime) VALUES('"+alert["operation"]+"','"+alert["message"]+" "+str(avg_data)+"','"+alert["type"]+"','"+alert["building"]+"',GETUTCDATE())"
-                    com = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType, AlertMessage, Metric,BLDG,BeginTime) VALUES('"+alert["operation"]+"','"+alert["message"]+"','"+alert["type"]+"','"+alert["building"]+"',GETUTCDATE())"
-                    insert_sql_total += com + "; "
-                    safe_log("An alert was sent for "+str(alert),"info")
-                safe_log("Checked "+str(i+1),"info")
+            safe_log("Checked "+str(i+1),"info")
 
         # Time custom measure
         elif ("<now>" in alert["value"]):
@@ -323,7 +346,7 @@ if total_issues == 0:
     insert_sql_total = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType,AlertMessage,Metric,BLDG,BeginTime) VALUES('All Clear','All Clear','N/A','All',GETUTCDATE())"
 
 # Insert into CEVAC_WATT_ALERT_HIST
-urllib.request.urlopen(command_to_query(insert_sql_total)).read()
+#urllib.request.urlopen(command_to_query(insert_sql_total)).read()
 
 if LOG:
     logging.info(str(datetime.datetime.now())+" TOTAL ISSUES: "+str(total_issues))
