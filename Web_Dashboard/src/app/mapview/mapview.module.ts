@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { MaterialModule } from 'src/app/material.module';
+import { MaterialModule } from '@app/material.module';
 
 import { MapviewRoutingModule } from './mapview-routing.module';
 

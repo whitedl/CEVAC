@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ColorService } from 'src/app/shared/color.service';
+import { ColorService } from '@shared/color.service';
 
 declare let L;
 var geodata = require('src/assets/CU_Building_Footprints.json');
