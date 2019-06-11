@@ -20,6 +20,8 @@ alert_fname = "alert_parameters.csv"
 
 LOG = True
 DEBUG = False
+SEND = True
+
 if DEBUG:
     CONDITIONS_FPATH = "C:\\Users\\hchall\\Downloads\\"
     LOGGING_PATH = "C:\\Users\\hchall\\Downloads\\"
@@ -76,17 +78,34 @@ def alias_to_list(regex_string):
 
 def angle_brackets_replace(regex_string,alert):
     """
-    TODO
+    Returns string with angle brackets replaced
     """
+    lc_alert = {}
+    for key in alert:
+        lc_alert[key.lower()] = alert[key]
+    print(lc_alert)
     try:
-        regex_list = regex_string.replace("<","").split(">")
-        for regex in regex_list:
-                if regex == "asdf":
-                        #TODO
-                        pass
+        regex_list = regex_string.replace(">","<").split("<")
+        for i,regex in enumerate(regex_list):
+                if regex.lower() in lc_alert:
+                    regex_list[i] = lc_alert[regex]
+        return "".join(regex_list)
     except:
         return regex_string
 
+
+def angle_brackets_replace_single(regex_string,replacement):
+    """
+    Returns string with angle brackets replaced with replacement
+    """
+    try:
+        regex_list = regex_string.replace("<","<&%").replace(">","<").split("<")
+        for i,regex in enumerate(regex_list):
+                if "&%" in regex:
+                    regex_list[i] = replacement
+        return "".join(regex_list)
+    except:
+        return regex_string
 
 def import_conditions(fname,logger):
     """
@@ -241,6 +260,7 @@ for i,a in enumerate(alerts):
             else:
                 selection_command += " WHERE " + "Alias" + " IN (" + str(alert["aliases"]).replace("[","").replace("]","") + ") ORDER BY " + alert["sort_column"] + " DESC"
 
+            print(selection_command)
             data_list = request_to_list_single(command_to_query(selection_command))
             avg_data = sum(data_list)/len(data_list)
 
@@ -322,6 +342,7 @@ for i,a in enumerate(alerts):
 
                     if send_alert:
                         total_issues += 1
+                        alert["message"] = angle_brackets_replace_single(alert["message"],room)
                         com = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType, AlertMessage, Metric,BLDG,BeginTime) VALUES('"+alert["operation"]+"','"+alert["message"]+"','"+alert["type"]+"','"+alert["building"]+"',GETUTCDATE())"
                         insert_sql_total += com + "; "
                         safe_log("An alert was sent for "+str(alert),"info")
@@ -346,8 +367,10 @@ if total_issues == 0:
     insert_sql_total = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType,AlertMessage,Metric,BLDG,BeginTime) VALUES('All Clear','All Clear','N/A','All',GETUTCDATE())"
 
 # Insert into CEVAC_WATT_ALERT_HIST
-if not DEBUG:
+if SEND:
     urllib.request.urlopen(command_to_query(insert_sql_total)).read()
+else:
+    print(insert_sql_total)
 
 if LOG:
     logging.info(str(datetime.datetime.now())+" TOTAL ISSUES: "+str(total_issues))
