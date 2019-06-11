@@ -228,3 +228,7 @@ correlate well with the data we received
   * Very few guests were apparently connected to the internet
   * This may be what "test" connections are used for, so I added them to our
   new CEVAC_WATT_WAP_FLOOR_HIST database
+
+## 06/11
+* After adding "test" accounts to the guest count, the numbers appear more accurate
+* The CEVAC_WATT_WAP_FLOOR_HIST count is running and we began working on the daily script

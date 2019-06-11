@@ -260,7 +260,6 @@ def ingest_file_floor(fname, dbc, xref):
     with open(fname, "r") as csvfile:
         reader = csv.reader(csvfile)
         insert_sql = "INSERT INTO  CEVAC_WATT_WAP_FLOOR_HIST (UTCDateTime, floor, guest_count, clemson_count) VALUES (?,?,?,?)"
-        logging.info("Got csv reader")
         #move reader to 'Client Sessions' line
         try:
             while reader.next()[0] != 'Client Sessions':
@@ -273,7 +272,6 @@ def ingest_file_floor(fname, dbc, xref):
 
         #read past header
         headers = next(reader)
-        logging.info("starting each row")
         hours = {}
         for row in reader:
             try:
@@ -286,7 +284,6 @@ def ingest_file_floor(fname, dbc, xref):
                 if username == "test":
                     username = str(random.randint(0,10000000))
                 SSID = row[7]
-                logging.info("passed random test")
                 hour = custom_datestring_to_datetime(row[3]).replace(minute=0,second=0)
                 assoc_time = custom_datestring_to_datetime(row[3])
                 try:
@@ -341,7 +338,6 @@ def ingest_file_floor(fname, dbc, xref):
             except:
                 logging.error("router not in xref")
 
-        logging.info("inserting")
         for hour in hours:
             for floor in hours[hour]:
                 clemson = 0
