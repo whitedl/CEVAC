@@ -112,7 +112,13 @@ export class MapdataService {
     
     layer.bringToFront;
   }
+
   resetHighlight = (e) => {
+    var layer = e.target;
+    if(this.tracked.hasLayer(layer)) this.tracked.resetStyle(layer);
+    else this.untracked.resetStyle(layer);
+  }
+
   focusBldg = (bldg: string) => {
     var layers = this.tracked.getLayers();
     for(let i = 0; i < layers.length; i++) 
@@ -125,6 +131,7 @@ export class MapdataService {
       if(layers[i].feature.properties.Short_Name == bldg)
         this.map.fitBounds(layers[i].getBounds());
   }
+
   zoomToFeat = (e) => {
     this.map.fitBounds(e.target.getBounds());
   }
@@ -132,7 +139,7 @@ export class MapdataService {
   onEachFeat = (feature, layer) => {
     var opt = {
       mouseover: this.highlightFeat,
-      click: this.zoomToFeat,
+      dblclick: this.zoomToFeat,
       mouseout: this.resetHighlight
     };
     layer.on(opt);
@@ -141,6 +148,7 @@ export class MapdataService {
       return layer.feature.properties.Short_Name;
       else return "Short_Name not set";
     });
+    layer.bindPopup('<pre>'+JSON.stringify(layer.feature.properties,null,' ').replace(/[\{\}"]/g,'')+'</pre>');
   }
   
   untrackedOptions = {
