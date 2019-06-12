@@ -38,19 +38,31 @@ def predAlg(numClasses):
 	# create the keras instance
     model = keras.Sequential()
     model.add(Dense(512, input_dim=6))
-    model.add(Activation('relu'))
+    model.add(Activation('elu'))
     model.add(Dropout(0.3))
     model.add(Dense(512))
     model.add(Activation('relu'))
-    model.add(Dense(256))
+    model.add(Dense(512))
     model.add(Activation('relu'))
-    model.add(Dense(numClasses))
+    model.add(Dense(512))
+    model.add(Activation('relu'))
+    model.add(Dense(512))
+    model.add(Activation('relu'))
+    # model.add(Dense(256))
+    # model.add(Activation('relu'))
+    # model.add(Dense(64))
+    # model.add(Activation('relu'))
+    # model.add(Dense(512))
+    # model.add(Activation('relu'))
+    model.add(Dense(300))
     model.add(Activation('softmax'))
 
 	# if changes are going to be made to increase accuracy it should be done here
     model.compile(optimizer='adam',loss=losses.categorical_crossentropy, metrics=['accuracy'])
+
     return model
 
+# trains the model
 def train(model):
 
 	# load data
@@ -70,6 +82,7 @@ def train(model):
 
 	print('Test accuracy:', test_acc)
 
+# loads weights and makes a prediction
 def predict(inq):
     # make a model instanace
     model = keras.Sequential([

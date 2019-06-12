@@ -109,8 +109,9 @@ def makeArrays(df):
             tempx.append(row['dayOfWeek'])
             tempy = [0 for i in range(0,300)]
             tempy[row['intSum']] = 1
-            x.append(tempx)
-            y.append(tempy)
+            if len(tempx) == 6:
+                x.append(tempx)
+                y.append(tempy)
             tempx = []
 
     # empty list of the training and testing sets that we are going to make
@@ -137,7 +138,7 @@ def makeArrays(df):
         testingData.append(element)
         testingLabels.append(y[i])
 
-    print(trainingData)
+
 
     # save our numpy arrays
     np.save('powerTrainingData.npy', trainingData)
@@ -146,12 +147,13 @@ def makeArrays(df):
     np.save('powerTestingLabels.npy', testingLabels)
 
     # Debugging nonsense
+    # print(trainingData)
     print('TESTING DATA:\t\t{} ENTRIES'.format(len(testingData)))
     print('TESTING LABELS:\t\t{} ENTRIES'.format(len(testingLabels)))
     print('TRAINING DATA:\t\t{} ENTRIES'.format(len(trainingData)))
     print('TRAINING LABELS:\t{} ENTRIES'.format(len(trainingLabels)))
 
 if __name__ =='__main__':
-    # for key in dfDict:
-    #     formatConditions(dfDict[key], key)
+    for key in dfDict:
+        formatConditions(dfDict[key], key)
     makeArrays(pdf)
