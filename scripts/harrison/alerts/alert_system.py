@@ -30,22 +30,30 @@ if DEBUG:
     alert_fname = "Alert Parameters (working).csv"
 
 COLUMNS = {
-        "alert_name" : 0,
-        "type" : 1,
-        "aliases" : 2,
-        "unit" : 3,
-        "message" : 4,
-        "building" : 5,
-        "database" : 6,
-        "column" : 7,
-        "sort_column" : 8,
-        "num_entries" : 9,
-        "hour" : 10,
-        "day" : 11,
-        "month" : 12,
-        "condition" : 13,
-        "value" : 14,
-        "operation" : 15,
+    "alert_name" : 0,
+    "type" : 1,
+    "aliases" : 2,
+    "unit" : 3,
+    "message" : 4,
+    "building" : 5,
+    "database" : 6,
+    "column" : 7,
+    "sort_column" : 8,
+    "num_entries" : 9,
+    "hour" : 10,
+    "day" : 11,
+    "month" : 12,
+    "condition" : 13,
+    "value" : 14,
+    "operation" : 15,
+}
+
+TIME = {
+    "day" : 1,
+    "hr" : 24,
+    "min" : 24*60,
+    "minute" : 24*60,
+    "minutes" : 24*60,
 }
 
 
@@ -353,9 +361,26 @@ for i,a in enumerate(alerts):
 
         # Time custom measure
         elif ("<now>" in alert["value"]):
-            #local_dt = local.localize(naive, is_dst=None)
-            #utc_dt = local_dt.astimezone(pytz.utc)
-            safe_log("<now> not yet ready in script","info")
+            # alert["value"] = "<now> - # day/hr/min"
+            dst = False
+            local = pytz.timezone ("America/New_York")
+            naive = datetime.datetime.now()
+            local_dt = local.localize(naive, is_dst=dst)
+            utc_dt = local_dt.astimezone(pytz.utc)
+            #safe_log("<now> not yet ready in script","info")
+            try:
+                amount = int(alert["value"].split()[2])
+                unit_str = alert["value"].split()[3]
+                unit = TIME[unit_str]
+            except:
+                amount = 1
+                unit = TIME["hour"]
+
+            selection_command = "SELECT top "+str(alert["num_entries"]) + " " + alert["column"] + " FROM " + str(alert["database"])
+
+
+
+
 
         else:
             safe_log("Could not find valid condition/value for "+str(alert),"info")

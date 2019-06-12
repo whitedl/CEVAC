@@ -1,31 +1,31 @@
 alert_name,type,alias,units,message,building,database,column,sort_column,num_entries,hour,day,month,condition,value,operation
-Watt_CO2_warning,CO2,*,ppm,<alias>  reads > 1000 ppm,Watt,CEVAC_WATT_IAQ_LATEST,ActualValue,UTCDateTime,1,8-23,*,*,>,1000,warning
-Watt_CO2_alert,CO2,*,ppm,<alias> reads > 2000 ppm,Watt,CEVAC_WATT_IAQ_LATEST,ActualValue,UTCDateTime,1,*,*,*,>,2000,alert
+Watt_CO2_warning,CO2,*,ppm,<alias> exceeds 1000 ppm,Watt,CEVAC_WATT_IAQ_LATEST,ActualValue,UTCDateTime,1,8-23,*,*,>,1000,warning
+Watt_CO2_alert,CO2,*,ppm,<alias> exceeds 2000 ppm,Watt,CEVAC_WATT_IAQ_LATEST,ActualValue,UTCDateTime,1,*,*,*,>,2000,alert
 Watt_Media_lights_summer_warning,Power,Building Media Lights,kW,The Media lights are on.,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,0-8 & 17-23,*,5-8,>,1,warning
 Watt_Media_lights_schoolyear_warning,Power,Building Media Lights,kW,The Media lights are on.,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,0-6 & 20-23,*,1-4 & 9-12,>,1,warning
-Watt_1F_Light_summer_warning,Power,1st Floor Lighting,kW,1st Floor Lights are on.,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,0-8 & 17-23,*,5-8,>,1.3,warning
-Watt_1F_Light_schoolyear_warning,Power,1st Floor Lighting,kW,1st Floor Lights are on.,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,0-6 & 20-23,*,1-4 & 9-12,>,1.3,warning
+Watt_1F_Light_summer_warning,Power,1st Floor Lighting,kW,1st Floor Lights are on.,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,0-8 & 17-23,1-5,5-8,>,1.3,warning
+Watt_1F_Light_schoolyear_warning,Power,1st Floor Lighting,kW,1st Floor Lights are on.,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,0-6 & 20-23,1-5,1-4 & 9-12,>,1.3,warning
 Watt_1F_Light_weekend_warning,Power,1st Floor Lighting,kW,1st Floor Lights are on.,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,*,6-7,*,>,1.3,warning
-Watt_2F_Light_summer_warning,Power,2nd Floor Lighting,kW,2nd Floor Lights are on.,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,0-8 & 17-23,*,5-8,>,1.15,warning
-Watt_2F_Light_schoolyear_warning,Power,2nd Floor Lighting,kW,2nd Floor Lights are on.,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,0-6 & 20-23,*,1-4 & 9-12,>,1.15,warning
+Watt_2F_Light_summer_warning,Power,2nd Floor Lighting,kW,2nd Floor Lights are on.,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,0-8 & 17-23,1-5,5-8,>,1.15,warning
+Watt_2F_Light_schoolyear_warning,Power,2nd Floor Lighting,kW,2nd Floor Lights are on.,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,0-6 & 20-23,1-5,1-4 & 9-12,>,1.15,warning
 Watt_2F_Light_weekend_warning,Power,2nd Floor Lighting,kW,2nd Floor Lights are on.,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,*,6-7,*,>,1.15,warning
-Watt_3F_Light_summer_warning,Power,3rd Floor Lighting,kW,3rd Floor Lights are on.,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,0-8 & 17-23,*,5-8,>,1.35,warning
-Watt_3F_Light_schoolyear_warning,Power,3rd Floor Lighting,kW,3rd Floor Lights are on.,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,0-6 & 20-23,*,1-4 & 9-12,>,1.35,warning
+Watt_3F_Light_summer_warning,Power,3rd Floor Lighting,kW,3rd Floor Lights are on.,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,0-8 & 17-23,1-5,5-8,>,1.35,warning
+Watt_3F_Light_schoolyear_warning,Power,3rd Floor Lighting,kW,3rd Floor Lights are on.,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,0-6 & 20-23,1-5,1-4 & 9-12,>,1.35,warning
 Watt_3F_Light_weekend_warning,Power,3rd Floor Lighting,kW,3rd Floor Lights are on.,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,*,6-7,*,>,1.35,warning
-Watt_4F_Light_summer_warning,Power,4th Floor Lighting,kW,4th Floor Lights are on.,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,0-8 & 17-23,*,5-8,>,1,warning
-Watt_4F_Light_schoolyear_warning,Power,4th Floor Lighting,kW,4th Floor Lights are on.,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,0-6 & 20-23,*,1-4 & 9-12,>,1,warning
+Watt_4F_Light_summer_warning,Power,4th Floor Lighting,kW,4th Floor Lights are on.,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,0-8 & 17-23,1-5,5-8,>,1,warning
+Watt_4F_Light_schoolyear_warning,Power,4th Floor Lighting,kW,4th Floor Lights are on.,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,0-6 & 20-23,1-5,1-4 & 9-12,>,1,warning
 Watt_4F_Light_weekend_warning,Power,4th Floor Lighting,kW,4th Floor Lights are on.,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,*,6-7,*,>,1,warning
-Watt_BSMT_Light_summer_warning,Power,Basement Lighting,kW,Basement Lights are on.,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,0-8 & 17-23,*,5-8,>,1,warning
-Watt_BSMT_Light_schoolyear_warning,Power,Basement Lighting,kW,Basement Lights are on.,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,0-6 & 20-23,*,1-4 & 9-12,>,1,warning
+Watt_BSMT_Light_summer_warning,Power,Basement Lighting,kW,Basement Lights are on.,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,0-8 & 17-23,1-5,5-8,>,1,warning
+Watt_BSMT_Light_schoolyear_warning,Power,Basement Lighting,kW,Basement Lights are on.,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,0-6 & 20-23,1-5,1-4 & 9-12,>,1,warning
 Watt_4F_Light_schoolyear_warning,Power,Basement Lighting,kW,Basement Lights are on.,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,*,6-7,*,>,1,warning
-Watt_Emergency_Power_alert,Power,Building Emergency,kW,The building emergency power > 80 kW,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,*,*,*,>,80,alert
-Watt_Power_night_summer_warning,Power,*,kW,Building power usage > 300 kW,Watt,CEVAC_WATT_POWER_SUMS,ActualValue,UTCDateTime,1,0-8 & 17-23,*,5-8,>,300,warning
-Watt_Power_weekend_warning,Power,*,kW,Building power usage > 300 kW,Watt,CEVAC_WATT_POWER_SUMS,ActualValue,UTCDateTime,1,*,6-7,*,>,300,warning
-Watt_Power_night_schoolyear_warning,Power,*,kW,Building power usage > 300 kW,Watt,CEVAC_WATT_POWER_SUMS,ActualValue,UTCDateTime,1,0-6 & 20-23,*,1-4 & 9-12,>,300,warning
-Watt_Temperature_high_warning,Temperature,*,degF,<alias> has been above its Cooling SP for more than 30 min,Watt,CEVAC_WATT_TEMP_DAY,ActualValue,UTCDateTime,2,*,*,*,>,"<alias- "" Temp""> Cooling SP",warning
-Watt_Temperature_high_alert,Temperature,*,degF,<alias> has been more than 3 degrees above its Cooling SP for more than 30 min,Watt,CEVAC_WATT_TEMP_DAY,ActualValue,UTCDateTime,2,*,*,*,>,"<alias- "" Temp""> Cooling SP+3",alert
-Watt_Temperature_low_warning,Temperature,*,degF,<alias> has been below is Heating SP for more than 30 min,Watt,CEVAC_WATT_TEMP_DAY,ActualValue,UTCDateTime,2,*,*,*,<,"<alias- "" Temp""> Heating SP",warning
-Watt_Temperature_low_alert,Temperature,*,degF,<alias> has been more than 3 degrees below its Heating SP for more than 30 min,Watt,CEVAC_WATT_TEMP_DAY,ActualValue,UTCDateTime,2,*,*,*,<,"<alias- "" Temp""> Heating SP+3",alert
+Watt_Emergency_Power_alert,Power,Building Emergency,kW,Building emergency power > 80 kW,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,*,*,*,>,80,alert
+Watt_Power_night_summer_warning,Power,*,kW,Building power usage > 300 kW,Watt,CEVAC_WATT_POWER_SUMS_LATEST,ActualValue,UTCDateTime,1,0-8 & 17-23,1-5,5-8,>,300,warning
+Watt_Power_weekend_warning,Power,*,kW,Building power usage > 300 kW,Watt,CEVAC_WATT_POWER_SUMS_LATEST,ActualValue,UTCDateTime,1,*,6-7,*,>,300,warning
+Watt_Power_night_schoolyear_warning,Power,*,kW,Building power usage > 300 kW,Watt,CEVAC_WATT_POWER_SUMS_LATEST,ActualValue,UTCDateTime,1,0-6 & 20-23,1-5,1-4 & 9-12,>,300,warning
+Watt_Temperature_high_warning,Temperature,*,degF,<alias> is above its Cooling SP,Watt,CEVAC_WATT_TEMP_DAY,ActualValue,UTCDateTime,2,*,*,*,>,"<alias- "" Temp""> Cooling SP",warning
+Watt_Temperature_high_alert,Temperature,*,degF,<alias> is above its Cooling SP by 3 degrees or more,Watt,CEVAC_WATT_TEMP_DAY,ActualValue,UTCDateTime,2,*,*,*,>,"<alias- "" Temp""> Cooling SP+3",alert
+Watt_Temperature_low_warning,Temperature,*,degF,<alias> is below its Heating SP,Watt,CEVAC_WATT_TEMP_DAY,ActualValue,UTCDateTime,2,*,*,*,<,"<alias- "" Temp""> Heating SP",warning
+Watt_Temperature_low_alert,Temperature,*,degF,<alias> is below its Heating SP by 3 degrees or more,Watt,CEVAC_WATT_TEMP_DAY,ActualValue,UTCDateTime,2,*,*,*,<,"<alias- "" Temp""> Heating SP+3",alert
 Watt_CO2_null_alert,CO2,*,ppm,<alias> has not reported in more than an hour,Watt,CEVAC_WATT_IAQ_LATEST_FULL,UTCDateTime,UTCDateTime,1,*,*,*,<,<now> - 1 day,alert
 Watt_Power_Null_alert,Power,*,kW,<alias> has not reported in more than an hour,Watt,CEVAC_WATT_POWER_LATEST,UTCDateTime,UTCDateTime,1,*,*,*,<,<now> - 1 hr,alert
 Watt_Temperature_Null_alert,Temperature,*,degF,<alias> has not reported in more than an hour,Watt,CEVAC_WATT_TEMP_LATEST,UTCDateTime,UTCDateTime,1,*,*,*,<,<now> - 1 hr,alert
