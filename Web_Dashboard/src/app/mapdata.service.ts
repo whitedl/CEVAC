@@ -102,8 +102,7 @@ export class MapdataService {
     return style;
   }
   
-  highlightFeat(e) {
-    var layer = e.target;
+  highlightFeat(layer) {
     layer.setStyle({
       weight: 5,
       color: '#666',
@@ -135,19 +134,31 @@ export class MapdataService {
   zoomToFeat = (e) => {
     this.map.fitBounds(e.target.getBounds());
   }
+
+  shortNameTooltip(layer) {
+    if(layer.feature.properties.Short_Name != " ")
+      return layer.feature.properties.Short_Name;
+    else return "Short_Name not set";
+  }
+
+  mouseOver = (e) => {
+    var layer = e.target;
+    this.highlightFeat(layer);
+    if(!layer.isPopupOpen()) layer.bindTooltip(this.shortNameTooltip).openTooltip();
+  }
+  hideTooltip = (e) => {
+    var layer = e.target;
+    layer.unbindTooltip();
+  }
   
   onEachFeat = (feature, layer) => {
     var opt = {
-      mouseover: this.highlightFeat,
+      mouseover: this.mouseOver,
+      click: this.hideTooltip,
       dblclick: this.zoomToFeat,
       mouseout: this.resetHighlight
     };
     layer.on(opt);
-    layer.bindTooltip(function(layer){
-      if(layer.feature.properties.Short_Name != " ")
-      return layer.feature.properties.Short_Name;
-      else return "Short_Name not set";
-    });
     layer.bindPopup('<pre>'+JSON.stringify(layer.feature.properties,null,' ').replace(/[\{\}"]/g,'')+'</pre>');
   }
   
