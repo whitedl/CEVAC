@@ -167,7 +167,7 @@ def ingest_file_fail(fname, dbc):
 
     with open(fname, "r") as csvfile:
         reader = csv.reader(csvfile)
-        insert_sql = "INSERT INTO  CEVAC_WATT_WAP_HIST (time, name, ssid, total_duration, predicted_occupancy, unique_users) VALUES (?,?,?,?,?,?)"
+        insert_sql = "INSERT INTO  CEVAC_WATT_WAP_HIST_RAW (time, name, ssid, total_duration, predicted_occupancy, unique_users) VALUES (?,?,?,?,?,?)"
 
         #move reader to 'Client Sessions' line
         try:
@@ -186,6 +186,8 @@ def ingest_file_fail(fname, dbc):
         for row in reader:
             name = row[5]
             username = row[0]
+            if username == "test":
+                username = str(random.randint(0,10000000))
             SSID = row[7]
             hour = custom_datestring_to_datetime(row[3]).replace(minute=0,second=0)
             assoc_time = custom_datestring_to_datetime(row[3])
@@ -276,6 +278,12 @@ def ingest_file_floor(fname, dbc, xref):
         for row in reader:
             try:
                 name = row[5]
+                vendor = row[4]
+
+                # Filter bad vendors
+                if vendor in ["Oculus VR, LLC"]:
+                    continue
+
                 if name in xref:
                     floor = xref[name]
                 else:
