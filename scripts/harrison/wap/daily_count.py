@@ -47,7 +47,7 @@ logging.basicConfig(filename=log_file, format=FORMAT, level=logging.INFO)
 processed_files = os.listdir(processed_dir)
 yesterdays_files = []
 yesterday = (dt.now() - datetime.timedelta(1)).date()
-for file in processed_files:
+for file in processed_files: 
     if "client" in file:
         unix_timestamp = os.path.getmtime(processed_dir+"/"+file)
         fdate = dt.fromtimestamp(unix_timestamp).date()
@@ -94,6 +94,7 @@ if DEBUG:
     print(yesterday,eduroam,clemsonguest)
     print("ERRORS:",errors)
     print("Files:",len(yesterdays_files))
+
 insert_sql_total = ("INSERT INTO CEVAC_WATT_WAP_DAILY_HIST(UTCDateTime, clemson_count, guest_count) VALUES("
                     "'"+yesterday.strftime('%Y-%m-%d %H:%M:%S')+"',"
                     "'"+str(eduroam)+"',"
@@ -113,3 +114,14 @@ else:
 if errors == 0:
     logging.info("Successfully inserted into daily database")
 logging.shutdown()
+
+"""
+      /##.*/
+     /#%&&%#/
+    ./%%%&%%#
+    %%%%&%&%%#
+   %&&  %%%&%%.
+   %&%  &%%&%%*
+   *%&@&@%&%%(
+     %%%%%%%%
+"""
