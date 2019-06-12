@@ -232,3 +232,6 @@ correlate well with the data we received
 ## 06/11
 * After adding "test" accounts to the guest count, the numbers appear more accurate
 * The CEVAC_WATT_WAP_FLOOR_HIST count is running and we began working on the daily script
+
+## 06/12
+* We now have `CEVAC_WATT_WAP_DAILY_HIST`
