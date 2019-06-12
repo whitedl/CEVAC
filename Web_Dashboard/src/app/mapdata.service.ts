@@ -113,8 +113,17 @@ export class MapdataService {
     layer.bringToFront;
   }
   resetHighlight = (e) => {
-    if(this.tracked.hasLayer(e.target)) this.tracked.resetStyle(e.target);
-    else this.untracked.resetStyle(e.target);
+  focusBldg = (bldg: string) => {
+    var layers = this.tracked.getLayers();
+    for(let i = 0; i < layers.length; i++) 
+      if(layers[i].feature.properties.Short_Name == bldg) {
+        this.map.fitBounds(layers[i].getBounds());
+        return;
+      }
+    layers = this.untracked.getLayers();
+    for(let i = 0; i < layers.length; i++)
+      if(layers[i].feature.properties.Short_Name == bldg)
+        this.map.fitBounds(layers[i].getBounds());
   }
   zoomToFeat = (e) => {
     this.map.fitBounds(e.target.getBounds());

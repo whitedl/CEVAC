@@ -1,6 +1,6 @@
 export interface Alert {
 	AlertID: number;
-	AlertType?: string;
+	AlertType: string;
 	AlertMessage?: string;
 	Metric?: string;
 	BLDG: string;
