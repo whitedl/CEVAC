@@ -11,6 +11,7 @@ u='wficcm'
 db='WFIC-CEVAC'
 p='5wattcevacmaint$'
 
+
 # output=$(sqlcmd -S 130.127.218.11 -U wficcm -d WFIC-CEVAC -P 5wattcevacmaint$ -Q "$sum_query")
 
 echo $'Executing query:\n\n'"$query"
