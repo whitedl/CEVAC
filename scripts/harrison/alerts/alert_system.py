@@ -361,13 +361,19 @@ for i,a in enumerate(alerts):
 
         # Time custom measure
         elif ("<now>" in alert["value"]):
+            # Find all aliases
+            selection_command = "SELECT Alias FROM " + str(alert["database"])
+            data_list = request_to_list_single(command_to_query(selection_command))
+            aliases = {}
+            for alias in  data_list:
+                aliases[alias] = None
+
             # alert["value"] = "<now> - # day/hr/min"
             dst = False
             local = pytz.timezone ("America/New_York")
             naive = datetime.datetime.now()
             local_dt = local.localize(naive, is_dst=dst)
             utc_dt = local_dt.astimezone(pytz.utc)
-            #safe_log("<now> not yet ready in script","info")
             try:
                 amount = int(alert["value"].split()[2])
                 unit_str = alert["value"].split()[3]
@@ -375,10 +381,24 @@ for i,a in enumerate(alerts):
             except:
                 amount = 1
                 unit = TIME["hour"]
+            minutes = amount * 24 / unit
 
-            selection_command = "SELECT top "+str(alert["num_entries"]) + " " + alert["column"] + " FROM " + str(alert["database"])
+            for alias in aliases
 
+                selection_command = "SELECT TOP 1 "+ alert["sort_column"] + " FROM " + str(alert["database"])
+                if alert["aliases"] == ["*"]:
+                    selection_command += " ORDER BY " + alert["sort_column"] + " DESC"
+                    selection_command += " WHERE " + "Alias" + " IN (" + alias + ") ORDER BY " + alert["sort_column"] + " DESC"
+                else:
+                    continue
 
+                print(selection_command)
+                data_list = request_to_list_single(command_to_query(selection_command))
+                datetime_object = datetime.datetime.strptime(data_list[0], '%Y-%m-%d %H:%M:%S.%f')
+                now_aware = pytz.utc.localize(datetime_object)
+                minutes_off = (now_aware - utc_dt).total_seconds()/60
+                if minutes_off > minutes:
+                    pass 
 
 
 
