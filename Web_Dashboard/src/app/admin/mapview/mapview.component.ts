@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { MapdataService } from 'src/app/mapdata.service';
+import { MapdataService } from '@services/mapdata.service';
 // Have to declare L before you can use leaflet in angular
 declare let L;
 
