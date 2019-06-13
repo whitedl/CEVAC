@@ -173,7 +173,7 @@ def request_to_list_single(query):
     '''
     data = urllib.request.urlopen(query)
     data_readable = data.read().decode('utf-8').replace("}{","} {")
-    data_list = data_readable.split(" ")
+    data_list = data_readable.split("} {")
     dict_list = [json.loads(d) for d in data_list]
     data_list = [sd[list(sd.keys())[0]] for sd in dict_list]
     return data_list
