@@ -361,6 +361,7 @@ for i,a in enumerate(alerts):
 
         # Time custom measure
         elif ("<now>" in alert["value"]):
+            continue
             # Find all aliases
             selection_command = "SELECT Alias FROM " + str(alert["database"])
             data_list = request_to_list_single(command_to_query(selection_command))
@@ -398,7 +399,7 @@ for i,a in enumerate(alerts):
                 now_aware = pytz.utc.localize(datetime_object)
                 minutes_off = (now_aware - utc_dt).total_seconds()/60
                 if minutes_off > minutes:
-                    pass 
+                    pass
 
 
 
