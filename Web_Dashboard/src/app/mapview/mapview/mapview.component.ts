@@ -1,22 +1,21 @@
 import { Component, OnInit } from '@angular/core';
-import { MapdataService } from 'src/app/mapdata.service'
+import { MapdataService } from 'src/app/mapdata.service';
 //Have to declare L before you can use leaflet in angular
 declare let L;
 
 @Component({
-	selector: 'app-mapview',
-	templateUrl: './mapview.component.html',
-	styleUrls: ['./mapview.component.scss']
+  selector: 'app-mapview',
+  templateUrl: './mapview.component.html',
+  styleUrls: ['./mapview.component.scss']
 })
 export class MapviewComponent implements OnInit {
+  constructor(private loadGISService: MapdataService) {}
 
-	constructor(private loadGISService: MapdataService) { }
-	
-	showOthers = true;
-	
-	map;
+  showOthers = true;
 
-	ngOnInit() {
-		this.map = this.loadGISService.getMap();
-	}
+  map;
+
+  ngOnInit() {
+    this.map = this.loadGISService.getMap();
+  }
 }

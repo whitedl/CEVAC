@@ -13,13 +13,10 @@ import { MapviewModule } from '@app/mapview/mapview.module';
 
 //for simulating api; remove for production
 import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
-import { InMemoryDataService }  from '@app/in-memory-data.service';
+import { InMemoryDataService } from '@app/in-memory-data.service';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    PageNotFoundComponent
-  ],
+  declarations: [AppComponent, PageNotFoundComponent],
   imports: [
     BrowserModule,
     HttpClientModule,
@@ -27,8 +24,8 @@ import { InMemoryDataService }  from '@app/in-memory-data.service';
     LayoutModule,
     MaterialModule,
     MapviewModule,
-    AppRoutingModule,
-	
+    AppRoutingModule
+
     //remove when real api is ready
     /*HttpClientInMemoryWebApiModule.forRoot(
       InMemoryDataService, { dataEncapsulation: false }
@@ -37,4 +34,4 @@ import { InMemoryDataService }  from '@app/in-memory-data.service';
   providers: [],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {}

@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
-import { PageNotFoundComponent } from '@app/page-not-found/page-not-found.component'
+import { PageNotFoundComponent } from '@app/page-not-found/page-not-found.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/map', pathMatch: 'full' },
@@ -12,4 +12,4 @@ const routes: Routes = [
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule]
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {}

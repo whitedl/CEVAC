@@ -9,14 +9,7 @@ import { MapviewComponent } from './mapview/mapview.component';
 import { AlertboxComponent } from './alertbox/alertbox.component';
 
 @NgModule({
-  declarations: [
-    MapviewComponent,
-    AlertboxComponent
-  ],
-  imports: [
-    CommonModule,
-    MaterialModule,
-    MapviewRoutingModule
-  ]
+  declarations: [MapviewComponent, AlertboxComponent],
+  imports: [CommonModule, MaterialModule, MapviewRoutingModule]
 })
-export class MapviewModule { }
+export class MapviewModule {}

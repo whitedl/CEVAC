@@ -6,9 +6,6 @@ import { AlertboxComponent } from './alertbox/alertbox.component';
 
 @NgModule({
   declarations: [AlertboxComponent],
-  imports: [
-    CommonModule,
-    AdminRoutingModule
-  ]
+  imports: [CommonModule, AdminRoutingModule]
 })
-export class AdminModule { }
+export class AdminModule {}

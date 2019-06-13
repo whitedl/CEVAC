@@ -1,15 +1,20 @@
-<mat-expansion-panel expanded="{{alerts.length > 0}}">
-	<mat-expansion-panel-header style="overflow: visible">
-		<span style="overflow: visible" matBadge={{alerts.length}} matBadgeOverlap="false" matBadgePosition="above before">
-			Alerts
-		</span>
-	</mat-expansion-panel-header>
-  <ng-template matExpansionPanelContent>
+<mat-expansion-panel expanded="{{ alerts.length > 0 }}">
+  <mat-expansion-panel-header style="overflow: visible">
+    <span
+      style="overflow: visible"
+      matBadge="{{ alerts.length }}"
+      matBadgeOverlap="false"
+      matBadgePosition="above before"
+    >
+      Alerts
+    </span>
+  </mat-expansion-panel-header>
+  <ng-template matExpansionPanelContent style="overflow:auto">
     <mat-action-list dense>
       <mat-list-item *ngFor="let alert of alerts">
         <mat-icon mat-list-icon color="warn">warning</mat-icon>
-        <h5 mat-line>{{alert.message}}</h5>
-        <p mat-line>{{alert.building}}</p>
+        <h5 mat-line>{{ alert.message }}</h5>
+        <p mat-line>{{ alert.building }}</p>
       </mat-list-item>
     </mat-action-list>
   </ng-template>

@@ -8,18 +8,15 @@ import { Alert } from '@app/alert';
   styleUrls: ['./alertbox.component.scss']
 })
 export class AlertboxComponent implements OnInit {
-	
-	alerts: Alert[] = [];
+  alerts: Alert[] = [];
 
-	constructor(private alertService: AlertService) { }
+  constructor(private alertService: AlertService) {}
 
-	ngOnInit() {
-		this.getAlerts();
-	}
-	
-	getAlerts(): void {
-		this.alertService.getAlerts()
-			.subscribe(alerts => this.alerts = alerts);
-	}
+  ngOnInit() {
+    this.getAlerts();
+  }
 
+  getAlerts(): void {
+    this.alertService.getAlerts().subscribe(alerts => (this.alerts = alerts));
+  }
 }
