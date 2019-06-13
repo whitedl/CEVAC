@@ -25,6 +25,7 @@ if DEBUG:
     processed_dir = "//130.127.219.170/Watt/Watt Staff/Building/WAP/processed"
 
 CLIENT = 0
+MAC = 2
 SSID = 7
 
 
@@ -47,7 +48,7 @@ logging.basicConfig(filename=log_file, format=FORMAT, level=logging.INFO)
 processed_files = os.listdir(processed_dir)
 yesterdays_files = []
 yesterday = (dt.now() - datetime.timedelta(1)).date()
-for file in processed_files: 
+for file in processed_files:
     if "client" in file:
         unix_timestamp = os.path.getmtime(processed_dir+"/"+file)
         fdate = dt.fromtimestamp(unix_timestamp).date()
@@ -74,7 +75,7 @@ for file in yesterdays_files:
 
             # insert client name in dictionary
             for row in reader:
-                username = row[CLIENT] if row[CLIENT] != "test" else str(random.randint(0,100000000))
+                username = row[CLIENT] if row[CLIENT] != "test" else row[MAC]
                 if username != "":
                     if row[SSID] in network:
                         network[row[SSID]][username] = None
