@@ -415,7 +415,7 @@ if total_issues == 0:
 if SEND:
     f = open("/home/bmeares/cache/insert_alert_system.sql","w")
     #print(insert_sql_total.replace(';','\nGO\n'))
-    f.write(insert_sql_total.replace(';','\nGO\n'),"w")
+    f.write(insert_sql_total.replace(';','\nGO\n'))
     f.close()
     os.system("/home/bmeares/scripts/exec_sql_script.sh /home/bmeares/cache/insert_alert_system.sql")
     os.remove("/home/bmeares/cache/insert_alert_system.sql")
