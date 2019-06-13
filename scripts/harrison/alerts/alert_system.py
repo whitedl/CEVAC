@@ -384,7 +384,7 @@ for i,a in enumerate(alerts):
                 unit = TIME["hour"]
             minutes = amount * 24 / unit
 
-            for alias in aliases
+            for alias in aliases:
 
                 selection_command = "SELECT TOP 1 "+ alert["sort_column"] + " FROM " + str(alert["database"])
                 if alert["aliases"] == ["*"]:
