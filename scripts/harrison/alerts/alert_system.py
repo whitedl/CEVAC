@@ -413,7 +413,12 @@ if total_issues == 0:
 
 # Insert into CEVAC_WATT_ALERT_HIST
 if SEND:
-    print(insert_sql_total.replace(';','\nGO\n'))
+    f = open("/home/bmeares/cache/insert_alert_system.sql","w")
+    #print(insert_sql_total.replace(';','\nGO\n'))
+    f.write(insert_sql_total.replace(';','\nGO\n'),"w")
+    f.close()
+    os.system("/home/bmeares/scripts/exec_sql_script.sh /home/bmeares/cache/insert_alert_system.sql")
+    os.remove("/home/bmeares/cache/insert_alert_system.sql")
     #  urllib.request.urlopen(command_to_query(insert_sql_total)).read()
 else:
     print(insert_sql_total)
