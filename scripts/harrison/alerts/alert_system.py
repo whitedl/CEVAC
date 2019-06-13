@@ -414,8 +414,8 @@ if total_issues == 0:
 
 # Insert into CEVAC_WATT_ALERT_HIST
 if SEND:
-    os.system('/home/bmeares/scripts/exec_sql.sh ' + insert_sql_total)
-    urllib.request.urlopen(command_to_query(insert_sql_total)).read()
+    os.system('/home/bmeares/scripts/exec_sql.sh ' + '"' + insert_sql_total.replace(';','\nGO\n') + '"')
+    #  urllib.request.urlopen(command_to_query(insert_sql_total)).read()
 else:
     print(insert_sql_total)
 
