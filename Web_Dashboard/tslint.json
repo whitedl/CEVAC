@@ -1,7 +1,7 @@
 {
   "extends": [
     "tslint:recommended",
-    "tstlint-plugin-prettier",
+    "tslint-plugin-prettier",
     "tslint-config-prettier"
   ],
   "rulesDirectory": ["codelyzer"],
@@ -20,12 +20,7 @@
     "member-ordering": [
       true,
       {
-        "order": [
-          "static-field",
-          "instance-field",
-          "static-method",
-          "instance-method"
-        ]
+        "order": "fields-first"
       }
     ],
     "no-consecutive-blank-lines": false,
@@ -51,6 +46,7 @@
     "use-life-cycle-interface": true,
     "use-pipe-transform-interface": true,
     "component-class-suffix": true,
-    "directive-class-suffix": true
+    "directive-class-suffix": true,
+    "no-string-literal": false
   }
 }

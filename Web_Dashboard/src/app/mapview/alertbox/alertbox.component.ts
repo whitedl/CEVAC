@@ -9,27 +9,29 @@ import { Alert } from '@app/alert';
   styleUrls: ['./alertbox.component.scss']
 })
 export class AlertboxComponent implements OnInit {
-	
-	alerts: Alert[] = [];
+  alerts: Alert[] = [];
 
-	constructor(private alertService: AlertService, private mapdataService: MapdataService) { }
+  constructor(
+    private alertService: AlertService,
+    private mapdataService: MapdataService
+  ) {}
 
-	ngOnInit() {
-		this.getAlerts();
-	}
+  ngOnInit() {
+    this.getAlerts();
+  }
 
-	focus(alert: Alert){
-		this.mapdataService.focusBldg(alert.BLDG);
-	}
+  focus(alert: Alert) {
+    this.mapdataService.focusBldg(alert.BLDG);
+  }
 
-	alertAll(): Alert[] {
-		return this.alerts.filter(alert => alert.AlertID === 1);
-	}
-	logAl = () => {this.alerts[1].AlertID = 3;}
-	
-	getAlerts(): void {
-		this.alertService.getAlerts()
-			.subscribe(alerts => this.alerts = alerts);
-	}
+  alertAll(): Alert[] {
+    return this.alerts.filter(alert => alert.AlertID === 1);
+  }
+  logAl = () => {
+    this.alerts[1].AlertID = 3;
+  };
 
+  getAlerts(): void {
+    this.alertService.getAlerts().subscribe(alerts => (this.alerts = alerts));
+  }
 }
