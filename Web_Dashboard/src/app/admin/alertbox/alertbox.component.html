@@ -14,7 +14,16 @@
   <ng-template matExpansionPanelContent>
     <mat-action-list dense>
       <button mat-list-item *ngFor="let alert of alerts" (click)="focus(alert)">
-        <mat-icon mat-list-icon color="warn">{{ alert.AlertType }}</mat-icon>
+        <mat-icon matListIcon [ngStyle]="getAlertColor(alert.AlertType)">
+          <ng-container [ngSwitch]="alert.AlertType">
+            <ng-container *ngSwitchCase="'alert'">
+              warning
+            </ng-container>
+            <ng-container *ngSwitchCase="'warning'">
+              notification_important
+            </ng-container>
+          </ng-container>
+        </mat-icon>
         <h5 mat-line>{{ alert.AlertMessage }}</h5>
         <p mat-line>{{ alert.BLDG }}</p>
       </button>
