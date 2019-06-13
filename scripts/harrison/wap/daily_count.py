@@ -15,11 +15,11 @@ import urllib.parse
 import random
 
 # Setup configuration
-SEND = False
-DEBUG = True
+SEND = True
+DEBUG = False
 
-log_dir = ""
-processed_dir = ""
+log_dir = "/home/bmeares/cron/wap/log"
+processed_dir = "/mnt/bldg/WAP/processed"
 if DEBUG:
     log_dir = "C:\\Users\\hchall\\Downloads"
     processed_dir = "//130.127.219.170/Watt/Watt Staff/Building/WAP/processed"
