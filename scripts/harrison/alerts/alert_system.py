@@ -240,7 +240,7 @@ req = "http://wfic-cevac1/requests/query.php?q="
 req_parse = req + urllib.parse.quote_plus(update_sql)
 
 append_tables_url = "http://wfic-cevac1/requests/script.php?s=append_tables.sh"
-urllib.request.urlopen(append_tables_url).read()
+#  urllib.request.urlopen(append_tables_url).read()
 
 ## Check alerts
 insert_sql_total = ""
