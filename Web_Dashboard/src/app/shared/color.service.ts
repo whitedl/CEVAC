@@ -1,5 +1,5 @@
-//Exists to centralize management of color in the app
-//*primarily for the map and map keys at the moment*
+// Exists to centralize management of color in the app
+// *primarily for the map and map keys at the moment*
 import { Injectable } from '@angular/core';
 
 @Injectable({
@@ -16,13 +16,13 @@ export class ColorService {
       Innovation: '#86898C'
     },
     ClemsonComplementary: {
-      //ClemsonOrange: '#F66733',
+      // ClemsonOrange: '#F66733',
       Regalia: '#522D80',
       Complementary1: '#33e9f6',
       Complementary2: '#80692d'
     },
     ClemsonTetradic: {
-      //ClemsonOrange: '#F66733',
+      // ClemsonOrange: '#F66733',
       Regalia: '#522D80',
       Tetradic1: '#57ebf6',
       Tetradic2: '#f6bf33'
@@ -31,11 +31,11 @@ export class ColorService {
 
   constructor() {}
 
-  //If name is not passed, assumes first color (ClemsonPalette).
-  //If pos is passed, will return color at position in chosen set
-  //If pos is not passed, will return requested set
+  // If name is not passed, assumes first color (ClemsonPalette).
+  // If pos is passed, will return color at position in chosen set
+  // If pos is not passed, will return requested set
   getColor(name = Object.keys(this.colors)[0], pos?: number) {
-    var set = Object.values(this.colors[name]);
+    const set = Object.values(this.colors[name]);
     return typeof pos !== 'undefined' ? set[pos % set.length] : set;
   }
 

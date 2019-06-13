@@ -11,7 +11,7 @@ import { PageNotFoundComponent } from '@app/page-not-found/page-not-found.compon
 
 import { MapviewModule } from '@app/mapview/mapview.module';
 
-//for simulating api; remove for production
+// for simulating api; remove for production
 import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
 import { InMemoryDataService } from '@app/in-memory-data.service';
 
@@ -26,7 +26,7 @@ import { InMemoryDataService } from '@app/in-memory-data.service';
     MapviewModule,
     AppRoutingModule
 
-    //remove when real api is ready
+    // remove when real api is ready
     /*HttpClientInMemoryWebApiModule.forRoot(
       InMemoryDataService, { dataEncapsulation: false }
     )*/

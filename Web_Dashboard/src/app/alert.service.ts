@@ -10,11 +10,10 @@ import { Alert } from '@app/alert';
   providedIn: 'root'
 })
 export class AlertService {
+  alerts: Alert[] = [];
   private alertsUrl = 'http://wfic-cevac1/requests/alerts.php';
 
   constructor(private http: HttpClient) {}
-
-  alerts: Alert[] = [];
 
   getAlerts(): Observable<Alert[]> {
     return this.http.get<Alert[]>(this.alertsUrl);

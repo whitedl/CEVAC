@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { MapdataService } from 'src/app/mapdata.service';
-//Have to declare L before you can use leaflet in angular
+// Have to declare L before you can use leaflet in angular
 declare let L;
 
 @Component({
@@ -9,11 +9,10 @@ declare let L;
   styleUrls: ['./mapview.component.scss']
 })
 export class MapviewComponent implements OnInit {
-  constructor(private loadGISService: MapdataService) {}
-
   showOthers = true;
-
   map;
+
+  constructor(private loadGISService: MapdataService) {}
 
   ngOnInit() {
     this.map = this.loadGISService.getMap();
