@@ -1,11 +1,30 @@
-<mat-sidenav-container class="flex-row" style='height: 100%'>
-    <mat-sidenav mode="side" opened="true" disableClose="false" fixedInViewport="false" class="flex-col">
-    </mat-sidenav>
-    <mat-sidenav-content>
-        <div id="map"></div>
-    </mat-sidenav-content>
-    <mat-sidenav mode="side" position="end" opened="true" disableClose="true" fixedInViewport="false" class="flex-col">
+<mat-sidenav-container class="flex-row" style="height: 100%">
+  <mat-sidenav
+    mode="side"
+    opened="true"
+    disableClose="false"
+    fixedInViewport="false"
+    class="flex-col"
+  >
+  </mat-sidenav>
+  <mat-sidenav-content>
+    <div id="map"></div>
+  </mat-sidenav-content>
+  <mat-sidenav
+    mode="side"
+    position="end"
+    opened="true"
+    disableClose="true"
+    fixedInViewport="false"
+    class="flex-col"
+  >
+    <mat-accordion multi="true" style="flex-basis:100%; overflow:hidden">
       <app-alertbox></app-alertbox>
-      <mat-expansion-panel><mat-expansion-panel-header>HI</mat-expansion-panel-header></mat-expansion-panel>
-    </mat-sidenav>
+      <mat-expansion-panel
+        ><mat-expansion-panel-header
+          >HI</mat-expansion-panel-header
+        ></mat-expansion-panel
+      >
+    </mat-accordion>
+  </mat-sidenav>
 </mat-sidenav-container>

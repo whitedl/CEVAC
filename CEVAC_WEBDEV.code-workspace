@@ -3,5 +3,13 @@
 		{
 			"path": "."
 		}
-	]
+	],
+	"settings": {
+		"editor.formatOnSave": true,
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+		"editor.formatOnPaste": true,
+		"prettier.requireConfig": true,
+		"prettier.singleQuote": true,
+		"prettier.jsxSingleQuote": true
+	}
 }

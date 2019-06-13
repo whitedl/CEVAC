@@ -27,24 +27,24 @@ export class ColorService {
       Tetradic1: '#57ebf6',
       Tetradic2: '#f6bf33'
     }
-  }
+  };
 
-  constructor() { }
+  constructor() {}
 
   //If name is not passed, assumes first color (ClemsonPalette).
   //If pos is passed, will return color at position in chosen set
   //If pos is not passed, will return requested set
   getColor(name = Object.keys(this.colors)[0], pos?: number) {
     var set = Object.values(this.colors[name]);
-    return (typeof pos !== "undefined") ? set[pos % set.length] : set;
+    return typeof pos !== 'undefined' ? set[pos % set.length] : set;
   }
 
   getComplementary(pos?: number) {
-    return this.getColor("ClemsonComplementary", pos);
+    return this.getColor('ClemsonComplementary', pos);
   }
 
   getTetradic(pos?: number) {
-    return this.getColor("ClemsonTetradic", pos);
+    return this.getColor('ClemsonTetradic', pos);
   }
 
   getActive() {
