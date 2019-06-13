@@ -9,7 +9,7 @@ import { LayoutModule } from '@angular/cdk/layout';
 import { MaterialModule } from '@app/material.module';
 import { PageNotFoundComponent } from '@app/page-not-found/page-not-found.component';
 
-import { MapviewModule } from '@app/mapview/mapview.module';
+import { AdminModule } from '@app/admin/admin.module';
 
 // for simulating api; remove for production
 import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
@@ -23,7 +23,7 @@ import { InMemoryDataService } from '@app/in-memory-data.service';
     BrowserAnimationsModule,
     LayoutModule,
     MaterialModule,
-    MapviewModule,
+    AdminModule,
     AppRoutingModule
 
     // remove when real api is ready

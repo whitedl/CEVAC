@@ -1,12 +1,13 @@
 // Exists to centralize management of color in the app
 // *primarily for the map and map keys at the moment*
 import { Injectable } from '@angular/core';
+import chroma from 'chroma-js';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ColorService {
-  colors = {
+  private colors = {
     ClemsonPalette: {
       ClemsonOrange: '#F66733',
       Regalia: '#522D80',
