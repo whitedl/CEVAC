@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ColorService } from '@services/color.service';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 declare let L;
 const geodata = require('src/assets/CU_Building_Footprints.json');
@@ -15,8 +17,9 @@ export class MapdataService {
   };
   categories = {};
   functions = {};
+  private dataUrl = 'http://wfic-cevac1/requests/stats.php';
 
-  constructor(private colorService: ColorService) {}
+  constructor(private colorService: ColorService, private http: HttpClient) {}
 
   getMap() {
     if (!this.map) {
@@ -102,10 +105,12 @@ export class MapdataService {
     const funcCol = [];
     let catCol;
     style['fill'] = true;
-    style['fillColor'] = this.colorService.getActive();
+    style['fillColor'] = feature.properties.bData
+      ? this.colorService.powerScale(feature.properties.bData.power_latest_sum)
+      : this.colorService.getActive();
     style['weight'] = 4;
     style['opacity'] = 1;
-    style['fillOpacity'] = 0.8;
+    style['fillOpacity'] = 1;
     if (feature.properties.Function) {
       for (const func of feature.properties.Function) {
         if (!(func in this.functions)) {
@@ -201,14 +206,22 @@ export class MapdataService {
       mouseout: this.resetHighlight
     };
     layer.on(opt);
-    layer.bindPopup(
-      '<pre>' +
-        JSON.stringify(layer.feature.properties, null, ' ').replace(
-          /[\{\}"]/g,
-          ''
-        ) +
-        '</pre>'
-    );
+    this.http
+      .get(this.dataUrl + '?building=' + layer.feature.properties.Short_Name)
+      .subscribe(bData => {
+        if (bData) {
+          layer.feature.properties['bData'] = bData;
+          this.tracked.resetStyle(layer);
+        }
+        layer.bindPopup(
+          '<pre>' +
+            JSON.stringify(layer.feature.properties, null, ' ').replace(
+              /[\{\}"]/g,
+              ''
+            ) +
+            '</pre>'
+        );
+      });
   };
 
   // tslint:disable-next-line: member-ordering
