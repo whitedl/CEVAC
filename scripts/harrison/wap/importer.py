@@ -187,7 +187,7 @@ def ingest_file_fail(fname, dbc):
             name = row[5]
             username = row[0]
             if username == "test":
-                username = str(random.randint(0,10000000))
+                username = row[2]
             SSID = row[7]
             hour = custom_datestring_to_datetime(row[3]).replace(minute=0,second=0)
             assoc_time = custom_datestring_to_datetime(row[3])
@@ -290,7 +290,7 @@ def ingest_file_floor(fname, dbc, xref):
                     floor = "outside"
                 username = row[0]
                 if username == "test":
-                    username = str(random.randint(0,10000000))
+                    username = row[2]
                 SSID = row[7]
                 hour = custom_datestring_to_datetime(row[3]).replace(minute=0,second=0)
                 assoc_time = custom_datestring_to_datetime(row[3])
