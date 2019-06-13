@@ -267,7 +267,7 @@ for i,a in enumerate(alerts):
             else:
                 selection_command += " WHERE " + "Alias" + " IN (" + str(alert["aliases"]).replace("[","").replace("]","") + ") ORDER BY " + alert["sort_column"] + " DESC"
 
-            #print(selection_command)
+            print(selection_command)
             data_list = request_to_list_single(command_to_query(selection_command))
             avg_data = sum(data_list)/len(data_list)
 
@@ -279,7 +279,7 @@ for i,a in enumerate(alerts):
             if send_alert:
                 total_issues += 1
                 safe_log("An alert was sent for "+str(alert),"info")
-                #print(alert["type"])
+                print(alert["type"])
                 com = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType, AlertMessage, Metric,BLDG,BeginTime) VALUES('"
                 com += alert["operation"]+"','"+alert["message"]+"','"+alert["type"]+"','"+alert["building"]+"',GETUTCDATE())"
                 insert_sql_total += com + "; "
@@ -288,7 +288,7 @@ for i,a in enumerate(alerts):
         # Temperature custom measure
         elif ("Temp" in alert["value"]):
             selection_command = "SELECT Alias, " + alert["column"] + " FROM " + alert["database"] + " ORDER BY " + alert["sort_column"]
-            #print(selection_command)
+            print(selection_command)
             data_list = request_to_list_multiple(command_to_query(selection_command),2)
 
             #data_list = [[row[0],row[1]] for row in data]
@@ -392,7 +392,7 @@ for i,a in enumerate(alerts):
                 else:
                     continue
 
-                #print(selection_command)
+                print(selection_command)
                 data_list = request_to_list_single(command_to_query(selection_command))
                 datetime_object = datetime.datetime.strptime(data_list[0], '%Y-%m-%d %H:%M:%S.%f')
                 now_aware = pytz.utc.localize(datetime_object)
