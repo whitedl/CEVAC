@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AlertService } from '@services/alert.service';
 import { MapdataService } from '@services/mapdata.service';
+import { ColorService } from '@services/color.service';
 import { Alert } from '@app/alert';
 
 @Component({
@@ -13,11 +14,27 @@ export class AlertboxComponent implements OnInit {
 
   constructor(
     private alertService: AlertService,
-    private mapdataService: MapdataService
+    private mapdataService: MapdataService,
+    private colorService: ColorService
   ) {}
 
   ngOnInit() {
     this.getAlerts();
+  }
+
+  getAlertColor(type: string) {
+    let col;
+    switch (type) {
+      case 'alert':
+        col = this.colorService.colors.Alerts.Alert;
+        break;
+      case 'warning':
+        col = this.colorService.colors.Alerts.Warn;
+        break;
+    }
+    return {
+      color: col
+    };
   }
 
   focus(alert: Alert) {

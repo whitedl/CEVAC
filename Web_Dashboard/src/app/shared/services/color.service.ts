@@ -7,7 +7,11 @@ import chroma from 'chroma-js';
   providedIn: 'root'
 })
 export class ColorService {
-  private colors = {
+  colors = {
+    Alerts: {
+      Alert: '#CC3300',
+      Warn: '#FFCC00'
+    },
     ClemsonPalette: {
       ClemsonOrange: '#F66733',
       Regalia: '#522D80',
@@ -27,10 +31,15 @@ export class ColorService {
       Regalia: '#522D80',
       Tetradic1: '#57ebf6',
       Tetradic2: '#f6bf33'
-    }
+    },
+    Scale: chroma.scale('Reds').domain([0, 1000])
   };
 
   constructor() {}
+
+  powerScale(n: number) {
+    return this.colors.Scale(n);
+  }
 
   // If name is not passed, assumes first color (ClemsonPalette).
   // If pos is passed, will return color at position in chosen set
@@ -49,7 +58,7 @@ export class ColorService {
   }
 
   getActive() {
-    return this.colors.ClemsonPalette.ClemsonOrange;
+    return this.colors.ClemsonPalette.HowardsRock;
   }
   getPassive() {
     return this.colors.ClemsonPalette.BlueRidge;
