@@ -6,6 +6,31 @@
 * Can paths throughout the building be accurately measured,
 * What users actually need to be counted (what measure reflects best)
 
+## Filtering
+Not all WAP data collected is useful for predicting occupancy. We have 3 databases
+that collect different aggregations of the wap data. These databases are useful
+for their own reasons, but do not show the same information.
+* `CEVAC_WATT_WAP_HIST`
+  * This database shows an hourly count of unique users by network per WAP
+* `CEVAC_WATT_WAP_FLOOR_HIST`
+  * This database shows an hourly count of unique users (as guests or clemson)
+  per floor
+* `CEVAC_WATT_WAP_DAILY_HIST`
+  * This database shows a daily count of unique users in the entire building
+  during the day
+The WFIC WAPs support 4 networks
+1. `eduroam`, the clemson staff/student/faculty network
+   * This is used to predict clemson staff/student/faculty occupancy by username
+2. `clemsonguest`, the open network for guests who visit clemson
+   * This is used to predict occupancy based on username
+     * The "test" username is filtered as unique users based on MAC Address
+3. `resmedianet`, the network for staff/student/faculty IOT devices with the
+potential for long-lasting, heavy connections, as to not clog the `eduroam` network
+   * This is not used for predicting occupancy
+4. `morrison`, the network for devices that cannot support modern protocols
+   * This network is not used for predicting occupancy, as users don't use it for
+   main devices
+
 ## Log
 ### 05/30
 * For a basic experiment, Drew and Harrison walked around all floors of Watt to
