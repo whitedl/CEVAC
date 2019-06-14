@@ -38,28 +38,24 @@ def loadData():
 # prediction with the built-in keras model
 def predAlg(numClasses):
 	# the capacity of the building
-    class_names = [i for i in range(0,numClasses)]	#these are your possible outputs (number of devices on the wifi
+	class_names = [i for i in range(0,numClasses)]	#these are your possible outputs (number of devices on the wifi
 
 	# create the keras instance
-    model = keras.Sequential()
-    model.add(Dense(512, input_shape=(6,)))
-    model.add(Activation('relu'))
-    model.add(Dropout(0.35))
-    model.add(Dense(512))
-    model.add(Activation('relu'))
-    model.add(Dense(512))
-    model.add(Activation('relu'))
-    model.add(Dense(512))
-    model.add(Activation('relu'))
-    model.add(Dense(512))
-    model.add(Activation('relu'))
-    model.add(Dense(300))
-    model.add(Activation('softmax'))
+	model = keras.Sequential()
+	model.add(Dense(6, input_shape=(6,)))
+	model.add(Activation('relu'))
+	model.add(Dropout(0.35))
+	model.add(Dense(64))
+	model.add(Activation('relu'))
+	model.add(Dense(1024))
+	model.add(Activation('relu'))
+	model.add(Dense(300))
+	model.add(Activation('softmax'))
 
+	model.compile(optimizer='sgd',loss=losses.categorical_crossentropy, metrics=['accuracy'])
 	# if changes are going to be made to increase accuracy it should be done here
-    model.compile(optimizer='adam',loss=losses.categorical_crossentropy, metrics=['accuracy'])
 
-    return model
+	return model
 
 # trains the model
 def train(model):
@@ -98,19 +94,11 @@ def pred(model, inq):
 # calculates and displays accuracy
 def disp():
 
-	# make a model instanace
+	# create the keras instance
 	model = keras.Sequential()
 	model.add(Dense(512, input_shape=(6,)))
-	model.add(Activation('relu'))
+	model.add(Activation('sigmoid'))
 	model.add(Dropout(0.35))
-	model.add(Dense(512))
-	model.add(Activation('relu'))
-	model.add(Dense(512))
-	model.add(Activation('relu'))
-	model.add(Dense(512))
-	model.add(Activation('relu'))
-	model.add(Dense(512))
-	model.add(Activation('relu'))
 	model.add(Dense(512))
 	model.add(Activation('relu'))
 	model.add(Dense(512))
@@ -140,11 +128,13 @@ def disp():
 		y = yIndex
 		prediction = pred(model, element.reshape(1, -1))
 		err = (((prediction - y) / y)**2)**.5 * 100
-		results.insert(0, err)
+		results.append([y, prediction, err])
 		t = time.time() - t
-		print('RESULT {}:\t{} SECONDS'.format(index, format(t, '.2f')))
+		# print('RESULT {}:\t{} SECONDS'.format(index, format(t, '.2f')))
+	np.save('results.npy', results)
 	return(results)
 
 if __name__ == '__main__':
-	train(predAlg(300))
-    # disp()
+    train(predAlg(300))
+	# results = disp()
+	# print(np.mean(results))
