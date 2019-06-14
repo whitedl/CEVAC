@@ -39,6 +39,13 @@ monat = {
     'DEC' : 12
 }
 
+# graph some data
+def graph():
+    array = np.load('accuracy.npy')
+    avg = np.mean(array)
+    std = np.std(array)
+    print(avg, std)
+
 def insertData(df):
     info = {
     'Hour' : [],
@@ -141,10 +148,10 @@ def makeArrays(df):
 
 
     # save our numpy arrays
-    np.save('powerTrainingData.npy', trainingData)
-    np.save('powerTrainingLabels.npy', trainingLabels)
-    np.save('powerTestingData.npy', testingData)
-    np.save('powerTestingLabels.npy', testingLabels)
+    # np.save('powerTrainingData.npy', trainingData)
+    # np.save('powerTrainingLabels.npy', trainingLabels)
+    # np.save('powerTestingData.npy', testingData)
+    # np.save('powerTestingLabels.npy', testingLabels)
 
     # Debugging nonsense
     # print(trainingData)
@@ -157,3 +164,4 @@ if __name__ =='__main__':
     for key in dfDict:
         formatConditions(dfDict[key], key)
     makeArrays(pdf)
+    # graph()
