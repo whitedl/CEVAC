@@ -22,6 +22,9 @@ export class MapdataService {
   categories = {};
   functions = {};
 
+  sasBaseURL =
+    'https://sas.clemson.edu:8343/SASVisualAnalytics/report?location=';
+
   // be sure the names match with the values in color service, otherwise you'll get the default scale
   dataSets: DataSet[] = [
     { name: 'power', propertyName: 'power_latest_sum' },
@@ -78,12 +81,12 @@ export class MapdataService {
     const funcCol = [];
     let catCol;
     style['fill'] = true;
-    style['fillColor'] = this.colorService.getPassive();
+    style['fillColor'] =
+      feature.properties.BLDG_NAME !== ' '
+        ? this.colorService.getPassive()
+        : this.colorService.getUnnamed();
     style['opacity'] = 1;
     style['fillOpacity'] = 0.8;
-    if (feature.properties.Short_Name === ' ') {
-      style['fillColor'] = this.colorService.getUnnamed();
-    }
     if (feature.properties.Function) {
       for (const func of feature.properties.Function) {
         if (!(func in this.functions)) {
@@ -195,6 +198,13 @@ export class MapdataService {
     this.map.fitBounds(e.target.getBounds());
   };
 
+  longNameTooltip(layer) {
+    if (layer.feature.properties.BLDG_NAME !== ' ') {
+      return layer.feature.properties.BLDG_NAME;
+    } else {
+      return 'Long_Name not set';
+    }
+  }
   shortNameTooltip(layer) {
     if (layer.feature.properties.Short_Name !== ' ') {
       return layer.feature.properties.Short_Name;
@@ -207,7 +217,7 @@ export class MapdataService {
     const layer = e.target;
     this.highlightFeat(layer);
     if (!layer.isPopupOpen()) {
-      layer.bindTooltip(this.shortNameTooltip).openTooltip();
+      layer.bindTooltip(this.longNameTooltip).openTooltip();
     }
   };
   hideTooltip = e => {
