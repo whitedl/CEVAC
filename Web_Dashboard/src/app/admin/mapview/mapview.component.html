@@ -6,6 +6,7 @@
     fixedInViewport="false"
     class="flex-col"
   >
+    <app-controlbox></app-controlbox>
   </mat-sidenav>
   <mat-sidenav-content>
     <div id="map"></div>
@@ -20,11 +21,9 @@
   >
     <mat-accordion multi="true" style="flex-basis:100%; overflow:hidden">
       <app-alertbox></app-alertbox>
-      <mat-expansion-panel
-        ><mat-expansion-panel-header
-          >HI</mat-expansion-panel-header
-        ></mat-expansion-panel
-      >
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>HI</mat-expansion-panel-header>
+      </mat-expansion-panel>
     </mat-accordion>
   </mat-sidenav>
 </mat-sidenav-container>

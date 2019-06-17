@@ -41,6 +41,24 @@ export class ColorService {
     return this.colors.Scale(n);
   }
 
+  defaultScale(n: number) {
+    return this.colors.Scale(n);
+  }
+
+  scale(n: number, scaleType: string = 'default') {
+    switch (scaleType) {
+      case 'power': {
+        return this.powerScale(n);
+      }
+      case 'default': {
+        return this.defaultScale(n);
+      }
+      default: {
+        return this.defaultScale(n);
+      }
+    }
+  }
+
   // If name is not passed, assumes first color (ClemsonPalette).
   // If pos is passed, will return color at position in chosen set
   // If pos is not passed, will return requested set

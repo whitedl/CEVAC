@@ -5,6 +5,10 @@ import { Observable } from 'rxjs';
 
 declare let L;
 const geodata = require('src/assets/CU_Building_Footprints.json');
+interface DataSet {
+  name: string;
+  propertyName: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class MapdataService {
@@ -17,6 +21,14 @@ export class MapdataService {
   };
   categories = {};
   functions = {};
+
+  // be sure the names match with the values in color service, otherwise you'll get the default scale
+  dataSets: DataSet[] = [
+    { name: 'power', propertyName: 'power_latest_sum' },
+    { name: 'temperature', propertyName: 'temp_latest_avg' },
+    { name: 'CO2', propertyName: 'co2_latest_avg' }
+  ];
+  dataSet: DataSet = this.dataSets[0];
   private dataUrl = 'http://wfic-cevac1/requests/stats.php';
 
   constructor(private colorService: ColorService, private http: HttpClient) {}
@@ -105,10 +117,7 @@ export class MapdataService {
     const funcCol = [];
     let catCol;
     style['fill'] = true;
-    style['fillColor'] = feature.properties.bData
-      ? this.colorService.powerScale(feature.properties.bData.power_latest_sum)
-      : this.colorService.getActive();
-    style['weight'] = 4;
+    style['weight'] = 2;
     style['opacity'] = 1;
     style['fillOpacity'] = 1;
     if (feature.properties.Function) {
@@ -136,6 +145,14 @@ export class MapdataService {
       catCol = this.colorService.getUnnamed();
     }
     style['color'] = catCol;
+    style['fillColor'] =
+      feature.properties.bData &&
+      feature.properties.bData[this.dataSet.propertyName]
+        ? this.colorService.scale(
+            feature.properties.bData[this.dataSet.propertyName],
+            this.dataSet.name
+          )
+        : this.colorService.getActive();
     return style;
   };
 
@@ -242,5 +259,9 @@ export class MapdataService {
     filter(feature, layer) {
       return feature.properties.Status === 'Active';
     }
+  };
+
+  update = () => {
+    this.tracked.setStyle(this.styleTracked);
   };
 }

@@ -1,0 +1,15 @@
+<mat-card>
+  <mat-radio-group
+    class="flex-col"
+    name="dataSet"
+    [(ngModel)]="mapdataService.dataSet"
+    (change)="update()"
+  >
+    <mat-radio-button
+      *ngFor="let dataSet of mapdataService.dataSets"
+      [value]="dataSet"
+    >
+      {{ dataSet.name }}
+    </mat-radio-button>
+  </mat-radio-group>
+</mat-card>
