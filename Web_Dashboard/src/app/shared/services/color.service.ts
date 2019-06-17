@@ -37,6 +37,13 @@ export class ColorService {
 
   constructor() {}
 
+  get alert() {
+    return this.colors.Alerts.Alert;
+  }
+  get warn() {
+    return this.colors.Alerts.Warn;
+  }
+
   powerScale(n: number) {
     return this.colors.Scale(n);
   }
