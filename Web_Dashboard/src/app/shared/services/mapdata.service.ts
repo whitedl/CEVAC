@@ -271,7 +271,9 @@ export class MapdataService {
     }
   };
 
-  update = () => {
-    this.tracked.setStyle(this.styleTracked);
+  setDataSet = () => {
+    this.tracked.eachLayer(layer => {
+      this.tracked.resetStyle(layer);
+    });
   };
 }
