@@ -13,6 +13,16 @@ export class ControlboxComponent implements OnInit {
 
   ngOnInit() {}
 
+  get dataSets() {
+    return this.mapdataService.dataSets;
+  }
+  get dataSet() {
+    return this.mapdataService.dataSet;
+  }
+  set dataSet(newVal: any) {
+    this.mapdataService.dataSet = newVal;
+  }
+
   update() {
     this.mapdataService.update();
   }
