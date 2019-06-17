@@ -37,37 +37,34 @@ def loadData():
 
 # prediction with the built-in keras model
 def predAlg(numClasses):
-	# the capacity of the building
-	class_names = [i for i in range(0,numClasses)]	#these are your possible outputs (number of devices on the wifi
 
 	# create the keras instance
 	model = keras.Sequential()
-	model.add(Dense(6, input_shape=(6,)))
-	model.add(Activation('relu'))
-	model.add(Dropout(0.35))
-	model.add(Dense(64))
-	model.add(Activation('relu'))
-	model.add(Dense(1024))
-	model.add(Activation('relu'))
-	model.add(Dense(300))
-	model.add(Activation('softmax'))
 
-	model.compile(optimizer='sgd',loss=losses.categorical_crossentropy, metrics=['accuracy'])
-	# if changes are going to be made to increase accuracy it should be done here
+	# add layers
+	model.add(Dense(5, input_dim=46))
+	model.add(Activation('sigmoid'))
+
+	model.add(Dense(5))
+	model.add(Activation('sigmoid'))
+
+	model.add(Dense(1))
+	model.add(Activation('sigmoid'))
+
+	model.compile(optimizer='sgd',loss=losses.mae, metrics=['accuracy'])
 
 	return model
 
 # trains the model
 def train(model):
-
     # load data
     train_data, train_labels, test_data, test_labels = loadData()
 
     # stops the model when the loss is no longer decreasing
-    early_stopping = EarlyStopping(monitor='loss', patience=15)
+    early_stopping = EarlyStopping(monitor='loss', patience=5)
 
     #more epochs = more work training ~= higher accuracy
-    model.fit(train_data, train_labels, epochs=1250, verbose=1, callbacks=[early_stopping]) #
+    model.fit(train_data, train_labels, epochs=1000, verbose=1, callbacks=[early_stopping]) #
 
     # for making re-running faster, toggle this to re-run with the same weights from the previous run
     model.save_weights('powerModel.h5')
@@ -96,15 +93,7 @@ def disp():
 
 	# create the keras instance
 	model = keras.Sequential()
-	model.add(Dense(512, input_shape=(6,)))
-	model.add(Activation('sigmoid'))
-	model.add(Dropout(0.35))
-	model.add(Dense(512))
-	model.add(Activation('relu'))
-	model.add(Dense(512))
-	model.add(Activation('relu'))
-	model.add(Dense(512))
-	model.add(Activation('relu'))
+	model.add(Dense(512, input_shape=(46,)))
 	model.add(Dense(300))
 	model.add(Activation('softmax'))
 
@@ -132,6 +121,7 @@ def disp():
 		t = time.time() - t
 		# print('RESULT {}:\t{} SECONDS'.format(index, format(t, '.2f')))
 	np.save('results.npy', results)
+
 	return(results)
 
 if __name__ == '__main__':
