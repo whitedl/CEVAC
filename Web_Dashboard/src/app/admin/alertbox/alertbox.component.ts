@@ -26,10 +26,10 @@ export class AlertboxComponent implements OnInit {
     let col;
     switch (type) {
       case 'alert':
-        col = this.colorService.colors.Alerts.Alert;
+        col = this.colorService.alert;
         break;
       case 'warning':
-        col = this.colorService.colors.Alerts.Warn;
+        col = this.colorService.warn;
         break;
     }
     return {
