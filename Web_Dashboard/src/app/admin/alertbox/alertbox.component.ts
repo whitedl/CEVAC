@@ -38,7 +38,7 @@ export class AlertboxComponent implements OnInit {
   }
 
   focus(alert: Alert) {
-    this.mapdataService.focusBldg(alert.BLDG);
+    this.mapdataService.focusBldg(alert.BLDG_STD);
   }
 
   alertAll(): Alert[] {
