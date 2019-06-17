@@ -44,15 +44,11 @@ export class ColorService {
     return this.colors.Alerts.Warn;
   }
 
-  powerScale(n: number) {
-    return this.colors.Scale(n);
-  }
+  powerScale = (n: number) => this.colors.Scale(n);
 
-  defaultScale(n: number) {
-    return this.colors.Scale(n);
-  }
+  defaultScale = (n: number) => this.colors.Scale(n);
 
-  scale(n: number, scaleType: string = 'default') {
+  scale = (n: number, scaleType: string = 'default') => {
     switch (scaleType) {
       case 'power': {
         return this.powerScale(n);
@@ -64,31 +60,24 @@ export class ColorService {
         return this.defaultScale(n);
       }
     }
-  }
+  };
 
   // If name is not passed, assumes first color (ClemsonPalette).
   // If pos is passed, will return color at position in chosen set
   // If pos is not passed, will return requested set
-  getColor(name = Object.keys(this.colors)[0], pos?: number) {
+  getColor = (name = Object.keys(this.colors)[0], pos?: number) => {
     const set = Object.values(this.colors[name]);
     return typeof pos !== 'undefined' ? set[pos % set.length] : set;
-  }
+  };
 
-  getComplementary(pos?: number) {
-    return this.getColor('ClemsonComplementary', pos);
-  }
+  getComplementary = (pos?: number) =>
+    this.getColor('ClemsonComplementary', pos);
 
-  getTetradic(pos?: number) {
-    return this.getColor('ClemsonTetradic', pos);
-  }
+  getTetradic = (pos?: number) => this.getColor('ClemsonTetradic', pos);
 
-  getActive() {
-    return this.colors.ClemsonPalette.HowardsRock;
-  }
-  getPassive() {
-    return this.colors.ClemsonPalette.BlueRidge;
-  }
-  getUnnamed() {
-    return this.colors.ClemsonPalette.Innovation;
-  }
+  getActive = () => this.colors.ClemsonPalette.HowardsRock;
+
+  getPassive = () => this.colors.ClemsonPalette.BlueRidge;
+
+  getUnnamed = () => this.colors.ClemsonPalette.Innovation;
 }
