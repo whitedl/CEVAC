@@ -3,7 +3,7 @@
     class="flex-col"
     name="dataSet"
     [(ngModel)]="dataSet"
-    (change)="update()"
+    (change)="(update)"
   >
     <mat-radio-button *ngFor="let dataSet of dataSets" [value]="dataSet">
       {{ dataSet.name }}

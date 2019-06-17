@@ -23,7 +23,7 @@ export class ControlboxComponent implements OnInit {
     this.mapdataService.dataSet = newVal;
   }
 
-  update() {
-    this.mapdataService.update();
+  get update() {
+    return this.mapdataService.setDataSet();
   }
 }
