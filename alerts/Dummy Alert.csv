@@ -1,0 +1,4 @@
+alert_name,message,start date ,end date,alias,reading,urgency,value
+Watt_CO2_warning,333 CO2 reads 1072 ppm,1/1/2019 0:00,1/1/2019 0:15,333 CO2,1072,warning,1000
+Watt_Media_Lights,The media lights are on,1/1/2019 20:00,1/2/2019 6:00,Building Media Lights,30,alert,1
+Watt_Power_Null_alert,Building HVAC has not reported in over an hour,6/1/2019 12:00,6/6/2019 12:00,Building HVAC,0,alert,0
