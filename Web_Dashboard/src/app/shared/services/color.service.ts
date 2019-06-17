@@ -8,65 +8,100 @@ import chroma from 'chroma-js';
 })
 export class ColorService {
   private colors = {
-    Alerts: {
-      Alert: '#CC3300',
-      Warn: '#FFCC00'
-    },
-    ClemsonPalette: {
-      ClemsonOrange: '#F66733',
-      Regalia: '#522D80',
-      HartwellMoon: '#D4C99E',
-      HowardsRock: '#685C53',
-      BlueRidge: '#3A4958',
-      Innovation: '#86898C'
-    },
-    ClemsonComplementary: {
-      // ClemsonOrange: '#F66733',
-      Regalia: '#522D80',
-      Complementary1: '#33e9f6',
-      Complementary2: '#80692d'
-    },
-    ClemsonTetradic: {
-      // ClemsonOrange: '#F66733',
-      Regalia: '#522D80',
-      Tetradic1: '#57ebf6',
-      Tetradic2: '#f6bf33'
-    },
-    Scale: chroma.scale('Reds').domain([0, 1000])
-  };
-
-  constructor() {}
-
-  get alert() {
-    return this.colors.Alerts.Alert;
-  }
-  get warn() {
-    return this.colors.Alerts.Warn;
-  }
-
-  powerScale = (n: number) => this.colors.Scale(n);
-
-  defaultScale = (n: number) => this.colors.Scale(n);
-
-  scale = (n: number, scaleType: string = 'default') => {
-    switch (scaleType) {
-      case 'power': {
-        return this.powerScale(n);
+    ColorSets: {
+      ClemsonPalette: {
+        clemsonOrange: '#F66733',
+        regalia: '#522D80',
+        hartwellMoon: '#D4C99E',
+        howardsRock: '#685C53',
+        blueRidge: '#3A4958',
+        innovation: '#86898C'
+      },
+      ClemsonComplementary: {
+        ClemsonOrange: '#F66733',
+        regalia: '#522D80',
+        complementary1: '#33e9f6',
+        complementary2: '#80692d'
+      },
+      ClemsonTetradic: {
+        ClemsonOrange: '#F66733',
+        regalia: '#522D80',
+        tetradic1: '#57ebf6',
+        tetradic2: '#f6bf33'
+      },
+      Alerts: {
+        alert: '#CC3300',
+        warn: '#FFCC00'
       }
-      case 'default': {
-        return this.defaultScale(n);
-      }
-      default: {
-        return this.defaultScale(n);
+    },
+    Scales: {
+      Power: {
+        min: 0,
+        max: 1000,
+        get scale() {
+          return chroma.scale('Reds').domain([this.min, this.max]);
+        }
+      },
+      Temperature: {
+        min: 50,
+        max: 100,
+        get scale() {
+          return chroma.scale('Blues').domain([this.min, this.max]);
+        }
+      },
+      CO2: {
+        min: 0,
+        max: 500,
+        get scale() {
+          return chroma.scale('Greens').domain([this.min, this.max]);
+        }
       }
     }
   };
 
-  // If name is not passed, assumes first color (ClemsonPalette).
+  constructor() {}
+
+  // If n is not passed, will return requested scale
+  // If scaleType is not passed, will assume first scale
+  getScale = (
+    n?: number,
+    scaleType: string = Object.keys(this.colors.Scales)[0]
+  ) => {
+    if (!(scaleType in this.colors.Scales)) {
+      scaleType = Object.keys(this.colors.Scales)[0];
+    }
+    const scale = this.colors.Scales[scaleType].scale;
+    return typeof n !== 'undefined' ? scale(n) : scale;
+  };
+
+  // if scale is in Scales, return the lower bound
+  getScaleLower = (scaleType: string) =>
+    scaleType in this.colors.Scales ? this.colors.Scales[scaleType].min : null;
+
+  // if scale is in Scales, set the minimum. Returnset value on success and null on fail.
+  setScaleLower = (n: number, scaleType: string) =>
+    scaleType in this.colors.Scales
+      ? (this.colors.Scales[scaleType].min = n)
+      : null;
+
+  // if scale is in Scales, return the upper bound
+  getScaleHigher = (scaleType: string) =>
+    scaleType in this.colors.Scales ? this.colors.Scales['notthere'].max : null;
+
+  // if scale is in Scales, set the maximum. Returns set value on success and null on fail.
+  setScaleHigher = (n: number, scaleType: string) =>
+    scaleType in this.colors.Scales
+      ? (this.colors.Scales[scaleType].max = n)
+      : null;
+
+  // If name is not passed, assumes first ColorSet (ClemsonPalette).
   // If pos is passed, will return color at position in chosen set
   // If pos is not passed, will return requested set
-  getColor = (name = Object.keys(this.colors)[0], pos?: number) => {
-    const set = Object.values(this.colors[name]);
+  getColor = (name = Object.keys(this.colors.ColorSets)[0], pos?: number) => {
+    if (!(name in this.colors.ColorSets)) {
+      name = Object.keys(this.colors.ColorSets)[0];
+    }
+    const set = Object.values(this.colors.ColorSets[name]);
     return typeof pos !== 'undefined' ? set[pos % set.length] : set;
   };
 
@@ -75,9 +110,16 @@ export class ColorService {
 
   getTetradic = (pos?: number) => this.getColor('ClemsonTetradic', pos);
 
-  getActive = () => this.colors.ClemsonPalette.HowardsRock;
+  getActive = () => this.colors.ColorSets.ClemsonPalette.howardsRock;
 
-  getPassive = () => this.colors.ClemsonPalette.BlueRidge;
+  getPassive = () => this.colors.ColorSets.ClemsonPalette.blueRidge;
 
-  getUnnamed = () => this.colors.ClemsonPalette.Innovation;
+  getUnnamed = () => this.colors.ColorSets.ClemsonPalette.innovation;
+
+  get alert() {
+    return this.colors.ColorSets.Alerts.alert;
+  }
+  get warn() {
+    return this.colors.ColorSets.Alerts.warn;
+  }
 }
