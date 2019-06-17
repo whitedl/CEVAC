@@ -7,7 +7,7 @@ import chroma from 'chroma-js';
   providedIn: 'root'
 })
 export class ColorService {
-  colors = {
+  private colors = {
     Alerts: {
       Alert: '#CC3300',
       Warn: '#FFCC00'
