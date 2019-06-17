@@ -12,19 +12,6 @@ interface DataSet {
 
 @Injectable({ providedIn: 'root' })
 export class MapdataService {
-  map;
-  tracked;
-  untracked;
-  mapOptions = {
-    minZoom: 15,
-    maxZoom: 20
-  };
-  categories = {};
-  functions = {};
-
-  sasBaseURL =
-    'https://sas.clemson.edu:8343/SASVisualAnalytics/report?location=';
-
   // be sure the names match with the values in color service, otherwise you'll get the default scale
   dataSets: DataSet[] = [
     { name: 'power', propertyName: 'power_latest_sum' },
@@ -33,6 +20,17 @@ export class MapdataService {
   ];
   dataSet: DataSet = this.dataSets[0];
   private dataUrl = 'http://wfic-cevac1/requests/stats.php';
+  private sasBaseURL =
+    'https://sas.clemson.edu:8343/SASVisualAnalytics/report?location=';
+  private map;
+  private tracked;
+  private untracked;
+  private mapOptions = {
+    minZoom: 15,
+    maxZoom: 20
+  };
+  private categories = {};
+  private functions = {};
 
   constructor(private colorService: ColorService, private http: HttpClient) {}
 
@@ -44,6 +42,26 @@ export class MapdataService {
   }
 
   initMap() {
+    for (const feature of geodata.features) {
+      if (feature.properties.Function) {
+        for (const func of feature.properties.Function) {
+          if (!(func in this.functions)) {
+            this.functions[func] = this.colorService.getComplementary(
+              Object.keys(this.functions).length
+            );
+          }
+        }
+      }
+      if (feature.properties.BLDG_Class) {
+        if (!(feature.properties.BLDG_Class in this.categories)) {
+          this.categories[
+            feature.properties.BLDG_Class
+          ] = this.colorService.getComplementary(
+            Object.keys(this.categories).length
+          );
+        }
+      }
+    }
     this.map = L.map('map', this.mapOptions).setView([34.6761, -82.8366], 16);
     const mapbox = this.getTileLayerMapboxLight().addTo(this.map);
     const controller = L.control
@@ -89,24 +107,12 @@ export class MapdataService {
     style['fillOpacity'] = 0.8;
     if (feature.properties.Function) {
       for (const func of feature.properties.Function) {
-        if (!(func in this.functions)) {
-          this.functions[func] = this.colorService.getComplementary(
-            Object.keys(this.functions).length
-          );
-        }
         funcCol.push(this.functions[func]);
       }
     } else {
       funcCol.push(this.colorService.getUnnamed());
     }
     if (feature.properties.BLDG_Class) {
-      if (!(feature.properties.BLDG_Class in this.categories)) {
-        this.categories[
-          feature.properties.BLDG_Class
-        ] = this.colorService.getComplementary(
-          Object.keys(this.categories).length
-        );
-      }
       catCol = this.categories[feature.properties.BLDG_Class];
     } else {
       catCol = this.colorService.getUnnamed();
@@ -117,32 +123,20 @@ export class MapdataService {
 
   styleTracked = feature => {
     const style = {};
-    const funcCol = [];
-    let catCol;
+    const funcCol: string[] = [];
+    let catCol: string;
     style['fill'] = true;
     style['weight'] = 2;
     style['opacity'] = 1;
     style['fillOpacity'] = 1;
     if (feature.properties.Function) {
       for (const func of feature.properties.Function) {
-        if (!(func in this.functions)) {
-          this.functions[func] = this.colorService.getComplementary(
-            Object.keys(this.functions).length
-          );
-        }
         funcCol.push(this.functions[func]);
       }
     } else {
       funcCol.push(this.colorService.getUnnamed());
     }
     if (feature.properties.BLDG_Class) {
-      if (!(feature.properties.BLDG_Class in this.categories)) {
-        this.categories[
-          feature.properties.BLDG_Class
-        ] = this.colorService.getComplementary(
-          Object.keys(this.categories).length
-        );
-      }
       catCol = this.categories[feature.properties.BLDG_Class];
     } else {
       catCol = this.colorService.getUnnamed();
@@ -272,8 +266,6 @@ export class MapdataService {
   };
 
   setDataSet = () => {
-    this.tracked.eachLayer(layer => {
-      this.tracked.resetStyle(layer);
-    });
+    this.tracked.resetStyle();
   };
 }
