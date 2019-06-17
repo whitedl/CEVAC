@@ -3,7 +3,7 @@ import { ColorService } from '@services/color.service';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-declare let L;
+declare const L: any;
 const geodata = require('src/assets/CU_Building_Footprints.json');
 interface DataSet {
   name: string;
@@ -19,6 +19,7 @@ export class MapdataService {
     { name: 'CO2', propertyName: 'co2_latest_avg' }
   ];
   dataSet: DataSet = this.dataSets[0];
+
   private dataUrl = 'http://wfic-cevac1/requests/stats.php';
   private sasBaseURL =
     'https://sas.clemson.edu:8343/SASVisualAnalytics/report?location=';
@@ -34,14 +35,29 @@ export class MapdataService {
 
   constructor(private colorService: ColorService, private http: HttpClient) {}
 
-  getMap() {
-    if (!this.map) {
-      this.initMap();
-    }
-    return this.map;
-  }
+  getMap = () => (!this.map ? this.initMap() : this.map);
 
-  initMap() {
+  setDataSet = () => {
+    this.tracked.setStyle(this.styleTracked);
+  };
+
+  focusBldg = (bldg: string) => {
+    let layers = this.tracked.getLayers();
+    for (const layer of layers) {
+      if (layer.feature.properties.Short_Name === bldg) {
+        this.map.fitBounds(layer.getBounds());
+        return;
+      }
+    }
+    layers = this.untracked.getLayers();
+    for (const layer of layers) {
+      if (layer.feature.properties.Short_Name === bldg) {
+        this.map.fitBounds(layer.getBounds());
+      }
+    }
+  };
+
+  private initMap = () => {
     for (const feature of geodata.features) {
       if (feature.properties.Function) {
         for (const func of feature.properties.Function) {
@@ -70,10 +86,11 @@ export class MapdataService {
     this.untracked = L.geoJSON(geodata, this.untrackedOptions).addTo(this.map);
     this.tracked = L.geoJSON(geodata, this.trackedOptions).addTo(this.map);
     controller.addOverlay(this.untracked, 'show untracked');
-  }
+    return this.map;
+  };
 
-  getTileLayerMapboxLight() {
-    return L.tileLayer(
+  private getTileLayerMapboxLight = () =>
+    L.tileLayer(
       'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={access_token}',
       {
         attribution:
@@ -85,16 +102,14 @@ export class MapdataService {
           'pk.eyJ1IjoienRrbGVpbiIsImEiOiJjanZ3aGdubWkwaWdiNGFwOXE0eW55ZG5jIn0.83eVqOeNMqaAywNFD0YqlQ'
       }
     );
-  }
 
-  getTileLayerOpenMap() {
-    return L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  private getTileLayerOpenMap = () =>
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution:
         '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
     });
-  }
 
-  styleUntracked = feature => {
+  private styleUntracked = feature => {
     const style = {};
     const funcCol = [];
     let catCol;
@@ -121,7 +136,7 @@ export class MapdataService {
     return style;
   };
 
-  styleTracked = feature => {
+  private styleTracked = feature => {
     const style = {};
     const funcCol: string[] = [];
     let catCol: string;
@@ -153,17 +168,16 @@ export class MapdataService {
     return style;
   };
 
-  highlightFeat(layer) {
+  private highlightFeat = layer => {
     layer.setStyle({
       weight: 5,
       color: '#666',
       fillOpacity: 0.7
     });
-
     layer.bringToFront();
-  }
+  };
 
-  resetHighlight = e => {
+  private resetHighlight = e => {
     const layer = e.target;
     if (this.tracked.hasLayer(layer)) {
       this.tracked.resetStyle(layer);
@@ -172,54 +186,24 @@ export class MapdataService {
     }
   };
 
-  focusBldg = (bldg: string) => {
-    let layers = this.tracked.getLayers();
-    for (const layer of layers) {
-      if (layer.feature.properties.Short_Name === bldg) {
-        this.map.fitBounds(layer.getBounds());
-        return;
-      }
-    }
-    layers = this.untracked.getLayers();
-    for (const layer of layers) {
-      if (layer.feature.properties.Short_Name === bldg) {
-        this.map.fitBounds(layer.getBounds());
-      }
-    }
-  };
-
-  zoomToFeat = e => {
+  private zoomToFeat = e => {
     this.map.fitBounds(e.target.getBounds());
   };
 
-  longNameTooltip(layer) {
-    if (layer.feature.properties.BLDG_NAME !== ' ') {
-      return layer.feature.properties.BLDG_NAME;
-    } else {
-      return 'Long_Name not set';
-    }
-  }
-  shortNameTooltip(layer) {
-    if (layer.feature.properties.Short_Name !== ' ') {
-      return layer.feature.properties.Short_Name;
-    } else {
-      return 'Short_Name not set';
-    }
-  }
-
-  mouseOver = e => {
+  private mouseOver = e => {
     const layer = e.target;
     this.highlightFeat(layer);
     if (!layer.isPopupOpen()) {
       layer.bindTooltip(this.longNameTooltip).openTooltip();
     }
   };
-  hideTooltip = e => {
+
+  private hideTooltip = e => {
     const layer = e.target;
     layer.unbindTooltip();
   };
 
-  onEachFeat = (feature, layer) => {
+  private onEachFeat = (feature, layer) => {
     const opt = {
       mouseover: this.mouseOver,
       click: this.hideTooltip,
@@ -245,27 +229,35 @@ export class MapdataService {
       });
   };
 
-  // tslint:disable-next-line: member-ordering
-  untrackedOptions = {
-    style: this.styleUntracked,
-    onEachFeature: this.onEachFeat,
-    filter(feature, layer) {
-      return (
-        !feature.properties.Status || feature.properties.Status !== 'Active'
-      );
-    }
-  };
+  private longNameTooltip = layer =>
+    layer.feature.properties.BLDG_NAME !== ' '
+      ? layer.feature.properties.BLDG_NAME
+      : 'Long_Name not set';
 
-  // tslint:disable-next-line: member-ordering
-  trackedOptions = {
-    style: this.styleTracked,
-    onEachFeature: this.onEachFeat,
-    filter(feature, layer) {
-      return feature.properties.Status === 'Active';
-    }
-  };
+  private shortNameTooltip = layer =>
+    layer.feature.properties.Short_Name !== ' '
+      ? layer.feature.properties.Short_Name
+      : 'Short_Name not set';
 
-  setDataSet = () => {
-    this.tracked.resetStyle();
-  };
+  private get untrackedOptions() {
+    return {
+      style: this.styleUntracked,
+      onEachFeature: this.onEachFeat,
+      filter(feature, layer) {
+        return (
+          !feature.properties.Status || feature.properties.Status !== 'Active'
+        );
+      }
+    };
+  }
+
+  private get trackedOptions() {
+    return {
+      style: this.styleTracked,
+      onEachFeature: this.onEachFeat,
+      filter(feature, layer) {
+        return feature.properties.Status === 'Active';
+      }
+    };
+  }
 }
