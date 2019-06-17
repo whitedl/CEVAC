@@ -3,8 +3,8 @@ export interface Alert {
   AlertType: string;
   AlertMessage?: string;
   Metric?: string;
-  BLDG_STD: string;
-  BLDG_DISP: string;
+  BLDG_STD?: string;
+  BLDG_DISP?: string;
   Acknowledged: number;
   BeginTime: Date;
   EndTime?: Date;
