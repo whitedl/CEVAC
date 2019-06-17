@@ -14,8 +14,8 @@ interface DataSet {
 export class MapdataService {
   // be sure the names match with the values in color service, otherwise you'll get the default scale
   dataSets: DataSet[] = [
-    { name: 'power', propertyName: 'power_latest_sum' },
-    { name: 'temperature', propertyName: 'temp_latest_avg' },
+    { name: 'Power', propertyName: 'power_latest_sum' },
+    { name: 'Temperature', propertyName: 'temp_latest_avg' },
     { name: 'CO2', propertyName: 'co2_latest_avg' }
   ];
   dataSet: DataSet = this.dataSets[0];
@@ -160,7 +160,7 @@ export class MapdataService {
     style['fillColor'] =
       feature.properties.bData &&
       feature.properties.bData[this.dataSet.propertyName]
-        ? this.colorService.scale(
+        ? this.colorService.getScale(
             feature.properties.bData[this.dataSet.propertyName],
             this.dataSet.name
           )
