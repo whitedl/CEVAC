@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 # TensorFlow and tf.keras
 import keras
-# from tensorflow.keras.callbacks import EarlyStopping
+
 from keras import losses
 from keras.utils import plot_model
 from keras.layers import Dense, Activation, Dropout, Conv1D
@@ -66,4 +66,4 @@ if __name__ == '__main__':
     inputArray = np.concatenate((hour, day, month, temperature, humidity, clouds), axis = -1)
     model = createModel()
     prediction = pred(model, inputArray.reshape(1,-1))
-    print(prediction)
+    print(prediction[0][0])
