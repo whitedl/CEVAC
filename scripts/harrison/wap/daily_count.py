@@ -96,7 +96,7 @@ if DEBUG:
     print("ERRORS:",errors)
     print("Files:",len(yesterdays_files))
 
-insert_sql_total = ("INSERT INTO CEVAC_WATT_WAP_DAILY_HIST(UTCDateTime, clemson_count, guest_count) VALUES("
+insert_sql_total = ("INSERT INTO CEVAC_WATT_WAP_DAILY_HIST_RAW(UTCDateTime, clemson_count, guest_count) VALUES("
                     "'"+yesterday.strftime('%Y-%m-%d %H:%M:%S')+"',"
                     "'"+str(eduroam)+"',"
                     "'"+str(clemsonguest)+"'"

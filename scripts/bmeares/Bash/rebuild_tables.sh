@@ -17,4 +17,4 @@ for t in "${tables_array[@]}"; do
 done
 
 
-echo Finished appending tables
+echo Finished

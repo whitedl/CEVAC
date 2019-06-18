@@ -12,10 +12,14 @@ GO
 CREATE VIEW CEVAC_WATT_POWER_EMERGENCY_HIST
 AS
 
-SELECT 'Building Emergency' AS Alias, UTCDateTime, DATEPART(year, UTCDateTime) AS Year, SUM(ActualValue) AS ActualValue, DATEPART(month, UTCDateTime) AS Month, DATEPART(day, UTCDateTime) AS Day
-FROM CEVAC_WATT_POWER_HIST
-WHERE Alias IN
-(
-	SELECT Alias FROM CEVAC_WATT_POWER_XREF
-	WHERE (Type = 'Emergency')
-) GROUP BY UTCDateTime
+WITH original AS (
+	SELECT 'Building Emergency' AS Alias, UTCDateTime, dbo.ConvertUTCToLocal(UTCDateTime) AS ETDateTime, SUM(ActualValue) AS ActualValue
+	FROM CEVAC_WATT_POWER_RAW_HIST
+	WHERE Alias IN
+	(
+		SELECT Alias FROM CEVAC_WATT_POWER_XREF
+		WHERE (Type = 'Emergency')
+	) GROUP BY UTCDateTime
+)
+SELECT *, DATEPART(year, ETDateTime) AS Year, DATEPART(month, ETDateTime) AS Month, DATEPART(day, ETDateTime) AS Day
+FROM original
