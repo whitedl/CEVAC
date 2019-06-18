@@ -10,9 +10,10 @@ from matplotlib import rcParams
 import matplotlib.pyplot as plt
 import matplotlib.pylab as plb
 
+
 # read in the data
 pdf = pd.read_csv('CEVAC_WATT_POWER_SUMS_HIST_CACHE.csv')
-tdf = pd.read_csv('H_WEATHER_TEMP.csv')
+temp = pd.read_csv('TMY3_StationsMeta.csv')
 
 # dictionary of dimensions I want to add to the array
 dfDict =    {
@@ -41,10 +42,7 @@ monat = {
 
 # graph some data
 def graph():
-    array = np.load('accuracy.npy')
-    avg = np.mean(array)
-    std = np.std(array)
-    print(avg, std)
+
 
 def insertData(df):
     info = {
@@ -105,21 +103,36 @@ def makeArrays(df):
     for index, row in df.iterrows():
         weatherData = cJSON.get(row['Date'][0:13])
         if weatherData != None:
+            # normalize temperature
             temperature = weatherData['temp']
+            temperature = [(temperature + 20) / 70]
+
+            # normalize humidity
             humidity = weatherData['humidity']
+            humidity = [(humidity / 100)]
+
+            # one hot encode month
+            month = [0 for i in range(0,12)]
+            month[row['Month'] - 1] = 1
+
+            # one hot encode hour
+            hour = [0 for i in range(0, 24)]
+            hour[row['Hour'] - 1] = 1
+
+            # one hot encode day
+            day = [0 for i in range(0, 7)]
+            day[row['dayOfWeek'] - 1] = 1
+
+            # normalize clouds
             clouds = weatherData['clouds']
-            tempx.append(humidity)
-            tempx.append(clouds)
-            tempx.append(temperature)
-            tempx.append(row['Month'])
-            tempx.append(row['Hour'])
-            tempx.append(row['dayOfWeek'])
-            tempy = [0 for i in range(0,300)]
-            tempy[row['intSum']] = 1
-            if len(tempx) == 6:
+            clouds = [(clouds / 100)]
+
+            tempx = np.concatenate((hour, day, month, temperature, humidity, clouds), axis = -1)
+            tempy = [(row['intSum'] / 275)]
+
+            if len(tempx) == 46:
                 x.append(tempx)
                 y.append(tempy)
-            tempx = []
 
     # empty list of the training and testing sets that we are going to make
     trainingData = []
@@ -129,7 +142,7 @@ def makeArrays(df):
     testingLabels = []
 
     # this is the dimension of our training dataset
-    tDim = int(len(x) * .9)
+    tDim = int(len(x) * .7)
 
     for i in range(0, tDim):
         size = len(x)
@@ -148,13 +161,12 @@ def makeArrays(df):
 
 
     # save our numpy arrays
-    # np.save('powerTrainingData.npy', trainingData)
-    # np.save('powerTrainingLabels.npy', trainingLabels)
-    # np.save('powerTestingData.npy', testingData)
-    # np.save('powerTestingLabels.npy', testingLabels)
+    np.save('powerTrainingData.npy', trainingData)
+    np.save('powerTrainingLabels.npy', trainingLabels)
+    np.save('powerTestingData.npy', testingData)
+    np.save('powerTestingLabels.npy', testingLabels)
 
     # Debugging nonsense
-    # print(trainingData)
     print('TESTING DATA:\t\t{} ENTRIES'.format(len(testingData)))
     print('TESTING LABELS:\t\t{} ENTRIES'.format(len(testingLabels)))
     print('TRAINING DATA:\t\t{} ENTRIES'.format(len(trainingData)))

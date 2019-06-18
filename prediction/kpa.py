@@ -9,17 +9,11 @@ from keras.layers import Dense, Activation, Dropout, Conv1D
 from keras.callbacks import EarlyStopping
 
 # Helper libraries
-import time
 import numpy as np
 from numpy import array
 import matplotlib.pyplot as plt
 import matplotlib.pyplot as plt
-import seaborn as sns
-import pandas as pd
-import scipy
-import datetime
 import os
-import random
 
 # read in our data
 def loadData():
@@ -30,28 +24,25 @@ def loadData():
 	test_data = np.load("powerTestingData.npy")
 	test_labels = np.load("powerTestingLabels.npy")
 
-	train_data = train_data / train_data.max()
-	test_data = test_data / test_data.max()
-
 	return train_data, train_labels, test_data, test_labels
 
 # prediction with the built-in keras model
-def predAlg(numClasses):
+def createModel():
 
 	# create the keras instance
 	model = keras.Sequential()
 
 	# add layers
-	model.add(Dense(5, input_dim=46))
+	model.add(Dense(128, input_shape=(46,)))
 	model.add(Activation('sigmoid'))
 
-	model.add(Dense(5))
-	model.add(Activation('sigmoid'))
+	# model.add(Dense(64))
+	# model.add(Activation('sigmoid'))
 
 	model.add(Dense(1))
 	model.add(Activation('sigmoid'))
 
-	model.compile(optimizer='sgd',loss=losses.mae, metrics=['accuracy'])
+	model.compile(optimizer='adam',loss=losses.mse, metrics=['accuracy'])
 
 	return model
 
@@ -64,7 +55,7 @@ def train(model):
     early_stopping = EarlyStopping(monitor='loss', patience=5)
 
     #more epochs = more work training ~= higher accuracy
-    model.fit(train_data, train_labels, epochs=1000, verbose=1, callbacks=[early_stopping]) #
+    model.fit(train_data, train_labels, batch_size = 16, epochs=50, verbose=1, callbacks=[early_stopping]) #
 
     # for making re-running faster, toggle this to re-run with the same weights from the previous run
     model.save_weights('powerModel.h5')
@@ -74,57 +65,34 @@ def train(model):
 
     print('Test accuracy:', test_acc)
 
-# loads weights and makes a prediction
-def pred(model, inq):
+def pred(model):
 
-	x = model.predict(inq)
-	# choice is the highest probability found so far
-	choice = 0
-	num = -1
-	for i, ran in enumerate(x[0]):
-	    if ran > choice:
-	        choice = ran
-	        num = i
-
-	return num
-
-# calculates and displays accuracy
-def disp():
-
-	# create the keras instance
-	model = keras.Sequential()
-	model.add(Dense(512, input_shape=(46,)))
-	model.add(Dense(300))
-	model.add(Activation('softmax'))
-
-	# if changes are going to be made to increase accuracy it should be done here
-	# model.compile(optimizer='adam',loss=losses.categorical_crossentropy, metrics=['accuracy'])
 	model.load_weights('powerModel.h5')
 
-	# list of error percentages
-	results = []
+	train_data, train_labels, test_data, test_labels = loadData()
 
-	# load data
-	testingData = np.load('powerTestingData.npy')
-	testingLabels = np.load('powerTestingLabels.npy')
+	y = model.predict(test_data, verbose = 1)
 
-	for index, element in enumerate(testingData):
-		t = time.time()
-		y = testingLabels[index]
-		for ind, el in enumerate(y):
-			if el == 1:
-				yIndex = ind
-		y = yIndex
-		prediction = pred(model, element.reshape(1, -1))
-		err = (((prediction - y) / y)**2)**.5 * 100
-		results.append([y, prediction, err])
-		t = time.time() - t
-		# print('RESULT {}:\t{} SECONDS'.format(index, format(t, '.2f')))
-	np.save('results.npy', results)
+	differences = []
 
-	return(results)
+	for i, element in enumerate(y):
+
+		difference = element[0] - test_labels[i][0]
+		differences.append(difference)
+
+	print('STANDARD DEV:\t{}'.format(np.std(differences)))
+	print('MEAN DIFFERENCE:\t{}'.format(np.mean(differences)))
+
+	axes = plt.gca()
+	axes.set_xlim([0,1])
+	axes.set_ylim([0,1])
+	plt.scatter(test_labels, y)
+	plt.plot(nx, ny, '-r')
+	plt.xlabel('Label', fontsize = 18)
+	plt.ylabel('Prediction', fontsize = 18)
+	plt.show()
 
 if __name__ == '__main__':
-    train(predAlg(300))
-	# results = disp()
-	# print(np.mean(results))
+	model = createModel()
+	# train(model)
+	pred(model)
