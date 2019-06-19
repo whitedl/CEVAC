@@ -5,3 +5,9 @@ mat-sidenav {
 #map {
   height: 100%;
 }
+
+.sidenav-column {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}

@@ -1,7 +1,9 @@
-<mat-expansion-panel expanded="{{ alerts.length > 0 }}">
-  <mat-expansion-panel-header style="overflow: visible">
+<mat-expansion-panel
+  expanded="{{ alerts.length > 0 }}"
+  class="scrollableExpansion"
+>
+  <mat-expansion-panel-header>
     <mat-panel-title
-      style="overflow: visible"
       matBadge="{{ alerts.length }}"
       matBadgeOverlap="false"
       matBadgePosition="above before"
