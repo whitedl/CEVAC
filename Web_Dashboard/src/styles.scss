@@ -6,6 +6,9 @@
 // Import Roboot (ensures consistency across browsers)
 @import '~bootstrap/scss/reboot';
 
+//bring in our material theme for use on custom components
+@import 'mat_theming.scss';
+
 html,
 body {
   height: 100%;
@@ -16,6 +19,29 @@ body {
 body {
   margin: 0;
   font-family: Roboto, 'Helvetica Neue', sans-serif;
+}
+
+// Custom scrollbars. Won't work in every browser.
+@mixin scrollcontainer {
+  &::-webkit-scrollbar {
+    width: 0.7em;
+  }
+  &::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 6px mat-color($clemson-primary, darker);
+    border-radius: 1em;
+    @debug map-get($clemson-theme, background);
+    background-color: darken(
+      map-get(map-get($clemson-theme, background), background),
+      10%
+    );
+  }
+  &::-webkit-scrollbar-thumb {
+    border-radius: 1em;
+    background-color: mat-color(map-get($clemson-theme, accent));
+  }
+  scrollbar-width: thin;
+  scrollbar-color: mat-color($clemson-accent)
+    darken(map-get(map-get($clemson-theme, background), background), 10%);
 }
 
 .flex-col {
@@ -67,6 +93,7 @@ body {
 }
 
 .scrollableExpansion > .mat-expansion-panel-content {
+  @include scrollcontainer;
   flex: auto;
   min-height: 0;
   overflow-y: auto;
