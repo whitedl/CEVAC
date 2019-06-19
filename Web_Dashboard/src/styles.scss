@@ -19,15 +19,55 @@ body {
 }
 
 .flex-col {
-  flex-basis: 100%;
   display: flex;
   flex-direction: column;
-  align-content: stretch;
 }
 
 .flex-row {
-  flex-basis: 100%;
   display: flex;
   flex-direction: row;
-  align-content: stretch;
+}
+
+.flex-just-sb {
+  justify-content: space-between;
+}
+
+.flex-none {
+  flex: none;
+}
+
+.flex-auto {
+  flex: auto;
+}
+
+.flex-initial {
+  flex: initial;
+}
+
+.flex-fill {
+  flex: 1 0 100%;
+}
+
+.filler {
+  height: 100%;
+  width: 100%;
+}
+
+.routerFiller + * {
+  flex: 1 1 100%;
+}
+
+.scrollableExpansion {
+  display: flex !important;
+  flex-direction: column;
+}
+
+.scrollableExpansion > mat-expansion-panel-header {
+  flex: 0 0 auto;
+}
+
+.scrollableExpansion > .mat-expansion-panel-content {
+  flex: auto;
+  min-height: 0;
+  overflow-y: auto;
 }
