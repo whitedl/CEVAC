@@ -14,7 +14,9 @@ WITH original AS (
 	SELECT UTCDateTime, dbo.ConvertUTCToLocal(UTCDateTime) AS ETDateTime, SUM(ActualValue) AS Total_Usage
 	FROM
 	(SELECT * FROM CEVAC_WATT_POWER_HIST
-	 WHERE Alias LIKE 'Building%') AS Building
+	 WHERE Alias LIKE 'Building%'
+	 AND DATEPART(minute,UTCDateTime) = 0
+	 ) AS Building
 	GROUP BY UTCDateTime
 )
 SELECT *, DATEPART(year, ETDateTime) AS Year, DATEPART(month, ETDateTime) AS Month, DATEPART(day, ETDateTime) AS Day
