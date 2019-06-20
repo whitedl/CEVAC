@@ -97,6 +97,8 @@ def createModel():
 	return model
 
 def pred(model):
+    # model.load_weights('powerModel.h5')
+    model.load_weights('/home/bmeares/CEVAC/prediction/powerModel.h5')
 
     predictions = []
     hourly = fetch()
@@ -113,9 +115,7 @@ def pred(model):
         temperature = [hourly['temperatures'][i]]
         cloudCoverage = [hourly['clouds'][i]]
         input = np.concatenate((hour, day, month, throughMonth, temperature, humidity, cloudCoverage), axis = -1)
-        model.load_weights('powerModel.h5')
 
-    model.load_weights('/home/bmeares/CEVAC/prediction/powerModel.h5')
         prediction = model.predict(input.reshape(1,-1))[0][0] * 275
         predictions.append(prediction)
 
