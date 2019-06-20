@@ -27,22 +27,23 @@ def loadData():
 	return train_data, train_labels, test_data, test_labels
 
 # prediction with the built-in keras model
-def createModel():
+def createModel(opt, length):
 
 	# create the keras instance
 	model = keras.Sequential()
 
 	# add layers
-	model.add(Dense(128, input_shape=(46,)))
+	## 128 seems to be the best so far
+	model.add(Dense(100, input_shape=(length,)))
 	model.add(Activation('sigmoid'))
 
-	# model.add(Dense(64))
+	# model.add(Dense(20))
 	# model.add(Activation('sigmoid'))
 
 	model.add(Dense(1))
 	model.add(Activation('sigmoid'))
 
-	model.compile(optimizer='adam',loss=losses.mse, metrics=['accuracy'])
+	model.compile(optimizer=opt,loss=losses.mse, metrics=['accuracy'])
 
 	return model
 
@@ -87,12 +88,12 @@ def pred(model):
 	axes.set_xlim([0,1])
 	axes.set_ylim([0,1])
 	plt.scatter(test_labels, y)
-	plt.plot(nx, ny, '-r')
+	# plt.plot(nx, ny, '-r')
 	plt.xlabel('Label', fontsize = 18)
 	plt.ylabel('Prediction', fontsize = 18)
 	plt.show()
 
 if __name__ == '__main__':
-	model = createModel()
-	# train(model)
+	model = createModel('adam', 47)
+	train(model)
 	pred(model)
