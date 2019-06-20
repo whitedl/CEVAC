@@ -115,12 +115,9 @@ def pred(model):
         input = np.concatenate((hour, day, month, throughMonth, temperature, humidity, cloudCoverage), axis = -1)
         model.load_weights('powerModel.h5')
 
-<<<<<<< HEAD
     model.load_weights('/home/bmeares/CEVAC/prediction/powerModel.h5')
-=======
         prediction = model.predict(input.reshape(1,-1))[0][0] * 275
         predictions.append(prediction)
->>>>>>> prediction
 
     str = ''
     for i, element in enumerate(predictions):
