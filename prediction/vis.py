@@ -10,9 +10,10 @@ from matplotlib import rcParams
 import matplotlib.pyplot as plt
 import matplotlib.pylab as plb
 
+
 # read in the data
-pdf = pd.read_csv('CEVAC_WATT_POWER_SUMS_HIST_CACHE.csv')
-tdf = pd.read_csv('H_WEATHER_TEMP.csv')
+pdf = pd.read_csv('CEVAC_WATT_POWER_HIST.csv')
+temp = pd.read_csv('TMY3_StationsMeta.csv')
 
 # dictionary of dimensions I want to add to the array
 dfDict =    {
@@ -25,48 +26,60 @@ cJSON = {}
 
 # use this to change the month from a string to num
 monat = {
-    'JAN' : 1,
-    'FEB': 2,
-    'MAR' : 3,
-    'APR' : 4,
-    'MAY' : 5,
-    'JUN' : 6,
-    'JUL' : 7,
-    'AUG' : 8,
-    'SEP' : 9,
-    'OCT' : 10,
-    'NOV' : 11,
-    'DEC' : 12
+    'JAN' : '01',
+    'FEB': '02',
+    'MAR' : '03',
+    'APR' : '04',
+    'MAY' : '05',
+    'JUN' : '06',
+    'JUL' : '07',
+    'AUG' : '08',
+    'SEP' : '09',
+    'OCT' : '10',
+    'NOV' : '11',
+    'DEC' : '12'
 }
 
-# graph some data
-def graph():
-    array = np.load('accuracy.npy')
-    avg = np.mean(array)
-    std = np.std(array)
-    print(avg, std)
+# return the number of days given a month's number value
+numMonth = {
+    '01' : 31,
+    '02': 29,
+    '03' : 31,
+    '04' : 30,
+    '05' : 31,
+    '06' : 30,
+    '07' : 31,
+    '08' : 31,
+    '09' : 30,
+    '10' : 31,
+    '11' : 30,
+    '12' : 31
+}
+
 
 def insertData(df):
     info = {
     'Hour' : [],
     'dayOfWeek' : [],
-    'intSum': []
+    'intSum': [],
+    'throughMonth' : []
     }
 
     for index, row in df.iterrows():
-        y = int(row['Date'][0:4])
-        m = int(row['Date'][5:7])
-        d = int(row['Date'][8:10])
-        h = int(row['Date'][11:13])
+        y = int(row['ETDateTime'][0:4])
+        m = int(row['ETDateTime'][5:7])
+        d = int(row['ETDateTime'][8:10])
+        tm = float(d/numMonth[row['ETDateTime'][5:7]])
+        h = int(row['ETDateTime'][11:13])
         d = date(y, m, d).weekday()
-        intSum = int(row['Sum'])
+        intSum = int(row['Total_Usage'])
         info['Hour'].append(h)
         info['dayOfWeek'].append(d)
         info['intSum'].append(intSum)
+        info['throughMonth'].append(tm)
 
     for key in info:
         df[key] = info[key]
-
     return df
 
 # format our weather data
@@ -103,33 +116,57 @@ def makeArrays(df):
 
     # populate each array for every row that has all of the attributes
     for index, row in df.iterrows():
-        weatherData = cJSON.get(row['Date'][0:13])
-        if weatherData != None:
+
+        # get our weather data for that date
+        try:
+            weatherData = cJSON[row['ETDateTime'][0:13]]
+        except:
+            weatherData = None
+
+        if weatherData != None and len(weatherData) == 3:
+            # normalize temperature
             temperature = weatherData['temp']
+            temperature = [(temperature + 20) / 70]
+
+            # normalize humidity
             humidity = weatherData['humidity']
+            humidity = [(humidity / 100)]
+
+            # one hot encode month
+            month = [0 for i in range(0,12)]
+            month[row['Month'] - 1] = 1
+
+            # one hot encode hour
+            hour = [0 for i in range(0, 24)]
+            hour[row['Hour'] - 1] = 1
+
+            # one hot encode day
+            day = [0 for i in range(0, 7)]
+            day[row['dayOfWeek'] - 1] = 1
+
+            # throughMonth value was already normalized when inserted into df
+            throughMonth = [row['throughMonth']]
+
+            # normalize clouds
             clouds = weatherData['clouds']
-            tempx.append(humidity)
-            tempx.append(clouds)
-            tempx.append(temperature)
-            tempx.append(row['Month'])
-            tempx.append(row['Hour'])
-            tempx.append(row['dayOfWeek'])
-            tempy = [0 for i in range(0,300)]
-            tempy[row['intSum']] = 1
-            if len(tempx) == 6:
+            clouds = [(clouds / 100)]
+
+            tempx = np.concatenate((hour, day, month, throughMonth, temperature, humidity, clouds), axis = -1)
+            tempy = [(row['intSum'] / 275)]
+
+            if len(tempx) == 47:
                 x.append(tempx)
                 y.append(tempy)
-            tempx = []
 
     # empty list of the training and testing sets that we are going to make
     trainingData = []
     trainingLabels = []
-    # # #
+    # # # # # # # # # # # # #
     testingData = []
     testingLabels = []
 
     # this is the dimension of our training dataset
-    tDim = int(len(x) * .9)
+    tDim = int(len(x) * .7)
 
     for i in range(0, tDim):
         size = len(x)
@@ -148,13 +185,12 @@ def makeArrays(df):
 
 
     # save our numpy arrays
-    # np.save('powerTrainingData.npy', trainingData)
-    # np.save('powerTrainingLabels.npy', trainingLabels)
-    # np.save('powerTestingData.npy', testingData)
-    # np.save('powerTestingLabels.npy', testingLabels)
+    np.save('powerTrainingData.npy', trainingData)
+    np.save('powerTrainingLabels.npy', trainingLabels)
+    np.save('powerTestingData.npy', testingData)
+    np.save('powerTestingLabels.npy', testingLabels)
 
     # Debugging nonsense
-    # print(trainingData)
     print('TESTING DATA:\t\t{} ENTRIES'.format(len(testingData)))
     print('TESTING LABELS:\t\t{} ENTRIES'.format(len(testingLabels)))
     print('TRAINING DATA:\t\t{} ENTRIES'.format(len(trainingData)))
@@ -164,4 +200,3 @@ if __name__ =='__main__':
     for key in dfDict:
         formatConditions(dfDict[key], key)
     makeArrays(pdf)
-    # graph()
