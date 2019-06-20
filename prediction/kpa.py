@@ -33,12 +33,8 @@ def createModel(opt, length):
 	model = keras.Sequential()
 
 	# add layers
-	## 128 seems to be the best so far
 	model.add(Dense(100, input_shape=(length,)))
 	model.add(Activation('sigmoid'))
-
-	# model.add(Dense(20))
-	# model.add(Activation('sigmoid'))
 
 	model.add(Dense(1))
 	model.add(Activation('sigmoid'))
@@ -56,7 +52,7 @@ def train(model):
     early_stopping = EarlyStopping(monitor='loss', patience=5)
 
     #more epochs = more work training ~= higher accuracy
-    model.fit(train_data, train_labels, batch_size = 16, epochs=50, verbose=1, callbacks=[early_stopping]) #
+    model.fit(train_data, train_labels, epochs=50, verbose=1, callbacks=[early_stopping]) #
 
     # for making re-running faster, toggle this to re-run with the same weights from the previous run
     model.save_weights('powerModel.h5')
@@ -88,7 +84,7 @@ def pred(model):
 	axes.set_xlim([0,1])
 	axes.set_ylim([0,1])
 	plt.scatter(test_labels, y)
-	# plt.plot(nx, ny, '-r')
+	plt.plot([0,1], [0,1], '-r')
 	plt.xlabel('Label', fontsize = 18)
 	plt.ylabel('Prediction', fontsize = 18)
 	plt.show()

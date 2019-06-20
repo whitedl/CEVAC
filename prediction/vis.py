@@ -161,7 +161,7 @@ def makeArrays(df):
     # empty list of the training and testing sets that we are going to make
     trainingData = []
     trainingLabels = []
-    # # #
+    # # # # # # # # # # # # #
     testingData = []
     testingLabels = []
 
