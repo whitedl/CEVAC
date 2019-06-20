@@ -109,10 +109,11 @@ CREATE TABLE #cevac_vars(
 CREATE TABLE #cevac_metric_params(Params nvarchar(100))
 
 -- Generate table names
-IF @Age = 'HIST' SET @Table_name = CONCAT('CEVAC_', @Building, '_', @Metric, '_', @Age, '_VIEW')
+IF @Age LIKE '%HIST%' SET @Table_name = CONCAT('CEVAC_', @Building, '_', @Metric, '_', @Age, '_VIEW')
 ELSE SET @Table_name = CONCAT('CEVAC_', @Building, '_', @Metric, '_', @Age);
 SELECT @Table_name AS 'Table_name init';
 SET @XREF = CONCAT('CEVAC_', @Building, '_', @Metric, '_XREF');
+IF @Metric = 'POWER_RAW' SET @XREF = CONCAT('CEVAC_', @Building, '_', REPLACE(@Metric, 'POWER_RAW', 'POWER'), '_XREF');
 IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = @XREF) SET @XREF = NULL;
 
 -- add quotes for regex search
@@ -188,9 +189,9 @@ IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = @XREF)
 DECLARE @Create_View nvarchar(4000);
 
 
--- HIST
+-- HIST_VIEW
 -- Note: Build _HIST first, then run CEVAC_CACHE_INIT before creating _DAY and _LATEST
-IF @Age = 'HIST' BEGIN
+IF @Age LIKE '%HIST%' BEGIN
 	DECLARE @PSID_source NVARCHAR(500);
 	IF @Alias_or_PSID = 'Alias' SET @PSID_source = '
 	SELECT PointSliceID FROM ' + @XREF + '
@@ -209,44 +210,108 @@ IF @Age = 'HIST' BEGIN
 
 	END
 
-	-- HIST
-	SET @Create_View = '
-		CREATE VIEW ' + @Table_name + ' AS
-
-		WITH original AS (
-			SELECT
-			' + @Alias_query + '
-			val.UTCDateTime, dbo.ConvertUTCToLocal(val.UTCDateTime) AS ETDateTime, val.ActualValue 
-			FROM
-				[130.127.238.129].JCIHistorianDB.dbo.tblActualValueFloat as val
-				INNER JOIN
-				[130.127.238.129].JCIHistorianDB.dbo.tblPointSlice as ps ON ps.PointSliceID = val.PointSliceID
-				INNER JOIN
-				[130.127.238.129].JCIHistorianDB.dbo.tblPoint as pt ON ps.PointID = pt.PointID
-				INNER JOIN
-				[130.127.238.129].JCIHistorianDB.dbo.tblUnitOfMeasure as units ON units.UnitOfMeasureID = pt.UnitOfMeasureID
-				' + isnull(@XREF_query, '') + '
-
-			WHERE val.PointSliceID IN
-			(' + @PSID_source + '
-			)' + isnull(@unitOfMeasureID_query, '') + ' ';
-
-		-- End of original
-		SET @Create_View = @Create_View + '
-		) SELECT *, DATEPART(year, ETDateTime) AS Year, DATEPART(month, ETDateTime) AS Month, DATEPART(day, ETDateTime) AS Day FROM original
-		';
-
-		-- Add Building sets for CEVAC_WATT_POWER_HIST
-		IF @Building = 'WATT' AND @Metric = 'POWER' BEGIN
-			SET @Create_View = @Create_View + '
-			UNION
-			SELECT * FROM
-			CEVAC_WATT_POWER_EMERGENCY_HIST
-			UNION
-			SELECT * FROM
-			CEVAC_WATT_POWER_ISOLATED_GROUND_HIST
-			';
+	-- HIST_MINI_VIEW
+	IF @Age LIKE '%MINI%' BEGIN
+		DECLARE @tblUnitOfMeasure_join NVARCHAR(500);
+		IF @unitOfMeasureID_query IS NOT NULL BEGIN
+			SET @tblUnitOfMeasure_join = '
+			INNER JOIN
+			[130.127.238.129].JCIHistorianDB.dbo.tblPointSlice as ps ON ps.PointSliceID = val.PointSliceID
+			INNER JOIN
+			[130.127.238.129].JCIHistorianDB.dbo.tblPoint as pt ON ps.PointID = pt.PointID
+			INNER JOIN
+			[130.127.238.129].JCIHistorianDB.dbo.tblUnitOfMeasure as units ON units.UnitOfMeasureID = pt.UnitOfMeasureID';
 		END
+
+		SET @Create_View = '
+			CREATE VIEW ' + @Table_name + ' AS
+			WITH PSID_source AS ( ' + @PSID_source + ' )
+			SELECT val.PointSliceID, val.UTCDateTime, val.ActualValue FROM
+			[130.127.238.129].JCIHistorianDB.dbo.tblActualValueFloat AS val'
+			 + isnull(@tblUnitOfMeasure_join, '')			
+			 + '
+			WHERE val.PointSliceID IN ( SELECT * FROM PSID_source )
+			' + isnull(@unitOfMeasureID_query, '') + ' ';
+	END -- end of _HIST_MINI_VIEW
+	ELSE BEGIN
+		-- HIST_VIEW
+		-- NOTE: requires _HIST_MINI
+		SET @Create_View = '
+			CREATE VIEW ' + @Table_name + ' AS
+
+			WITH original AS (
+				SELECT
+				' + @Alias_query + '
+				val.UTCDateTime, dbo.ConvertUTCToLocal(val.UTCDateTime) AS ETDateTime, val.ActualValue 
+				FROM
+					[130.127.238.129].JCIHistorianDB.dbo.tblActualValueFloat as val
+					INNER JOIN
+					[130.127.238.129].JCIHistorianDB.dbo.tblPointSlice as ps ON ps.PointSliceID = val.PointSliceID
+					INNER JOIN
+					[130.127.238.129].JCIHistorianDB.dbo.tblPoint as pt ON ps.PointID = pt.PointID
+					INNER JOIN
+					[130.127.238.129].JCIHistorianDB.dbo.tblUnitOfMeasure as units ON units.UnitOfMeasureID = pt.UnitOfMeasureID
+					' + isnull(@XREF_query, '') + '
+
+				WHERE val.PointSliceID IN
+				(' + @PSID_source + '
+				)' + isnull(@unitOfMeasureID_query, '') + ' ';
+
+
+		-- MINI_api is the _MINI table. The lines below remove _VIEW or _CACHE
+		DECLARE @Mini_API NVARCHAR(100);
+		SET @Mini_API = REPLACE(@Table_name, '_HIST' , '_HIST_MINI');
+		SET @Mini_API = REPLACE(@Mini_API, '_VIEW' , '');
+		SET @Mini_API = REPLACE(@Mini_API, '_CACHE' , '');
+
+		--SET @Create_View = '
+		--	CREATE VIEW ' + @Table_name + ' AS
+		--	WITH original AS (
+		--		SELECT
+		--		' + @Alias_query + '
+		--		UTCDateTime, dbo.ConvertUTCToLocal(UTCDateTime) AS ETDateTime, ActualValue 
+		--		FROM  
+		--			' + @Mini_API + ' AS ps 
+		--		' + isnull(@XREF_query, '') + '
+
+		--';
+			-- End of original
+			SET @Create_View = @Create_View + '
+			) SELECT *, DATEPART(year, ETDateTime) AS Year, DATEPART(month, ETDateTime) AS Month, DATEPART(day, ETDateTime) AS Day FROM original
+			';
+
+			-- Add Building sets for CEVAC_WATT_POWER_HIST
+			IF @Building = 'WATT' AND @Metric = 'POWER' BEGIN
+				DECLARE @Power_raw_API NVARCHAR(100);
+				SET @Power_raw_API = 'CEVAC_' + @Building + '_' + @Metric + '_RAW_HIST';
+				SET @Create_View = 'CREATE VIEW ' + @Table_name + ' AS ' + '
+				SELECT * FROM ' + @Power_raw_API + '
+				UNION
+				SELECT * FROM
+				CEVAC_WATT_POWER_EMERGENCY_HIST
+				UNION
+				SELECT * FROM
+				CEVAC_WATT_POWER_ISOLATED_GROUND_HIST
+				UNION
+				SELECT * FROM
+				CEVAC_WATT_POWER_1ST_FLOOR_HIST
+				UNION
+				SELECT * FROM
+				CEVAC_WATT_POWER_2ND_FLOOR_HIST
+				UNION
+				SELECT * FROM
+				CEVAC_WATT_POWER_3RD_FLOOR_HIST
+				UNION
+				SELECT * FROM
+				CEVAC_WATT_POWER_4TH_FLOOR_HIST
+				UNION
+				SELECT * FROM
+				CEVAC_WATT_POWER_BASEMENT_HIST
+				';
+			END
+		END -- END of _HIST_VIEW
+		
+
 
 
 -- DAY
@@ -290,7 +355,7 @@ SELECT @Create_View AS 'Create _HIST_VIEW'
 IF @execute = 1 EXEC(@Create_View)
 
 -- Make _HIST view as alias for _HIST_CACHE
-IF @Age = 'HIST' BEGIN
+IF @Age LIKE '%HIST%' BEGIN
 	DECLARE @Drop_API NVARCHAR(100);
 	SET @Drop_API = 'DROP VIEW ' + REPLACE(@Table_name, '_VIEW', '');
 	IF OBJECT_ID(REPLACE(@Table_name, '_VIEW', ''), 'V') IS NOT NULL BEGIN
