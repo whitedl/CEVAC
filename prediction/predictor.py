@@ -97,8 +97,8 @@ def createModel():
 	return model
 
 def pred(model):
-    # model.load_weights('powerModel.h5')
-    model.load_weights('/home/bmeares/CEVAC/prediction/powerModel.h5')
+    model.load_weights('powerModel.h5')
+    # model.load_weights('/home/bmeares/CEVAC/prediction/powerModel.h5')
 
     predictions = []
     hourly = fetch()
