@@ -1,18 +1,38 @@
 <?php
+
 session_start();
 include "config.php";
 global $db;
 header('Content-Type: text/event-stream');
 header('Cache-Control: no-cache');
 
-$newest_query = 'SELECT TOP 1 dbo.ConvertUTCToLocal(BeginTime) AS BeginTimeET
-  FROM CEVAC_ALL_ALERTS_HIST ORDER BY BeginTime DESC';
-$newest_result = sqlsrv_query($db, $newest_query);
-$newest_row = sqlsrv_fetch_array($newest_result, SQLSRV_FETCH_ASSOC);
-$newest_time = strtotime($newest_row['BeginTimeET']);
-
 // session time is out of date. Send alerts as event
 if(!isset($_SESSION['time']) || $_SESSION['time'] < $newest_time){
+
+
+}
+
+fire_event();
+
+// Initialize session time on first run
+if(!isset($_SESSION['time'])) $_SESSION['time'] = time();
+
+
+sqlsrv_close($db);
+
+
+/*
+ * fire_event()
+ * Fires an event for event listeners
+ * 
+ * */
+
+function fire_event(){
+  $newest_query = 'SELECT TOP 1 dbo.ConvertUTCToLocal(BeginTime) AS BeginTimeET
+    FROM CEVAC_ALL_ALERTS_HIST ORDER BY BeginTime DESC';
+  $newest_result = sqlsrv_query($db, $newest_query);
+  $newest_row = sqlsrv_fetch_array($newest_result, SQLSRV_FETCH_ASSOC);
+  $newest_time = strtotime($newest_row['BeginTimeET']);
 
   $_SESSION['time'] = time();
   $query = '
@@ -38,10 +58,7 @@ if(!isset($_SESSION['time']) || $_SESSION['time'] < $newest_time){
 
 }
 
-// Initialize session time on first run
-if(!isset($_SESSION['time'])) $_SESSION['time'] = time();
 
 
-sqlsrv_close($db);
 ?>
 
