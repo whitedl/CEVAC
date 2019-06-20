@@ -48,7 +48,7 @@ def createModel():
 
 def pred(model, input):
 
-    model.load_weights('powerModel.h5')
+    model.load_weights('/home/bmeares/CEVAC/prediction/powerModel.h5')
 
     prediction = model.predict(input) * 275
 
