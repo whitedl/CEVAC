@@ -33,11 +33,11 @@ def createModel():
 	model = keras.Sequential()
 
 	# add layers
-	model.add(Dense(128, input_shape=(46,)))
+	model.add(Dense(32, input_shape=(46,)))
 	model.add(Activation('sigmoid'))
 	#
-	# model.add(Dense(64))
-	# model.add(Activation('sigmoid'))
+	model.add(Dense(32))
+	model.add(Activation('sigmoid'))
 
 	model.add(Dense(1))
 	model.add(Activation('sigmoid'))

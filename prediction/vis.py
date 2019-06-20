@@ -12,7 +12,7 @@ import matplotlib.pylab as plb
 
 
 # read in the data
-pdf = pd.read_csv('CEVAC_WATT_POWER_SUMS_HIST_CACHE.csv')
+pdf = pd.read_csv('CEVAC_WATT_POWER_HIST.csv')
 temp = pd.read_csv('TMY3_StationsMeta.csv')
 
 # dictionary of dimensions I want to add to the array
@@ -26,45 +26,60 @@ cJSON = {}
 
 # use this to change the month from a string to num
 monat = {
-    'JAN' : 1,
-    'FEB': 2,
-    'MAR' : 3,
-    'APR' : 4,
-    'MAY' : 5,
-    'JUN' : 6,
-    'JUL' : 7,
-    'AUG' : 8,
-    'SEP' : 9,
-    'OCT' : 10,
-    'NOV' : 11,
-    'DEC' : 12
+    'JAN' : '01',
+    'FEB': '02',
+    'MAR' : '03',
+    'APR' : '04',
+    'MAY' : '05',
+    'JUN' : '06',
+    'JUL' : '07',
+    'AUG' : '08',
+    'SEP' : '09',
+    'OCT' : '10',
+    'NOV' : '11',
+    'DEC' : '12'
 }
 
-# graph some data
-def graph():
+# return the number of days given a month's number value
+numMonth = {
+    '01' : 31,
+    '02': 29,
+    '03' : 31,
+    '04' : 30,
+    '05' : 31,
+    '06' : 30,
+    '07' : 31,
+    '08' : 31,
+    '09' : 30,
+    '10' : 31,
+    '11' : 30,
+    '12' : 31
+}
 
 
 def insertData(df):
     info = {
     'Hour' : [],
     'dayOfWeek' : [],
-    'intSum': []
+    'intSum': [],
+    'throughMonth' : []
     }
 
     for index, row in df.iterrows():
-        y = int(row['Date'][0:4])
-        m = int(row['Date'][5:7])
-        d = int(row['Date'][8:10])
-        h = int(row['Date'][11:13])
+        y = int(row['ETDateTime'][0:4])
+        m = int(row['ETDateTime'][5:7])
+        d = int(row['ETDateTime'][8:10])
+        tm = float(d/numMonth[row['ETDateTime'][5:7]])
+        h = int(row['ETDateTime'][11:13])
         d = date(y, m, d).weekday()
-        intSum = int(row['Sum'])
+        intSum = int(row['Total_Usage'])
         info['Hour'].append(h)
         info['dayOfWeek'].append(d)
         info['intSum'].append(intSum)
+        info['throughMonth'].append(tm)
 
     for key in info:
         df[key] = info[key]
-
     return df
 
 # format our weather data
@@ -101,8 +116,14 @@ def makeArrays(df):
 
     # populate each array for every row that has all of the attributes
     for index, row in df.iterrows():
-        weatherData = cJSON.get(row['Date'][0:13])
-        if weatherData != None:
+
+        # get our weather data for that date
+        try:
+            weatherData = cJSON[row['ETDateTime'][0:13]]
+        except:
+            weatherData = None
+
+        if weatherData != None and len(weatherData) == 3:
             # normalize temperature
             temperature = weatherData['temp']
             temperature = [(temperature + 20) / 70]
@@ -123,14 +144,17 @@ def makeArrays(df):
             day = [0 for i in range(0, 7)]
             day[row['dayOfWeek'] - 1] = 1
 
+            # throughMonth value was already normalized when inserted into df
+            throughMonth = [row['throughMonth']]
+
             # normalize clouds
             clouds = weatherData['clouds']
             clouds = [(clouds / 100)]
 
-            tempx = np.concatenate((hour, day, month, temperature, humidity, clouds), axis = -1)
+            tempx = np.concatenate((hour, day, month, throughMonth, temperature, humidity, clouds), axis = -1)
             tempy = [(row['intSum'] / 275)]
 
-            if len(tempx) == 46:
+            if len(tempx) == 47:
                 x.append(tempx)
                 y.append(tempy)
 
@@ -176,4 +200,3 @@ if __name__ =='__main__':
     for key in dfDict:
         formatConditions(dfDict[key], key)
     makeArrays(pdf)
-    # graph()
