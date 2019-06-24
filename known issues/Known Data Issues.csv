@@ -1,0 +1,34 @@
+Event,Location,Date,Power Effects,Temperature Effects,IAQ Effects,WAP Effects
+Partial Outage,Watt,9/10/2016,Monitors not in place,Many Sensors do not report,Many sensors do not report,Monitors not in place
+Outage Restored,Watt,9/13/2016,Monitors not in place,All sensors restored,All sensors restored,Monitors not in place
+Partial Outage,Watt,10/1/2016,Monitors not in place,Many Sensors do not report,Many sensors do not report,Monitors not in place
+Outage Restored,Watt,10/4/2016,Monitors not in place,All sensors restored,All sensors restored,Monitors not in place
+Metasys Outage,Campus,5/27/2017,No Data collection,No Data Collection,No Data Collection,Monitors not in place
+Metasys Restored,Campus,5/29/2017,Data collection restored,Data collection restored,Data collection restored,Monitors not in place
+Metasys Outage,Campus,6/3/2017,No Data collection,No Data Collection,No Data Collection,Monitors not in place
+Metasys Restored,Campus,6/6/2017,Data collection restored,Data collection restored,Data collection restored,Monitors not in place
+Metasys Outage,Campus,6/9/2017,No Data collection,No Data Collection,No Data Collection,Monitors not in place
+Metasys Restored,Campus,6/12/2017,Data collection restored,Data collection restored,Data collection restored,Monitors not in place
+Metasys Outage,Campus,7/5/2017,No Data collection,No Data Collection,No Data Collection,Monitors not in place
+Metasys Restored,Campus,7/26/2017,Data collection restored,Data collection restored,Data collection restored,Monitors not in place
+Metasys Outage,Campus,10/2/2017,No Data collection,No Data Collection,No Data Collection,Monitors not in place
+Metasys Restored,Campus,10/6/2017,Data collection restored,Data collection restored,Data collection restored,Monitors not in place
+Chilled Water Outage,Watt,12/16/2018,HVAC Power Consumption Increase,Temperature Increase,CO2 Decrease,Monitors not in place
+Chilled Water Restored,Watt,12/24/2018,Readings Normalized,Readings Normalized,Readings Normalized,Monitors not in place
+Power Outage ,Watt,2/19/2019,Non-emergency sensors do not report,Non-emergency sensors do not report,None,Monitors not in place
+Power Restored,Watt,2/21/2019,All sensors restored,All sensors restored,None,Monitors not in place
+Power Outage ,Watt,3/23/2019,Non-emergency sensors do not report,None,None,Monitors not in place
+Power Restored,Watt,3/23/2019,Normalization,None,None,Monitors not in place
+"WAP ""test"" users aggregated",Watt,5/25/2019,None,None,None,Guest Count Underestimated
+"WAP ""test"" users separated",Watt,6/12/2019,None,None,None,Guest Count Accuracy Improved
+439A Temp partial outage (filtered out),Watt,11/17/2017,None,439A reports 0 occasionally,None,None
+439A Temp restored,Watt,12/11/2017,None,439A reports normally,None,None
+439A Temp total outage (filtered out),Watt,3/20/2018,None,439A reports only 0,None,None
+439A Temp restored,Watt,9/11/2018,None,439A reports normally,None,None
+Several Sensors reporting 0 before coming online,Watt,12/8/2015,None,None,Several sensors report 0,None
+333 CO2 online,Watt,5/27/2016,None,None,333 CO2 begins reporting,None
+344B CO2 online,Watt,12/28/2015,None,None,344B CO2 begins reporting,None
+209 CO2 online,Watt,12/9/2015,None,None,209 CO2 begins reporting,None
+211 CO2 online,Watt,12/9/2015,None,None,211 CO2 begins reporting,None
+207 CO2 online,Watt,12/9/2015,None,None,207 CO2 begins reporting,None
+205 CO2 online,Watt,12/9/2015,None,None,205 CO2 begins reporting,None
