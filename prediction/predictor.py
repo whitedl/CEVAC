@@ -32,6 +32,7 @@ def fetch():
                 'clouds' : []
                 }
 
+    # request url with api key
     requestURL = 'https://api.darksky.net/forecast/db6bb38a65d59c7677e8e97db002705b/33.662333,-79.830875'
     r = requests.get(requestURL).json()
     hourlyData = r['hourly']['data']
@@ -45,6 +46,8 @@ def fetch():
         hourly['humidities'].append(element['humidity'])
         hourly['temperatures'].append(((element['temperature'] - 32) / 1.8 + 20) / 70)
         hourly['clouds'].append(element['cloudCover'])
+
+    # return json formatted 'hourly' dictionary of lists of hourly data
     return hourly
 
 # normalize the hours, days, and months
@@ -103,6 +106,7 @@ def pred(model):
     predictions = []
     hourly = fetch()
 
+
     for i, hour in enumerate(hourly['hours']):
 
         day = hourly['days'][i]
@@ -119,9 +123,10 @@ def pred(model):
         prediction = model.predict(input.reshape(1,-1))[0][0] * 275
         predictions.append(prediction)
 
-    str = ''
-    for i, element in enumerate(predictions):
 
+    for i, prediction in enumerate(predictions):
+        date =  '/'.join((str(hourly['months'][i]), str(hourly['days'][i]), str(hourly['years'][i]))) + ' ' + str(hourly['hours'][i])
+        str = 'INSERT INTO [] ({},{},{})'.format(date, prediction, building, metric)
         str += 'ESTIMATE {} ON {}/{} AT HOUR {}\n'.format(element, hourly['days'][i], hourly['months'][i], hourly['hours'][i])
     with open('predictions.txt', 'w') as f:
         f.write(str)

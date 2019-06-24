@@ -12,7 +12,7 @@ import matplotlib.pylab as plb
 
 
 # read in the data
-pdf = pd.read_csv('CEVAC_WATT_POWER_HIST.csv')
+cwdf = pd.read_csv('chwLogs.csv')
 temp = pd.read_csv('TMY3_StationsMeta.csv')
 
 # dictionary of dimensions I want to add to the array
