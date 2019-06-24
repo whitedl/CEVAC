@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ColorService } from '@services/color.service';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
 
 declare const L: any;
 const geodata = require('src/assets/CU_Building_Footprints.json');
@@ -30,8 +29,7 @@ export class MapdataService {
     minZoom: 15,
     maxZoom: 20
   };
-  private categories = {};
-  private functions = {};
+  private categories: Set<string> = new Set();
 
   constructor(private colorService: ColorService, private http: HttpClient) {}
 
@@ -59,23 +57,10 @@ export class MapdataService {
 
   private initMap = () => {
     for (const feature of geodata.features) {
-      if (feature.properties.Function) {
-        for (const func of feature.properties.Function) {
-          if (!(func in this.functions)) {
-            this.functions[func] = this.colorService.getComplementary(
-              Object.keys(this.functions).length
-            );
-          }
-        }
-      }
-      if (feature.properties.BLDG_Class) {
-        if (!(feature.properties.BLDG_Class in this.categories)) {
-          this.categories[
-            feature.properties.BLDG_Class
-          ] = this.colorService.getComplementary(
-            Object.keys(this.categories).length
-          );
-        }
+      const bclass = feature.properties.BLDG_CLASS;
+      if (!this.categories.has(bclass)) {
+        this.categories.add(bclass);
+        this.colorService.registerCategory(bclass);
       }
     }
     this.map = L.map('map', this.mapOptions).setView([34.6761, -82.8366], 16);
@@ -109,9 +94,18 @@ export class MapdataService {
         '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
     });
 
+  private style = feature => {
+    const style = {};
+    let catCol: string;
+
+    style['fill'] = true;
+    style['opacity'] = 1;
+    style['fillOpacity'] = 1;
+    style['color'] = this.colorService.getColor();
+  };
+
   private styleUntracked = feature => {
     const style = {};
-    const funcCol = [];
     let catCol;
     style['fill'] = true;
     style['fillColor'] =
@@ -120,13 +114,6 @@ export class MapdataService {
         : this.colorService.getUnnamed();
     style['opacity'] = 1;
     style['fillOpacity'] = 0.8;
-    if (feature.properties.Function) {
-      for (const func of feature.properties.Function) {
-        funcCol.push(this.functions[func]);
-      }
-    } else {
-      funcCol.push(this.colorService.getUnnamed());
-    }
     if (feature.properties.BLDG_Class) {
       catCol = this.categories[feature.properties.BLDG_Class];
     } else {
@@ -138,24 +125,12 @@ export class MapdataService {
 
   private styleTracked = feature => {
     const style = {};
-    const funcCol: string[] = [];
     let catCol: string;
     style['fill'] = true;
     style['weight'] = 2;
     style['opacity'] = 1;
     style['fillOpacity'] = 1;
-    if (feature.properties.Function) {
-      for (const func of feature.properties.Function) {
-        funcCol.push(this.functions[func]);
-      }
-    } else {
-      funcCol.push(this.colorService.getUnnamed());
-    }
-    if (feature.properties.BLDG_Class) {
-      catCol = this.categories[feature.properties.BLDG_Class];
-    } else {
-      catCol = this.colorService.getUnnamed();
-    }
+    catCol = this.colorService.getColor();
     style['color'] = catCol;
     style['fillColor'] =
       feature.properties.bData &&

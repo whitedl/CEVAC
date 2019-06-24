@@ -2,13 +2,30 @@
 // *primarily for the map and map keys at the moment*
 import { Injectable } from '@angular/core';
 import chroma from 'chroma-js';
-import { fromStringWithSourceMap } from 'source-list-map';
+
+interface Palette {
+  [index: string]: string;
+}
+interface PaletteSet {
+  [index: string]: Palette;
+}
+interface Scale {
+  domain: [number, number];
+  min: number;
+  max: number;
+}
+interface ScaleSet {
+  [index: string]: Scale;
+}
+interface BuildingRegistry {
+  [index: string]: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class ColorService {
-  private colors = {
+  private colors: PaletteSet = {
     ClemsonPalette: {
       clemsonOrange: '#F66733',
       regalia: '#522D80',
@@ -34,7 +51,7 @@ export class ColorService {
       warn: '#FFCC00'
     }
   };
-  private Scales = {
+  private Scales: ScaleSet = {
     Power: {
       domain: [0, 1000],
       get min() {
@@ -81,23 +98,33 @@ export class ColorService {
       }
     }
   };
+  private crg: BuildingRegistry;
+  private crgPalette = 'ClemsonComplementary';
 
-  private regScales: Map<string, any>;
+  constructor() {}
 
-  constructor() {
-    this.regScales = new Map<string, any>();
-  }
+  // If name is not passed, assumes first ColorSet (ClemsonPalette).
+  // If pos is passed, will return color at position in chosen set
+  // If pos is not passed, will return first in set
+  getColor = (name: string = Object.keys(this.colors)[0], pos: number = 0) => {
+    if (!(name in this.colors)) {
+      name = Object.keys(this.colors)[0];
+    }
+    const set = Object.values(this.colors[name]);
+    return set[pos % set.length];
+  };
 
-  getRegisteredScale = (
-    color: string,
-    n?: number,
-    scaleType: string = Object.keys(this.Scales)[0]
-  ) => {
-    if (!this.regScales.has(color)) {
-      const c = chroma(color);
-      const low = chroma.set('lch.l', 0);
-      const high = chroma.set('lch.l', 100);
-      this.regScales.set(color, chroma.scale([low, high]));
+  getScaledColor = (category: string, scale: string, val: number) =>
+    chroma
+      .scale([this.crg[category], this.crg[category]])
+      .domain(this.Scales[scale].domain)(val);
+
+  registerCategory = (cat: string) => {
+    if (!this.crg.hasOwnProperty(cat)) {
+      this.crg[cat] = this.getColor(
+        this.crgPalette,
+        Object.keys(this.crg).length
+      );
     }
   };
 
@@ -130,17 +157,6 @@ export class ColorService {
   // if scale is in Scales, set the maximum. Returns set value on success and null on fail.
   setScaleHigher = (n: number, scaleType: string) =>
     scaleType in this.Scales ? (this.Scales[scaleType].max = n) : null;
-
-  // If name is not passed, assumes first ColorSet (ClemsonPalette).
-  // If pos is passed, will return color at position in chosen set
-  // If pos is not passed, will return requested set
-  getColor = (name = Object.keys(this.colors)[0], pos?: number) => {
-    if (!(name in this.colors)) {
-      name = Object.keys(this.colors)[0];
-    }
-    const set = Object.values(this.colors[name]);
-    return typeof pos !== 'undefined' ? set[pos % set.length] : set;
-  };
 
   getComplementary = (pos: number = 0) =>
     this.getColor('ClemsonComplementary', pos);
