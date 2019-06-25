@@ -108,7 +108,12 @@ logging.info("clemson_count: " + str(eduroam))
 logging.info("guest_count: " + str(clemsonguest))
 
 if SEND:
-    urllib.request.urlopen(command_to_query(insert_sql_total)).read()
+    #urllib.request.urlopen(command_to_query(insert_sql_total)).read()
+    f = open("/home/bmeares/cache/insert_daily_wap.sql","w")
+    f.write(insert_sql_total.replace(';','\nGO\n'))
+    f.close()
+    os.system("/home/bmeares/scripts/exec_sql_script.sh /home/bmeares/cache/insert_daily_wap.sql")
+    os.remove("/home/bmeares/cache/insert_daily_wap.sql")
 else:
     print(insert_sql_total,"\n",command_to_query(insert_sql_total))
 
