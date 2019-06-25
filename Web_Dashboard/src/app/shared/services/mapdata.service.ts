@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ColorService } from '@services/color.service';
 import { HttpClient } from '@angular/common/http';
+import { utils } from 'protractor';
 
 declare const L: any;
 const geodata = require('src/assets/CU_Building_Footprints.json');
@@ -8,6 +9,43 @@ interface DataSet {
   name: string;
   propertyName: string;
 }
+
+// yes, this is dirty and not the best thing to do in Angular. I'm using a very non-angular library. Might fix it later.
+L.Control.Legend = L.Control.extend({
+  options: {
+    position: 'bottomleft'
+  },
+  initialize(scale: [number, number], options) {
+    L.Util.setOptions(this, options);
+    this.scale = scale;
+    this.container = L.DomUtil.create('div', 'legend');
+  },
+  onAdd(map) {
+    return this.container;
+  },
+  onRemove(map) {},
+  addCategory(cat: string, domain: ['string', 'string']) {
+    const grad = L.DomUtil.create('div', 'gradient-scale', this.container);
+    grad.setAttribute(
+      'style',
+      'background-image: linear-gradient(to top, ' +
+        domain[0] +
+        ', ' +
+        domain[1] +
+        ');'
+    );
+    L.DomUtil.create('div', 'flex-col-spacer', this.container);
+  },
+  update() {
+    if (!this.container) {
+      return this;
+    }
+  }
+});
+
+L.control.legend = (scale: [number, number], options) => {
+  return new L.Control.Legend(scale, options);
+};
 
 @Injectable({ providedIn: 'root' })
 export class MapdataService {
@@ -71,6 +109,22 @@ export class MapdataService {
     this.untracked = L.geoJSON(geodata, this.untrackedOptions).addTo(this.map);
     this.tracked = L.geoJSON(geodata, this.trackedOptions).addTo(this.map);
     controller.addOverlay(this.untracked, 'show untracked');
+    const legend = L.control.legend(
+      this.colorService.getScale(this.dataSet.name),
+      { position: 'bottomleft' }
+    );
+    for (const cat of this.categories) {
+      console.log(
+        cat +
+          ': ' +
+          this.colorService.labDomain(this.colorService.getScaledColor(cat))
+      );
+      legend.addCategory(
+        cat,
+        this.colorService.labDomain(this.colorService.getScaledColor(cat))
+      );
+    }
+    legend.addTo(this.map);
     return this.map;
   };
 

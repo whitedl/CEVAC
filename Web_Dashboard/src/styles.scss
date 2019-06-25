@@ -75,6 +75,11 @@ body {
   width: 100%;
 }
 
+.flex-col-spacer {
+  height: 100%;
+  width: 0px;
+}
+
 .routerFiller + * {
   flex: 1 1 100%;
 }
@@ -93,4 +98,23 @@ body {
   flex: auto;
   min-height: 0;
   overflow-y: auto;
+}
+
+.legend {
+  padding: 6px 8px;
+  font: 14px/16px Arial, Helvetica, sans-serif;
+  background: white;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+  height: 6em;
+  display: inline-flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+}
+
+.gradient-scale {
+  height: 100%;
+  width: 2em;
+  flex: auto;
 }
