@@ -13,6 +13,7 @@ import matplotlib.pylab as plb
 
 # read in the data
 cwdf = pd.read_csv('chwLogs.csv')
+pdf = pd.read_csv('CEVAC_WATT_POWER_HIST.csv')
 temp = pd.read_csv('TMY3_StationsMeta.csv')
 
 # dictionary of dimensions I want to add to the array
@@ -116,7 +117,7 @@ def makeArrays(df):
 
     # populate each array for every row that has all of the attributes
     for index, row in df.iterrows():
-
+        print(df.ix[index])
         # get our weather data for that date
         try:
             weatherData = cJSON[row['ETDateTime'][0:13]]
@@ -151,12 +152,14 @@ def makeArrays(df):
             clouds = weatherData['clouds']
             clouds = [(clouds / 100)]
 
-            tempx = np.concatenate((hour, day, month, throughMonth, temperature, humidity, clouds), axis = -1)
+            tempx.append(np.concatenate((hour, day, month, throughMonth, temperature, humidity, clouds), axis = -1))
             tempy = [(row['intSum'] / 275)]
 
             if len(tempx) == 47:
                 x.append(tempx)
                 y.append(tempy)
+            tempx = []
+            tempy = []
 
     # empty list of the training and testing sets that we are going to make
     trainingData = []
