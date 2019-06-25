@@ -105,8 +105,6 @@ def ingest_file(fname):
             except:
                 errorCount += 1
 
-    os.remove("tempcsv.csv")
-
     return insert_sql_total
 
 # remove files older than two weeks in output directories
