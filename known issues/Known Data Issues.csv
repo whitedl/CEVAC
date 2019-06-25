@@ -25,10 +25,25 @@ Power Restored,Watt,3/23/2019,Normalization,None,None,Monitors not in place
 439A Temp restored,Watt,12/11/2017,None,439A reports normally,None,None
 439A Temp total outage (filtered out),Watt,3/20/2018,None,439A reports only 0,None,None
 439A Temp restored,Watt,9/11/2018,None,439A reports normally,None,None
-Several Sensors reporting 0 before coming online,Watt,12/8/2015,None,None,Several sensors report 0,None
+Several CO2 sensors offline (filtered out),Watt,12/8/2015,None,None,"205, 207, 209, 211, 333, and 344B report 0",None
 333 CO2 online,Watt,5/27/2016,None,None,333 CO2 begins reporting,None
 344B CO2 online,Watt,12/28/2015,None,None,344B CO2 begins reporting,None
 209 CO2 online,Watt,12/9/2015,None,None,209 CO2 begins reporting,None
 211 CO2 online,Watt,12/9/2015,None,None,211 CO2 begins reporting,None
 207 CO2 online,Watt,12/9/2015,None,None,207 CO2 begins reporting,None
 205 CO2 online,Watt,12/9/2015,None,None,205 CO2 begins reporting,None
+103 Temp offline,Watt,5/9/2016,None,103 Temp does not report,None,None
+103 Temp restored,Watt,12/27/2017,None,103 Temp begins reporting,None,None
+103 Temp offline,Watt,2/11/2018,None,103 Temp does not report,None,None
+103 Temp restored,Watt,1/21/2019,None,103 Temp begins reporting,None,None
+103 Temp offline,Watt,3/25/2019,None ,103 Temp does not report,None,None
+103 Temp restored,Watt,6/24/2019,None,103 Temp begins reporting,None,None
+433 Temp offline,Watt,8/10/2018,None,433 Temp does not report,None,None
+344A Temp offline,Watt,8/20/2016,None,344A Temp does not report,None,None
+214 Temp offline,Watt,5/31/2018,None,214 Temp does not report,None,None
+214 Temp Restored,Watt,8/3/2018,None,214 Temp begins reporting,None,None
+339A Temp offline,Watt,2/6/2016,None,339A Temp does not report,None,None
+339A Temp restored,Watt,8/3/2016,None,339A Temp begins reporting,None,None
+308 Temp offline,Watt,8/9/2018,None,308 Temp does not report,None,None
+433 CO2 offline,Watt,8/9/2018,None,None,433 CO2 does not report,None
+433 CO2 restored,Watt,5/27/2019,None,None,433 CO2 begins reporting,
