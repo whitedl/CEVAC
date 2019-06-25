@@ -261,7 +261,7 @@ def ingest_file_floor(fname, dbc, xref):
     logging.info("opening file")
     with open(fname, "r") as csvfile:
         reader = csv.reader(csvfile)
-        insert_sql = "INSERT INTO  CEVAC_WATT_WAP_FLOOR_HIST (UTCDateTime, floor, guest_count, clemson_count) VALUES (?,?,?,?)"
+        insert_sql = "INSERT INTO  CEVAC_WATT_WAP_FLOOR_HIST_RAW (UTCDateTime, floor, guest_count, clemson_count) VALUES (?,?,?,?)"
         #move reader to 'Client Sessions' line
         try:
             while reader.next()[0] != 'Client Sessions':

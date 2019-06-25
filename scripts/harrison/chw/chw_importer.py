@@ -48,6 +48,10 @@ def custom_datestring_to_datetime(datestring):
 
     return central
 
+def custom_datestring_utc(datestring):
+    naive = datetime.datetime.strptime(datestring, "%b %d, %Y %I:%M:%S %p")
+    return naive
+
 # moves regular files and renames them if necessary. Undefined behavior if directories are passed.
 def safe_move(old_path, new_path):
 	try:
@@ -85,13 +89,12 @@ def ingest_file(fname):
         headers = next(reader)
 
         for row in reader:
-            # insert into CEVAC_ALL_CHW_RATE_HIST
+            # insert into CEVAC_ALL_CHW_RATE_HIST (BTU/sec)
             try:
                 today = custom_datestring_to_datetime(row[0]).strftime('%Y-%m-%d %H:%M:%S')
-                print(today)
+                today_utc = custom_datestring_utc(row[0]).strftime('%Y-%m-%d %H:%M:%S')
                 val = float(row[2].replace(",",""))
-                print(val)
-                com = "INSERT INTO  CEVAC_ALL_CHW_RATE_HIST (ETDateTime, name, ActualValue) VALUES ('"+today+"','"+name+"','"+str(val)+"')"
+                com = "INSERT INTO  CEVAC_PLANTS_CHW_RATE_HIST_RAW (UTCDateTime, ETDateTime, Alias, ActualValue) VALUES ('"+today_utc+"','"+today+"','"+name+"','"+str(val)+"')"
                 insert_sql_total += com + "; "
 
             except:
@@ -101,9 +104,13 @@ def ingest_file(fname):
             if len(row) < 5:
                 continue
 
-            # insert into CEVAC_ALL_CHW_HIST
+            # insert into CEVAC_ALL_CHW_HIST (kWh)
             try:
-                pass
+                today = custom_datestring_to_datetime(row[4]).strftime('%Y-%m-%d %H:%M:%S')
+                today_utc = custom_datestring_utc(row[4]).strftime('%Y-%m-%d %H:%M:%S')
+                val = float(row[6].replace(",",""))
+                com = "INSERT INTO  CEVAC_PLANTS_CHW_HIST_RAW (UTCDateTime, ETDateTime, Alias, ActualValue) VALUES ('"+today_utc+"','"+today+"','"+name+"','"+str(val)+"')"
+                insert_sql_total += com + "; "
             except:
                 errorCount += 1
 
