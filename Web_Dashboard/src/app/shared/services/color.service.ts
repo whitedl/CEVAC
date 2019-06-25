@@ -155,6 +155,9 @@ export class ColorService {
     }
   };
 
+  getScale = (scaleType: string) =>
+    scaleType in this.scales ? this.scales[scaleType].domain : null;
+
   // if scale is in Scales, return the lower bound
   scaleLowBound = (scaleType: string) =>
     scaleType in this.scales ? this.scales[scaleType].min : null;
@@ -192,10 +195,7 @@ export class ColorService {
     return this.colors.Alerts.warn;
   }
 
-  private labDomain = (color: string) => [
-    this.labMin(color),
-    this.labMax(color)
-  ];
+  labDomain = (color: string) => [this.labMin(color), this.labMax(color)];
   private labMax = (color: string) => chroma(color).set('lab.l', 100);
   private labMin = (color: string) => chroma(color).set('lab.l', 0);
 }
