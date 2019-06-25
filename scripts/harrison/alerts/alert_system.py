@@ -246,7 +246,7 @@ insert_sql_total = ""
 total_issues = 0
 for i,a in enumerate(alerts):
     alert = alerts[a]
-    insert_sql = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType, AlertMessage, Metric,BLDG,BeginTime) VALUES(?,?,?,?,GETUTCDATE())"
+    insert_sql = "INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType, AlertMessage, Metric,BLDG,UTCDateTime) VALUES(?,?,?,?,GETUTCDATE())"
     try:
         # Check time conditional
         now = datetime.datetime.now()
@@ -280,7 +280,7 @@ for i,a in enumerate(alerts):
                 total_issues += 1
                 safe_log("An alert was sent for "+str(alert),"info")
                 print(alert["type"])
-                com = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType, AlertMessage, Metric,BLDG,BeginTime) VALUES('"
+                com = "INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType, AlertMessage, Metric,BLDG,UTCDateTime) VALUES('"
                 com += alert["operation"]+"','"+alert["message"]+"','"+alert["type"]+"','"+alert["building"]+"',GETUTCDATE())"
                 insert_sql_total += com + "; "
             safe_log("Checked "+str(i+1),"info")
@@ -350,7 +350,7 @@ for i,a in enumerate(alerts):
                     if send_alert:
                         total_issues += 1
                         alert["message"] = angle_brackets_replace_single(alert["message"],room)
-                        com = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType, AlertMessage, Metric,BLDG,BeginTime) VALUES('"+alert["operation"]+"','"+alert["message"]+"','"+alert["type"]+"','"+alert["building"]+"',GETUTCDATE())"
+                        com = "INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType, AlertMessage, Metric,BLDG,UTCDateTime) VALUES('"+alert["operation"]+"','"+alert["message"]+"','"+alert["type"]+"','"+alert["building"]+"',GETUTCDATE())"
                         insert_sql_total += com + "; "
                         safe_log("An alert was sent for "+str(alert),"info")
                 except:
@@ -409,7 +409,7 @@ for i,a in enumerate(alerts):
         safe_log("Issue on alert "+str(i+1)+" "+str(alert),"info")
 
 if total_issues == 0:
-    insert_sql_total = "INSERT INTO CEVAC_ALL_ALERTS_HIST(AlertType,AlertMessage,Metric,BLDG,BeginTime) VALUES('All Clear','All Clear','N/A','All',GETUTCDATE())"
+    insert_sql_total = "INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType,AlertMessage,Metric,BLDG,UTCDateTime) VALUES('All Clear','All Clear','N/A','All',GETUTCDATE())"
 
 # Insert into CEVAC_WATT_ALERT_HIST
 if SEND:
