@@ -10,8 +10,14 @@ GO
 
 CREATE VIEW CEVAC_WATT_POWER_SUMS_HIST_VIEW AS
 
-SELECT UTCDateTime,  SUM(ActualValue) AS Total_Usage, DATEPART(year, UTCDateTime) AS Year, DATEPART(month, UTCDateTime) AS Month, DATEPART(day, UTCDateTime) AS Day
-FROM
-(SELECT * FROM CEVAC_WATT_POWER_HIST_VIEW
- WHERE Alias LIKE 'Building%') AS Building
-GROUP BY UTCDateTime
+WITH original AS (
+	SELECT UTCDateTime, dbo.ConvertUTCToLocal(UTCDateTime) AS ETDateTime, SUM(ActualValue) AS Total_Usage
+	FROM
+	(SELECT * FROM CEVAC_WATT_POWER_HIST
+	 WHERE Alias LIKE 'Building%'
+	 AND DATEPART(minute,UTCDateTime) = 0
+	 ) AS Building
+	GROUP BY UTCDateTime
+)
+SELECT *, DATEPART(year, ETDateTime) AS Year, DATEPART(month, ETDateTime) AS Month, DATEPART(day, ETDateTime) AS Day
+FROM original

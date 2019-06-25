@@ -1,4 +1,0 @@
-#BUILDING#
-#METRIC#
-#AGE#
-#KEYS_LIST#
