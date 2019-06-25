@@ -67,16 +67,20 @@ def generateInput(h, d, m, y):
         '12' : 31
     }
 
+    # the percent of the month that has elapsed
     throughMonth = [float(d/numMonth[str(m)])]
 
+    # normalized hour of the day for a given data point
     hour = [0 for i in range(0,24)]
     hour[h] = 1
 
+    # returns the day of the week: MONDAY == 0
     d = date(y, m, d).weekday()
 
     day = [0 for i in range(0,7)]
     day[d -1] = 1
 
+    # normalized month of the year: JANUARY == 0
     month = [0 for i in range(0,12)]
     month[m - 1] = 1
 
@@ -123,11 +127,12 @@ def pred(model):
         prediction = model.predict(input.reshape(1,-1))[0][0] * 275
         predictions.append(prediction)
 
+    str = ''
 
     for i, prediction in enumerate(predictions):
-        date =  '/'.join((str(hourly['months'][i]), str(hourly['days'][i]), str(hourly['years'][i]))) + ' ' + str(hourly['hours'][i])
-        str = 'INSERT INTO [] ({},{},{})'.format(date, prediction, building, metric)
-        str += 'ESTIMATE {} ON {}/{} AT HOUR {}\n'.format(element, hourly['days'][i], hourly['months'][i], hourly['hours'][i])
+        # date =  '/'.join((str(hourly['months'][i]), str(hourly['days'][i]), str(hourly['years'][i]))) + ' ' + str(hourly['hours'][i])
+        # str = 'INSERT INTO [] ({},{},{})'.format(date, prediction, building, metric)
+        str += 'ESTIMATE {} ON {}/{} AT HOUR {}\n'.format(prediction, hourly['days'][i], hourly['months'][i], hourly['hours'][i])
     with open('predictions.txt', 'w') as f:
         f.write(str)
     return predictions
