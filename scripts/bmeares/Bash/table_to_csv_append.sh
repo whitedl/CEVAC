@@ -105,6 +105,9 @@ else # csv exists
   # append new data to existing csv
   cat /home/bmeares/cache/$table.csv >> /srv/csv/$table.csv
 
+  # append columns to cache CSV for Append
+  cat /home/bmeares/cache/cols_$table.csv /home/bmeares/cache/$table.csv > /home/bmeares/cache/temp_$table.csv && mv /home/bmeares/cache/temp_$table.csv /home/bmeares/cache/$table.csv
+
 fi
 row_count=$(wc -l < /srv/csv/$table.csv)
 record_query="
