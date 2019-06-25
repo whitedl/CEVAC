@@ -40,7 +40,7 @@ def custom_datestring_to_datetime(datestring):
     to_zone = tz.gettz('America/New_York')
 
     local = pytz.timezone ("America/New_York")
-    naive = datetime.datetime.strptime(datestring, "%b %d, %Y %I:%M:%S %p"
+    naive = datetime.datetime.strptime(datestring, "%b %d, %Y %I:%M:%S %p")
 
     utc = naive.replace(tzinfo=from_zone)
     central = utc.astimezone(to_zone)
