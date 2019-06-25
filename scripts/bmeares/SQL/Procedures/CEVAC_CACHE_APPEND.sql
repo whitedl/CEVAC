@@ -13,7 +13,7 @@ DECLARE @name NVARCHAR(50);
 DECLARE @name_CACHE NVARCHAR(50);
 DECLARE @select_query NVARCHAR(500);
 DECLARE @i INT;
-SET @i = 20;
+SET @i = 100;
 IF OBJECT_ID('dbo.#cevac_params', 'U') IS NOT NULL DROP TABLE #cevac_params;
 SELECT * INTO #cevac_params FROM ListTable(@tables);
 WHILE (EXISTS(SELECT 1 FROM #cevac_params) AND @i > 0) BEGIN
@@ -35,17 +35,34 @@ WHILE (EXISTS(SELECT 1 FROM #cevac_params) AND @i > 0) BEGIN
 	DECLARE @where_subquery NVARCHAR(300);
 	DECLARE @select_or_insert NVARCHAR(30);
 	SET @select_or_insert = 'SELECT';
+	-- Default: clone _VIEW into _HIST
 	SET @select_query = 'SELECT * INTO ' + @name_CACHE + ' FROM ' + @name;
 
-	-- if cache exists, 
+	-- if cache exists, only grab latest data
 	IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME=@name_CACHE) BEGIN
 		DECLARE @update_time DATETIME;
 		SET @update_time = (SELECT TOP 1 update_time FROM CEVAC_CACHE_RECORDS WHERE table_name = @name ORDER BY update_time DESC);
-		SET @where_subquery = ' WHERE UTCDateTime BETWEEN ' + '''' + CAST(@update_time AS NVARCHAR(50)) + '''' + ' AND ' + '''' + CAST(@now AS NVARCHAR(50)) + '''';
+		--SET @where_subquery = ' WHERE UTCDateTime BETWEEN ' + '''' + CAST(@update_time AS NVARCHAR(50)) + '''' + ' AND ' + '''' + CAST(@now AS NVARCHAR(50)) + '''';
+--		SET @where_subquery = ' WHERE UTCDateTime BETWEEN @update_time AND @now';
 		SET @select_or_insert = 'INSERT';
 	
-		SET @select_query = 'INSERT INTO ' + @name_CACHE + ' SELECT * FROM ' + @name	
-		 + ' ' + isnull(@where_subquery, '');
+		DECLARE @begin DATETIME;
+		SET @begin = DATEADD(day, -2, @now);		
+
+		IF DATEDIFF(day, @update_time, @begin) > 0 BEGIN
+			SET @begin = @update_time;
+		END
+
+		SET @select_query = ' ' +
+--		'DECLARE @update_time DATETIME; SET @update_time = ''' + CAST(@update_time AS NVARCHAR(50)) +  '''; ' +
+		'DECLARE @now DATETIME; SET @now = ''' + CAST(@now AS NVARCHAR(50)) +  '''; 
+		DECLARE @begin DATETIME; SET @begin = ''' + CAST(@begin AS NVARCHAR(50)) +  ''';
+
+		INSERT INTO ' + @name_CACHE +
+		' SELECT V.* FROM ' + @name + ' AS V ' +
+		'LEFT JOIN ' + @name_CACHE + ' AS C ON V.UTCDateTime = C.UTCDateTime '
+		+ ' WHERE C.UTCDateTime IS NULL ' +
+		' AND V.UTCDateTime BETWEEN @begin AND @now'			
 	
 	
 --		DECLARE @ExecSQL NVARCHAR(300);

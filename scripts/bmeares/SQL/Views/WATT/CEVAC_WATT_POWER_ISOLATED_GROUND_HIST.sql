@@ -12,13 +12,14 @@ GO
 CREATE VIEW CEVAC_WATT_POWER_ISOLATED_GROUND_HIST
 AS
 
-
-SELECT 'Building Isolated Ground' AS Alias, UTCDateTime, SUM(ActualValue) AS ActualValue, DATEPART(year, UTCDateTime) AS Year, DATEPART(month, UTCDateTime) AS Month, DATEPART(day, UTCDateTime) AS Day
-FROM CEVAC_WATT_POWER_RAW_HIST
-WHERE Alias IN
-(
-	SELECT Alias FROM CEVAC_WATT_POWER_XREF
-	WHERE (Type = 'Isolated Ground')
+WITH original AS (
+	SELECT 'Building Isolated Ground' AS Alias, UTCDateTime, dbo.ConvertUTCToLocal(UTCDateTime) AS ETDateTime, SUM(ActualValue) AS ActualValue
+	FROM CEVAC_WATT_POWER_RAW_HIST
+	WHERE Alias IN
+	(
+		SELECT Alias FROM CEVAC_WATT_POWER_XREF
+		WHERE (Type = 'Isolated Ground')
+	) GROUP BY UTCDateTime
 )
-AND UTCDateTime <= GETUTCDATE() AND UTCDateTime >= DATEADD(day, -1, GETUTCDATE())
-GROUP BY UTCDateTime
+SELECT *, DATEPART(year, ETDateTime) AS Year, DATEPART(month, ETDateTime) AS Month, DATEPART(day, ETDateTime) AS Day
+FROM original

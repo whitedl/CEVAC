@@ -1,5 +1,0 @@
-Executing query:
-
-SET NOCOUNT ON
-EXEC CEVAC_VIEW @Building = 'WATT', @Metric = 'IAQ', @Age = 'HIST', @keys_list = 'CO2,-Q', @unitOfMeasureID = 96
-
