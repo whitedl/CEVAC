@@ -2,13 +2,45 @@
 // *primarily for the map and map keys at the moment*
 import { Injectable } from '@angular/core';
 import chroma from 'chroma-js';
-import { fromStringWithSourceMap } from 'source-list-map';
+
+interface Palette {
+  [index: string]: string;
+}
+interface PaletteSet {
+  [index: string]: Palette;
+}
+
+// Using a class for Scale makes life easier. You can't define a generic getter/setter for interfaces.
+class Scale {
+  domain: [number, number];
+  get min() {
+    return this.domain[0];
+  }
+  set min(n: number) {
+    this.domain[0] = n;
+  }
+  get max() {
+    return this.domain[1];
+  }
+  set max(n: number) {
+    this.domain[1] = n;
+  }
+  constructor(domain: [number, number] = [0, 1000]) {
+    this.domain = domain;
+  }
+}
+interface ScaleSet {
+  [index: string]: Scale;
+}
+interface BuildingRegistry {
+  [index: string]: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class ColorService {
-  private colors = {
+  private colors: PaletteSet = {
     ClemsonPalette: {
       clemsonOrange: '#F66733',
       regalia: '#522D80',
@@ -34,7 +66,7 @@ export class ColorService {
       warn: '#FFCC00'
     }
   };
-  private Scales = {
+  private scales: ScaleSet = {
     Power: {
       domain: [0, 1000],
       get min() {
@@ -81,66 +113,63 @@ export class ColorService {
       }
     }
   };
-
-  private regScales: Map<string, any>;
+  private crg: BuildingRegistry = {};
+  private crgPalette = 'ClemsonComplementary';
 
   constructor() {
-    this.regScales = new Map<string, any>();
+    this.crg['undefined'] = this.getPassive();
   }
-
-  getRegisteredScale = (
-    color: string,
-    n?: number,
-    scaleType: string = Object.keys(this.Scales)[0]
-  ) => {
-    if (!this.regScales.has(color)) {
-      const c = chroma(color);
-      const low = chroma.set('lch.l', 0);
-      const high = chroma.set('lch.l', 100);
-      this.regScales.set(color, chroma.scale([low, high]));
-    }
-  };
-
-  // If n is not passed, will return requested scale
-  // If scaleType is not passed, will assume first scale
-  getScale = (n?: number, scaleType: string = Object.keys(this.Scales)[0]) => {
-    if (!(scaleType in this.Scales)) {
-      scaleType = Object.keys(this.Scales)[0];
-    }
-    const scale = this.Scales[scaleType];
-    const c = chroma(this.getColor('ClemsonTetradic', 0));
-    const low = c.set('lab.l', 0);
-    const high = c.set('lab.l', 100);
-    const s = chroma.scale([high, low]).domain(scale.domain);
-    return typeof n !== 'undefined' ? s(n) : scale;
-  };
-
-  // if scale is in Scales, return the lower bound
-  getScaleLower = (scaleType: string) =>
-    scaleType in this.Scales ? this.Scales[scaleType].min : null;
-
-  // if scale is in Scales, set the minimum. Returnset value on success and null on fail.
-  setScaleLower = (n: number, scaleType: string) =>
-    scaleType in this.Scales ? (this.Scales[scaleType].min = n) : null;
-
-  // if scale is in Scales, return the upper bound
-  getScaleHigher = (scaleType: string) =>
-    scaleType in this.Scales ? this.Scales[scaleType].max : null;
-
-  // if scale is in Scales, set the maximum. Returns set value on success and null on fail.
-  setScaleHigher = (n: number, scaleType: string) =>
-    scaleType in this.Scales ? (this.Scales[scaleType].max = n) : null;
 
   // If name is not passed, assumes first ColorSet (ClemsonPalette).
   // If pos is passed, will return color at position in chosen set
-  // If pos is not passed, will return requested set
-  getColor = (name = Object.keys(this.colors)[0], pos?: number) => {
+  // If pos is not passed, will return first in set
+  getColor = (name: string = Object.keys(this.colors)[0], pos: number = 0) => {
     if (!(name in this.colors)) {
       name = Object.keys(this.colors)[0];
     }
     const set = Object.values(this.colors[name]);
-    return typeof pos !== 'undefined' ? set[pos % set.length] : set;
+    return set[pos % set.length];
   };
+
+  getScaledColor = (category: string, scale?: string, val?: number) => {
+    if (typeof val === 'undefined' || typeof scale === 'undefined') {
+      return this.crg[category];
+    }
+    return chroma
+      .scale(this.labDomain(this.crg[category]))
+      .domain(this.scales[scale].domain)(val);
+  };
+
+  registerCategory = (cat: string) => {
+    if (!this.crg.hasOwnProperty(cat)) {
+      this.crg[cat] = this.getColor(
+        this.crgPalette,
+        Object.keys(this.crg).length - 1
+      );
+    }
+  };
+
+  registerScale = (scale: string, domain: [number, number]) => {
+    if (!this.scales.hasOwnProperty(scale)) {
+      this.scales[scale].domain = domain;
+    }
+  };
+
+  // if scale is in Scales, return the lower bound
+  scaleLowBound = (scaleType: string) =>
+    scaleType in this.scales ? this.scales[scaleType].min : null;
+
+  // if scale is in Scales, set the minimum. Returnset value on success and null on fail.
+  setScaleLowBound = (n: number, scaleType: string) =>
+    scaleType in this.scales ? (this.scales[scaleType].min = n) : null;
+
+  // if scale is in Scales, return the upper bound
+  scaleHighBound = (scaleType: string) =>
+    scaleType in this.scales ? this.scales[scaleType].max : null;
+
+  // if scale is in Scales, set the maximum. Returns set value on success and null on fail.
+  setScaleHighBound = (n: number, scaleType: string) =>
+    scaleType in this.scales ? (this.scales[scaleType].max = n) : null;
 
   getComplementary = (pos: number = 0) =>
     this.getColor('ClemsonComplementary', pos);
@@ -153,10 +182,20 @@ export class ColorService {
 
   getUnnamed = () => this.colors.ClemsonPalette.innovation;
 
+  brighten = (color: string, n: number = 1) => chroma(color).brighten(n);
+  darken = (color: string, n: number = 1) => chroma(color).darken(n);
+
   get alert() {
     return this.colors.Alerts.alert;
   }
   get warn() {
     return this.colors.Alerts.warn;
   }
+
+  private labDomain = (color: string) => [
+    this.labMin(color),
+    this.labMax(color)
+  ];
+  private labMax = (color: string) => chroma(color).set('lab.l', 100);
+  private labMin = (color: string) => chroma(color).set('lab.l', 0);
 }
