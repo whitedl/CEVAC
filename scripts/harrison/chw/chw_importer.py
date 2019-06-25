@@ -89,7 +89,7 @@ def ingest_file(fname):
             try:
                 today = custom_datestring_to_datetime(row[0]).strftime('%Y-%m-%d %H:%M:%S')
                 print(today)
-                val = float(row[2])
+                val = float(row[2].replace(",",""))
                 print(val)
                 com = "INSERT INTO  CEVAC_ALL_CHW_RATE_HIST (ETDateTime, name, ActualValue) VALUES ('"+today+"','"+name+"','"+str(val)+"')"
                 insert_sql_total += com + "; "
