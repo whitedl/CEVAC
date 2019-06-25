@@ -65,7 +65,7 @@ def safe_move(old_path, new_path):
 def ingest_file(fname):
     errorCount = 0
     print(fname)
-    name = fname.split("BTU")[0][:-1]
+    name = fname.split("/")[-1].split("BTU")[0][:-1]
     print(name)
 
     insert_sql_total = ""
@@ -74,10 +74,10 @@ def ingest_file(fname):
 
         # Move reader to 'Timestamp' line
         try:
-            while next(reader)[0] != 'Timestamp':
+            while next(reader)[0] != 'TimeStamp':
                 pass
         except StopIteration as e:
-            logging.error("Couldn't find 'Timestamp' line in %s. Unable to injest file.", fname)
+            logging.error("Couldn't find 'TimeStamp' line in %s. Unable to injest file.", fname)
             return ""
 
         #read past header
