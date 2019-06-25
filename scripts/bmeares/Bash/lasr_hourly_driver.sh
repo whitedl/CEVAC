@@ -5,3 +5,6 @@
 
 
 
+/home/bmeares/scripts/lasr.sh WATT POWER_SUMS HIST
+
+

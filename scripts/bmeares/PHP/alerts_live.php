@@ -28,8 +28,8 @@ sqlsrv_close($db);
  * */
 
 function fire_event(){
-  $newest_query = 'SELECT TOP 1 dbo.ConvertUTCToLocal(BeginTime) AS BeginTimeET
-    FROM CEVAC_ALL_ALERTS_HIST ORDER BY BeginTime DESC';
+  $newest_query = 'SELECT TOP 1 dbo.ConvertUTCToLocal(UTCDateTime) AS BeginTimeET
+    FROM CEVAC_ALL_ALERTS_HIST ORDER BY UTCDateTime DESC';
   $newest_result = sqlsrv_query($db, $newest_query);
   $newest_row = sqlsrv_fetch_array($newest_result, SQLSRV_FETCH_ASSOC);
   $newest_time = strtotime($newest_row['BeginTimeET']);
@@ -37,7 +37,7 @@ function fire_event(){
   $_SESSION['time'] = time();
   $query = '
     SELECT AlertID, RTRIM(AlertType) AS AlertType, RTRIM(AlertMessage) AS AlertMessage,
-    RTRIM(Metric) AS Metric, RTRIM(BLDG) AS BLDG, Acknowledged, BeginTime, EndTime
+    RTRIM(Metric) AS Metric, RTRIM(BLDG) AS BLDG, Acknowledged, UTCDateTime, EndTime
     FROM CEVAC_ALL_ALERTS_HIST
     WHERE Acknowledged = 0
     ORDER BY AlertID DESC;
