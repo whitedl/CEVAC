@@ -64,8 +64,9 @@ def safe_move(old_path, new_path):
 # Used for the new dataset that will fail at ingest_file
 def ingest_file(fname):
     errorCount = 0
-
+    print(fname)
     name = fname.split("BTU")[0][:-1]
+    print(name)
 
     insert_sql_total = ""
     with open(fname, "r") as csvfile:
@@ -83,6 +84,7 @@ def ingest_file(fname):
         headers = next(reader)
 
         for row in reader:
+            print(row)
             # insert into CEVAC_ALL_CHW_RATE_HIST
             try:
                 today = custom_datestring_to_datetime(row[0]).strftime('%Y-%m-%d %H:%M:%S')
