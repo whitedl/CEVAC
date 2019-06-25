@@ -3,7 +3,6 @@
 import os
 import sys
 from stat import *
-import pypyodbc
 import json
 import datetime
 import time
@@ -18,13 +17,14 @@ import pandas as pd
 ######################################
 
 #set up variables
-prefix = "//130.127.219.170/Watt/Watt Staff/Building/CAMPUS_POWER"
+prefix = "/mnt/bldg/CAMPUS_POWER"
+print(os.listdir("/mnt/bldg"))
 import_dir = prefix
 failed_dir = prefix
 processed_dir = prefix + "/processed"
 log_dir = prefix + "/logs"
 
-SEND = False
+SEND = True
 DEBUG = False
 
 #######################################
@@ -56,7 +56,7 @@ def ingest_file(fname):
     errorCount = 0
 
     # Turn into csv
-    data_xls = pd.read_excel('fname', 'Sheet1', index_col=None)
+    data_xls = pd.read_excel(fname, 'Sheet1', index_col=None)
     data_xls.to_csv('tempcsv.csv', encoding='utf-8')
 
     insert_sql_total = ""
@@ -65,19 +65,19 @@ def ingest_file(fname):
 
         # Move reader to 'Timestamp' line
         try:
-            while str(next(reader)[0]) != 'Timestamp':
-                 print("x")
+            while next(reader)[1] != 'Timestamp':
+                pass
         except StopIteration as e:
             logging.error("Couldn't find 'Timestamp' line in %s. Unable to injest file.", fname)
-            return False
+            return ""
 
         #read past header
         headers = next(reader)
         for row in reader:
             try:
-                today = custom_datestring_to_datetime(row[0]).strftime('%Y-%m-%d %H:%M:%S')
-                kWh = float(row[1])
-                com = "INSERT INTO  CEVAC_CAMPUS_ENERGY_HIST_RAW (ETDateTime, ActualValue) VALUES ('"+today+"','"+kWh+"')"
+                today = custom_datestring_to_datetime(row[1]).strftime('%Y-%m-%d %H:%M:%S')
+                kWh = float(row[3])
+                com = "INSERT INTO  CEVAC_CAMPUS_ENERGY_HIST_RAW (ETDateTime, ActualValue) VALUES ('"+today+"','"+str(kWh)+"')"
                 insert_sql_total += com + "; "
 
             except:
@@ -140,15 +140,10 @@ for fname in next(os.walk(import_dir))[2]:
 
     if success:
         try:
-            safe_move.safe_move(fpath, os.path.join(processed_dir, fname))
+            safe_move(fpath, os.path.join(processed_dir, fname))
             logging.info("Successfully imported data in file " + fname)
-        except WindowsError as e:
-            logging.exception("Failed to move %s to %s.", fname, processed_dir)
-    else:
-        try:
-            safe_move.safe_move(fpath, os.path.join(failed_dir, fname))
-        except WindowsError as e:
-            logging.exception("Failed to move %s to %s", fname, failed_dir)
+        except:
+            print("not moved")
 
 if SEND:
     #urllib.request.urlopen(command_to_query(insert_sql_total)).read()
@@ -158,6 +153,7 @@ if SEND:
     os.system("/home/bmeares/scripts/exec_sql_script.sh /home/bmeares/cache/insert_powermeters.sql")
     os.remove("/home/bmeares/cache/insert_powermeters.sql")
 else:
+    print("DID NOT SEND")
     print(insert_sql_total.replace(';','\nGO\n'))
 
 # clean output directories
@@ -176,4 +172,4 @@ logging.shutdown()
    *%&@&@%&%%(
      %%%%%%%%
 """
-# communicaiton, innovation, adaptability, tech, ethics
+
