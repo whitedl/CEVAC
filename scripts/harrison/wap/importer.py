@@ -189,7 +189,11 @@ def ingest_file_fail(fname, dbc):
             if username == "test":
                 username = row[2]
             SSID = row[7]
-            hour = custom_datestring_to_datetime(row[3]).replace(minute=0,second=0)
+            hour = custom_datestring_to_datetime(row[3])
+            if hour.minute < 30:
+                hour = hour.replace(minute=0,second=0)
+            else:
+                hour = hour.replace(minute=30,second=0)
             assoc_time = custom_datestring_to_datetime(row[3])
             try:
                 dissoc_time = custom_datestring_to_datetime(row[10])
@@ -261,7 +265,7 @@ def ingest_file_floor(fname, dbc, xref):
     logging.info("opening file")
     with open(fname, "r") as csvfile:
         reader = csv.reader(csvfile)
-        insert_sql = "INSERT INTO  CEVAC_WATT_WAP_FLOOR_HIST (UTCDateTime, floor, guest_count, clemson_count) VALUES (?,?,?,?)"
+        insert_sql = "INSERT INTO  CEVAC_WATT_WAP_FLOOR_HIST_RAW (UTCDateTime, floor, guest_count, clemson_count) VALUES (?,?,?,?)"
         #move reader to 'Client Sessions' line
         try:
             while reader.next()[0] != 'Client Sessions':
@@ -292,7 +296,11 @@ def ingest_file_floor(fname, dbc, xref):
                 if username == "test":
                     username = row[2]
                 SSID = row[7]
-                hour = custom_datestring_to_datetime(row[3]).replace(minute=0,second=0)
+                hour = custom_datestring_to_datetime(row[3])
+                if hour.minute < 30:
+                    hour = hour.replace(minute=0,second=0)
+                else:
+                    hour = hour.replace(minute=30,second=0)
                 assoc_time = custom_datestring_to_datetime(row[3])
                 try:
                     dissoc_time = custom_datestring_to_datetime(row[10])

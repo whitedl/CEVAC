@@ -1,5 +1,6 @@
 <head>
 <title>CEVAC SQL</title>
+<link rel="stylesheet" type="text/css" href="har.css">
 </head>
 <body>
   <div style="margin: 0 auto; width: 70%;">
@@ -17,7 +18,7 @@
   <iframe 
     style='width:100%; height:100%'
     frameborder="0"
-    src="query.php?debug=1&q=<?php if(isset($_POST['query'])) echo urlencode($_POST['query']); ?>"></iframe>
+    src="query.php?q=<?php if(isset($_POST['query'])) echo urlencode($_POST['query']); ?>"></iframe>
 
 
 <?php
