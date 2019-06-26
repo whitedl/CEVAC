@@ -260,3 +260,23 @@ correlate well with the data we received
 
 ## 06/12
 * We now have `CEVAC_WATT_WAP_DAILY_HIST`
+
+## 06/26
+* When looking at orientation numbers, the waps are under-reporting by a large
+margin
+  * This is due to a mix of:
+    1. New students not yet connecting to the internet
+    2. New students not being in the WATT center long enough for the waps to
+    pick them up
+  ```
+  date  actual  clemson guest (clemson+guest)
+  6/7-  410     3       97    100
+  6/10- 266     44      138   182
+  6/11- 932     31      70    101
+  6/13- 963     35      62    97
+  6/17- 506     18      55    73
+  6/18- 959     50      73    123
+  6/20- 966     41      47    88
+  6/24- 933     69      93    162
+  6/26- 553     24      89    113
+  ```
