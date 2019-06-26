@@ -411,7 +411,7 @@ for i,a in enumerate(alerts):
 if total_issues == 0:
     insert_sql_total = "INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType,AlertMessage,Metric,BLDG,UTCDateTime) VALUES('All Clear','All Clear','N/A','All',GETUTCDATE())"
 
-# Insert into CEVAC_WATT_ALERT_HIST
+# Insert into CEVAC_ALL_ALERTS_HIST
 if SEND:
     f = open("/home/bmeares/cache/insert_alert_system.sql","w")
     #print(insert_sql_total.replace(';','\nGO\n'))
