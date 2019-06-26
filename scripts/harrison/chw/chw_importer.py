@@ -10,6 +10,7 @@ import pytz
 import csv
 import logging
 import pandas as pd
+from dateutil import tz
 
 
 ######################################
@@ -17,7 +18,7 @@ import pandas as pd
 ######################################
 
 #set up variables
-prefix = "/mnt/bldg/CAMPUS_POWER"
+prefix = "/mnt/bldg/Campus_CHW"
 print(os.listdir("/mnt/bldg"))
 import_dir = prefix
 failed_dir = prefix
@@ -26,7 +27,7 @@ log_dir = prefix + "/logs"
 
 SEND = True
 DEBUG = False
-
+# BTU/s
 #######################################
 # Function Definitions
 #######################################
@@ -35,7 +36,21 @@ DEBUG = False
 # for conversion details:
 # https://stackoverflow.com/questions/79797/how-do-i-convert-local-time-to-utc-in-python
 def custom_datestring_to_datetime(datestring):
-    return datetime.datetime.strptime(datestring, "%m/%d/%Y %I:%M:%S %p")
+    dst = False
+    from_zone = tz.gettz('UTC')
+    to_zone = tz.gettz('America/New_York')
+
+    local = pytz.timezone ("America/New_York")
+    naive = datetime.datetime.strptime(datestring, "%b %d, %Y %I:%M:%S %p")
+
+    utc = naive.replace(tzinfo=from_zone)
+    central = utc.astimezone(to_zone)
+
+    return central
+
+def custom_datestring_utc(datestring):
+    naive = datetime.datetime.strptime(datestring, "%b %d, %Y %I:%M:%S %p")
+    return naive
 
 # moves regular files and renames them if necessary. Undefined behavior if directories are passed.
 def safe_move(old_path, new_path):
@@ -54,36 +69,50 @@ def safe_move(old_path, new_path):
 # Used for the new dataset that will fail at ingest_file
 def ingest_file(fname):
     errorCount = 0
-
-    # Turn into csv
-    data_xls = pd.read_excel(fname, 'Sheet1', index_col=None)
-    data_xls.to_csv('tempcsv.csv', encoding='utf-8')
+    print(fname)
+    name = fname.split("/")[-1].split("BTU")[0][:-1]
+    print(name)
 
     insert_sql_total = ""
-    with open("tempcsv.csv", "r") as csvfile:
+    with open(fname, "r") as csvfile:
         reader = csv.reader(csvfile)
 
         # Move reader to 'Timestamp' line
         try:
-            while next(reader)[1] != 'Timestamp':
+            while next(reader)[0] != 'TimeStamp':
                 pass
         except StopIteration as e:
-            logging.error("Couldn't find 'Timestamp' line in %s. Unable to injest file.", fname)
+            logging.error("Couldn't find 'TimeStamp' line in %s. Unable to injest file.", fname)
             return ""
 
         #read past header
         headers = next(reader)
+
         for row in reader:
+            # insert into CEVAC_ALL_CHW_RATE_HIST (BTU/sec)
             try:
-                today = custom_datestring_to_datetime(row[1]).strftime('%Y-%m-%d %H:%M:%S')
-                kWh = float(row[3])
-                com = "INSERT INTO  CEVAC_CAMPUS_ENERGY_HIST_RAW (ETDateTime, ActualValue) VALUES ('"+today+"','"+str(kWh)+"')"
+                today = custom_datestring_to_datetime(row[0]).strftime('%Y-%m-%d %H:%M:%S')
+                today_utc = custom_datestring_utc(row[0]).strftime('%Y-%m-%d %H:%M:%S')
+                val = float(row[2].replace(",",""))
+                com = "INSERT INTO  CEVAC_PLANTS_CHW_RATE_HIST_RAW (UTCDateTime, ETDateTime, Alias, ActualValue) VALUES ('"+today_utc+"','"+today+"','"+name+"','"+str(val)+"')"
                 insert_sql_total += com + "; "
 
             except:
                 errorCount += 1
 
-    os.remove("tempcsv.csv")
+            # skip if other table ended
+            if len(row) < 5:
+                continue
+
+            # insert into CEVAC_ALL_CHW_HIST (kWh)
+            try:
+                today = custom_datestring_to_datetime(row[4]).strftime('%Y-%m-%d %H:%M:%S')
+                today_utc = custom_datestring_utc(row[4]).strftime('%Y-%m-%d %H:%M:%S')
+                val = float(row[6].replace(",",""))
+                com = "INSERT INTO  CEVAC_PLANTS_CHW_HIST_RAW (UTCDateTime, ETDateTime, Alias, ActualValue) VALUES ('"+today_utc+"','"+today+"','"+name+"','"+str(val)+"')"
+                insert_sql_total += com + "; "
+            except:
+                errorCount += 1
 
     return insert_sql_total
 
@@ -108,15 +137,6 @@ def debug_log(message, LOG):
 ######################################
 # Begin Script
 ######################################
-
-# check import directory for files, end program if none exist
-file_list = []
-for fname in os.listdir(import_dir):
-    if S_ISREG(os.stat(os.path.join(import_dir, fname)).st_mode):
-        file_list.append(fname)
-
-if len(file_list) == 0:
-    sys.exit()
 
 # create logger
 FORMAT = '%(asctime)s %(levelname)s:%(message)s'
@@ -147,11 +167,11 @@ for fname in next(os.walk(import_dir))[2]:
 
 if SEND:
     #urllib.request.urlopen(command_to_query(insert_sql_total)).read()
-    f = open("/home/bmeares/cache/insert_powermeters.sql","w")
+    f = open("/home/bmeares/cache/insert_chw.sql","w")
     f.write(insert_sql_total.replace(';','\nGO\n'))
     f.close()
-    os.system("/home/bmeares/scripts/exec_sql_script.sh /home/bmeares/cache/insert_powermeters.sql")
-    os.remove("/home/bmeares/cache/insert_powermeters.sql")
+    os.system("/home/bmeares/scripts/exec_sql_script.sh /home/bmeares/cache/insert_chw.sql")
+    os.remove("/home/bmeares/cache/insert_chw.sql")
 else:
     print("DID NOT SEND")
     print(insert_sql_total.replace(';','\nGO\n'))
@@ -172,4 +192,3 @@ logging.shutdown()
    *%&@&@%&%%(
      %%%%%%%%
 """
-

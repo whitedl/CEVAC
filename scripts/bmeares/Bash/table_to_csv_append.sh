@@ -1,9 +1,22 @@
 #! /bin/bash
-
 if [ -z "$1" ]; then
   echo Error: Missing table name
+  echo "Usage: ./table_to_csv_append.sh [TABLE] [UTCDateTime] [Alias]"
   exit 1
 fi
+if [ -z "$2" ]; then
+  echo "Error: Missing time metric (e.g. UTCDateTime)"
+  echo "Usage: ./table_to_csv_append.sh [TABLE] [UTCDateTime] [Alias]"
+  exit 1
+fi
+if [ -z "$3" ]; then
+  echo "Error: Missing name metric (e.g. Alias)"
+  echo "Usage: ./table_to_csv_append.sh [TABLE] [UTCDateTime] [Alias]"
+  exit 1
+fi
+
+UTCDateTime="$2"
+Alias="$3"
 
 table="$1"
 table_CSV="$table"_CSV
@@ -20,13 +33,13 @@ SET @begin = DATEADD(day, -2, @now);
 
 WITH new AS (
   SELECT * FROM $table
-  WHERE UTCDateTime > isnull(@begin, 0) AND UTCDateTime <= @now
+  WHERE $UTCDateTime > isnull(@begin, 0) AND $UTCDateTime <= @now
 )
   INSERT INTO $table_CSV
 
-  SELECT new.UTCDateTime FROM new
-  LEFT JOIN $table_CSV AS CSV ON CSV.UTCDateTime = new.UTCDateTime
-  WHERE CSV.UTCDateTime IS NULL
+  SELECT new.$UTCDateTime FROM new
+  LEFT JOIN $table_CSV AS CSV ON CSV.$UTCDateTime = new.$UTCDateTime
+  WHERE CSV.$UTCDateTime IS NULL
 
 "
 append_query="
@@ -38,26 +51,26 @@ SET @begin = DATEADD(day, -2, @now);
 
 WITH new AS (
   SELECT * FROM $table
-  WHERE UTCDateTime > isnull(@begin, 0) AND UTCDateTime <= @now
+  WHERE $UTCDateTime > isnull(@begin, 0) AND $UTCDateTime <= @now
 )
   SELECT new.* FROM new
-  LEFT JOIN $table_CSV AS CSV ON CSV.UTCDateTime = new.UTCDateTime
-  WHERE CSV.UTCDateTime IS NULL
-  ORDER BY UTCDateTime DESC
+  LEFT JOIN $table_CSV AS CSV ON CSV.$UTCDateTime = new.$UTCDateTime
+  WHERE CSV.$UTCDateTime IS NULL
+  ORDER BY LEN($Alias) DESC
 "
 
 
 csv_utc_query="
 SET NOCOUNT ON
 IF OBJECT_ID('dbo.$table_CSV') IS NOT NULL DROP TABLE $table_CSV
-SELECT UTCDateTime
+SELECT $UTCDateTime
 INTO $table_CSV
 FROM $table
 "
 query="
 SET NOCOUNT ON
 SELECT * FROM $table
-ORDER BY UTCDateTime DESC
+ORDER BY LEN($Alias) DESC
 "
 h='130.127.218.11'
 u='wficcm'
@@ -105,13 +118,16 @@ else # csv exists
   # append new data to existing csv
   cat /home/bmeares/cache/$table.csv >> /srv/csv/$table.csv
 
+  # append columns to cache CSV for Append
+  cat /home/bmeares/cache/cols_$table.csv /home/bmeares/cache/$table.csv > /home/bmeares/cache/temp_$table.csv && mv /home/bmeares/cache/temp_$table.csv /home/bmeares/cache/$table.csv
+
 fi
 row_count=$(wc -l < /srv/csv/$table.csv)
 record_query="
 DECLARE @last_UTC DATETIME;
 SET @last_UTC = (
-  SELECT TOP 1 UTCDateTime FROM $table
-  ORDER BY UTCDateTime DESC
+  SELECT TOP 1 $UTCDateTime FROM $table
+  ORDER BY $UTCDateTime DESC
 );
 INSERT INTO CEVAC_CACHE_RECORDS(table_name,update_time,storage,last_UTC,row_count,rows_transferred)
 VALUES ('$table',GETUTCDATE(),'CSV', @last_UTC,($row_count - 1),$rows_transferred)
