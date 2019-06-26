@@ -185,6 +185,7 @@ def command_to_json_string(command):
                 json_string += str(temp_dict)
 
     #os.remove("temp_csv.csv")
+    print(json_string)
     return json_string
 
 
