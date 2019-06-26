@@ -6,6 +6,7 @@ This CEVAC alert system script reads from alert_system.csv to populate the table
 
 TODO: Time-based alert conditionals
 """
+# TEST 2
 
 import os
 import sys
@@ -167,12 +168,13 @@ def command_to_json_string(command):
     """
     Returns a string of json from a sql command
     """
+    sys.stdout.flush()
     os.system("/home/bmeares/scripts/exec_sql.sh \"" + command +
             "\" temp_csv.csv")
 
     json_string = ""
     headers = {}
-    with open("/home/bmeares/temp_csv.csv","r") as temp_csv:
+    with open("/cevac/cache/temp_csv.csv","r") as temp_csv:
         csvfile = csv.reader(temp_csv)
         for i,row in enumerate(csvfile):
             if i == 0:
@@ -180,12 +182,13 @@ def command_to_json_string(command):
                     headers[j] = item
             else:
                 temp_dict = {}
-                for j,item in enumerate(row):
-                    temp_dict[headers[j]] = item
-                json_string += str(temp_dict)
+                try:
+                    for j,item in enumerate(row):
+                        temp_dict[headers[j]] = item
+                    json_string += str(temp_dict)
+                except:
+                    continue
 
-    #os.remove("temp_csv.csv")
-    print(json_string)
     return json_string
 
 
@@ -194,19 +197,21 @@ def command_to_list_single(command):
     Returns a list of data from a query
     """
     data = command_to_json_string(command)
-    data_readable = data.replace("}{","} {")
+    print(data)
+    data_readable = data.replace("}{","} {").replace("\'","\"")
     data_list = data_readable.split("} {")
     dict_list = [json.loads(d) for d in data_list]
     data_list = [sd[list(sd.keys())[0]] for sd in dict_list]
     return data_list
 
 
-def command_to_list_multiple(query, num_args):
+def command_to_list_multiple(command, num_args):
     '''
     Returns a list of lists (with length up to num_args) of data from a query
     '''
     data = command_to_json_string(command)
-    data_readable = data.replace("}{","} {")
+
+    data_readable = data.replace("}{","} {").replace("\'","\"")
     data_list = data_readable.split("} {")
     dict_list = []
     for i,d in enumerate(data_list):
@@ -251,7 +256,6 @@ def request_to_list_multiple(query, num_args):
         d = d if d[0] == "{" else "{" + d
         d = d if d[-1] == "}" else d + "}"
         dict_list.append(json.loads(d))
-
 
     data_list = []
     for sd in dict_list:
@@ -324,6 +328,7 @@ for i,a in enumerate(alerts):
                 continue
 
             data_list = command_to_list_single(selection_command)
+            data_list = [float(d) for d in data_list]
             avg_data = sum(data_list)/len(data_list)
 
             send_alert = False
@@ -425,13 +430,15 @@ for i,a in enumerate(alerts):
 
         # Check if aliases have reported within a given time
         elif ("<now>" in alert["value"]):
+            continue
             # Find all aliases
-            selection_command = "SELECT Alias FROM " + str(alert["database"])
+            selection_command = f"SELECT Alias, {alert['column']} FROM " + str(alert["database"])
             print(selection_command)
             if not CHECK_ALERTS:
                 continue
 
-            data_list = command_to_list_single(selection_command)
+            data_list = command_to_list_multiple(selection_command,2)
+            print(data_list) ## ?
             aliases = {}
             for alias in  data_list:
                 aliases[alias] = None
@@ -482,9 +489,11 @@ for i,a in enumerate(alerts):
 
         else:
             safe_log("Could not find valid condition/value for "+str(alert),"info")
+            print("invalid condition")
 
     except:
         safe_log("Issue on alert "+str(i+1)+" "+str(alert),"info")
+        print("issue on alert",str(i+1))
 
 if total_issues == 0:
     insert_sql_total = ("INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType,"
