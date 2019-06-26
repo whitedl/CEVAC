@@ -422,7 +422,7 @@ if total_issues == 0:
                         "AlertMessage,Metric,BLDG,UTCDateTime) VALUES('All Clear'"
                         ",'All Clear','N/A','All',GETUTCDATE())")
 
-# Insert into CEVAC_WATT_ALERT_HIST
+# Insert into CEVAC_ALL_ALERTS_HIST
 if SEND:
     f = open("/home/bmeares/cache/insert_alert_system.sql","w")
     f.write(insert_sql_total.replace(';','\nGO\n'))
