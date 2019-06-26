@@ -43,7 +43,7 @@ WITH new AS (
   SELECT new.* FROM new
   LEFT JOIN $table_CSV AS CSV ON CSV.UTCDateTime = new.UTCDateTime
   WHERE CSV.UTCDateTime IS NULL
-  ORDER BY UTCDateTime ASC
+  ORDER BY UTCDateTime DESC
 "
 
 
@@ -57,7 +57,7 @@ FROM $table
 query="
 SET NOCOUNT ON
 SELECT * FROM $table
-ORDER BY UTCDateTime ASC
+ORDER BY UTCDateTime DESC
 "
 h='130.127.218.11'
 u='wficcm'
