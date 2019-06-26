@@ -40,7 +40,12 @@ time /home/bmeares/scripts/lasr_append.sh WATT WAP HIST "time" Alias $runsas $re
 time /home/bmeares/scripts/lasr_append.sh WATT WAP_DAILY HIST UTCDateTime UTCDateTime $runsas $reset
 time /home/bmeares/scripts/lasr_append.sh WATT WAP_FLOOR HIST UTCDateTime UTCDateTime $runsas $reset
 
-echo "All _HIST tables have been loaded. Executing runsas.sh..."
-time /home/bmeares/scripts/runsas.sh
+echo "All _HIST tables have been loaded."
+if [ "$runsas" != "norun" ]; then
+  echo "Executing runsas.sh..."
+  time /home/bmeares/scripts/runsas.sh
+else
+  echo "Skipping runsas.sh. Tables will be loaded automatically in 15 minutes."
+fi
 
 
