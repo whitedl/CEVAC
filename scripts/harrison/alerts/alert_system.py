@@ -168,11 +168,11 @@ def command_to_json_string(command):
     Returns a string of json from a sql command
     """
     os.system("/home/bmeares/scripts/exec_sql.sh \"" + command +
-            "\" /home/bmeares/cache/temp_csv.csv")
+            "\" temp_csv.csv")
 
     json_string = ""
     headers = {}
-    with open("/home/bmeares/cache/temp_csv.csv","r") as temp_csv:
+    with open("/home/bmeares/temp_csv.csv","r") as temp_csv:
         csvfile = csv.reader(temp_csv)
         for i,row in enumerate(csvfile):
             if i == 0:
@@ -184,7 +184,7 @@ def command_to_json_string(command):
                     temp_dict[headers[j]] = item
                 json_string += str(temp_dict)
 
-    os.remove("/home/bmeares/cache/temp_csv.csv")
+    #os.remove("temp_csv.csv")
     return json_string
 
 
