@@ -1,6 +1,12 @@
 # alert_system.py
 
-### TODO: angle bracket replation, time-based alert conditionals
+"""
+This CEVAC alert system script reads from alert_system.csv to populate the table
+`CEVAC_ALL_ALERTS_HIST`.
+
+TODO: Time-based alert conditionals
+"""
+
 import os
 import sys
 import csv
@@ -15,18 +21,16 @@ import urllib.parse
 CONDITIONS_FPATH = "/home/bmeares/cron/alerts/"
 LOGGING_PATH = "/home/bmeares/cron/alerts/"
 PHONE_PATH = "/home/bmeares/cron/alerts/"
-CONFIG_PATH = "/home/bmeares/cron/alerts/"
 alert_fname = "alert_parameters.csv"
 
-LOG = True
-DEBUG = False
-SEND = True
+LOG = False
+DEBUG = True
+SEND = False
 
 if DEBUG:
     CONDITIONS_FPATH = "C:\\Users\\hchall\\Downloads\\"
     LOGGING_PATH = "C:\\Users\\hchall\\Downloads\\"
     PHONE_PATH = "/home/bmeares/cron/alerts/"
-    CONFIG_PATH = "//130.127.219.170/Watt/Watt Staff/Building/WAP/config/"
     alert_fname = "Alert Parameters (working).csv"
 
 COLUMNS = {
@@ -58,7 +62,6 @@ TIME = {
 
 
 
-# Definitions
 
 def regex_to_numlist(regex_string):
     """
@@ -114,6 +117,7 @@ def angle_brackets_replace_single(regex_string,replacement):
     except:
         return regex_string
 
+
 def import_conditions(fname,logger):
     """
     Moves CSV file to dict of alert condtions
@@ -146,16 +150,6 @@ def import_conditions(fname,logger):
             except:
                 safe_log("Issue importing conditions "+str(i),"error")
     return (alerts,unique_databases)
-
-
-def get_config(fname):
-    """
-    Returns json of database connection configuration file
-    """
-    fp = open(fname, "r")
-    config = json.loads(fp.read())
-    fp.close()
-    return config
 
 
 def command_to_query(command):
@@ -211,9 +205,10 @@ def safe_log(message,type):
         else:
             logging.info(message)
 
-# Script
 
-## Initialize logging
+
+
+# Initialize logging
 if LOG:
     FORMAT = '%(asctime)s %(levelname)s:%(message)s'
     datestring = str(datetime.datetime.now().date())
@@ -222,10 +217,10 @@ if LOG:
     logging.info("NEW JOB\n---")
 
 
-## Get alert conditions
+# Get alert conditions
 alerts, unique_databases = import_conditions(alert_fname,logging)
 
-## Update database cache
+# Update database cache
 db_string = ""
 for i,item in enumerate(list(unique_databases)):
     if i == 0:
@@ -239,16 +234,16 @@ req = "http://wfic-cevac1/requests/query.php?q="
 req_parse = req + urllib.parse.quote_plus(update_sql)
 
 append_tables_url = "http://wfic-cevac1/requests/script.php?s=append_tables.sh"
-#  urllib.request.urlopen(append_tables_url).read()
 
-## Check alerts
+# Check alerts for conditions
 insert_sql_total = ""
 total_issues = 0
 for i,a in enumerate(alerts):
     alert = alerts[a]
-    insert_sql = "INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType, AlertMessage, Metric,BLDG,UTCDateTime) VALUES(?,?,?,?,GETUTCDATE())"
+    insert_sql = ("INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType, AlertMessage,"
+                " Metric,BLDG,UTCDateTime) VALUES(?,?,?,?,GETUTCDATE())")
     try:
-        # Check time conditional
+        # Check time conditional to make sure it is the correct time for the alert
         now = datetime.datetime.now()
         correct_day = ( (str(now.isoweekday()) in alert["day"]) or (alert["day"] == ["*"]) )
         correct_hour = ( (str(now.hour) in alert["hour"]) or (alert["hour"] == ["*"]) )
@@ -276,22 +271,25 @@ for i,a in enumerate(alerts):
                 send_alert = (avg_data > alert["value"])
             elif alert["condition"] == "<":
                 send_alert = (avg_data < alert["value"])
+
             if send_alert:
                 total_issues += 1
                 safe_log("An alert was sent for "+str(alert),"info")
-                print(alert["type"])
-                com = "INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType, AlertMessage, Metric,BLDG,UTCDateTime) VALUES('"
-                com += alert["operation"]+"','"+alert["message"]+"','"+alert["type"]+"','"+alert["building"]+"',GETUTCDATE())"
+                com = (f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType, "
+                    f"AlertMessage, Metric,BLDG,UTCDateTime)"
+                    f" VALUES('{alert["operation"]}','{alert["message"]}',"
+                    f"'{alert["type"]}','{alert["building"]}',GETUTCDATE())")
                 insert_sql_total += com + "; "
             safe_log("Checked "+str(i+1),"info")
 
-        # Temperature custom measure
+        # Check each alias for temperature
         elif ("Temp" in alert["value"]):
-            selection_command = "SELECT Alias, " + alert["column"] + " FROM " + alert["database"] + " ORDER BY " + alert["sort_column"]
+            selection_command = ("SELECT Alias, " + alert["column"] + " FROM "
+                                + alert["database"] + " ORDER BY "
+                                + alert["sort_column"])
             print(selection_command)
             data_list = request_to_list_multiple(command_to_query(selection_command),2)
 
-            #data_list = [[row[0],row[1]] for row in data]
             temps = {}
             ec = 0
             for row in data_list:
@@ -350,7 +348,10 @@ for i,a in enumerate(alerts):
                     if send_alert:
                         total_issues += 1
                         alert["message"] = angle_brackets_replace_single(alert["message"],room)
-                        com = "INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType, AlertMessage, Metric,BLDG,UTCDateTime) VALUES('"+alert["operation"]+"','"+alert["message"]+"','"+alert["type"]+"','"+alert["building"]+"',GETUTCDATE())"
+                        com = (f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType,"
+                            f" AlertMessage, Metric,BLDG,UTCDateTime)"
+                            f" VALUES('{alert["operation"]}','{alert["message"]}',"
+                            f"'{alert["type"]}','{alert["building"]}',GETUTCDATE())")
                         insert_sql_total += com + "; "
                         safe_log("An alert was sent for "+str(alert),"info")
                 except:
@@ -358,9 +359,8 @@ for i,a in enumerate(alerts):
 
             safe_log("Checked "+str(i+1),"info")
 
-        # Time custom measure
+        # Check if aliases have reported within a given time
         elif ("<now>" in alert["value"]):
-            continue
             # Find all aliases
             selection_command = "SELECT Alias FROM " + str(alert["database"])
             data_list = request_to_list_single(command_to_query(selection_command))
@@ -368,7 +368,7 @@ for i,a in enumerate(alerts):
             for alias in  data_list:
                 aliases[alias] = None
 
-            # alert["value"] = "<now> - # day/hr/min"
+            # alert["value"] in format "<now> - # day/hr/min"
             dst = False
             local = pytz.timezone ("America/New_York")
             naive = datetime.datetime.now()
@@ -385,20 +385,29 @@ for i,a in enumerate(alerts):
 
             for alias in aliases:
 
-                selection_command = "SELECT TOP 1 "+ alert["sort_column"] + " FROM " + str(alert["database"])
+                selection_command = (f"SELECT TOP 1 {alert["sort_column"]} FROM "
+                                    f"{str(alert["database"])}")
                 if alert["aliases"] == ["*"]:
-                    selection_command += " ORDER BY " + alert["sort_column"] + " DESC"
-                    selection_command += " WHERE " + "Alias" + " IN (" + alias + ") ORDER BY " + alert["sort_column"] + " DESC"
+                    selection_command += f" ORDER BY {alert["sort_column"]} DESC"
+                    selection_command += (f" WHERE " + "Alias" + " IN ({alias})"
+                                            f" ORDER BY {alert["sort_column"]} DESC")
                 else:
                     continue
 
-                print(selection_command)
                 data_list = request_to_list_single(command_to_query(selection_command))
                 datetime_object = datetime.datetime.strptime(data_list[0], '%Y-%m-%d %H:%M:%S.%f')
                 now_aware = pytz.utc.localize(datetime_object)
                 minutes_off = (now_aware - utc_dt).total_seconds()/60
+
+                ## Add to alerts to send
                 if minutes_off > minutes:
-                    pass
+                    total_issues += 1
+                    safe_log("An alert was sent for "+str(alert),"info")
+                    com = (f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType, "
+                        "AlertMessage, Metric,BLDG,UTCDateTime)"
+                        f" VALUES('{alert["operation"]}','{alert["message"]}',"
+                        f"'{alert["type"]}','{alert["building"]}',GETUTCDATE())")
+                    insert_sql_total += com + "; "
 
 
 
@@ -409,17 +418,18 @@ for i,a in enumerate(alerts):
         safe_log("Issue on alert "+str(i+1)+" "+str(alert),"info")
 
 if total_issues == 0:
-    insert_sql_total = "INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType,AlertMessage,Metric,BLDG,UTCDateTime) VALUES('All Clear','All Clear','N/A','All',GETUTCDATE())"
+    insert_sql_total = ("INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType,"
+                        "AlertMessage,Metric,BLDG,UTCDateTime) VALUES('All Clear'"
+                        ",'All Clear','N/A','All',GETUTCDATE())")
 
 # Insert into CEVAC_WATT_ALERT_HIST
 if SEND:
     f = open("/home/bmeares/cache/insert_alert_system.sql","w")
-    #print(insert_sql_total.replace(';','\nGO\n'))
     f.write(insert_sql_total.replace(';','\nGO\n'))
     f.close()
-    os.system("/home/bmeares/scripts/exec_sql_script.sh /home/bmeares/cache/insert_alert_system.sql")
+    os.system("/home/bmeares/scripts/exec_sql_script.sh "
+            "/home/bmeares/cache/insert_alert_system.sql")
     os.remove("/home/bmeares/cache/insert_alert_system.sql")
-    #  urllib.request.urlopen(command_to_query(insert_sql_total)).read()
 else:
     print(insert_sql_total)
 
