@@ -49,7 +49,7 @@ fi
 
 if [ "$runsas" == "true" ]; then
   echo "runsas detected. Executing LASR Autoload script..."
-  ./runsas.sh
+  /home/bmeares/scripts/runsas.sh
   echo Finished uploading to LASR
 else
   echo "runsas not detected. $table will be loaded into LASR on the next Autoload schedule"
