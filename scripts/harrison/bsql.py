@@ -1,5 +1,5 @@
 # ben_sql_api.py
-## Used to verify data in our sql database and bring it in as python
+## [Deprecated] Used to verify data in our sql database and bring it in as python
 ## with little hassle
 import urllib.request
 import urllib.parse
