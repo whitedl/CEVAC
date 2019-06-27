@@ -24,6 +24,12 @@ LOGGING_PATH = "/home/bmeares/cron/alerts/"
 PHONE_PATH = "/home/bmeares/cron/alerts/"
 alert_fname = "alert_parameters.csv"
 
+TIMED = False
+
+for arg in sys.argv:
+    if "timed_alerts" in arg.lower():
+        TIMED = True
+
 LOG = True
 DEBUG = False
 CHECK_ALERTS = True
@@ -432,7 +438,9 @@ for i, a in enumerate(alerts):
 
         # Check if aliases have reported within a given time
         elif ("<now>" in alert["value"]):
-            continue
+            if not TIMED:
+                continue
+
             # Find all aliases
             selection_command = f"SELECT Alias, {alert['column']} FROM " + str(
                 alert["database"])
@@ -441,6 +449,7 @@ for i, a in enumerate(alerts):
                 continue
 
             data_list = command_to_list_multiple(selection_command, 2)
+            print("TIMED")
             print(data_list)  # ?
             aliases = {}
             for alias in data_list:
