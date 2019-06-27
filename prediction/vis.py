@@ -3,7 +3,6 @@ import json
 import random
 import numpy as np
 import pandas as pd
-import seaborn as sns
 import datetime as dt
 from datetime import date
 from matplotlib import rcParams
@@ -12,16 +11,10 @@ import matplotlib.pylab as plb
 
 
 # read in the data
-cwdf = pd.read_csv('chwLogs.csv')
-pdf = pd.read_csv('CEVAC_WATT_POWER_HIST.csv')
-temp = pd.read_csv('TMY3_StationsMeta.csv')
+# cwdf = pd.read_csv('chwLogs.csv')
+pdf = pd.read_csv('CEVAC_WATT_POWER_SUMS_HIST.csv')
 
-# dictionary of dimensions I want to add to the array
-dfDict =    {
-    'temp' : pd.read_csv('H_WEATHER_TEMP.csv'),
-    'clouds' : pd.read_csv('H_WEATHER_CLOUDS.csv'),
-    'humidity' : pd.read_csv('H_WEATHER_HUMIDITY.csv')
-    }
+weatherDF = pd.read_csv('historicWeather.csv', error_bad_lines=False)
 
 cJSON = {}
 
@@ -84,19 +77,19 @@ def insertData(df):
     return df
 
 # format our weather data
-def formatConditions(df, condition):
+def formatConditions(df):
     for index, row in df.iterrows():
-        date = row['time'][0:12]
-        year = str(date[5:9])
-        month = str(monat[date[2:5]])
-        day = str(date[0:2])
-        hour = str(date[10:12])
-        key = '-'.join((year, month, day))
-        key = key + ' ' + hour
+        key = row['time']
         isDict = cJSON.get(key)
         if isDict == None:
             cJSON[key] = {}
-        cJSON[key][condition] = row['value']
+        for condition in ['temperature', 'humidity', 'cloudCover', 'uvIndex']:
+            if row[condition] == 'snow' or row[condition] == 'rain':
+                pass
+            else:
+                cJSON[key][condition] = row[condition]
+        if len(cJSON[key]) != 4:
+            del cJSON[key]
 
     with open('combinedData.json', 'w') as f:
         json.dump(cJSON, f)
@@ -170,18 +163,18 @@ def makeArrays(df):
             except:
                 weatherData = None
 
-            if weatherData != None and len(weatherData) == 3:
+            if weatherData != None and len(weatherData) == 4:
                 year = int(newDate[0:4])
                 d = int(newDate[8:10])
                 m = int(newDate[5:7])
                 h = int(newDate[-2:])
 
                 # normalize temperature
-                temperature = weatherData['temp']
-                temperature = [(temperature + 20) / 70]
+                temperature = float(weatherData['temperature'])
+                temperature = [(temperature - 12) /1.8 / 70]
 
                 # normalize humidity
-                humidity = weatherData['humidity']
+                humidity = float(weatherData['humidity'])
                 humidity = [(humidity / 100)]
 
                 # one hot encode month
@@ -201,7 +194,7 @@ def makeArrays(df):
                 throughMonth = [float(d/numMonth[newDate[5:7]])]
 
                 # normalize clouds
-                clouds = weatherData['clouds']
+                clouds = weatherData['cloudCover']
                 clouds = [(clouds / 100)]
 
                 tempx.append(np.concatenate((hour, day, month, throughMonth, temperature, humidity, clouds), axis = -1))
@@ -250,6 +243,5 @@ def makeArrays(df):
     print('TRAINING LABELS:\t{} ENTRIES'.format(len(trainingLabels)))
 
 if __name__ =='__main__':
-    for key in dfDict:
-        formatConditions(dfDict[key], key)
+    formatConditions(weatherDF)
     makeArrays(pdf)

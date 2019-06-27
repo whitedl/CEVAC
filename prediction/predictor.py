@@ -93,13 +93,16 @@ def createModel():
 	model = keras.Sequential()
 
 	# add layers
-	model.add(Dense(100, input_shape=(47,10)))
+	model.add(LSTM(256, input_shape=(12, 47), return_sequences=True))
 	model.add(Activation('sigmoid'))
 
-	model.add(Dense(1))
+	# model.add(LSTM(64, return_sequences=True))
+	# model.add(Activation('sigmoid'))
+
+	model.add(LSTM(units=1))
 	model.add(Activation('sigmoid'))
 
-	model.compile(optimizer='adam',loss=losses.mse, metrics=['accuracy'])
+	model.compile(optimizer=opt,loss=losses.mse, metrics=['accuracy'])
 
 	return model
 
@@ -133,8 +136,11 @@ def pred(model):
         date =  '/'.join((str(hourly['months'][i]), str(hourly['days'][i]), str(hourly['years'][i]))) + ' ' + str(hourly['hours'][i])
         # str = 'INSERT INTO [] ({},{},{})'.format(date, prediction, building, metric)
         str += 'ESTIMATE {} ON {}/{} AT HOUR {}\n'.format(prediction, hourly['days'][i], hourly['months'][i], hourly['hours'][i])
+
+    # write to our predictions text file
     with open('predictions.txt', 'w') as f:
         f.write(str)
+
     return predictions
 
 if __name__ == '__main__':
