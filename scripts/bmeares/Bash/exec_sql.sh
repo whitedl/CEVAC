@@ -21,12 +21,17 @@ if [ ! -z "$2" ]; then
   fi
   echo $'Executing query:\n\n'"$query"
   # Get columns and data
-  /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$query" -W -o "/home/bmeares/cache/$output" -s"," -w 700
-  # remove separator
-  sed -i 2d /home/bmeares/cache/$output
+  /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$query" -W -b -o "/home/bmeares/cache/$output" -s"," -w 700
+  if [ $? -eq 0 ]; then
+    # remove separator
+    sed -i 2d /home/bmeares/cache/$output
+  else
+    cat /home/bmeares/cache/$output  
+  fi
+  
 else
   echo $'Executing query:\n\n'"$query"
-  /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$query" -W -w 700
+  /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$query" -W -b -w 700
 fi
 
 

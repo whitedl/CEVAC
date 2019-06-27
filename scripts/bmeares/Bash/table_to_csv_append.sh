@@ -133,16 +133,20 @@ else # csv exists
   echo "Updating $table_CSV..."
   /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$csv_utc_append_query"
 
-  echo Appending data to existing $table.csv...
+  echo Removing columns from /srv/csv/$table.csv...
   # remove columns from historical csv
   sed -i '1d' /srv/csv/$table.csv
   # append new data to top of existing csv
+  # sed -i "1i`cat /home/bmeares/cache/$table.csv`" /srv/csv/$table.csv
+  echo Appending data to existing $table.csv...
   cat /home/bmeares/cache/$table.csv /srv/csv/$table.csv | sponge /srv/csv/$table.csv
+  echo Done appending.
 
   # append columns to cache CSV for Append
   # cat /home/bmeares/cache/cols_$table.csv /home/bmeares/cache/$table.csv > /home/bmeares/cache/temp_$table.csv && mv /home/bmeares/cache/temp_$table.csv /home/bmeares/cache/$table.csv
 
 fi
+echo Calculating row_count...
 row_count=$(wc -l < /srv/csv/$table.csv)
 record_query="
 DECLARE @last_UTC DATETIME;
