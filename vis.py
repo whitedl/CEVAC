@@ -3,7 +3,6 @@ import json
 import random
 import numpy as np
 import pandas as pd
-import seaborn as sns
 import datetime as dt
 from datetime import date
 from matplotlib import rcParams
@@ -12,18 +11,10 @@ import matplotlib.pylab as plb
 
 
 # read in the data
-cwdf = pd.read_csv('chwLogs.csv')
-pdf = pd.read_csv('CEVAC_WATT_POWER_HIST.csv')
-temp = pd.read_csv('TMY3_StationsMeta.csv')
+# cwdf = pd.read_csv('chwLogs.csv')
+pdf = pd.read_csv('CEVAC_WATT_POWER_SUMS_HIST.csv')
 
 weatherDF = pd.read_csv('historicWeather.csv', error_bad_lines=False)
-
-# dictionary of dimensions I want to add to the array
-dfDict =    {
-    'temp' : pd.read_csv('H_WEATHER_TEMP.csv'),
-    'clouds' : pd.read_csv('H_WEATHER_CLOUDS.csv'),
-    'humidity' : pd.read_csv('H_WEATHER_HUMIDITY.csv')
-    }
 
 cJSON = {}
 
