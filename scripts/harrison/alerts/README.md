@@ -1,3 +1,22 @@
+
+# Alerts
+The alerts csv should follow the following format:
+`alert_name, type, alias, units, alert_message, bldg_std, bldg_disp, database, column, sort_column, num_entries, time_dependent, occupancy_status, condition, value, alert_type, comments`
+## Info
+`alert_parameters.csv` is interpreted by `alert_system.py` which populates the table
+`CEVAC_ALL_ALERTS_HIST`. Current, non-acknowledged alerts are displayed on the
+controlboard to be acknowledged. 
+## Example
+A full example is located in `alert_parameters.csv`
+```
+alert_name, type, alias, units, alert_message, bldg_std, bldg_disp, database, column, sort_column, num_entries, time_dependent, occupancy_status, condition, value, alert_type, comments
+Watt_CO2_warning, CO2, *, ppm, <alias> exceeds 1000 ppm., WATT, Watt, CEVAC_WATT_IAQ_LATEST, ActualValue, UTCDateTime, 1, 1, 1, >, 1000, warning,
+Watt_CO2_alert, CO2, *, ppm, <alias> exceeds 2000 ppm., WATT, Watt, CEVAC_WATT_IAQ_LATEST, ActualValue, UTCDateTime, 1, 0, *, >, 2000, alert
+```
+
+---
+
+The following is deprecated.
 # Alerts
 The alerts csv should follow the following format:
 ```
