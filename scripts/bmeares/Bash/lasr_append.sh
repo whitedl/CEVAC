@@ -1,17 +1,17 @@
 #! /bin/bash
 if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
   echo Please enter building, metric, age.
-  echo "Usage: ./lasr_append [BLDG] [METRIC] [AGE] [UTCDateTime] [Alias]"
+  echo "Usage: ./lasr_append [BLDG] [METRIC] [AGE] [UTCDateTime] [Alias] [runsas] [reset]"
   exit 1
 fi
 if [ -z "$4" ]; then
   echo "Error: Missing time metric (e.g. UTCDateTime)"
-  echo "Usage: ./lasr_append [BLDG] [METRIC] [AGE] [UTCDateTime] [Alias]"
+  echo "Usage: ./lasr_append [BLDG] [METRIC] [AGE] [UTCDateTime] [Alias] [runsas] [reset]"
   exit 1
 fi
 if [ -z "$5" ]; then
   echo "Error: Missing name metric (e.g. Alias)"
-  echo "Usage: ./lasr_append [BLDG] [METRIC] [AGE] [UTCDateTime] [Alias]"
+  echo "Usage: ./lasr_append [BLDG] [METRIC] [AGE] [UTCDateTime] [Alias] [runsas] [reset]"
   exit 1
 fi
 if [ "$6" == "runsas" ]; then
@@ -40,10 +40,10 @@ echo Uploading CSV to LASR Autoloader...
 
 if [ "$reset" == "true" ]; then
   echo Reset detected. Uploading entire $table.csv
-  rsync -v /srv/csv/$table.csv wfic-sas-im-hd.clemson.edu:/opt/sasinside/sasconfig/Lev1/AppData/SASVisualAnalytics/VisualAnalyticsAdministrator/AutoLoad
+  rsync -vh --progress /srv/csv/$table.csv wfic-sas-im-hd.clemson.edu:/opt/sasinside/sasconfig/Lev1/AppData/SASVisualAnalytics/VisualAnalyticsAdministrator/AutoLoad
 else
   echo Sending newest lines of $table.csv over rsync...
-  rsync -v /home/bmeares/cache/$table.csv wfic-sas-im-hd.clemson.edu:/opt/sasinside/sasconfig/Lev1/AppData/SASVisualAnalytics/VisualAnalyticsAdministrator/AutoLoad/Append
+  rsync -vh --progress /home/bmeares/cache/$table.csv wfic-sas-im-hd.clemson.edu:/opt/sasinside/sasconfig/Lev1/AppData/SASVisualAnalytics/VisualAnalyticsAdministrator/AutoLoad/Append
 fi
 
 
