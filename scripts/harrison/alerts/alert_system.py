@@ -6,7 +6,6 @@ This CEVAC alert system script reads from alert_system.csv to populate the table
 
 TODO: Time-based alert conditionals
 """
-# TEST 2
 
 import os
 import sys
