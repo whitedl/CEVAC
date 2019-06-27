@@ -27,7 +27,6 @@ log_dir = prefix + "/logs"
 
 SEND = True
 DEBUG = False
-# BTU/s
 #######################################
 # Function Definitions
 #######################################
