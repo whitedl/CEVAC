@@ -27,8 +27,8 @@ time /home/bmeares/scripts/lasr_append.sh ALL ALERTS HIST UTCDateTime AlertMessa
 time /home/bmeares/scripts/lasr_append.sh ASC TEMP HIST UTCDateTime Alias $runsas $reset
 time /home/bmeares/scripts/lasr_append.sh ASC IAQ HIST UTCDateTime Alias $runsas $reset
 
-time /home/bmeares/scripts/lasr_append.sh COOPER TEMP HIST UTCDateTime PointSliceID $runsas $reset
-time /home/bmeares/scripts/lasr_append.sh COOPER POWER HIST UTCDateTime PointSliceID $runsas $reset
+time /home/bmeares/scripts/lasr_append.sh COOPER TEMP HIST UTCDateTime Alias $runsas $reset
+# time /home/bmeares/scripts/lasr_append.sh COOPER POWER HIST UTCDateTime PointSliceID $runsas $reset
 
 time /home/bmeares/scripts/lasr_append.sh LEE_III TEMP HIST UTCDateTime Alias $runsas $reset
 
