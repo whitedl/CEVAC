@@ -171,7 +171,7 @@ def makeArrays(df):
 
                 # normalize temperature
                 temperature = float(weatherData['temperature'])
-                temperature = [(temperature - 12) /1.8 / 70]
+                temperature = [((temperature - 32) / 1.8 + 20) / 70]
 
                 # normalize humidity
                 humidity = float(weatherData['humidity'])

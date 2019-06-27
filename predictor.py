@@ -7,6 +7,7 @@ from keras import losses
 from keras.utils import plot_model
 from keras.layers import Dense, Activation, Dropout, Conv1D
 from keras.callbacks import EarlyStopping
+from keras.layers.recurrent import LSTM
 
 # Helper libraries
 import numpy as np
@@ -18,6 +19,11 @@ import time
 from datetime import date
 import numpy as np
 # import matplotlib as plt
+
+# open our api json file and pull the darkSky api key from it
+with open('api.json') as f:
+    credentials = json.load(f)
+key = credentials['key']
 
 # fetch our weather forecast
 def fetch():
@@ -33,7 +39,7 @@ def fetch():
                 }
 
     # request url with api key
-    requestURL = 'https://api.darksky.net/forecast/db6bb38a65d59c7677e8e97db002705b/33.662333,-79.830875'
+    requestURL = 'https://api.darksky.net/forecast/' + key + '/33.662333,-79.830875'
     r = requests.get(requestURL).json()
     hourlyData = r['hourly']['data']
 
@@ -102,7 +108,7 @@ def createModel():
 	model.add(LSTM(units=1))
 	model.add(Activation('sigmoid'))
 
-	model.compile(optimizer=opt,loss=losses.mse, metrics=['accuracy'])
+	model.compile(optimizer='adam',loss=losses.mse, metrics=['accuracy'])
 
 	return model
 
@@ -110,6 +116,7 @@ def pred(model):
     model.load_weights('powerModel.h5')
     # model.load_weights('/home/bmeares/CEVAC/prediction/powerModel.h5')
 
+    input = []
     predictions = []
     hourly = fetch()
 
@@ -125,10 +132,11 @@ def pred(model):
         humidity = [hourly['humidities'][i]]
         temperature = [hourly['temperatures'][i]]
         cloudCoverage = [hourly['clouds'][i]]
-        input = np.concatenate((hour, day, month, throughMonth, temperature, humidity, cloudCoverage), axis = -1)
+        temp = np.concatenate((hour, day, month, throughMonth, temperature, humidity, cloudCoverage), axis = -1)
+        input.append(temp)
 
-        prediction = model.predict(input.reshape(1,-1))[0][0] * 275
-        predictions.append(prediction)
+    prediction = model.predict(input.reshape(1,-1))[0][0] * 275
+    predictions.append(prediction)
 
     str = ''
 

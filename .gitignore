@@ -1,0 +1,7 @@
+combinedData.json
+api.json
+*.npy
+Pipfile
+Pipfile.lock
+*.h5
+*.csv
