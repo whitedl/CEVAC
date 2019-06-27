@@ -6,6 +6,7 @@ This CEVAC alert system script reads from alert_system.csv to populate the table
 
 TODO: Time-based alert conditionals
 """
+# TEST
 
 import os
 import sys
@@ -287,21 +288,6 @@ if LOG:
 # Get alert conditions
 alerts, unique_databases = import_conditions(alert_fname,logging)
 
-# Update database cache
-db_string = ""
-for i,item in enumerate(list(unique_databases)):
-    if i == 0:
-        db_string += item + ","
-    elif i == len(list(unique_databases))-1:
-        db_string += item
-    else:
-        db_string += item + ","
-update_sql = "EXEC CEVAC_CACHE_INIT @tables='" + db_string + "'"
-req = "http://wfic-cevac1/requests/query.php?q="
-req_parse = req + urllib.parse.quote_plus(update_sql)
-
-append_tables_url = "http://wfic-cevac1/requests/script.php?s=append_tables.sh"
-
 # Check alerts for conditions
 insert_sql_total = ""
 total_issues = 0
@@ -358,7 +344,7 @@ for i,a in enumerate(alerts):
             safe_log("Checked "+str(i+1),"info")
 
         # Check each alias for temperature
-        elif ("Temp" in alert["value"]):
+        elif ("SP" in alert["value"]):
             selection_command = (f"SELECT ALIAS, {alert['column']} FROM "
                                 f"{alert['database']} ORDER BY {alert['sort_column']}")
             print(selection_command)

@@ -27,7 +27,7 @@ fi
 time /home/bmeares/scripts/lasr.sh ASC TEMP LATEST UTCDateTime Alias $runsas $reset
 
 /home/bmeares/scripts/lasr.sh COOPER TEMP LATEST UTCDateTime Alias $runsas $reset
-/home/bmeares/scripts/lasr.sh COOPER POWER LATEST UTCDateTime Alias $runsas $reset
+# /home/bmeares/scripts/lasr.sh COOPER POWER LATEST UTCDateTime Alias $runsas $reset
 
 /home/bmeares/scripts/lasr.sh LEE_III TEMP LATEST UTCDateTime Alias $runsas $reset
 

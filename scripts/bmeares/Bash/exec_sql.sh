@@ -21,9 +21,9 @@ if [ ! -z "$2" ]; then
   fi
   echo $'Executing query:\n\n'"$query"
   # Get columns and data
-  /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$query" -W -o "/home/bmeares/cache/temp_$output" -s"," -w 700
+  /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$query" -W -o "/home/bmeares/cache/$output" -s"," -w 700
   # remove separator
-  cat /home/bmeares/cache/temp_$output | sed 2d > /home/bmeares/cache/$output && rm -f /home/bmeares/cache/temp_$output
+  sed -i 2d /home/bmeares/cache/$output
 else
   echo $'Executing query:\n\n'"$query"
   /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$query" -W -w 700

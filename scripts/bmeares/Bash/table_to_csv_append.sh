@@ -46,8 +46,17 @@ append_query="
 SET NOCOUNT ON
 DECLARE @begin DATETIME;
 DECLARE @now DATETIME;
+DECLARE @last_UTC DATETIME;
 SET @now = GETUTCDATE();
 SET @begin = DATEADD(day, -2, @now);
+SET @last_UTC = (
+  SELECT TOP 1 last_UTC FROM CEVAC_CACHE_RECORDS 
+  WHERE table_name = '$table' AND storage = 'CSV'
+  ORDER BY update_time DESC
+);
+IF DATEDIFF(day, @last_UTC, @begin) > 0 BEGIN
+  SET @begin = @last_UTC;
+END;
 
 WITH new AS (
   SELECT * FROM $table
@@ -78,8 +87,10 @@ db='WFIC-CEVAC'
 p='5wattcevacmaint$'
 
 latest=$(echo $table | grep LATEST)
-if [ ! -z $latest ]; then
-  echo Latest table detected. Will overwrite $table.csv
+xref=$(echo $table | grep XREF)
+if [ ! -z "$latest" ] || [ ! -z "$xref" ]; then
+  echo LATEST or XREF detected. Will overwrite $table.csv
+  rm -f /srv/csv/$table.csv
 fi
 
 # If $table.csv doesn't exist, initialize data
@@ -97,8 +108,10 @@ if [ ! -f /srv/csv/$table.csv ] || [ ! -z $latest ]; then
   /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$query" -W -o "/home/bmeares/cache/$table.csv" -h-1 -s"," -w 700
   rows_transferred=$(wc -l < /home/bmeares/cache/$table.csv)
 
-  echo "Creating $table_CSV..."
-  /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$csv_utc_query"
+  if [ -z "$latest" ] && [ -z "$xref" ]; then
+    echo "Creating $table_CSV..."
+    /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$csv_utc_query"
+  fi
 
   #append columns to beginning of CSV
   cat /home/bmeares/cache/cols_$table.csv /home/bmeares/cache/$table.csv > /home/bmeares/cache/temp_$table.csv && mv /home/bmeares/cache/temp_$table.csv /srv/csv/$table.csv
@@ -107,19 +120,27 @@ else # csv exists
 
   echo Executing query:
   echo "$append_query"
+
+  # Get columns and data
+  /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$append_query" -W -o "/home/bmeares/cache/$table.csv" -s"," -w 700
+  # remove separator
+  sed 2d -i /home/bmeares/cache/$table.csv
+
   # get newest data since last download
-  /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$append_query" -W -o "/home/bmeares/cache/$table.csv" -h-1 -s"," -w 700
-  rows_transferred=$(wc -l < /home/bmeares/cache/$table.csv)
+  # /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$append_query" -W -o "/home/bmeares/cache/$table.csv" -h-1 -s"," -w 700
+  rows_transferred=$(expr `wc -l < /home/bmeares/cache/$table.csv` - 1 )
 
   echo "Updating $table_CSV..."
   /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$csv_utc_append_query"
 
   echo Appending data to existing $table.csv...
-  # append new data to existing csv
-  cat /home/bmeares/cache/$table.csv >> /srv/csv/$table.csv
+  # remove columns from historical csv
+  sed -i '1d' /srv/csv/$table.csv
+  # append new data to top of existing csv
+  cat /home/bmeares/cache/$table.csv /srv/csv/$table.csv | sponge /srv/csv/$table.csv
 
   # append columns to cache CSV for Append
-  cat /home/bmeares/cache/cols_$table.csv /home/bmeares/cache/$table.csv > /home/bmeares/cache/temp_$table.csv && mv /home/bmeares/cache/temp_$table.csv /home/bmeares/cache/$table.csv
+  # cat /home/bmeares/cache/cols_$table.csv /home/bmeares/cache/$table.csv > /home/bmeares/cache/temp_$table.csv && mv /home/bmeares/cache/temp_$table.csv /home/bmeares/cache/$table.csv
 
 fi
 row_count=$(wc -l < /srv/csv/$table.csv)
@@ -133,7 +154,9 @@ INSERT INTO CEVAC_CACHE_RECORDS(table_name,update_time,storage,last_UTC,row_coun
 VALUES ('$table',GETUTCDATE(),'CSV', @last_UTC,($row_count - 1),$rows_transferred)
 "
 
-echo Inserting into CEVAC_CACHE_RECORDS
-# insert interaction into CEVAC_CACHE_RECORDS
-/opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$record_query"
+if [ -z "$xref" ]; then
+  echo Inserting into CEVAC_CACHE_RECORDS
+  # insert interaction into CEVAC_CACHE_RECORDS
+  /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$record_query"
+fi
 echo Finished
