@@ -28,7 +28,7 @@ alert_fname = "alert_parameters.csv"
 LOG = True
 DEBUG = False
 CHECK_ALERTS = True
-SEND = False
+SEND = True
 
 if DEBUG:
     CONDITIONS_FPATH = "C:\\Users\\hchall\\Downloads\\"

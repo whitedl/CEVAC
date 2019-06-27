@@ -1,9 +1,10 @@
 # ben_sql_api.py
-## [Deprecated] Used to verify data in our sql database and bring it in as python
-## with little hassle
+# [Deprecated] Used to verify data in our sql database and bring it in as python
+# with little hassle
 import urllib.request
 import urllib.parse
 import json
+
 
 class Query:
     def __init__(self, sql_command):
@@ -31,16 +32,16 @@ class Query:
         Requests data
         """
         data = urllib.request.urlopen(query)
-        data_readable = data.read().decode('utf-8').replace("}{","} {")
+        data_readable = data.read().decode('utf-8').replace("}{", "} {")
         data_list = data_readable.split("} {")
         json_list = []
-        for i,d in enumerate(data_list):
+        for i, d in enumerate(data_list):
             d = d if d[0] == "{" else "{" + d
             d = d if d[-1] == "}" else d + "}"
             json_list.append(json.loads(d))
         return json_list
 
-    def as_dict(self,key=None):
+    def as_dict(self, key=None):
         """
         Returns dictionary of data, keyed in as id or key
         """
@@ -53,7 +54,7 @@ class Query:
 
         # Make into dict
         if key == None:
-            for i,data in enumerate(self.json_list):
+            for i, data in enumerate(self.json_list):
                 d[i] = data
         else:
             for data in self.json_list:
