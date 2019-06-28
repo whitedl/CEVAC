@@ -109,7 +109,7 @@ def angle_brackets_replace(regex_string, alert):
             if regex.lower() in lc_alert:
                 regex_list[i] = lc_alert[regex]
         return "".join(regex_list)
-    except:
+    except Exception:
         return regex_string
 
 
@@ -122,7 +122,7 @@ def angle_brackets_replace_single(regex_string, replacement):
             if "&%" in regex:
                 regex_list[i] = replacement
         return "".join(regex_list)
-    except:
+    except Exception:
         return regex_string
 
 
@@ -155,7 +155,7 @@ def import_conditions(fname, logger):
                         "building": row[COLUMNS["building"]],
                     }
                     unique_databases[row[COLUMNS["database"]]] = None
-            except:
+            except Exception:
                 safe_log("Issue importing conditions " + str(i), "error")
     return (alerts, unique_databases)
 
@@ -198,7 +198,7 @@ def command_to_json_string(command):
                     for j, item in enumerate(row):
                         temp_dict[headers[j]] = item
                     json_string += str(temp_dict)
-                except:
+                except Exception:
                     continue
 
     return json_string
@@ -236,7 +236,7 @@ def command_to_list_multiple(command, num_args):
             for k in sd:
                 dl.append(sd[k])
             data_list.append(dl)
-        except:
+        except Exception:
             pass
     return data_list
 
@@ -272,7 +272,7 @@ def request_to_list_multiple(query, num_args):
             for k in sd:
                 dl.append(sd[k])
             data_list.append(dl)
-        except:
+        except Exception:
             pass
     return data_list
 
@@ -385,7 +385,7 @@ for i, a in enumerate(alerts):
                         temps[room] = {
                             row[0][row[0].find(" ") + 1:]: float(row[1])
                         }
-                except:
+                except Exception:
                     ec += 1
 
             for room in temps:
@@ -408,7 +408,7 @@ for i, a in enumerate(alerts):
                             val = float(val_str[val_str.find("-") + 1:])
                             room_vals["Cooling SP"] -= val
                             room_vals["Heating SP"] -= val
-                    except:
+                    except Exception:
                         pass
 
                     # Check value
@@ -450,7 +450,7 @@ for i, a in enumerate(alerts):
                                f"GETUTCDATE())")
                         insert_sql_total += com + "; "
                         safe_log("An alert was sent for " + str(a), "info")
-                except:
+                except Exception:
                     pass
 
             safe_log("Checked " + str(i + 1), "info")
@@ -472,7 +472,7 @@ for i, a in enumerate(alerts):
 
             try:
                 data_list = command_to_list_multiple(selection_command, 2)
-            except:
+            except Exception:
                 safe_log("Checked " + str(i + 1), "info")
                 continue
 
@@ -490,7 +490,7 @@ for i, a in enumerate(alerts):
                 amount = int(alert["value"].split()[2])
                 unit_str = alert["value"].split()[3]
                 unit = TIME[unit_str]
-            except:
+            except Exception:
                 amount = 1
                 unit = TIME["hour"]
             minutes = amount * 24 * 60 / unit
@@ -523,7 +523,7 @@ for i, a in enumerate(alerts):
                      str(alert), "info")
             print("invalid condition")
 
-    except:
+    except Exception:
         safe_log("Issue on alert " + str(i + 1) + " " + str(alert), "info")
         print("issue on alert", str(i + 1))
 
@@ -548,3 +548,14 @@ if LOG:
     logging.info(str(datetime.datetime.now()) +
                  " TOTAL ISSUES: " + str(total_issues))
     logging.shutdown()
+
+"""
+      /##.*/
+     /#%&&%#/
+    ./%%%&%%#
+    %%%%&%&%%#
+   %&&  %%%&%%.
+   %&%  &%%&%%*
+   *%&@&@%&%%(
+     %%%%%%%%
+"""
