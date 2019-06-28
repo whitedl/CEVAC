@@ -5,7 +5,7 @@ import datetime
 import time
 import csv
 import logging
-from stat import *
+from stat import S_ISREG
 from dateutil import tz
 
 
@@ -137,7 +137,8 @@ def cleanup():
     for directory in [processed_dir, log_dir]:
         for fname in os.listdir(directory):
             fpath = os.path.join(directory, fname)
-            if S_ISREG(os.stat(fpath).st_mode) and os.path.getatime(fpath) < cutoff:
+            if (S_ISREG(os.stat(fpath).st_mode) and
+                    os.path.getatime(fpath) < cutoff):
                 os.remove(fpath)
 
 # Logging during debug
