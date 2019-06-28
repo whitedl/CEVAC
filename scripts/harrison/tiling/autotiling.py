@@ -1,7 +1,8 @@
-"""Tile Chrome windows in Windows 10.
+r"""Tile Chrome windows in Windows 10.
 
 For running correct pip:
-C:\Users\hchall\Local Settings\Application Data\Programs\Python\Python37\Scripts
+C:\Users\hchall\Local Settings\Application Data\Programs\Python\Python37
+\Scripts
 
 Possible TODO: command shell with more modes, set max windows, etc.
 """
