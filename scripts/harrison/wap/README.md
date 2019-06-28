@@ -1,7 +1,10 @@
-# WAP Cron Job
+# WAP
 `importer.py` uses `safe_move.py` to populate tables `CEVAC_WATT_WAP_HIST` and
-`CEVAC_WATT_WAP_FLOOR_HIST`.  
-`daily_count.py` populates table `CEVAC_WATT_WAP_DAILY`.
+`CEVAC_WATT_WAP_FLOOR_HIST`.  `daily_count.py` populates table
+`CEVAC_WATT_WAP_DAILY`.
+
+For the thought process Harrison and Drew had, consult
+[our experiments](Experimentation.md).
 
 ## Tables
 ### `CEVAC_WATT_WAP_HIST`
