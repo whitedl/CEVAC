@@ -2,7 +2,7 @@
 
 import os
 import sys
-from stat import *
+from stat import S_ISREG
 import pypyodbc
 import json
 import datetime
