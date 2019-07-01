@@ -108,12 +108,11 @@ body {
   font: 14px/16px Arial, Helvetica, sans-serif;
   background: white;
   background: rgba(255, 255, 255, 0.8);
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  color: #333;
   border-radius: 5px;
-  height: 6em;
+  height: 10em;
   display: inline-flex;
   flex-direction: row;
-  width: 20em;
   align-items: stretch;
   justify-content: space-between;
 }
@@ -122,13 +121,15 @@ body {
   flex: 1 1 0;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   align-items: center;
+  padding: 0.5em;
 }
 
-.legend-heading {
-  color: black;
+.legend-header {
   flex: 0 0 auto;
   margin-bottom: 0px;
+  font-weight: bold;
 }
 
 .gradient-scale {
