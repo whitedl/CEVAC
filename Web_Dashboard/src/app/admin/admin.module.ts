@@ -9,9 +9,15 @@ import { AdminRoutingModule } from './admin-routing.module';
 import { MapviewComponent } from './mapview/mapview.component';
 import { AlertboxComponent } from './alertbox/alertbox.component';
 import { ControlboxComponent } from './controlbox/controlbox.component';
+import { BuildingDetailComponent } from './building-detail/building-detail.component';
 
 @NgModule({
-  declarations: [MapviewComponent, AlertboxComponent, ControlboxComponent],
+  declarations: [
+    MapviewComponent,
+    AlertboxComponent,
+    ControlboxComponent,
+    BuildingDetailComponent
+  ],
   imports: [CommonModule, MaterialModule, AdminRoutingModule, FormsModule]
 })
 export class AdminModule {}
