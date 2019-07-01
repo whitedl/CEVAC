@@ -533,7 +533,7 @@ for i, a in enumerate(alerts):
                                                                         last_events,
                                                                         new_events,
                                                                         alert,
-                                                                        alias)
+                                                                        room)
 
                         com = (f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW("
                                f"AlertType,"
