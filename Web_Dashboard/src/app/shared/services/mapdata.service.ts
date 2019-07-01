@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ColorService } from '@services/color.service';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 
 declare const L: any;
 const geodata = require('src/assets/CU_Building_Footprints.json');
@@ -92,7 +93,11 @@ export class MapdataService {
   private categories: Set<string> = new Set();
   private legend;
 
-  constructor(private colorService: ColorService, private http: HttpClient) {}
+  constructor(
+    private colorService: ColorService,
+    private http: HttpClient,
+    private router: Router
+  ) {}
 
   getMap = () => (!this.map ? this.initMap() : this.map);
 
@@ -231,11 +236,21 @@ export class MapdataService {
     layer.unbindTooltip();
   };
 
+  private selectBuilding = e => {
+    const layer = e.target;
+    const bldg = layer.feature.properties.Short_Name;
+    this.router.navigate(['map', bldg]);
+  };
+
+  private onClick = e => {
+    this.hideTooltip(e);
+    this.selectBuilding(e);
+  };
+
   private onEachFeat = (feature, layer) => {
     const opt = {
       mouseover: this.mouseOver,
-      click: this.hideTooltip,
-      dblclick: this.zoomToFeat,
+      click: this.onClick,
       mouseout: this.resetHighlight
     };
     layer.on(opt);
