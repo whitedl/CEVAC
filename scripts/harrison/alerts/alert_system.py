@@ -28,11 +28,11 @@ for arg in sys.argv:
     if "timed_alerts" in arg.lower():
         TIMED = True
 
-LOG = True
+LOG = False
 DEBUG = False
 CHECK_ALERTS = True
-SEND = True
-UPDATE_CACHE = True
+SEND = False
+UPDATE_CACHE = False
 
 if DEBUG:
     CONDITIONS_FPATH = "C:\\Users\\hchall\\Downloads\\"
@@ -121,6 +121,18 @@ def angle_brackets_replace_single(regex_string, replacement):
         for i, regex in enumerate(regex_list):
             if "&%" in regex:
                 regex_list[i] = replacement
+        return "".join(regex_list)
+    except Exception:
+        return regex_string
+
+
+def angle_brackets_replace_specific(regex_string, key, replacement):
+    """Return string with angle brackets at key replaced with replacement."""
+    try:
+        regex_list = regex_string.split(f"<{key}>")
+        for i, regex in enumerate(regex_list):
+            if i < len(regex_list) - 1:
+                regex_list[i] += str(replacement)
         return "".join(regex_list)
     except Exception:
         return regex_string
@@ -441,8 +453,19 @@ for i, a in enumerate(alerts):
                     if send_alert:
                         a = deepcopy(alert)
                         total_issues += 1
-                        a["message"] = angle_brackets_replace_single(
-                            a["message"], room)
+
+                        a["message"] = angle_brackets_replace_specific(
+                                        a["message"], "alias", room)
+                        a["message"] = angle_brackets_replace_specific(
+                                        a["message"], "Cooling SP",
+                                        room_vals["Cooling SP"])
+                        a["message"] = angle_brackets_replace_specific(
+                                        a["message"], "Heating SP",
+                                        room_vals["Heating SP"])
+                        a["message"] = angle_brackets_replace_specific(
+                                        a["message"], "ActualValue",
+                                        room_vals[Alias_Temp])
+
                         com = (f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW("
                                f"AlertType,"
                                f" AlertMessage, Metric,BLDG,UTCDateTime)"
