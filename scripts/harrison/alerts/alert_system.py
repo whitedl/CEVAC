@@ -29,11 +29,11 @@ for arg in sys.argv:
     if "timed_alerts" in arg.lower():
         TIMED = True
 
-LOG = True
+LOG = False
 DEBUG = False
 CHECK_ALERTS = True
-SEND = True
-UPDATE_CACHE = True
+SEND = False
+UPDATE_CACHE = False
 
 if DEBUG:
     CONDITIONS_FPATH = "C:\\Users\\hchall\\Downloads\\"
@@ -541,7 +541,7 @@ for i, a in enumerate(alerts):
                                f"MessageID, Alias, EventID)"
                                f" VALUES('{a['operation']}','{a['message']}',"
                                f"'{a['type']}','{a['bldg_disp']}',"
-                               f"'{utcdatetimenow_str}'"
+                               f"'{utcdatetimenow_str}',"
                                f"'{alert['message_id']}', '{room}', "
                                f"'{event_id}')")
                         insert_sql_total += com + "; "
@@ -617,7 +617,7 @@ for i, a in enumerate(alerts):
                            f"MessageID, Alias, EventID)"
                            f" VALUES('{a['operation']}','{a['message']}',"
                            f"'{a['type']}','{a['bldg_disp']}',"
-                           f"'{utcdatetimenow_str}')"
+                           f"'{utcdatetimenow_str}',"
                            f"'{alert['message_id']}', '{alias}',"
                            f" '{event_id}')")
                     insert_sql_total += com + "; "
