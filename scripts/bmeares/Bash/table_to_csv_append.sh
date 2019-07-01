@@ -135,7 +135,8 @@ else # csv exists
 
   echo Removing columns from /srv/csv/$table.csv...
   # remove columns from historical csv
-  sed -i '1d' /srv/csv/$table.csv
+#  sed -i '1d' /srv/csv/$table.csv
+  tail -n +2 /srv/csv/$table.csv | sponge /srv/csv/$table.csv
   # append new data to top of existing csv
   # sed -i "1i`cat /home/bmeares/cache/$table.csv`" /srv/csv/$table.csv
   echo Appending data to existing $table.csv...
