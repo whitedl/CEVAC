@@ -112,12 +112,27 @@ body {
   border-radius: 5px;
   height: 6em;
   display: inline-flex;
+  flex-direction: row;
+  width: 20em;
+  align-items: stretch;
+  justify-content: space-between;
+}
+
+.legend-object {
+  flex: 1 1 0;
+  display: flex;
   flex-direction: column;
-  flex-wrap: wrap;
+  align-items: center;
+}
+
+.legend-heading {
+  color: black;
+  flex: 0 0 auto;
+  margin-bottom: 0px;
 }
 
 .gradient-scale {
-  height: 100%;
-  width: 2em;
-  flex: auto;
+  flex: 1 1 auto;
+  min-width: 2em;
+  max-width: 4em;
 }

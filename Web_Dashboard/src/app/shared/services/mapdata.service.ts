@@ -24,7 +24,11 @@ L.Control.Legend = L.Control.extend({
   },
   onRemove(map) {},
   addCategory(cat: string, domain: ['string', 'string']) {
-    const grad = L.DomUtil.create('div', 'gradient-scale', this.container);
+    // Not using L.DomUtil.create's option to specify parent, as we need more control over placement
+    const contain = L.DomUtil.create('div', 'legend-object');
+    const title = L.DomUtil.create('p', 'legend-heading', contain);
+    title.innerText = cat;
+    const grad = L.DomUtil.create('div', 'gradient-scale', contain);
     grad.setAttribute(
       'style',
       'background-image: linear-gradient(to top, ' +
@@ -33,7 +37,7 @@ L.Control.Legend = L.Control.extend({
         domain[1] +
         ');'
     );
-    L.DomUtil.create('div', 'flex-col-spacer', this.container);
+    this.container.insertAdjacentElement('afterbegin', contain);
   },
   update() {
     if (!this.container) {
@@ -162,9 +166,18 @@ export class MapdataService {
     let catCol;
     style['fill'] = true;
     style['fillColor'] =
-      feature.properties.BLDG_NAME !== ' '
-        ? this.colorService.getPassive()
-        : this.colorService.getUnnamed();
+      feature.properties.bData &&
+      feature.properties.bData[this.dataSet.propertyName]
+        ? this.colorService.getScaledColor(
+            feature.properties.BLDG_Class,
+            this.dataSet.name,
+            feature.properties.bData[this.dataSet.propertyName]
+          )
+        : this.colorService.getScaledColor(
+            feature.properties.BLDG_Class,
+            this.dataSet.name,
+            0
+          );
     style['opacity'] = 1;
     style['fillOpacity'] = 0.8;
     if (feature.properties.BLDG_Class) {
