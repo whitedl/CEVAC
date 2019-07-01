@@ -142,11 +142,6 @@ export class MapdataService {
       { position: 'bottomleft' }
     );
     for (const cat of this.categories) {
-      console.log(
-        cat +
-          ': ' +
-          this.colorService.labDomain(this.colorService.getScaledColor(cat))
-      );
       this.legend.addCategory(
         cat,
         this.colorService.labDomain(this.colorService.getScaledColor(cat))
