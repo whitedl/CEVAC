@@ -181,7 +181,7 @@ def pred(model):
     f.close()
     os.system("/cevac/scripts/exec_sql_script.sh "
               "/cevac/cache/insert_predictions.sql")
-    os.remove("/cevac/cache/insert_predictions.sql")
+    # os.remove("/cevac/cache/insert_predictions.sql")
 
 
 if __name__ == '__main__':
