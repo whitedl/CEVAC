@@ -25,21 +25,13 @@ L.Control.Legend = L.Control.extend({
       this.container
     );
     const scaleHeader = L.DomUtil.create('div', '', rangeContainer);
-    this.rangeHeader = L.DomUtil.create(
-      'p',
-      'legend-header',
-      scaleHeader
-    ).textContent = rangeHead;
-    this.scaleMax = L.DomUtil.create(
-      'div',
-      '',
-      scaleHeader
-    ).textContent = this.scale[1];
-    this.scaleMin = L.DomUtil.create(
-      'div',
-      '',
-      rangeContainer
-    ).textContent = this.scale[0];
+    this.rangeHeader = L.DomUtil.create('p', 'legend-header', scaleHeader);
+    this.rangeHeader.textContent = rangeHead;
+    this.scaleMax = L.DomUtil.create('div', '', scaleHeader);
+    this.scaleMax.setAttribute('style', 'text-align: center;');
+    this.scaleMax.textContent = this.scale[1];
+    this.scaleMin = L.DomUtil.create('div', '', rangeContainer);
+    this.scaleMin.textContent = this.scale[0];
   },
   onAdd(map) {
     return this.container;
@@ -60,6 +52,11 @@ L.Control.Legend = L.Control.extend({
         ');'
     );
     this.container.insertAdjacentElement('beforeEnd', contain);
+  },
+  changeScale(scale: [number, number], rangeHead: string) {
+    this.rangeHeader.textContent = rangeHead;
+    this.scaleMin.textContent = scale[0];
+    this.scaleMax.textContent = scale[1];
   },
   update() {
     if (!this.container) {
@@ -93,6 +90,7 @@ export class MapdataService {
     maxZoom: 20
   };
   private categories: Set<string> = new Set();
+  private legend;
 
   constructor(private colorService: ColorService, private http: HttpClient) {}
 
@@ -100,6 +98,10 @@ export class MapdataService {
 
   setDataSet = () => {
     this.tracked.setStyle(this.styleTracked);
+    this.legend.changeScale(
+      this.colorService.getScale(this.dataSet.name),
+      this.dataSet.name
+    );
   };
 
   focusBldg = (bldg: string) => {
@@ -134,7 +136,7 @@ export class MapdataService {
     this.untracked = L.geoJSON(geodata, this.untrackedOptions).addTo(this.map);
     this.tracked = L.geoJSON(geodata, this.trackedOptions).addTo(this.map);
     controller.addOverlay(this.untracked, 'show untracked');
-    const legend = L.control.legend(
+    this.legend = L.control.legend(
       this.colorService.getScale(this.dataSet.name),
       this.dataSet.name,
       { position: 'bottomleft' }
@@ -145,12 +147,12 @@ export class MapdataService {
           ': ' +
           this.colorService.labDomain(this.colorService.getScaledColor(cat))
       );
-      legend.addCategory(
+      this.legend.addCategory(
         cat,
         this.colorService.labDomain(this.colorService.getScaledColor(cat))
       );
     }
-    legend.addTo(this.map);
+    this.legend.addTo(this.map);
     return this.map;
   };
 
