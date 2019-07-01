@@ -78,6 +78,12 @@ class Query:
 
         return d
 
+    def as_json_dict(self):
+        """Return dictionary of data, with dicts instead of lists."""
+        d = {}
+
+        return d
+
 
 class INSERT:
     """INSERT a string into a sql table."""

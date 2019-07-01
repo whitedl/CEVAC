@@ -1,17 +1,17 @@
-alert_name,type,alias,units,alert_message,bldg_std,bldg_disp,database,column,sort_column,num_entries,time_dependent,occupancy_status,condition,value,alert_type,comments
-Watt_CO2_warning,CO2,*,ppm,<alias> exceeds 1000 ppm.,WATT,Watt,CEVAC_WATT_IAQ_LATEST,ActualValue,UTCDateTime,1,1,1,>,1000,warning,
-Watt_CO2_alert,CO2,*,ppm,<alias> exceeds 2000 ppm.,WATT,Watt,CEVAC_WATT_IAQ_LATEST,ActualValue,UTCDateTime,1,0,*,>,2000,alert,
-1st_Floor_Lights,Power,1st Floor Lighting,kW,1st Floor Lights are on.,WATT,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,1,0,>,1.3,alert,
-2nd_Floor_Lights,Power,2nd Floor Lighting,kW,2nd Floor Lights are on.,WATT,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,1,0,>,1.15,alert,
-3rd_Floor_Lights,Power,3rd Floor Lighting,kW,3rd Floor Lights are on.,WATT,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,1,0,>,1.35,alert,
-4th_Floor_Lights,Power,4th Floor Lighting,kW,4th Floor Lights are on.,WATT,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,1,0,>,1,alert,
-Media_Lights,Power,Building Media Lights,kW,The Media Lights are on.,WATT,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,1,0,>,1,alert,
-Temp_High_warning,Temperature,*,deg-F,<alias> reads <ActualValue> (Cooling SP = <Cooling SP>.),WATT,Watt,CEVAC_WATT_TEMP_DAY,ActualValue,UTCDateTime,3,0,*,>,<Cooling SP ActualValue>,warning,
-Temp_High_alert,Temperature,*,deg-F,<alias> reads <ActualValue> (Cooling SP = <Cooling SP>.),WATT,Watt,CEVAC_WATT_TEMP_LATEST,ActualValue,UTCDateTime,1,0,*,>,<Cooling SP ActualValue>+3,alert,
-Temp_Low_warning,Temperature,*,deg-F,<alias> reads <ActualValue> (Heating SP = <Heating SP>.),WATT,Watt,CEVAC_WATT_TEMP_DAY,ActualValue,UTCDateTime,3,0,*,<,<Heating SP ActualValue>,warning,
-Temp_Low_alert,Temperature,*,deg-F,<alias> reads <ActualValue> (Heating SP = <Heating SP>.),WATT,Watt,CEVAC_WATT_TEMP_LATEST,ActualValue,UTCDateTime,1,0,*,<,<Heating SP ActualValue> -3,alert,
-Building_Emergency_Power_alert,Power,Building Emergency,kW,Building emergency power exceeds 80 kW.,WATT,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,0,*,>,80,alert,
-Building_Power_Unoccupied_alert,Power,*,kW,The building is unoccupied but is using a lot of power.,WATT,Watt,CEVAC_WATT_POWER_SUMS_LATEST,ActualValue,UTCDateTime,1,1,0,>,300,alert,
-Dead_Temp_sensor_alert,Temperature,*,deg-F,<alias> has not reported recently.,WATT,Watt,CEVAC_WATT_TEMP_LATEST,UTCDateTime,UTCDateTime,1,0,*,<,<now> - 1 hr,alert,subtraction and alert value are in hours
-Dead_Power_sensor_alert,Power,*,kW,<alias> has not reported recently.,WATT,Watt,CEVAC_WATT_POWER_LATEST,UTCDateTime,UTCDateTime,1,0,*,<,<now> - 1 hr,alert,
-Dead_IAQ_sensor_alert,CO2,*,ppm,<alias> has not reported recently.,WATT,Watt,CEVAC_WATT_IAQ_LATEST,UTCDateTime,UTCDateTime,1,0,*,<,<now> - 1 hr,alert,
+alert_name,type,alias,units,alert_message,bldg_std,bldg_disp,database,column,sort_column,num_entries,time_dependent,occupancy_status,condition,value,alert_type,message_ID
+Watt_CO2_warning,CO2,*,ppm,<alias> exceeds 1000 ppm.,WATT,Watt,CEVAC_WATT_IAQ_LATEST,ActualValue,UTCDateTime,1,1,1,>,1000,warning,1
+Watt_CO2_alert,CO2,*,ppm,<alias> exceeds 2000 ppm.,WATT,Watt,CEVAC_WATT_IAQ_LATEST,ActualValue,UTCDateTime,1,0,*,>,2000,alert,2
+1st_Floor_Lights,Power,1st Floor Lighting,kW,1st Floor Lights are on.,WATT,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,1,0,>,1.3,alert,3
+2nd_Floor_Lights,Power,2nd Floor Lighting,kW,2nd Floor Lights are on.,WATT,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,1,0,>,1.15,alert,4
+3rd_Floor_Lights,Power,3rd Floor Lighting,kW,3rd Floor Lights are on.,WATT,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,1,0,>,1.35,alert,5
+4th_Floor_Lights,Power,4th Floor Lighting,kW,4th Floor Lights are on.,WATT,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,1,0,>,1,alert,6
+Media_Lights,Power,Building Media Lights,kW,The Media Lights are on.,WATT,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,1,0,>,1,alert,7
+Temp_High_warning,Temperature,*,deg-F,<alias> reads <ActualValue> [deg-F] (Cooling SP = <Cooling SP> [deg-F]),WATT,Watt,CEVAC_WATT_TEMP_DAY,ActualValue,UTCDateTime,3,0,*,>,<Cooling SP ActualValue>,warning,8
+Temp_High_alert,Temperature,*,deg-F,<alias> reads <ActualValue> [deg-F] (Cooling SP = <Cooling SP> [deg-F]),WATT,Watt,CEVAC_WATT_TEMP_LATEST,ActualValue,UTCDateTime,1,0,*,>,<Cooling SP ActualValue>+3,alert,9
+Temp_Low_warning,Temperature,*,deg-F,<alias> reads <ActualValue> [deg-F] (Heating SP = <Heating SP> [deg-F]),WATT,Watt,CEVAC_WATT_TEMP_DAY,ActualValue,UTCDateTime,3,0,*,<,<Heating SP ActualValue>,warning,10
+Temp_Low_alert,Temperature,*,deg-F,<alias> reads <ActualValue> [deg-F] (Heating SP = <Heating SP> [deg-F]),WATT,Watt,CEVAC_WATT_TEMP_LATEST,ActualValue,UTCDateTime,1,0,*,<,<Heating SP ActualValue> -3,alert,11
+Building_Emergency_Power_alert,Power,Building Emergency,kW,Building emergency power exceeds 80 kW.,WATT,Watt,CEVAC_WATT_POWER_LATEST,ActualValue,UTCDateTime,1,0,*,>,80,alert,12
+Building_Power_Unoccupied_alert,Power,*,kW,The building is unoccupied but is using a lot of power.,WATT,Watt,CEVAC_WATT_POWER_SUMS_LATEST,ActualValue,UTCDateTime,1,1,0,>,300,alert,13
+Dead_Temp_sensor_alert,Temperature,*,deg-F,<alias> has not reported recently.,WATT,Watt,CEVAC_WATT_TEMP_LATEST,UTCDateTime,UTCDateTime,1,0,*,<,<now> - 1 hr,alert,14
+Dead_Power_sensor_alert,Power,*,kW,<alias> has not reported recently.,WATT,Watt,CEVAC_WATT_POWER_LATEST,UTCDateTime,UTCDateTime,1,0,*,<,<now> - 1 hr,alert,15
+Dead_IAQ_sensor_alert,CO2,*,ppm,<alias> has not reported recently.,WATT,Watt,CEVAC_WATT_IAQ_LATEST,UTCDateTime,UTCDateTime,1,0,*,<,<now> - 1 hr,alert,16

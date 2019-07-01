@@ -21,6 +21,7 @@ CONDITIONS_FPATH = "/home/bmeares/cron/alerts/"
 LOGGING_PATH = "/home/bmeares/cron/alerts/"
 PHONE_PATH = "/home/bmeares/cron/alerts/"
 alert_fname = "alert_parameters.csv"
+json_fname = "/cevac/cron/alert_log.json"
 
 TIMED = True
 
@@ -28,11 +29,11 @@ for arg in sys.argv:
     if "timed_alerts" in arg.lower():
         TIMED = True
 
-LOG = True
+LOG = False
 DEBUG = False
 CHECK_ALERTS = True
-SEND = True
-UPDATE_CACHE = True
+SEND = False
+UPDATE_CACHE = False
 
 if DEBUG:
     CONDITIONS_FPATH = "C:\\Users\\hchall\\Downloads\\"
@@ -57,7 +58,7 @@ COLUMNS = {
     "condition": 13,
     "value": 14,
     "operation": 15,
-    "comment": 16,
+    "message_id": 16,
 }
 
 
@@ -68,6 +69,11 @@ TIME = {
     "minute": 24 * 60,
     "minutes": 24 * 60,
 }
+
+
+def sql_time_str(t):
+    """Return time in sql format."""
+    return t.strftime('%Y-%m-%d %H:%M:%S')
 
 
 def regex_to_numlist(regex_string):
@@ -166,6 +172,7 @@ def import_conditions(fname, logger):
                         "sort_column": row[COLUMNS["sort_column"]],
                         "building": row[COLUMNS["building"]],
                         "bldg_disp": row[COLUMNS["bldg_disp"]],
+                        "message_id": row[COLUMNS["message_id"]]
                     }
                     unique_databases[row[COLUMNS["database"]]] = None
             except Exception:
@@ -299,6 +306,42 @@ def safe_log(message, type):
             logging.info(message)
 
 
+def parse_json(filename):
+    """Parse json for cron use."""
+    try:
+        f = open(filename, "r")
+        line = f.readlines()[0]
+        new_json = json.loads(line)
+        next_id = new_json["next_id"]
+        f.close()
+        return (next_id, new_json)
+    except Exception:
+        return (0, {})
+
+
+def write_json(filename, new_events, next_id):
+    """Write json to file."""
+    new_events["next_id"] = next_id
+    f = open(filename, "w")
+    f.write(json.dumps(new_events))
+    f.close()
+    return None
+
+
+def assign_event_id(next_id, old_json, new_json, alert, alias):
+    """Assign event id."""
+    key = alias+alert["message_id"]
+    print(key, old_json)
+    event_id = next_id
+    if key in old_json:
+        event_id = old_json[key]
+        new_json[key] = event_id
+    else:
+        next_id += 1
+        new_json[key] = event_id
+    return event_id, next_id, new_json
+
+
 # Initialize logging
 if LOG:
     FORMAT = '%(asctime)s %(levelname)s:%(message)s'
@@ -311,9 +354,15 @@ if LOG:
 # Get alert conditions
 alerts, unique_databases = import_conditions(alert_fname, logging)
 
+# JSON
+next_id, last_events = parse_json(json_fname)
+new_events = {}  # id: { hash : event_id }
+
 # Check alerts for conditions
 insert_sql_total = ""
 total_issues = 0
+utcdatetimenow = datetime.datetime.utcnow()
+utcdatetimenow_str = sql_time_str(utcdatetimenow)
 for i, a in enumerate(alerts):
     alert = alerts[a]
     try:
@@ -362,15 +411,23 @@ for i, a in enumerate(alerts):
             elif alert["condition"] == "<":
                 send_alert = (avg_data < alert["value"])
 
+            alias = "Alias"
             if send_alert:
+                event_id, next_id, new_events = assign_event_id(next_id,
+                                                                last_events,
+                                                                new_events,
+                                                                alert,
+                                                                alias)
                 total_issues += 1
                 safe_log("An alert was sent for " + str(alert), "info")
                 com = (f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType, "
-                       f"AlertMessage, Metric,BLDG,UTCDateTime)"
+                       f"AlertMessage, Metric, BLDG, UTCDateTime, MessageID,"
+                       " Alias, EventID)"
                        f" VALUES('{alert['operation']}',"
                        f"'{alert['message']}',"
                        f"'{alert['type']}',"
-                       f"'{alert['bldg_disp']}',GETUTCDATE())")
+                       f"'{alert['bldg_disp']}','{utcdatetimenow_str}',"
+                       f"'{alert['message_id']}', {alias}, '{event_id}')")
                 insert_sql_total += com + "; "
             safe_log("Checked " + str(i + 1), "info")
 
@@ -405,8 +462,13 @@ for i, a in enumerate(alerts):
                 try:
                     Alias_Temp = "Temp"
                     for key in temps[room].keys():
-                        if (key != "Cooling SP" and key != "Heating SP"):
+                        if (key != "Cooling SP" and key != "Heating SP"
+                                and "TEMP" in key):
                             Alias_Temp = key
+                        elif ("AHU" in key):
+                            continue
+                        else:
+                            continue
 
                     # Modify value
                     room_vals = temps[room]
@@ -455,23 +517,33 @@ for i, a in enumerate(alerts):
                         total_issues += 1
 
                         a["message"] = angle_brackets_replace_specific(
-                                        a["message"], "alias", room)
+                                        a["message"], "alias",
+                                        room + str(" Temp"))
                         a["message"] = angle_brackets_replace_specific(
                                         a["message"], "Cooling SP",
-                                        room_vals["Cooling SP"])
+                                        f"{room_vals['Cooling SP']:.1f}")
                         a["message"] = angle_brackets_replace_specific(
                                         a["message"], "Heating SP",
-                                        room_vals["Heating SP"])
+                                        f"{room_vals['Heating SP']:.1f}")
                         a["message"] = angle_brackets_replace_specific(
                                         a["message"], "ActualValue",
-                                        room_vals[Alias_Temp])
+                                        f"{room_vals[Alias_Temp]:.1f}")
+
+                        event_id, next_id, new_events = assign_event_id(next_id,
+                                                                        last_events,
+                                                                        new_events,
+                                                                        alert,
+                                                                        alias)
 
                         com = (f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW("
                                f"AlertType,"
-                               f" AlertMessage, Metric,BLDG,UTCDateTime)"
+                               f" AlertMessage, Metric,BLDG,UTCDateTime,"
+                               f"MessageID, Alias, EventID)"
                                f" VALUES('{a['operation']}','{a['message']}',"
                                f"'{a['type']}','{a['bldg_disp']}',"
-                               f"GETUTCDATE())")
+                               f"'{utcdatetimenow_str}'"
+                               f"'{alert['message_id']}', '{room}', "
+                               f"'{event_id}')")
                         insert_sql_total += com + "; "
                         safe_log("An alert was sent for " + str(a), "info")
                 except Exception:
@@ -535,10 +607,19 @@ for i, a in enumerate(alerts):
                     a = deepcopy(alert)
                     a["message"] = angle_brackets_replace_single(
                         a["message"], alias) + " " + t
+                    event_id, next_id, new_events = assign_event_id(next_id,
+                                                                    last_events,
+                                                                    new_events,
+                                                                    alert,
+                                                                    alias)
                     com = (f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType, "
-                           f"AlertMessage, Metric,BLDG,UTCDateTime)"
+                           f"AlertMessage, Metric,BLDG,UTCDateTime, "
+                           f"MessageID, Alias, EventID)"
                            f" VALUES('{a['operation']}','{a['message']}',"
-                           f"'{a['type']}','{a['bldg_disp']}',GETUTCDATE())")
+                           f"'{a['type']}','{a['bldg_disp']}',"
+                           f"'{utcdatetimenow_str}')"
+                           f"'{alert['message_id']}', '{alias}',"
+                           f" '{event_id}')")
                     insert_sql_total += com + "; "
             safe_log("Checked " + str(i + 1), "info")
 
@@ -553,11 +634,12 @@ for i, a in enumerate(alerts):
 
 if total_issues == 0:
     insert_sql_total = ("INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType,"
-                        "AlertMessage,Metric,BLDG,UTCDateTime) "
+                        "AlertMessage,Metric,BLDG,UTCDateTime,MessageID) "
                         f"VALUES('All Clear''All Clear','N/A','All',"
-                        f"GETUTCDATE())")
+                        f"GETUTCDATE(),'0')")
 
 # Insert into CEVAC_ALL_ALERTS_HIST
+write_json(json_fname, new_events, next_id)
 if SEND:
     f = open("/home/bmeares/cache/insert_alert_system.sql", "w")
     f.write(insert_sql_total.replace(';', '\nGO\n'))
@@ -566,7 +648,7 @@ if SEND:
               "/home/bmeares/cache/insert_alert_system.sql")
     os.remove("/home/bmeares/cache/insert_alert_system.sql")
 else:
-    print(insert_sql_total)
+    print(insert_sql_total.replace(';', '\nGO\n'))
 
 if LOG:
     logging.info(str(datetime.datetime.now()) +
