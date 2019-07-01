@@ -9,7 +9,7 @@ import { switchMap } from 'rxjs/operators';
   styleUrls: ['./building-detail.component.scss']
 })
 export class BuildingDetailComponent implements OnInit {
-  private building$;
+  building$;
 
   constructor(
     private route: ActivatedRoute,
