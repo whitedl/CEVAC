@@ -357,7 +357,7 @@ for i, a in enumerate(alerts):
                        f" VALUES('{alert['operation']}',"
                        f"'{alert['message']}',"
                        f"'{alert['type']}',"
-                       f"'{alert['building']}',GETUTCDATE())")
+                       f"'{alert['bldg_disp']}',GETUTCDATE())")
                 insert_sql_total += com + "; "
             safe_log("Checked " + str(i + 1), "info")
 
@@ -446,7 +446,7 @@ for i, a in enumerate(alerts):
                                f"AlertType,"
                                f" AlertMessage, Metric,BLDG,UTCDateTime)"
                                f" VALUES('{a['operation']}','{a['message']}',"
-                               f"'{a['type']}','{a['building']}',"
+                               f"'{a['type']}','{a['bldg_disp']}',"
                                f"GETUTCDATE())")
                         insert_sql_total += com + "; "
                         safe_log("An alert was sent for " + str(a), "info")
@@ -514,7 +514,7 @@ for i, a in enumerate(alerts):
                     com = (f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType, "
                            f"AlertMessage, Metric,BLDG,UTCDateTime)"
                            f" VALUES('{a['operation']}','{a['message']}',"
-                           f"'{a['type']}','{a['building']}',GETUTCDATE())")
+                           f"'{a['type']}','{a['bldg_disp']}',GETUTCDATE())")
                     insert_sql_total += com + "; "
             safe_log("Checked " + str(i + 1), "info")
 
