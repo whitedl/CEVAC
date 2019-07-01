@@ -28,11 +28,11 @@ for arg in sys.argv:
     if "timed_alerts" in arg.lower():
         TIMED = True
 
-LOG = False
+LOG = True
 DEBUG = False
 CHECK_ALERTS = True
-SEND = False
-UPDATE_CACHE = False
+SEND = True
+UPDATE_CACHE = True
 
 if DEBUG:
     CONDITIONS_FPATH = "C:\\Users\\hchall\\Downloads\\"
