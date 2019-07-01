@@ -529,11 +529,9 @@ for i, a in enumerate(alerts):
                                         a["message"], "ActualValue",
                                         f"{room_vals[Alias_Temp]:.1f}")
 
-                        event_id, next_id, new_events = assign_event_id(next_id,
-                                                                        last_events,
-                                                                        new_events,
-                                                                        alert,
-                                                                        room)
+                        event_id, next_id,
+                        new_events = assign_event_id(next_id, last_events,
+                                                     new_events, alert, room)
 
                         com = (f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW("
                                f"AlertType,"
