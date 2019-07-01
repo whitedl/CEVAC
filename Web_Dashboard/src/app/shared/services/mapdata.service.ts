@@ -128,7 +128,7 @@ export class MapdataService {
         this.colorService.registerCategory(bclass);
       }
     }
-    this.map = L.map('map', this.mapOptions).setView([34.6761, -82.8366], 16);
+    this.map = L.map('map', this.mapOptions).setView([34.678, -82.838], 17);
     const mapbox = this.getTileLayerMapboxLight().addTo(this.map);
     const controller = L.control
       .layers({ mapbox, openstreetmap: this.getTileLayerOpenMap() })
