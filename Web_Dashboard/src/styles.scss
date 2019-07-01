@@ -1,0 +1,139 @@
+/* You can add global styles to this file, and also import other style files */
+// Imports functions, variables, and mixins that are needed by other Bootstrap files
+@import '~bootstrap/scss/functions';
+@import '~bootstrap/scss/variables';
+@import '~bootstrap/scss/mixins';
+// Import Roboot (ensures consistency across browsers)
+@import '~bootstrap/scss/reboot';
+
+//bring in our material theme for use on custom components
+@import 'mat_theming.scss';
+
+html,
+body {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-content: stretch;
+}
+body {
+  margin: 0;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+}
+
+// Custom scrollbars. Won't work in every browser.
+@mixin scrollcontainer {
+  &::-webkit-scrollbar {
+    width: 0.5em;
+  }
+  &::-webkit-scrollbar-track {
+    background-color: darken(
+      map-get(map-get($clemson-theme, background), background),
+      10%
+    );
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: mat-color(map-get($clemson-theme, accent));
+  }
+  scrollbar-width: thin;
+  scrollbar-color: mat-color($clemson-accent)
+    darken(map-get(map-get($clemson-theme, background), background), 10%);
+}
+
+// general use flex containers
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.flex-just-sb {
+  justify-content: space-between;
+}
+
+.flex-none {
+  flex: none;
+}
+
+.flex-auto {
+  flex: auto;
+}
+
+.flex-initial {
+  flex: initial;
+}
+
+.flex-fill {
+  flex: 1 0 100%;
+}
+
+.filler {
+  height: 100%;
+  width: 100%;
+}
+
+.flex-col-spacer {
+  height: 100%;
+  width: 0px;
+}
+
+.routerFiller + * {
+  flex: 1 1 100%;
+}
+
+// exactly what it says it is
+.scrollableExpansion {
+  display: flex !important;
+  flex-direction: column;
+}
+
+.scrollableExpansion > mat-expansion-panel-header {
+  flex: 0 0 auto;
+}
+
+.scrollableExpansion > .mat-expansion-panel-content {
+  @include scrollcontainer;
+  flex: auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+// leaflet css
+.legend {
+  padding: 6px 8px;
+  font: 14px/16px Arial, Helvetica, sans-serif;
+  background: white;
+  background: rgba(255, 255, 255, 0.8);
+  color: #333;
+  border-radius: 5px;
+  height: 10em;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: space-between;
+}
+
+.legend-object {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5em;
+}
+
+.legend-header {
+  flex: 0 0 auto;
+  margin-bottom: 0px;
+  font-weight: bold;
+}
+
+.gradient-scale {
+  flex: 1 1 auto;
+  min-width: 2em;
+  max-width: 4em;
+}
