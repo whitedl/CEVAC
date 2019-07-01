@@ -28,11 +28,11 @@ for arg in sys.argv:
     if "timed_alerts" in arg.lower():
         TIMED = True
 
-LOG = True
+LOG = False
 DEBUG = False
 CHECK_ALERTS = True
-SEND = True
-UPDATE_CACHE = True
+SEND = False
+UPDATE_CACHE = False
 
 if DEBUG:
     CONDITIONS_FPATH = "C:\\Users\\hchall\\Downloads\\"
@@ -153,6 +153,7 @@ def import_conditions(fname, logger):
                         "aliases": alias_to_list(row[COLUMNS["aliases"]]),
                         "sort_column": row[COLUMNS["sort_column"]],
                         "building": row[COLUMNS["building"]],
+                        "bldg_disp": row[COLUMNS["bldg_disp"]],
                     }
                     unique_databases[row[COLUMNS["database"]]] = None
             except Exception:
