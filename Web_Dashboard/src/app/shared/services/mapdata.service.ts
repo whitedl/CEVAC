@@ -14,10 +14,32 @@ L.Control.Legend = L.Control.extend({
   options: {
     position: 'bottomleft'
   },
-  initialize(scale: [number, number], options) {
+  initialize(scale: [number, number], rangeHead: string, options) {
     L.Util.setOptions(this, options);
     this.scale = scale;
+    this.rangeTitle = rangeHead;
     this.container = L.DomUtil.create('div', 'legend');
+    const rangeContainer = L.DomUtil.create(
+      'div',
+      'legend-object',
+      this.container
+    );
+    const scaleHeader = L.DomUtil.create('div', '', rangeContainer);
+    this.rangeHeader = L.DomUtil.create(
+      'p',
+      'legend-header',
+      scaleHeader
+    ).textContent = rangeHead;
+    this.scaleMax = L.DomUtil.create(
+      'div',
+      '',
+      scaleHeader
+    ).textContent = this.scale[1];
+    this.scaleMin = L.DomUtil.create(
+      'div',
+      '',
+      rangeContainer
+    ).textContent = this.scale[0];
   },
   onAdd(map) {
     return this.container;
@@ -26,7 +48,7 @@ L.Control.Legend = L.Control.extend({
   addCategory(cat: string, domain: ['string', 'string']) {
     // Not using L.DomUtil.create's option to specify parent, as we need more control over placement
     const contain = L.DomUtil.create('div', 'legend-object');
-    const title = L.DomUtil.create('p', 'legend-heading', contain);
+    const title = L.DomUtil.create('p', 'legend-header', contain);
     title.innerText = cat;
     const grad = L.DomUtil.create('div', 'gradient-scale', contain);
     grad.setAttribute(
@@ -37,7 +59,7 @@ L.Control.Legend = L.Control.extend({
         domain[1] +
         ');'
     );
-    this.container.insertAdjacentElement('afterbegin', contain);
+    this.container.insertAdjacentElement('beforeEnd', contain);
   },
   update() {
     if (!this.container) {
@@ -114,6 +136,7 @@ export class MapdataService {
     controller.addOverlay(this.untracked, 'show untracked');
     const legend = L.control.legend(
       this.colorService.getScale(this.dataSet.name),
+      this.dataSet.name,
       { position: 'bottomleft' }
     );
     for (const cat of this.categories) {
