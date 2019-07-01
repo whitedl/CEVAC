@@ -9,6 +9,7 @@ from keras.layers import Dense, Activation, Dropout, Conv1D
 from keras.callbacks import EarlyStopping
 
 # Helper libraries
+import os
 import numpy as np
 from numpy import array
 from sys import argv
@@ -39,7 +40,6 @@ def fetch():
             'clouds' : []
             }
 
-    # request url with api key
     requestURL = 'https://api.darksky.net/forecast/db6bb38a65d59c7677e8e97db002705b/33.662333,-79.830875'
     r = requests.get(requestURL).json()
     hourlyData = r['hourly']['data']
@@ -60,10 +60,6 @@ def fetch():
         hourly['temperatures'].append(((element['temperature'] - 32) / 1.8 + 20) / 70)
         hourly['clouds'].append(element['cloudCover'])
 
-<<<<<<< HEAD
-    # return json formatted 'hourly' dictionary of lists of hourly data
-=======
->>>>>>> origin/prediction
     return hourly
 
 # normalize the hours, days, and months
@@ -83,20 +79,16 @@ def generateInput(h, d, m, y):
         '12' : 31
     }
 
-    # the percent of the month that has elapsed
     throughMonth = [float(d/numMonth[str(m)])]
 
-    # normalized hour of the day for a given data point
     hour = [0 for i in range(0,24)]
     hour[h] = 1
 
-    # returns the day of the week: MONDAY == 0
     d = date(y, m, d).weekday()
 
     day = [0 for i in range(0,7)]
     day[d -1] = 1
 
-    # normalized month of the year: JANUARY == 0
     month = [0 for i in range(0,12)]
     month[m - 1] = 1
 
@@ -109,26 +101,20 @@ def createModel():
 	model = keras.Sequential()
 
 	# add layers
-	model.add(LSTM(256, input_shape=(12, 47), return_sequences=True))
+	model.add(Dense(100, input_shape=(47,)))
 	model.add(Activation('sigmoid'))
 
-	# model.add(LSTM(64, return_sequences=True))
-	# model.add(Activation('sigmoid'))
-
-	model.add(LSTM(units=1))
+	model.add(Dense(1))
 	model.add(Activation('sigmoid'))
 
-	model.compile(optimizer=opt,loss=losses.mse, metrics=['accuracy'])
+	model.compile(optimizer='adam',loss=losses.mse, metrics=['accuracy'])
 
 	return model
 
 def pred(model):
-    model.load_weights('powerModel.h5')
-    # model.load_weights('/home/bmeares/CEVAC/prediction/powerModel.h5')
 
     predictions = []
     hourly = fetch()
-
 
     for i, hour in enumerate(hourly['hours']):
 
@@ -144,24 +130,11 @@ def pred(model):
         temperature = [hourly['temperatures'][i]]
         cloudCoverage = [hourly['clouds'][i]]
         input = np.concatenate((hour, day, month, throughMonth, temperature, humidity, cloudCoverage), axis = -1)
+        model.load_weights('powerModel.h5')
 
         prediction = model.predict(input.reshape(1,-1))[0][0] * 275
         predictions.append(prediction)
 
-<<<<<<< HEAD
-    str = ''
-
-    for i, prediction in enumerate(predictions):
-        date =  '/'.join((str(hourly['months'][i]), str(hourly['days'][i]), str(hourly['years'][i]))) + ' ' + str(hourly['hours'][i])
-        # str = 'INSERT INTO [] ({},{},{})'.format(date, prediction, building, metric)
-        str += 'ESTIMATE {} ON {}/{} AT HOUR {}\n'.format(prediction, hourly['days'][i], hourly['months'][i], hourly['hours'][i])
-
-    # write to our predictions text file
-    with open('predictions.txt', 'w') as f:
-        f.write(str)
-
-    return predictions
-=======
 
     insert_sql_total = ''
 
@@ -203,14 +176,13 @@ def pred(model):
                                  f"{str(prediction)});")
 
     # Write to `CEVAC_WATT_POWER_SUMS_PRED_HIST`
-    f = open("/home/bmeares/cache/insert_predictions.sql", "w")
+    f = open("/cevac/cache/insert_predictions.sql", "w")
     f.write(insert_sql_total.replace(';', '\nGO\n'))
     f.close()
-    os.system("/CEVAC/scripts/exec_sql_script.sh "
-              "/CEVAC/cache/insert_predictions.sql")
-    os.remove("/CEVAC/cache/insert_predictions.sql")
+    os.system("/cevac/scripts/exec_sql_script.sh "
+              "/cevac/cache/insert_predictions.sql")
+    os.remove("/cevac/cache/insert_predictions.sql")
 
->>>>>>> origin/prediction
 
 if __name__ == '__main__':
     model = createModel()
