@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ColorService } from '@services/color.service';
 import { HttpClient } from '@angular/common/http';
-import { utils } from 'protractor';
 
 declare const L: any;
 const geodata = require('src/assets/CU_Building_Footprints.json');
