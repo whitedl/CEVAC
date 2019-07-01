@@ -170,6 +170,13 @@ def pred(model):
             t_utc = local_dt.astimezone (pytz.utc)
             UTCDateTime = t_utc.strftime("%Y-%m-%d %H:%M:%S")
 
+            deleteString = ('''
+                            DECLARE @utc DATETIME;
+                            SET @utc = '{}';
+                            DELETE FROM CEVAC_WATT_POWER_SUMS_PRED_HIST_RAW
+                            WHERE UTCDateTime = @utc;
+                            ''').format(UTCDateTime)
+
             insert_sql_total += ("INSERT INTO CEVAC_WATT_POWER_SUMS_PRED_HIST_RAW "
                                  "(UTCDateTime, ETDateTime, Total_Usage) "
                                  f" VALUES('{UTCDateTime}','{ETDateTime}',"
