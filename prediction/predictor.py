@@ -172,8 +172,8 @@ def pred(model):
 
             insert_sql_total += ("INSERT INTO CEVAC_WATT_POWER_SUMS_PRED_HIST_RAW "
                                  "(UTCDateTime, ETDateTime, Total_Usage) "
-                                 f" VALUES({UTCDateTime},{ETDateTime},"
-                                 f"{str(prediction)});")
+                                 f" VALUES('{UTCDateTime}','{ETDateTime}',"
+                                 f"'{str(prediction)}');")
 
     # Write to `CEVAC_WATT_POWER_SUMS_PRED_HIST`
     f = open("/cevac/cache/insert_predictions.sql", "w")
