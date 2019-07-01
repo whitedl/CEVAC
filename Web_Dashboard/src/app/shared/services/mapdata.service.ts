@@ -179,7 +179,7 @@ export class MapdataService {
   private style = feature => {
     const style = {};
     style['fill'] = true;
-    style['weight'] = 2;
+    style['weight'] = 3;
     style['opacity'] = 1;
     style['fillOpacity'] = 1;
     style['color'] = this.colorService.getScaledColor(
