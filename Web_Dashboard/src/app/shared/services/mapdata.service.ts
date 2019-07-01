@@ -97,7 +97,7 @@ export class MapdataService {
   getMap = () => (!this.map ? this.initMap() : this.map);
 
   setDataSet = () => {
-    this.tracked.setStyle(this.styleTracked);
+    this.tracked.setStyle(this.style);
     this.legend.changeScale(
       this.colorService.getScale(this.dataSet.name),
       this.dataSet.name
@@ -177,44 +177,6 @@ export class MapdataService {
     });
 
   private style = feature => {
-    const style = {};
-    let catCol: string;
-
-    style['fill'] = true;
-    style['opacity'] = 1;
-    style['fillOpacity'] = 1;
-    style['color'] = this.colorService.getColor();
-  };
-
-  private styleUntracked = feature => {
-    const style = {};
-    let catCol;
-    style['fill'] = true;
-    style['fillColor'] =
-      feature.properties.bData &&
-      feature.properties.bData[this.dataSet.propertyName]
-        ? this.colorService.getScaledColor(
-            feature.properties.BLDG_Class,
-            this.dataSet.name,
-            feature.properties.bData[this.dataSet.propertyName]
-          )
-        : this.colorService.getScaledColor(
-            feature.properties.BLDG_Class,
-            this.dataSet.name,
-            0
-          );
-    style['opacity'] = 1;
-    style['fillOpacity'] = 0.8;
-    if (feature.properties.BLDG_Class) {
-      catCol = this.categories[feature.properties.BLDG_Class];
-    } else {
-      catCol = this.colorService.getUnnamed();
-    }
-    style['color'] = catCol;
-    return style;
-  };
-
-  private styleTracked = feature => {
     const style = {};
     style['fill'] = true;
     style['weight'] = 2;
@@ -312,7 +274,7 @@ export class MapdataService {
 
   private get untrackedOptions() {
     return {
-      style: this.styleUntracked,
+      style: this.style,
       onEachFeature: this.onEachFeat,
       filter(feature, layer) {
         return (
@@ -324,7 +286,7 @@ export class MapdataService {
 
   private get trackedOptions() {
     return {
-      style: this.styleTracked,
+      style: this.style,
       onEachFeature: this.onEachFeat,
       filter(feature, layer) {
         return feature.properties.Status === 'Active';
