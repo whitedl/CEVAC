@@ -21,17 +21,17 @@ Dead_IAQ_sensor_alert_ASC,IAQ,*,ppm,<alias> has not reported recently.,ASC,ASC,C
 Dead_Temp_sensor_alert_Cooper,Temp,*,deg-F,<alias> has not reported recently.,COOP,Cooper,CEVAC_COOPER_TEMP_LATEST,UTCDateTime,UTCDateTime,1,0,*,<,<now> - 1 hr,alert,20
 Dead_Power_sensor_alert_Cooper,Power,*,kW,<alias> has not reported recently.,COOP,Cooper,CEVAC_COOPER_POWER_LATEST,UTCDateTime,UTCDateTime,1,0,*,<,<now> - 1 hr,alert,21
 Dead_IAQ_sensor_alert_Cooper,IAQ,*,ppm,<alias> has not reported recently.,COOP,Cooper,CEVAC_COOPER_IAQ_LATEST,UTCDateTime,UTCDateTime,1,0,*,<,<now> - 1 hr,alert,22
-Dead_Temp_sensor_alert_Lee3,Temp,*,deg-F,<alias> has not reported recently.,LEE3,Lee III,CEVAC_LEE3_TEMP_LATEST,UTCDateTime,UTCDateTime,1,0,*,<,<now> - 1 hr,alert,23
-Dead_Power_sensor_alert_Lee3,Power,*,kW,<alias> has not reported recently.,LEE3,Lee III,CEVAC_LEE3_POWER_LATEST,UTCDateTime,UTCDateTime,1,0,*,<,<now> - 1 hr,alert,24
-Dead_IAQ_sensor_alert_Lee3,IAQ,*,ppm,<alias> has not reported recently.,LEE3,Lee III,CEVAC_LEE3_IAQ_LATEST,UTCDateTime,UTCDateTime,1,0,*,<,<now> - 1 hr,alert,25
+Dead_Temp_sensor_alert_Lee3,Temp,*,deg-F,<alias> has not reported recently.,LEE_III,Lee III,CEVAC_LEE_III_TEMP_LATEST,UTCDateTime,UTCDateTime,1,0,*,<,<now> - 1 hr,alert,23
+Dead_Power_sensor_alert_Lee3,Power,*,kW,<alias> has not reported recently.,LEE_III,Lee III,CEVAC_LEE_III_POWER_LATEST,UTCDateTime,UTCDateTime,1,0,*,<,<now> - 1 hr,alert,24
+Dead_IAQ_sensor_alert_Lee3,IAQ,*,ppm,<alias> has not reported recently.,LEE_III,Lee III,CEVAC_LEE_III_IAQ_LATEST,UTCDateTime,UTCDateTime,1,0,*,<,<now> - 1 hr,alert,25
 Temp_High_warning_ASC,Temp,*,deg-F,<alias> reads <ActualValue> [deg-F] (Cooling SP = <Cooling SP> [deg-F]),ASC,ASC,CEVAC_ASC_TEMP_DAY,ActualValue,UTCDateTime,3,0,*,>,<Cooling SP ActualValue>,warning,26
 Temp_High_alert_ASC,Temp,*,deg-F,<alias> reads <ActualValue> [deg-F] (Cooling SP = <Cooling SP> [deg-F]),ASC,ASC,CEVAC_ASC_TEMP_LATEST,ActualValue,UTCDateTime,1,0,*,>,<Cooling SP ActualValue>+3,alert,27
 Temp_Low_warning_ASC,Temp,*,deg-F,<alias> reads <ActualValue> [deg-F] (Heating SP = <Heating SP> [deg-F]),ASC,ASC,CEVAC_ASC_TEMP_DAY,ActualValue,UTCDateTime,3,0,*,<,<Heating SP ActualValue>,warning,28
 Temp_Low_alert_ASC,Temp,*,deg-F,<alias> reads <ActualValue> [deg-F] (Heating SP = <Heating SP> [deg-F]),ASC,ASC,CEVAC_ASC_TEMP_LATEST,ActualValue,UTCDateTime,1,0,*,<,<Heating SP ActualValue> -3,alert,29
-Temp_High_warning_Lee3,Temp,*,deg-F,<alias> reads <ActualValue> [deg-F] (Cooling SP = <Cooling SP> [deg-F]),LEE3,Lee III,CEVAC_LEE3_TEMP_DAY,ActualValue,UTCDateTime,3,0,*,>,<Cooling SP ActualValue>,warning,30
-Temp_High_alert_Lee3,Temp,*,deg-F,<alias> reads <ActualValue> [deg-F] (Cooling SP = <Cooling SP> [deg-F]),LEE3,Lee III,CEVAC_LEE3_TEMP_LATEST,ActualValue,UTCDateTime,1,0,*,>,<Cooling SP ActualValue>+3,alert,31
-Temp_Low_warning_Lee3,Temp,*,deg-F,<alias> reads <ActualValue> [deg-F] (Heating SP = <Heating SP> [deg-F]),LEE3,Lee III,CEVAC_LEE3_TEMP_DAY,ActualValue,UTCDateTime,3,0,*,<,<Heating SP ActualValue>,warning,32
-Temp_Low_alert_Lee3,Temp,*,deg-F,<alias> reads <ActualValue> [deg-F] (Heating SP = <Heating SP> [deg-F]),LEE3,Lee III,CEVAC_LEE3_TEMP_LATEST,ActualValue,UTCDateTime,1,0,*,<,<Heating SP ActualValue> -3,alert,33
+Temp_High_warning_Lee3,Temp,*,deg-F,<alias> reads <ActualValue> [deg-F] (Cooling SP = <Cooling SP> [deg-F]),LEE_III,Lee III,CEVAC_LEE_III_TEMP_DAY,ActualValue,UTCDateTime,3,0,*,>,<Cooling SP ActualValue>,warning,30
+Temp_High_alert_Lee3,Temp,*,deg-F,<alias> reads <ActualValue> [deg-F] (Cooling SP = <Cooling SP> [deg-F]),LEE_III,Lee III,CEVAC_LEE_III_TEMP_LATEST,ActualValue,UTCDateTime,1,0,*,>,<Cooling SP ActualValue>+3,alert,31
+Temp_Low_warning_Lee3,Temp,*,deg-F,<alias> reads <ActualValue> [deg-F] (Heating SP = <Heating SP> [deg-F]),LEE_III,Lee III,CEVAC_LEE_III_TEMP_DAY,ActualValue,UTCDateTime,3,0,*,<,<Heating SP ActualValue>,warning,32
+Temp_Low_alert_Lee3,Temp,*,deg-F,<alias> reads <ActualValue> [deg-F] (Heating SP = <Heating SP> [deg-F]),LEE_III,Lee III,CEVAC_LEE_III_TEMP_LATEST,ActualValue,UTCDateTime,1,0,*,<,<Heating SP ActualValue> -3,alert,33
 Temp_High_warning_Cooper,Temp,*,deg-F,<alias> reads <ActualValue> [deg-F] (Cooling SP = <Cooling SP> [deg-F]),COOP,Cooper,CEVAC_COOPER_TEMP_DAY,ActualValue,UTCDateTime,3,0,*,>,<Cooling SP ActualValue>,warning,34
 Temp_High_alert_Cooper,Temp,*,deg-F,<alias> reads <ActualValue> [deg-F] (Cooling SP = <Cooling SP> [deg-F]),COOP,Cooper,CEVAC_COOPER_TEMP_LATEST,ActualValue,UTCDateTime,1,0,*,>,<Cooling SP ActualValue>+3,alert,35
 Temp_Low_warning_Cooper,Temp,*,deg-F,<alias> reads <ActualValue> [deg-F] (Heating SP = <Heating SP> [deg-F]),COOP,Cooper,CEVAC_COOPER_TEMP_DAY,ActualValue,UTCDateTime,3,0,*,<,<Heating SP ActualValue>,warning,36
