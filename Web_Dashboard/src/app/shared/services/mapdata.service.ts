@@ -164,7 +164,7 @@ export class MapdataService {
       {
         attribution:
           // tslint:disable-next-line: max-line-length
-          'Map data &copy; <a href=https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+          '<a href="http://mapbox.com/about/maps" class="mapbox-wordmark" target="_blank"></a>© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank">Improve this map</a></strong>',
         id: 'mapbox.light',
         // Currently my personal token, should change to university token
         access_token:
@@ -175,7 +175,7 @@ export class MapdataService {
   private getTileLayerOpenMap = () =>
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution:
-        '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+        'Map data and Imagery <a href="https://www.openstreetmap.org/copyright">&#169; OpenStreetMap</a>'
     });
 
   private style = feature => {
