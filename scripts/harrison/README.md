@@ -14,7 +14,7 @@ program, modify the correct `ingest_file_<platform>` function and run the
 program.
 
 
-## `bsql.py` 
+## `bsql.py`
 * `bsql` is a module used for querying the cevac server for data
 * `help(bsql)` will show the docstrings for the `Query` class
 * `Query("Select * FROM CEVAC_WATT_WAP_DAILY_HIST").as_dict()` will return a
@@ -22,3 +22,9 @@ dictionary of data made from the query
   * Keys are integers 1-n
   * `.as_dict(key="UTCDateTime")` will make `UTCDateTime` the key in the
   dictionary
+
+
+## `time_handler.py`
+when inserting via `bsql`, a string is required. When querying via `bsql`,
+strings are returned. UTC and EST conversion is another necessary conversion.
+This can all be handled with `time_handler.py`.

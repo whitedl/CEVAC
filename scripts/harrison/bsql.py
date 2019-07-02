@@ -81,7 +81,6 @@ class Query:
     def as_json_dict(self):
         """Return dictionary of data, with dicts instead of lists."""
         d = {}
-
         return d
 
 
@@ -101,3 +100,15 @@ class INSERT:
         os.remove(f"/home/bmeares/cache/{fname}")
         self.success = True
         return self.success
+
+
+'''
+        /##.*/
+       /#%&&%#/
+      ./%%%&%%#
+      %%%%&%&%%#
+     %&&  %%%&%%.
+     %&%  &%%&%%*
+     *%&@&@%&%%(
+       %%%%%%%%
+'''
