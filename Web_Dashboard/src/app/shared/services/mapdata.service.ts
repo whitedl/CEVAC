@@ -114,6 +114,7 @@ export class MapdataService {
     for (const layer of layers) {
       if (layer.feature.properties.Short_Name === bldg) {
         this.map.fitBounds(layer.getBounds());
+        this.router.navigate(['map', bldg]);
         return;
       }
     }
@@ -121,6 +122,7 @@ export class MapdataService {
     for (const layer of layers) {
       if (layer.feature.properties.Short_Name === bldg) {
         this.map.fitBounds(layer.getBounds());
+        this.router.navigate(['map', bldg]);
       }
     }
   };

@@ -38,15 +38,12 @@ export class AlertboxComponent implements OnInit {
   }
 
   focus(alert: Alert) {
-    this.mapdataService.focusBldg(alert.BLDG_STD);
+    this.mapdataService.focusBldg(alert.BuildingSName);
   }
 
   alertAll(): Alert[] {
-    return this.alerts.filter(alert => alert.AlertID === 1);
+    return this.alerts.filter(alert => alert.EventID === 1);
   }
-  logAl = () => {
-    this.alerts[1].AlertID = 3;
-  };
 
   getAlerts(): void {
     this.alertService.getAlerts().subscribe(alerts => (this.alerts = alerts));
