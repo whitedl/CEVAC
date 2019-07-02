@@ -41,6 +41,7 @@
                   "with": "src/environments/environment.prod.ts"
                 }
               ],
+              "baseHref": "/cevac_web/",
               "outputPath": "build",
               "deleteOutputPath": false,
               "optimization": true,
