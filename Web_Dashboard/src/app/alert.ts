@@ -1,11 +1,11 @@
 export interface Alert {
-  AlertID: number;
+  EventID: number;
   AlertType: string;
   AlertMessage?: string;
   Metric?: string;
-  BLDG_STD?: string;
-  BLDG_DISP?: string;
+  BuildingSName: string;
+  BuildingDName?: string;
   Acknowledged: number;
-  BeginTime: Date;
-  EndTime?: Date;
+  ETDateTime: Date;
+  DetectionTimeET: Date;
 }
