@@ -1,0 +1,34 @@
+<mat-expansion-panel
+  expanded="{{ alerts.length > 0 }}"
+  class="scrollableExpansion"
+>
+  <mat-expansion-panel-header>
+    <mat-panel-title
+      matBadge="{{ alerts.length }}"
+      matBadgeOverlap="false"
+      matBadgePosition="above before"
+      matBadgeHidden="false"
+    >
+      Alerts
+    </mat-panel-title>
+    <mat-panel-description> </mat-panel-description>
+  </mat-expansion-panel-header>
+  <ng-template matExpansionPanelContent>
+    <mat-action-list dense>
+      <button mat-list-item *ngFor="let alert of alerts" (click)="focus(alert)">
+        <mat-icon matListIcon [ngStyle]="getAlertColor(alert.AlertType)">
+          <ng-container [ngSwitch]="alert.AlertType">
+            <ng-container *ngSwitchCase="'alert'">
+              warning
+            </ng-container>
+            <ng-container *ngSwitchCase="'warning'">
+              notification_important
+            </ng-container>
+          </ng-container>
+        </mat-icon>
+        <h5 mat-line>{{ alert.AlertMessage }}</h5>
+        <p mat-line>{{ alert.BLDG_DISP }}</p>
+      </button>
+    </mat-action-list>
+  </ng-template>
+</mat-expansion-panel>
