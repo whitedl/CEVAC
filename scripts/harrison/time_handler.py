@@ -11,7 +11,7 @@ def sql_time_str(t):
 
 def time_of_sql(time_str):
     """Return datetime object of time string."""
-    t = datetime.datetime.strptime('%Y-%m-%d %H:%M:%S')
+    t = datetime.datetime.strptime(time_str, '%Y-%m-%d %H:%M:%S.%f')
     return t
 
 
