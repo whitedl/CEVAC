@@ -321,6 +321,7 @@ def parse_json(filename):
 
 def write_json(filename, new_events, next_id):
     """Write json to file."""
+    print(filename, new_events, next_id)
     new_events["next_id"] = next_id
     f = open(filename, "w")
     f.write(json.dumps(new_events))
@@ -421,13 +422,15 @@ for i, a in enumerate(alerts):
                 total_issues += 1
                 safe_log("An alert was sent for " + str(alert), "info")
                 com = (f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType, "
-                       f"AlertMessage, Metric, BLDG, UTCDateTime, MessageID,"
-                       " Alias, EventID)"
+                       f"AlertMessage, Metric, BuildingDName, UTCDateTime, "
+                       "MessageID,"
+                       " Alias, EventID, BuildingSName)"
                        f" VALUES('{alert['operation']}',"
                        f"'{alert['message']}',"
                        f"'{alert['type']}',"
                        f"'{alert['bldg_disp']}','{utcdatetimenow_str}',"
-                       f"'{alert['message_id']}', {alias}, '{event_id}')")
+                       f"'{alert['message_id']}', {alias}, '{event_id}',"
+                       f"'{alert['building']}')")
                 insert_sql_total += com + "; "
             safe_log("Checked " + str(i + 1), "info")
 
@@ -529,19 +532,22 @@ for i, a in enumerate(alerts):
                                         a["message"], "ActualValue",
                                         f"{room_vals[Alias_Temp]:.1f}")
 
-                        event_id, next_id,
-                        new_events = assign_event_id(next_id, last_events,
-                                                     new_events, alert, room)
+                        event_id, next_id, new_events = assign_event_id(
+                                                            next_id,
+                                                            last_events,
+                                                            new_events,
+                                                            alert, room)
 
                         com = (f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW("
                                f"AlertType,"
-                               f" AlertMessage, Metric,BLDG,UTCDateTime,"
-                               f"MessageID, Alias, EventID)"
+                               f" AlertMessage, Metric,BuildingDName,"
+                               "UTCDateTime,"
+                               f"MessageID, Alias, EventID, BuildingSName)"
                                f" VALUES('{a['operation']}','{a['message']}',"
                                f"'{a['type']}','{a['bldg_disp']}',"
                                f"'{utcdatetimenow_str}',"
                                f"'{alert['message_id']}', '{room}', "
-                               f"'{event_id}')")
+                               f"'{event_id}', '{alert['building']}')")
                         insert_sql_total += com + "; "
                         safe_log("An alert was sent for " + str(a), "info")
                 except Exception:
@@ -605,19 +611,21 @@ for i, a in enumerate(alerts):
                     a = deepcopy(alert)
                     a["message"] = angle_brackets_replace_single(
                         a["message"], alias) + " " + t
-                    event_id, next_id, new_events = assign_event_id(next_id,
-                                                                    last_events,
-                                                                    new_events,
-                                                                    alert,
-                                                                    alias)
+                    event_id, next_id, new_events = assign_event_id(
+                                                        next_id,
+                                                        last_events,
+                                                        new_events,
+                                                        alert,
+                                                        alias)
+
                     com = (f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType, "
-                           f"AlertMessage, Metric,BLDG,UTCDateTime, "
-                           f"MessageID, Alias, EventID)"
+                           f"AlertMessage, Metric,BuildingDName,UTCDateTime, "
+                           f"MessageID, Alias, EventID, BuildingSName)"
                            f" VALUES('{a['operation']}','{a['message']}',"
                            f"'{a['type']}','{a['bldg_disp']}',"
                            f"'{utcdatetimenow_str}',"
                            f"'{alert['message_id']}', '{alias}',"
-                           f" '{event_id}')")
+                           f" '{event_id}', '{alert['building']}')")
                     insert_sql_total += com + "; "
             safe_log("Checked " + str(i + 1), "info")
 
