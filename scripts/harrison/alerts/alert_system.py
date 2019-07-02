@@ -652,7 +652,6 @@ if SEND:
     f.close()
     os.system("/home/bmeares/scripts/exec_sql_script.sh "
               "/home/bmeares/cache/insert_alert_system.sql")
-    os.remove("/home/bmeares/cache/insert_alert_system.sql")
 else:
     print(insert_sql_total.replace(';', '\nGO\n'))
 
