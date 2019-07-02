@@ -1,0 +1,14 @@
+<mat-card>
+  <mat-card-title>Building Statistics</mat-card-title>
+  <mat-radio-group
+    class="flex-col"
+    name="dataSet"
+    [(ngModel)]="dataSet"
+    (change)="(update)"
+    aria-labelledby="control-label"
+  >
+    <mat-radio-button *ngFor="let dataSet of dataSets" [value]="dataSet">
+      {{ dataSet.name }}
+    </mat-radio-button>
+  </mat-radio-group>
+</mat-card>
