@@ -1,6 +1,6 @@
-"""Handle time functions."""
+"""Handle time functions for sql-python interactions."""
 
-import dateutil as tz
+from dateutil import tz
 import datetime
 
 
@@ -33,3 +33,15 @@ def utc_to_est(t):
     utc = t.replace(tzinfo=from_zone)
     est = utc.astimezone(to_zone)
     return est
+
+
+'''
+        /##.*/
+       /#%&&%#/
+      ./%%%&%%#
+      %%%%&%&%%#
+     %&&  %%%&%%.
+     %&%  &%%&%%*
+     *%&@&@%&%%(
+       %%%%%%%%
+'''
