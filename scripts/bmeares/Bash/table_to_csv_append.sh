@@ -65,7 +65,7 @@ WITH new AS (
   SELECT new.* FROM new
   LEFT JOIN $table_CSV AS CSV ON CSV.$UTCDateTime = new.$UTCDateTime
   WHERE CSV.$UTCDateTime IS NULL
-  ORDER BY LEN($Alias) DESC
+  ORDER BY LEN(new.$Alias) DESC
 "
 
 
