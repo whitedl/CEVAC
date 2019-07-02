@@ -170,21 +170,22 @@ def pred(model):
             t_utc = local_dt.astimezone (pytz.utc)
             UTCDateTime = t_utc.strftime("%Y-%m-%d %H:%M:%S")
 
-            deleteString = ('''
-                            DECLARE @utc DATETIME;
-                            SET @utc = '{}';
-                            DELETE FROM CEVAC_WATT_POWER_SUMS_PRED_HIST_RAW
-                            WHERE UTCDateTime = @utc;
+            deleteString = ('''DECLARE @utc DATETIME;
+            SET @utc = '{}';
+            DELETE FROM CEVAC_WATT_POWER_SUMS_PRED_HIST_RAW
+            WHERE UTCDateTime = @utc;
+            GO
                             ''').format(UTCDateTime)
 
-            insert_sql_total += ("INSERT INTO CEVAC_WATT_POWER_SUMS_PRED_HIST_RAW "
+            insert_sql_total += (deleteString +
+                                 "INSERT INTO CEVAC_WATT_POWER_SUMS_PRED_HIST_RAW "
                                  "(UTCDateTime, ETDateTime, Total_Usage) "
                                  f" VALUES('{UTCDateTime}','{ETDateTime}',"
-                                 f"'{str(prediction)}');")
+                                 f"'{str(prediction)}')\nGO\n")
 
     # Write to `CEVAC_WATT_POWER_SUMS_PRED_HIST`
     f = open("/cevac/cache/insert_predictions.sql", "w")
-    f.write(insert_sql_total.replace(';', '\nGO\n'))
+    f.write(insert_sql_total)
     f.close()
     os.system("/cevac/scripts/exec_sql_script.sh "
               "/cevac/cache/insert_predictions.sql")
