@@ -137,7 +137,8 @@ export class ColorService {
     }
     return chroma
       .scale(this.labDomain(this.crg[category]))
-      .domain(this.scales[scale].domain)(val);
+      .domain(this.scales[scale].domain)
+      .correctLightness()(val);
   };
 
   registerCategory = (cat: string) => {
@@ -195,7 +196,7 @@ export class ColorService {
     return this.colors.Alerts.warn;
   }
 
-  labDomain = (color: string) => [this.labMin(color), this.labMax(color)];
-  private labMax = (color: string) => chroma(color).set('lab.l', 100);
-  private labMin = (color: string) => chroma(color).set('lab.l', 0);
+  labDomain = (color: string) => [this.labMax(color), this.labMin(color)];
+  private labMax = (color: string) => chroma(color).set('lab.l', 90);
+  private labMin = (color: string) => chroma(color).set('lab.l', 10);
 }
