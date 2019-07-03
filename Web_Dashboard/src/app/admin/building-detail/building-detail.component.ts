@@ -9,7 +9,7 @@ import { switchMap } from 'rxjs/operators';
   styleUrls: ['./building-detail.component.scss']
 })
 export class BuildingDetailComponent implements OnInit {
-  building$;
+  building$: string;
 
   constructor(
     private route: ActivatedRoute,
@@ -17,12 +17,8 @@ export class BuildingDetailComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.building$ = this.route.paramMap.pipe(
-      switchMap((params: ParamMap) => {
-        console.log('hi');
-        console.log(params.get('id'));
-        return params.get('id');
-      })
+    this.route.paramMap.subscribe(
+      (params: ParamMap) => (this.building$ = params.get('bldg'))
     );
   }
 }
