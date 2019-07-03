@@ -11,7 +11,7 @@ interface DataSet {
 }
 
 // yes, this is dirty and not the best thing to do in Angular. I'm using a very non-angular library. Might fix it later.
-L.Control.Legend = L.Control.extend({
+const Legend = L.Control.extend({
   options: {
     position: 'bottomleft'
   },
@@ -71,7 +71,7 @@ L.Control.Legend = L.Control.extend({
 });
 
 L.control.legend = (scale: [number, number], options: L.ControlOptions) => {
-  return new L.Control.Legend(scale, options);
+  return new Legend(scale, options);
 };
 
 @Injectable({ providedIn: 'root' })
@@ -87,15 +87,15 @@ export class MapdataService {
   private dataUrl = 'http://wfic-cevac1/requests/stats.php';
   private sasBaseURL =
     'https://sas.clemson.edu:8343/SASVisualAnalytics/report?location=';
-  private map: L.Map;
-  private tracked: L.GeoJSON;
-  private untracked: L.GeoJSON;
+  private map!: L.Map;
+  private tracked!: L.GeoJSON;
+  private untracked!: L.GeoJSON;
   private mapOptions = {
     minZoom: 15,
-    maxZoom: 20
+    maxZoom: 18
   };
   private categories: Set<string> = new Set();
-  private legend;
+  private legend!: Legend;
 
   constructor(
     private colorService: ColorService,
@@ -106,11 +106,14 @@ export class MapdataService {
   getMap = () => (!this.map ? this.initMap() : this.map);
 
   getBuilding = (bName: string) => {
-    this.tracked.eachLayer(layer =>
-      (layer as L.Polygon).feature.properties.Short_Name === bName
-        ? (layer as L.Polygon).feature.properties
-        : (layer as L.Polygon).feature.properties
-    );
+    let building;
+    this.tracked.eachLayer(layer => {
+      const l = layer as L.Polygon;
+      l.feature && l.feature.properties.Short_Name === bName
+        ? (building = l.feature.properties)
+        : (building = 'BLDG not found');
+    });
+    return building;
   };
 
   setDataSet = () => {
@@ -152,10 +155,8 @@ export class MapdataService {
     const controller = L.control
       .layers({ mapbox, openstreetmap: this.getTileLayerOpenMap() })
       .addTo(this.map);
-    this.untracked = L.geoJSON(geodata, this
-      .untrackedOptions as L.GeoJSONOptions).addTo(this.map);
-    this.tracked = L.geoJSON(geodata, this
-      .trackedOptions as L.GeoJSONOptions).addTo(this.map);
+    this.untracked = L.geoJSON(geodata, this.untrackedOptions).addTo(this.map);
+    this.tracked = L.geoJSON(geodata, this.trackedOptions).addTo(this.map);
     controller.addOverlay(this.untracked, 'show untracked');
     this.legend = L.control.legend(
       this.colorService.getScale(this.dataSet.name),
@@ -169,6 +170,7 @@ export class MapdataService {
       );
     }
     this.legend.addTo(this.map);
+    this.getBuilding('WATT');
     return this.map;
   };
 
@@ -192,36 +194,34 @@ export class MapdataService {
         'Map data and Imagery <a href="https://www.openstreetmap.org/copyright">&#169; OpenStreetMap</a>'
     });
 
-  private style = (feature: GeoJSON.Feature) => {
+  private style = (feature?: GeoJSON.Feature<GeoJSON.GeometryObject, any>) => {
     const style: L.PathOptions = {};
-    style.fill = true;
-    style.weight = 3;
-    style.opacity = 1;
-    style.fillOpacity = 1;
-    style.color = this.colorService.getScaledColor(
-      feature.properties.BLDG_Class
-    );
-    style.fillColor =
-      feature.properties.bData &&
-      feature.properties.bData[this.dataSet.propertyName]
-        ? this.colorService.getScaledColor(
-            feature.properties.BLDG_Class,
-            this.dataSet.name,
-            feature.properties.bData[this.dataSet.propertyName]
-          )
-        : this.colorService.getScaledColor(
-            feature.properties.BLDG_Class,
-            this.dataSet.name,
-            0
-          );
+    if (feature) {
+      const bclass: string = feature.properties.BLDG_Class;
+      style.fill = true;
+      style.weight = 3;
+      style.opacity = 1;
+      style.fillOpacity = 1;
+      style.color = this.colorService.getScaledColor(bclass);
+      style.fillColor =
+        feature.properties &&
+        feature.properties.bData &&
+        feature.properties.bData[this.dataSet.propertyName]
+          ? this.colorService.getScaledColor(
+              bclass,
+              this.dataSet.name,
+              feature.properties.bData[this.dataSet.propertyName]
+            )
+          : this.colorService.getScaledColor(bclass, this.dataSet.name, 0);
+    }
     return style;
   };
 
   private highlightFeat = (layer: L.Polygon) => {
     layer.setStyle({
       weight: 5,
-      color: this.colorService.brighten(layer.options.color),
-      fillColor: this.colorService.brighten(layer.options.fillColor)
+      color: this.colorService.brighten(layer.options.color as string),
+      fillColor: this.colorService.brighten(layer.options.fillColor as string)
     });
     layer.bringToFront();
   };
@@ -263,7 +263,10 @@ export class MapdataService {
     this.selectBuilding(e);
   };
 
-  private onEachFeat = (feature: GeoJSON.Feature, layer: L.Polygon) => {
+  private onEachFeat = (
+    feature: GeoJSON.Feature<GeoJSON.GeometryObject, any>,
+    layer: L.Polygon
+  ) => {
     const opt = {
       mouseover: this.mouseOver,
       click: this.onClick,
@@ -271,15 +274,15 @@ export class MapdataService {
     };
     layer.on(opt);
     this.http
-      .get(this.dataUrl + '?building=' + layer.feature.properties.Short_Name)
+      .get(this.dataUrl + '?building=' + feature.properties.Short_Name)
       .subscribe(bData => {
         if (bData) {
-          layer.feature.properties['bData'] = bData;
+          feature.properties.bData = bData;
           this.tracked.resetStyle(layer);
         }
         layer.bindPopup(
           '<pre>' +
-            JSON.stringify(layer.feature.properties, null, ' ').replace(
+            JSON.stringify(feature.properties, null, ' ').replace(
               /[\{\}"]/g,
               ''
             ) +
@@ -289,31 +292,31 @@ export class MapdataService {
   };
 
   private longNameTooltip = (layer: L.Polygon) =>
-    layer.feature.properties.BLDG_NAME !== ' '
+    layer.feature && layer.feature.properties.BLDG_NAME !== ' '
       ? layer.feature.properties.BLDG_NAME
       : 'Long_Name not set';
 
   private shortNameTooltip = (layer: L.Polygon) =>
-    layer.feature.properties.Short_Name !== ' '
+    layer.feature && layer.feature.properties.Short_Name !== ' '
       ? layer.feature.properties.Short_Name
       : 'Short_Name not set';
 
-  private get untrackedOptions() {
+  private get untrackedOptions(): L.GeoJSONOptions {
     return {
       style: this.style,
       onEachFeature: this.onEachFeat,
-      filter(feature: GeoJSON.Feature, layer: L.Layer) {
-        return feature.properties.Status !== 'Active';
+      filter(feature: GeoJSON.Feature<GeoJSON.Geometry, any>) {
+        return feature.properties && feature.properties.Status !== 'Active';
       }
     };
   }
 
-  private get trackedOptions() {
+  private get trackedOptions(): L.GeoJSONOptions {
     return {
       style: this.style,
       onEachFeature: this.onEachFeat,
-      filter(feature: GeoJSON.Feature, layer: L.Layer) {
-        return feature.properties.Status === 'Active';
+      filter(feature: GeoJSON.Feature<GeoJSON.Geometry, any>) {
+        return feature.properties && feature.properties.Status === 'Active';
       }
     };
   }
