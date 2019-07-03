@@ -7,8 +7,6 @@ import datetime as dt
 from datetime import date
 from matplotlib import rcParams
 import matplotlib.pyplot as plt
-import matplotlib.pylab as plb
-
 
 # read in the data
 # cwdf = pd.read_csv('chwLogs.csv')

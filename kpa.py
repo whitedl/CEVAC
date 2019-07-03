@@ -36,9 +36,6 @@ def createModel(opt):
 	model.add(LSTM(256, input_shape=(12, 47), return_sequences=True))
 	model.add(Activation('sigmoid'))
 
-	# model.add(LSTM(64, return_sequences=True))
-	# model.add(Activation('sigmoid'))
-
 	model.add(LSTM(units=1))
 	model.add(Activation('sigmoid'))
 

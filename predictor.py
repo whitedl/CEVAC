@@ -18,15 +18,20 @@ import json
 import time
 from datetime import date
 import numpy as np
+import csv
 # import matplotlib as plt
 
 class predictor():
 
     def __init__(self):
+
         # open our api json file and pull the darkSky api key from it
         with open('api.json') as f:
             credentials = json.load(f)
+
         self.key = credentials['key']
+
+        # dictionary of all of the hourly data from the range(yesterday -> tomorrow)
         self.hourly = {
                     'hours' : [],
                     'days' : [],
@@ -36,20 +41,24 @@ class predictor():
                     'temperatures' : [],
                     'clouds' : []
                     }
+
+        print(self.hourly)
         self.predictions = []
         self.model = None
-        self.urlEndings = ['/33.662333,-79.830875,' + str(time.time() - 86400),
-                            '/33.662333,-79.830875,' + str(time.time()),
+        self.urlEndings = ['/33.662333,-79.830875,' + str(int(time.time() - 86400)),
+                            '/33.662333,-79.830875,' + str(int(time.time())),
                             '/33.662333,-79.830875']
 
 
     # fetch our weather forecast
     def fetch(self):
-        for ending in urlEndings:
+        for ending in self.urlEndings:
             # request url with api key
             requestURL = 'https://api.darksky.net/forecast/' + self.key + ending
             r = requests.get(requestURL).json()
             hourlyData = r['hourly']['data']
+
+            # print(self.hourly)
 
             # insert every element in the hourly data
             for element in hourlyData:
@@ -60,7 +69,6 @@ class predictor():
                 self.hourly['humidities'].append(element['humidity'])
                 self.hourly['temperatures'].append(((element['temperature'] - 32) / 1.8 + 20) / 70)
                 self.hourly['clouds'].append(element['cloudCover'])
-
 
     # normalize the hours, days, and months
     def generateInput(self, h, d, m, y):
@@ -115,45 +123,54 @@ class predictor():
         # specify compiler, loss function, and metrics we want printed out
     	self.model.compile(optimizer='adam',loss=losses.mse, metrics=['accuracy'])
 
-
     def predict(self, model):
+
+        # load jonathan's brain
         self.model.load_weights('powerModel.h5')
         # model.load_weights('/home/bmeares/CEVAC/prediction/powerModel.h5')
 
+        # list that we are going to append 12 hours of data to
+        # then turn into a numpy array
         input = []
-        self.hourly = self.fetch()
 
+        # get the first 12 hours of data for now
+        for i in range(0,12):
 
-        for i, hour in enumerate(hourly['hours']):
-
-            day = hourly['days'][i]
-            month = hourly['months'][i]
-            year = hourly['years'][i]
+            hour = self.hourly['hours'][i]
+            day = self.hourly['days'][i]
+            month = self.hourly['months'][i]
+            year = self.hourly['years'][i]
 
             # formats and normalizes the data for the numpy array
-            hour, day, month, throughMonth = generateInput(hour, day, month, year)
-            humidity = [hourly['humidities'][i]]
-            temperature = [hourly['temperatures'][i]]
-            cloudCoverage = [hourly['clouds'][i]]
+            hour, day, month, throughMonth = self.generateInput(hour, day, month, year)
+            humidity = [self.hourly['humidities'][i]]
+            temperature = [self.hourly['temperatures'][i]]
+            cloudCoverage = [self.hourly['clouds'][i]]
             temp = np.concatenate((hour, day, month, throughMonth, temperature, humidity, cloudCoverage), axis = -1)
             input.append(temp)
 
-        prediction = model.predict(input.reshape(1,-1))[0][0] * 275
-        self.predictions.append(prediction)
+        input = np.array(input)
+        print(input.shape)
+        prediction = model.predict(input)
+        # prediction = model.predict(input.reshape(1,-1))[0][0] * 275
+        print(prediction)
+        # self.predictions.append(prediction)
 
-        str = ''
+        # str = ''
 
-        for i, prediction in enumerate(self.predictions):
-            date =  '/'.join((str(hourly['months'][i]), str(hourly['days'][i]), str(hourly['years'][i]))) + ' ' + str(hourly['hours'][i])
-            # str = 'INSERT INTO [] ({},{},{})'.format(date, prediction, building, metric)
-            str += 'ESTIMATE {} ON {}/{} AT HOUR {}\n'.format(prediction, hourly['days'][i], hourly['months'][i], hourly['hours'][i])
+        # for i, prediction in enumerate(self.predictions):
+        #     date =  '/'.join((str(hourly['months'][i]), str(hourly['days'][i]), str(hourly['years'][i]))) + ' ' + str(hourly['hours'][i])
+        #     # str = 'INSERT INTO [] ({},{},{})'.format(date, prediction, building, metric)
+        #     str += 'ESTIMATE {} ON {}/{} AT HOUR {}\n'.format(prediction, hourly['days'][i], hourly['months'][i], hourly['hours'][i])
 
-        # write to our predictions text file
-        with open('predictions.txt', 'w') as f:
-            f.write(str)
+        # # write to our predictions text file
+        # with open('predictions.txt', 'w') as f:
+        #     f.write(str)
 
 if __name__ == '__main__':
+
     # make a predictor instance
     predictor = predictor()
     predictor.createModel()
+    predictor.fetch()
     predictor.predict(predictor.model)
