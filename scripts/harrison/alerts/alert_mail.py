@@ -14,7 +14,7 @@ email = "cevac5733@gmail.com"
 password = "cevacsteve5733"
 to_list = {
     "Harrison Hall": "hchall@g.clemson.edu",
-    "Bennett Meares": "bmeares@g.clemson.edu",
+    # "Bennett Meares": "bmeares@g.clemson.edu",
     # "Inscribe boi": "bmeares@inscribe.productions",
     # "Zach Smith": "ztsmith@g.clemson.edu",
     # "Zach Klein": "ztklein@g.clemson.edu",
@@ -78,7 +78,7 @@ class Alert_Log:
             return False
         if self.etc < other.etc:
             return True
-        return False
+        return True
 
     def __str__(self):
         """Return string of alert."""
