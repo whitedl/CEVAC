@@ -16,10 +16,10 @@ to_list = {
     "Harrison Hall": "hchall@g.clemson.edu",
     # "Bennett Meares": "bmeares@g.clemson.edu",
     # "Inscribe boi": "bmeares@inscribe.productions",
-    "Zach Smith": "ztsmith@g.clemson.edu",
+    # "Zach Smith": "ztsmith@g.clemson.edu",
     # "Zach Klein": "ztklein@g.clemson.edu",
     # "Drewboi": "abemery@clemson.edu",
-    "Tim": "timh@clemson.edu",
+    # "Tim": "timh@clemson.edu",
 }
 f = open("alerts/alert_email.html", "r")
 page = Template("".join(f.readlines()))
@@ -27,7 +27,7 @@ page = Template("".join(f.readlines()))
 metrics = {
     "TEMP": {
         "key": "<TEMP>",
-        "char": "🌡"
+        "char": "🌡",
     },
     "POWER": {
         "key": "<POWER>",
@@ -35,7 +35,20 @@ metrics = {
     },
     "IAQ": {
         "key": "<IAQ>",
-        "char": "🌫"
+        "char": "🌫",
+    },
+    "CHW": {
+        "key": "<CHW>",
+        "char": "❄",
+    },
+    "STEAM": {
+        "key": "<STEAM>",
+        "char": "⛅",
+    },
+
+    "UNKNOWN": {
+        "key": "<UNKNOWN>",
+        "char": "📏",
     }
 }
 
@@ -47,7 +60,9 @@ class Alert_Log:
         """Init."""
         self.type = alert[0].strip()
         self.message = alert[1].strip()
-        self.metric = metrics[alert[2].strip()]["key"]
+        self.metric = metrics["UNKNOWN"]["key"]
+        if alert[2].strip() in metrics:
+            self.metric = metrics[alert[2].strip()]["key"]
         self.building = alert[4].strip()
         self.acknowledged = bool(int(alert[5]))
         self.etc = time_handler.time_of_sql(alert[7])
@@ -63,7 +78,7 @@ class Alert_Log:
             return False
         if self.etc < other.etc:
             return True
-        return True
+        return False
 
     def __str__(self):
         """Return string of alert."""
