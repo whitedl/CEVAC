@@ -94,4 +94,4 @@ def pred(model):
 if __name__ == '__main__':
 	model = createModel('adam')
 	train(model)
-	# pred(model)
+	pred(model)
