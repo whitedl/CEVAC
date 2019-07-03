@@ -605,6 +605,7 @@ for i, a in enumerate(alerts):
                 minutes_off = (utc_dt - now_aware).total_seconds() / 60
                 dt_formatted = datetime_object.strftime("%m/%d/%y %I:%M %p")
                 today = datetime.datetime.now()
+                today = pytz.utc.localize(today)
                 time_diff = today - now_aware
                 days_since = time_diff.days
 
