@@ -374,7 +374,7 @@ for i, a in enumerate(alerts):
         day = now.isoweekday()
         hour = now.hour
         correct_day = (day >= 1 and day <= 5)
-        correct_hour = (hour >= 8 and hour <= 5)
+        correct_hour = (hour >= 8 and hour < 17)
         if (alert["time_dependent"]):
             if ((alert["occupancy_status"] and ((not correct_day)
                  or (not correct_hour)))
@@ -604,14 +604,19 @@ for i, a in enumerate(alerts):
                 now_aware = pytz.utc.localize(datetime_object)
                 minutes_off = (utc_dt - now_aware).total_seconds() / 60
                 dt_formatted = datetime_object.strftime("%m/%d/%y %I:%M %p")
+                today = datetime.datetime.now()
+                time_diff = today - now_aware
+                days_since = time_diff.days
 
                 # Add to alerts to send
                 if True:
                     total_issues += 1
                     safe_log("An alert was sent for " + str(alert), "info")
                     a = deepcopy(alert)
-                    a["message"] = angle_brackets_replace_single(
-                        a["message"], alias) + " " + dt_formatted
+                    a["message"] = angle_brackets_replace_specific(
+                                        a["message"], "alias", alias)
+                    a["message"] = angle_brackets_replace_specific(
+                                        a["message"], "days", days_since)
                     event_id, next_id, new_events = assign_event_id(
                                                         next_id,
                                                         last_events,

@@ -57,12 +57,20 @@ class Alert_Log:
         """Return self is less than other."""
         if self.type != other.type:
             return (self.type == "alert")
-        if (sorted([self.building, other.building])[0] ==
-                self.building):
-            return True
-        if self.etc < other.etc:
+        if (sorted([self.building, other.building])[1] ==
+                self.building and self.building != other.building):
             return False
+        if self.etc < other.etc:
+            return True
         return True
+
+    def __str__(self):
+        """Return string of alert."""
+        return f"{self.type}: {self.building}, {self.etc_str}"
+
+    def __repr__(self):
+        """Return string of alert."""
+        return self.__str__()
 
     def insert_into_dict(self, dict):
         """Insert into dict."""
@@ -96,21 +104,18 @@ def email_message(email, password, to_list, message, subject):
         server.starttls(context=context)
         server.ehlo()
         server.login(email, password)
-        print(email, subject, "\n", message)
         for person in to_list:
             p_email = to_list[person]
             p_page = page.render(Name=person, message=message, subject=subject)
-            print(p_page)
 
             m_message = msg.Message()
             m_message.add_header('Content-Type', 'text/html')
             m_message.set_payload(p_page)
             m_message["Subject"] = subject
 
-            # send_message = f"Subject: {subject}\n\n{m_message.as_string()}"
-            print(m_message.as_string())
-            server.sendmail(email, p_email,
-                            replace_metric(m_message.as_string()).encode("utf-8"))
+            new_message = replace_metric(m_message.as_string())
+            print(new_message.encode("utf-8"))
+            server.sendmail(email, p_email, new_message.encode("utf-8"))
 
 
 def main():
@@ -119,9 +124,6 @@ def main():
     now = datetime.datetime.utcnow()
     day = datetime.timedelta(1)
     yesterday = now - day
-    now_str = time_handler.sql_time_str(now)
-    yesterday_str = time_handler.sql_time_str(yesterday)
-    print(now_str, yesterday_str)
     alerts = bsql.Query(f" DECLARE @yesterday DATETIME; SET @yesterday = "
                         f"DATEADD(day,"
                         f" -1, GETDATE());"
@@ -141,6 +143,7 @@ def main():
         all_alerts.append(Alert_Log(alert))
 
     all_alerts = sorted(all_alerts)
+    print(all_alerts)
     alert_gd = {}
     for al in all_alerts:
         al.insert_into_dict(alert_gd)
