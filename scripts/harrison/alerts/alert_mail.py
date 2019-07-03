@@ -16,9 +16,10 @@ to_list = {
     "Harrison Hall": "hchall@g.clemson.edu",
     # "Bennett Meares": "bmeares@g.clemson.edu",
     # "Inscribe boi": "bmeares@inscribe.productions",
-    # "Zach Smith": "ztsmith@g.clemson.edu",
+    "Zach Smith": "ztsmith@g.clemson.edu",
     # "Zach Klein": "ztklein@g.clemson.edu",
     # "Drewboi": "abemery@clemson.edu",
+    "Tim": "timh@clemson.edu",
 }
 f = open("alerts/alert_email.html", "r")
 page = Template("".join(f.readlines()))
@@ -143,7 +144,6 @@ def main():
         all_alerts.append(Alert_Log(alert))
 
     all_alerts = sorted(all_alerts)
-    print(all_alerts)
     alert_gd = {}
     for al in all_alerts:
         al.insert_into_dict(alert_gd)

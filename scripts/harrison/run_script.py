@@ -11,3 +11,14 @@ script_table = {
 for arg in argv:
     if arg in script_table:
         script_table[arg]()
+
+"""
+      /##.*/
+     /#%&&%#/
+    ./%%%&%%#
+    %%%%&%&%%#
+   %&&  %%%&%%.
+   %&%  &%%&%%*
+   *%&@&@%&%%(
+     %%%%%%%%
+"""
