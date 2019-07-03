@@ -343,6 +343,14 @@ def assign_event_id(next_id, old_json, new_json, alert, alias):
     return event_id, next_id, new_json
 
 
+def get_alias_or_psid(table_name):
+    """Return whether a table uses alias or point slice id."""
+    request_str = f"EXEC CEVAC_ALIAS_OR_PSID @table = '{table_name}'"
+    r_dict = json.loads(command_to_json_string(request_str).replace("'", '"'))
+    for key in r_dict:
+        return r_dict[key]
+
+
 # Initialize logging
 if LOG:
     FORMAT = '%(asctime)s %(levelname)s:%(message)s'
@@ -366,6 +374,7 @@ utcdatetimenow = datetime.datetime.utcnow()
 utcdatetimenow_str = sql_time_str(utcdatetimenow)
 for i, a in enumerate(alerts):
     alert = alerts[a]
+    a_or_psid = get_alias_or_psid(alert["database"])
     try:
         # Check time conditional to make sure it is the correct time for the
         # alert
@@ -436,7 +445,7 @@ for i, a in enumerate(alerts):
 
         # Check each alias for temperature
         elif ("SP" in alert["value"]):
-            selection_command = (f"SELECT ALIAS, {alert['column']} FROM "
+            selection_command = (f"SELECT {a_or_psid}, {alert['column']} FROM "
                                  f"{alert['database']} ORDER BY "
                                  f"{alert['sort_column']}")
             print(selection_command)
@@ -561,7 +570,7 @@ for i, a in enumerate(alerts):
                 continue
 
             # Find all aliases
-            selection_command = (f"SELECT Alias, UTCDateTime FROM "
+            selection_command = (f"SELECT {a_or_psid}, UTCDateTime FROM "
                                  f"{alert['database']+'_BROKEN_CACHE'}")
             print(selection_command)
             if not CHECK_ALERTS:
