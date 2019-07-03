@@ -65,7 +65,7 @@ WITH new AS (
   SELECT new.* FROM new
   LEFT JOIN $table_CSV AS CSV ON CSV.$UTCDateTime = new.$UTCDateTime
   WHERE CSV.$UTCDateTime IS NULL
-  ORDER BY LEN($Alias) DESC
+  ORDER BY LEN(new.$Alias) DESC
 "
 
 
@@ -135,7 +135,8 @@ else # csv exists
 
   echo Removing columns from /srv/csv/$table.csv...
   # remove columns from historical csv
-  sed -i '1d' /srv/csv/$table.csv
+#  sed -i '1d' /srv/csv/$table.csv
+  tail -n +2 /srv/csv/$table.csv | sponge /srv/csv/$table.csv
   # append new data to top of existing csv
   # sed -i "1i`cat /home/bmeares/cache/$table.csv`" /srv/csv/$table.csv
   echo Appending data to existing $table.csv...

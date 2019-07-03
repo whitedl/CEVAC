@@ -1,5 +1,5 @@
 #! /bin/bash
-runsas="runsas"
+runsas="norun"
 reset="reset"
 
 if [ ! -z "$1" ]; then
@@ -17,25 +17,27 @@ if [ "$runsas" == "runsas" ]; then
 fi
 
 
-/home/bmeares/scripts/append_tables.sh
+time /home/bmeares/scripts/append_tables.sh
 
-# /home/bmeares/scripts/lasr.sh ALL ALERTS HIST
-# /home/bmeares/scripts/lasr.sh WATT WAP HIST
-
-
-# /home/bmeares/scripts/lasr.sh ASC IAQ LATEST
-time /home/bmeares/scripts/lasr.sh ASC TEMP LATEST UTCDateTime Alias $runsas $reset
-
-/home/bmeares/scripts/lasr.sh COOPER TEMP LATEST UTCDateTime Alias $runsas $reset
-# /home/bmeares/scripts/lasr.sh COOPER POWER LATEST UTCDateTime Alias $runsas $reset
-
-/home/bmeares/scripts/lasr.sh LEE_III TEMP LATEST UTCDateTime Alias $runsas $reset
-
-/home/bmeares/scripts/lasr.sh WATT IAQ LATEST UTCDateTime Alias $runsas $reset
-/home/bmeares/scripts/lasr.sh WATT POWER LATEST UTCDateTime Alias $runsas $reset
-/home/bmeares/scripts/lasr.sh WATT TEMP LATEST UTCDateTime Alias $runsas $reset
-
-echo "All _LATEST tables have been loaded. Executing runsas.sh..."
-time /home/bmeares/scripts/runsas.sh
+# 	time /cevac/scripts/lasr_append.sh ALL ALERTS HIST
+# 	time /cevac/scripts/lasr_append.sh WATT WAP HIST
 
 
+# 	time /cevac/scripts/lasr_append.sh ASC IAQ LATEST
+	time /cevac/scripts/lasr_append.sh ASC TEMP LATEST UTCDateTtime Alias $runsas $reset
+
+	time /cevac/scripts/lasr_append.sh COOPER TEMP LATEST UTCDateTtime Alias $runsas $reset
+# 	time /cevac/scripts/lasr_append.sh COOPER POWER LATEST UTCDateTtime Alias $runsas $reset
+
+	time /cevac/scripts/lasr_append.sh LEE_III TEMP LATEST UTCDateTtime Alias $runsas $reset
+
+	time /cevac/scripts/lasr_append.sh WATT IAQ LATEST UTCDateTtime Alias $runsas $reset
+	time /cevac/scripts/lasr_append.sh WATT POWER LATEST UTCDateTtime Alias $runsas $reset
+	time /cevac/scripts/lasr_append.sh WATT TEMP LATEST UTCDateTtime Alias $runsas $reset
+
+if [ "$runsas" == "runsas" ]; then
+  echo Running sas...
+  time /home/bmeares/scripts/runsas.sh
+fi
+
+echo Done with _LATEST
