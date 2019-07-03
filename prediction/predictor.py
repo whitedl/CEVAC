@@ -159,8 +159,7 @@ def pred(model):
 
             # datestring = ' '.join((weekdayName, monthName, str(day), ':'.join((str(H), str(minute), str(second)), str(Y))))
 
-            t = datetime.datetime.strptime(f"{m} {d} {Y} {H}","%m %w %Y %H")
-
+            t = datetime.datetime.strptime(datestring, "%a %b %d %H:%M:%S %Y")
             ETDateTime = t.strftime("%Y-%m-%d %H:%M:%S")
 
             dst = False
@@ -190,7 +189,6 @@ def pred(model):
     os.system("/cevac/scripts/exec_sql_script.sh "
               "/cevac/cache/insert_predictions.sql")
     # os.remove("/cevac/cache/insert_predictions.sql")
-
 
 if __name__ == '__main__':
     model = createModel()
