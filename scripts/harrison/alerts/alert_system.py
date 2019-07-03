@@ -603,6 +603,7 @@ for i, a in enumerate(alerts):
                     t, '%Y-%m-%d %H:%M:%S.%f')
                 now_aware = pytz.utc.localize(datetime_object)
                 minutes_off = (utc_dt - now_aware).total_seconds() / 60
+                dt_formatted = datetime_object.strftime("%m/%d/%y %I:%M %p")
 
                 # Add to alerts to send
                 if True:
@@ -610,7 +611,7 @@ for i, a in enumerate(alerts):
                     safe_log("An alert was sent for " + str(alert), "info")
                     a = deepcopy(alert)
                     a["message"] = angle_brackets_replace_single(
-                        a["message"], alias) + " " + t
+                        a["message"], alias) + " " + dt_formatted
                     event_id, next_id, new_events = assign_event_id(
                                                         next_id,
                                                         last_events,
