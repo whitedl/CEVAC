@@ -647,8 +647,8 @@ for i, a in enumerate(alerts):
 
 if total_issues == 0:
     insert_sql_total = ("INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType,"
-                        "AlertMessage,Metric,BLDG,UTCDateTime,MessageID) "
-                        f"VALUES('All Clear''All Clear','N/A','All',"
+                        "AlertMessage,Metric,UTCDateTime,MessageID) "
+                        f"VALUES('All Clear','All Clear','N/A',"
                         f"GETUTCDATE(),'0')")
 
 # Insert into CEVAC_ALL_ALERTS_HIST
