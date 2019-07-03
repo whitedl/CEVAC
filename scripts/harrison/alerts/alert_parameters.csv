@@ -18,9 +18,9 @@ Dead_IAQ_sensor_alert_Watt,IAQ,*,ppm,<alias> has not reported in <days> days. ,W
 Dead_Temp_sensor_alert_ASC,TEMP,*,deg-F,<alias> has not reported in <days> days. ,ASC,Academic Success Center,CEVAC_ASC_TEMP_LATEST,UTCDateTime,UTCDateTime,1,0,*,<,<now> - 1 hr,alert,17
 Dead_Power_sensor_alert_ASC,POWER,*,kW,<alias> has not reported in <days> days. ,ASC,Academic Success Center,CEVAC_ASC_POWER_LATEST,UTCDateTime,UTCDateTime,1,0,*,<,<now> - 1 hr,alert,18
 Dead_IAQ_sensor_alert_ASC,IAQ,*,ppm,<alias> has not reported in <days> days. ,ASC,Academic Success Center,CEVAC_ASC_IAQ_LATEST,UTCDateTime,UTCDateTime,1,0,*,<,<now> - 1 hr,alert,19
-Dead_Temp_sensor_alert_Cooper,TEMP,*,deg-F,<alias> has not reported in <days> days. ,COOPER,Robert Muldrow Cooper L,CEVAC_COOPER_TEMP_LATEST,UTCDateTime,UTCDateTime,1,0,*,<,<now> - 1 hr,alert,20
-Dead_Power_sensor_alert_Cooper,POWER,*,kW,<alias> has not reported in <days> days. ,COOPER,Robert Muldrow Cooper L,CEVAC_COOPER_POWER_LATEST,UTCDateTime,UTCDateTime,1,0,*,<,<now> - 1 hr,alert,21
-Dead_IAQ_sensor_alert_Cooper,IAQ,*,ppm,<alias> has not reported in <days> days. ,COOPER,Robert Muldrow Cooper L,CEVAC_COOPER_IAQ_LATEST,UTCDateTime,UTCDateTime,1,0,*,<,<now> - 1 hr,alert,22
+Dead_Temp_sensor_alert_Cooper,TEMP,*,deg-F,<alias> has not reported in <days> days. ,COOPER,Robert Muldrow Cooper Library,CEVAC_COOPER_TEMP_LATEST,UTCDateTime,UTCDateTime,1,0,*,<,<now> - 1 hr,alert,20
+Dead_Power_sensor_alert_Cooper,POWER,*,kW,<alias> has not reported in <days> days. ,COOPER,Robert Muldrow Cooper Library,CEVAC_COOPER_POWER_LATEST,UTCDateTime,UTCDateTime,1,0,*,<,<now> - 1 hr,alert,21
+Dead_IAQ_sensor_alert_Cooper,IAQ,*,ppm,<alias> has not reported in <days> days. ,COOPER,Robert Muldrow Cooper Library,CEVAC_COOPER_IAQ_LATEST,UTCDateTime,UTCDateTime,1,0,*,<,<now> - 1 hr,alert,22
 Dead_Temp_sensor_alert_Lee3,TEMP,*,deg-F,<alias> has not reported in <days> days. ,LEE_III,Lee III Hall,CEVAC_LEE_III_TEMP_LATEST,UTCDateTime,UTCDateTime,1,0,*,<,<now> - 1 hr,alert,23
 Dead_Power_sensor_alert_Lee3,POWER,*,kW,<alias> has not reported in <days> days. ,LEE_III,Lee III Hall,CEVAC_LEE_III_POWER_LATEST,UTCDateTime,UTCDateTime,1,0,*,<,<now> - 1 hr,alert,24
 Dead_IAQ_sensor_alert_Lee3,IAQ,*,ppm,<alias> has not reported in <days> days. ,LEE_III,Lee III Hall,CEVAC_LEE_III_IAQ_LATEST,UTCDateTime,UTCDateTime,1,0,*,<,<now> - 1 hr,alert,25
@@ -32,9 +32,9 @@ Temp_High_warning_Lee3,TEMP,*,deg-F,<alias> reads <ActualValue> [deg-F] (Cooling
 Temp_High_alert_Lee3,TEMP,*,deg-F,<alias> reads <ActualValue> [deg-F] (Cooling SP = <Cooling SP> [deg-F]),LEE_III,Lee III Hall,CEVAC_LEE_III_TEMP_LATEST,ActualValue,UTCDateTime,1,0,*,>,<Cooling SP ActualValue>+3,alert,31
 Temp_Low_warning_Lee3,TEMP,*,deg-F,<alias> reads <ActualValue> [deg-F] (Heating SP = <Heating SP> [deg-F]),LEE_III,Lee III Hall,CEVAC_LEE_III_TEMP_DAY,ActualValue,UTCDateTime,3,0,*,<,<Heating SP ActualValue>,warning,32
 Temp_Low_alert_Lee3,TEMP,*,deg-F,<alias> reads <ActualValue> [deg-F] (Heating SP = <Heating SP> [deg-F]),LEE_III,Lee III Hall,CEVAC_LEE_III_TEMP_LATEST,ActualValue,UTCDateTime,1,0,*,<,<Heating SP ActualValue> -3,alert,33
-Temp_High_warning_Cooper,TEMP,*,deg-F,<alias> reads <ActualValue> [deg-F] (Cooling SP = <Cooling SP> [deg-F]),COOPER,Robert Muldrow Cooper L,CEVAC_COOPER_TEMP_DAY,ActualValue,UTCDateTime,3,0,*,>,<Cooling SP ActualValue>,warning,34
-Temp_High_alert_Cooper,TEMP,*,deg-F,<alias> reads <ActualValue> [deg-F] (Cooling SP = <Cooling SP> [deg-F]),COOPER,Robert Muldrow Cooper L,CEVAC_COOPER_TEMP_LATEST,ActualValue,UTCDateTime,1,0,*,>,<Cooling SP ActualValue>+3,alert,35
-Temp_Low_warning_Cooper,TEMP,*,deg-F,<alias> reads <ActualValue> [deg-F] (Heating SP = <Heating SP> [deg-F]),COOPER,Robert Muldrow Cooper L,CEVAC_COOPER_TEMP_DAY,ActualValue,UTCDateTime,3,0,*,<,<Heating SP ActualValue>,warning,36
-Temp_Low_alert_Cooper,TEMP,*,deg-F,<alias> reads <ActualValue> [deg-F] (Heating SP = <Heating SP> [deg-F]),COOPER,Robert Muldrow Cooper L,CEVAC_COOPER_TEMP_LATEST,ActualValue,UTCDateTime,1,0,*,<,<Heating SP ActualValue> -3,alert,37
+Temp_High_warning_Cooper,TEMP,*,deg-F,<alias> reads <ActualValue> [deg-F] (Cooling SP = <Cooling SP> [deg-F]),COOPER,Robert Muldrow Cooper Library,CEVAC_COOPER_TEMP_DAY,ActualValue,UTCDateTime,3,0,*,>,<Cooling SP ActualValue>,warning,34
+Temp_High_alert_Cooper,TEMP,*,deg-F,<alias> reads <ActualValue> [deg-F] (Cooling SP = <Cooling SP> [deg-F]),COOPER,Robert Muldrow Cooper Library,CEVAC_COOPER_TEMP_LATEST,ActualValue,UTCDateTime,1,0,*,>,<Cooling SP ActualValue>+3,alert,35
+Temp_Low_warning_Cooper,TEMP,*,deg-F,<alias> reads <ActualValue> [deg-F] (Heating SP = <Heating SP> [deg-F]),COOPER,Robert Muldrow Cooper Library,CEVAC_COOPER_TEMP_DAY,ActualValue,UTCDateTime,3,0,*,<,<Heating SP ActualValue>,warning,36
+Temp_Low_alert_Cooper,TEMP,*,deg-F,<alias> reads <ActualValue> [deg-F] (Heating SP = <Heating SP> [deg-F]),COOPER,Robert Muldrow Cooper Library,CEVAC_COOPER_TEMP_LATEST,ActualValue,UTCDateTime,1,0,*,<,<Heating SP ActualValue> -3,alert,37
 CO2_warning_ASC,IAQ,*,ppm,<alias> exceeds 1000 ppm.,ASC,Academic Success Center,CEVAC_ASC_IAQ_LATEST,ActualValue,UTCDateTime,1,1,1,>,1000,warning,38
 CO2_alert_ASC,IAQ,*,ppm,<alias> exceeds 2000 ppm.,ASC,Academic Success Center,CEVAC_ASC_IAQ_LATEST,ActualValue,UTCDateTime,1,0,*,>,2000,alert,39
