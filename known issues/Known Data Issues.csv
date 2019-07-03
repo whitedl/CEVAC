@@ -49,3 +49,4 @@ Several CO2 sensors offline (filtered out),Watt,12/8/2015,None,None,"205, 207, 2
 433 CO2 restored,Watt,5/27/2019,None,None,433 CO2 begins reporting,
 AHU1 Cooling Coil Discharge SP offline,Watt,5/27/2019,None,AHU1 CCDSP does not report,None,None
 400N Temp offline,Watt,8/9/2018,None,400N Temp does not report,None,None
+All Air Handler CO2 offline,ASC,4/12/2018,None,None,No Data Collection,None
