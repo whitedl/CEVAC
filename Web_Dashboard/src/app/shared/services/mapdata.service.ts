@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { ColorService } from '@services/color.service';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import * as L from 'leaflet';
 
-declare const L: any;
 const geodata = require('src/assets/CU_Building_Footprints.json');
 interface DataSet {
   name: string;
@@ -15,7 +15,11 @@ L.Control.Legend = L.Control.extend({
   options: {
     position: 'bottomleft'
   },
-  initialize(scale: [number, number], rangeHead: string, options) {
+  initialize(
+    scale: [number, number],
+    rangeHead: string,
+    options: L.ControlOptions
+  ) {
     L.Util.setOptions(this, options);
     this.scale = scale;
     this.rangeTitle = rangeHead;
@@ -34,10 +38,10 @@ L.Control.Legend = L.Control.extend({
     this.scaleMin = L.DomUtil.create('div', '', rangeContainer);
     this.scaleMin.textContent = this.scale[0];
   },
-  onAdd(map) {
+  onAdd(map: L.Map) {
     return this.container;
   },
-  onRemove(map) {},
+  onRemove(map: L.Map) {},
   addCategory(cat: string, domain: ['string', 'string']) {
     // Not using L.DomUtil.create's option to specify parent, as we need more control over placement
     const contain = L.DomUtil.create('div', 'legend-object');
@@ -66,7 +70,7 @@ L.Control.Legend = L.Control.extend({
   }
 });
 
-L.control.legend = (scale: [number, number], options) => {
+L.control.legend = (scale: [number, number], options: L.ControlOptions) => {
   return new L.Control.Legend(scale, options);
 };
 
@@ -83,9 +87,9 @@ export class MapdataService {
   private dataUrl = 'http://wfic-cevac1/requests/stats.php';
   private sasBaseURL =
     'https://sas.clemson.edu:8343/SASVisualAnalytics/report?location=';
-  private map;
-  private tracked;
-  private untracked;
+  private map: L.Map;
+  private tracked: L.GeoJSON;
+  private untracked: L.GeoJSON;
   private mapOptions = {
     minZoom: 15,
     maxZoom: 20
@@ -101,6 +105,14 @@ export class MapdataService {
 
   getMap = () => (!this.map ? this.initMap() : this.map);
 
+  getBuilding = (bName: string) => {
+    this.tracked.eachLayer(layer =>
+      (layer as L.Polygon).feature.properties.Short_Name === bName
+        ? (layer as L.Polygon).feature.properties
+        : (layer as L.Polygon).feature.properties
+    );
+  };
+
   setDataSet = () => {
     this.tracked.setStyle(this.style);
     this.legend.changeScale(
@@ -110,17 +122,17 @@ export class MapdataService {
   };
 
   focusBldg = (bldg: string) => {
-    let layers = this.tracked.getLayers();
+    let layers: L.Polygon[] = this.tracked.getLayers() as L.Polygon[];
     for (const layer of layers) {
-      if (layer.feature.properties.Short_Name === bldg) {
+      if (layer.feature && layer.feature.properties.Short_Name === bldg) {
         this.map.fitBounds(layer.getBounds());
         this.router.navigate(['map', bldg]);
         return;
       }
     }
-    layers = this.untracked.getLayers();
+    layers = this.untracked.getLayers() as L.Polygon[];
     for (const layer of layers) {
-      if (layer.feature.properties.Short_Name === bldg) {
+      if (layer.feature && layer.feature.properties.Short_Name === bldg) {
         this.map.fitBounds(layer.getBounds());
         this.router.navigate(['map', bldg]);
       }
@@ -140,8 +152,10 @@ export class MapdataService {
     const controller = L.control
       .layers({ mapbox, openstreetmap: this.getTileLayerOpenMap() })
       .addTo(this.map);
-    this.untracked = L.geoJSON(geodata, this.untrackedOptions).addTo(this.map);
-    this.tracked = L.geoJSON(geodata, this.trackedOptions).addTo(this.map);
+    this.untracked = L.geoJSON(geodata, this
+      .untrackedOptions as L.GeoJSONOptions).addTo(this.map);
+    this.tracked = L.geoJSON(geodata, this
+      .trackedOptions as L.GeoJSONOptions).addTo(this.map);
     controller.addOverlay(this.untracked, 'show untracked');
     this.legend = L.control.legend(
       this.colorService.getScale(this.dataSet.name),
@@ -169,7 +183,7 @@ export class MapdataService {
         // Currently my personal token, should change to university token
         access_token:
           'pk.eyJ1IjoienRrbGVpbiIsImEiOiJjanZ3aGdubWkwaWdiNGFwOXE0eW55ZG5jIn0.83eVqOeNMqaAywNFD0YqlQ'
-      }
+      } as L.TileLayerOptions
     );
 
   private getTileLayerOpenMap = () =>
@@ -178,16 +192,16 @@ export class MapdataService {
         'Map data and Imagery <a href="https://www.openstreetmap.org/copyright">&#169; OpenStreetMap</a>'
     });
 
-  private style = feature => {
-    const style = {};
-    style['fill'] = true;
-    style['weight'] = 3;
-    style['opacity'] = 1;
-    style['fillOpacity'] = 1;
-    style['color'] = this.colorService.getScaledColor(
+  private style = (feature: GeoJSON.Feature) => {
+    const style: L.PathOptions = {};
+    style.fill = true;
+    style.weight = 3;
+    style.opacity = 1;
+    style.fillOpacity = 1;
+    style.color = this.colorService.getScaledColor(
       feature.properties.BLDG_Class
     );
-    style['fillColor'] =
+    style.fillColor =
       feature.properties.bData &&
       feature.properties.bData[this.dataSet.propertyName]
         ? this.colorService.getScaledColor(
@@ -203,7 +217,7 @@ export class MapdataService {
     return style;
   };
 
-  private highlightFeat = layer => {
+  private highlightFeat = (layer: L.Polygon) => {
     layer.setStyle({
       weight: 5,
       color: this.colorService.brighten(layer.options.color),
@@ -212,7 +226,7 @@ export class MapdataService {
     layer.bringToFront();
   };
 
-  private resetHighlight = e => {
+  private resetHighlight = (e: L.LeafletEvent) => {
     const layer = e.target;
     if (this.tracked.hasLayer(layer)) {
       this.tracked.resetStyle(layer);
@@ -221,11 +235,11 @@ export class MapdataService {
     }
   };
 
-  private zoomToFeat = e => {
+  private zoomToFeat = (e: L.LeafletEvent) => {
     this.map.fitBounds(e.target.getBounds());
   };
 
-  private mouseOver = e => {
+  private mouseOver = (e: L.LeafletEvent) => {
     const layer = e.target;
     this.highlightFeat(layer);
     if (!layer.isPopupOpen()) {
@@ -233,23 +247,23 @@ export class MapdataService {
     }
   };
 
-  private hideTooltip = e => {
+  private hideTooltip = (e: L.LeafletEvent) => {
     const layer = e.target;
     layer.unbindTooltip();
   };
 
-  private selectBuilding = e => {
+  private selectBuilding = (e: L.LeafletEvent) => {
     const layer = e.target;
     const bldg = layer.feature.properties.Short_Name;
     this.router.navigate(['map', bldg]);
   };
 
-  private onClick = e => {
+  private onClick = (e: L.LeafletEvent) => {
     this.hideTooltip(e);
     this.selectBuilding(e);
   };
 
-  private onEachFeat = (feature, layer) => {
+  private onEachFeat = (feature: GeoJSON.Feature, layer: L.Polygon) => {
     const opt = {
       mouseover: this.mouseOver,
       click: this.onClick,
@@ -274,12 +288,12 @@ export class MapdataService {
       });
   };
 
-  private longNameTooltip = layer =>
+  private longNameTooltip = (layer: L.Polygon) =>
     layer.feature.properties.BLDG_NAME !== ' '
       ? layer.feature.properties.BLDG_NAME
       : 'Long_Name not set';
 
-  private shortNameTooltip = layer =>
+  private shortNameTooltip = (layer: L.Polygon) =>
     layer.feature.properties.Short_Name !== ' '
       ? layer.feature.properties.Short_Name
       : 'Short_Name not set';
@@ -288,10 +302,8 @@ export class MapdataService {
     return {
       style: this.style,
       onEachFeature: this.onEachFeat,
-      filter(feature, layer) {
-        return (
-          !feature.properties.Status || feature.properties.Status !== 'Active'
-        );
+      filter(feature: GeoJSON.Feature, layer: L.Layer) {
+        return feature.properties.Status !== 'Active';
       }
     };
   }
@@ -300,7 +312,7 @@ export class MapdataService {
     return {
       style: this.style,
       onEachFeature: this.onEachFeat,
-      filter(feature, layer) {
+      filter(feature: GeoJSON.Feature, layer: L.Layer) {
         return feature.properties.Status === 'Active';
       }
     };

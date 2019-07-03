@@ -7,7 +7,7 @@ const routes: Routes = [
   {
     path: 'map',
     component: MapviewComponent,
-    children: [{ path: ':id', component: BuildingDetailComponent }]
+    children: [{ path: ':bldg', component: BuildingDetailComponent }]
   }
 ];
 

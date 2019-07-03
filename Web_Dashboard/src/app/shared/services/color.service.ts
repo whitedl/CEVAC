@@ -1,7 +1,7 @@
 // Exists to centralize management of color in the app
 // *primarily for the map and map keys at the moment*
 import { Injectable } from '@angular/core';
-import chroma from 'chroma-js';
+import * as chroma from 'chroma-js';
 
 interface Palette {
   [index: string]: string;
@@ -136,9 +136,11 @@ export class ColorService {
       return this.crg[category];
     }
     return chroma
-      .scale(this.labDomain(this.crg[category]))
+      .bezier(this.labDomain(this.crg[category]))
+      .scale()
       .domain(this.scales[scale].domain)
-      .correctLightness()(val);
+      .correctLightness()(val)
+      .name();
   };
 
   registerCategory = (cat: string) => {
@@ -186,8 +188,14 @@ export class ColorService {
 
   getUnnamed = () => this.colors.ClemsonPalette.innovation;
 
-  brighten = (color: string, n: number = 1) => chroma(color).brighten(n);
-  darken = (color: string, n: number = 1) => chroma(color).darken(n);
+  brighten = (color: string, n: number = 1) =>
+    chroma(color)
+      .brighten(n)
+      .hex();
+  darken = (color: string, n: number = 1) =>
+    chroma(color)
+      .darken(n)
+      .hex();
 
   get alert() {
     return this.colors.Alerts.alert;
@@ -197,6 +205,12 @@ export class ColorService {
   }
 
   labDomain = (color: string) => [this.labMax(color), this.labMin(color)];
-  private labMax = (color: string) => chroma(color).set('lab.l', 90);
-  private labMin = (color: string) => chroma(color).set('lab.l', 10);
+  private labMax = (color: string) =>
+    chroma(color)
+      .set('lab.l', 90)
+      .hex();
+  private labMin = (color: string) =>
+    chroma(color)
+      .set('lab.l', 10)
+      .hex();
 }
