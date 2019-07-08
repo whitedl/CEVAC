@@ -14,17 +14,17 @@ email = "cevac5733@gmail.com"
 password = "cevacsteve5733"
 to_list = {
     "Harrison Hall": "hchall@g.clemson.edu",
-    "Bennett Meares": "bmeares@g.clemson.edu",
+    # "Bennett Meares": "bmeares@g.clemson.edu",
     # "Inscribe boi": "bmeares@inscribe.productions",
-    "Zach Smith": "ztsmith@g.clemson.edu",
+    # "Zach Smith": "ztsmith@g.clemson.edu",
     # "Zach Klein": "ztklein@g.clemson.edu",
     # "Drewboi": "abemery@clemson.edu",
-    "Tim": "timh@clemson.edu",
+    # "Tim": "timh@clemson.edu",
 }
-f = open("alerts/alert_email.html", "r")
+f = open("/cevac/CEVAC/scripts/harrison/alerts/alert_email.html", "r")
 page = Template("".join(f.readlines()))
 
-metrics = {
+old_metrics = {
     "TEMP": {
         "key": "<TEMP>",
         "char": "🌡",
@@ -52,6 +52,40 @@ metrics = {
     }
 }
 
+sz = 5
+pic_path = "/cevac/DEV/scripts/harrison/alerts/pics/"
+metrics = {
+    "TEMP": {
+        "key": "<TEMP>",
+        "char": (f"<src=\"{pic_path}TEMP.png\" width=\"{sz}em\""
+                 f" height=\"{sz}em\">"),
+    },
+    "POWER": {
+        "key": "<POWER>",
+        "char": (f"<src=\"{pic_path}POWER.png\" width=\"{sz}em\""
+                 f" height=\"{sz}em\">"),
+    },
+    "IAQ": {
+        "key": "<IAQ>",
+        "char": (f"<src=\"{pic_path}CO2.png\" width=\"{sz}em\""
+                 f" height=\"{sz}em\">"),
+    },
+    "CHW": {
+        "key": "<CHW>",
+        "char": (f"<src=\"{pic_path}CHW.png\" width=\"{sz}em\""
+                 f" height=\"{sz}em\">"),
+    },
+    "STEAM": {
+        "key": "<STEAM>",
+        "char": (f"<src=\"{pic_path}STEAM.png\" width=\"{sz}em\""
+                 f" height=\"{sz}em\">"),
+    },
+
+    "UNKNOWN": {
+        "key": "<UNKNOWN>",
+        "char": "📏",
+    }
+}
 
 class Alert_Log:
     """Handles sorting alerts."""
