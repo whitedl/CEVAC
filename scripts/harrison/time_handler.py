@@ -25,6 +25,11 @@ def est_to_utc(t):
     return utc
 
 
+def human_readable(t):
+    """Return human readable string of time."""
+    return t.strptime("%m/%d/%y %I:%M %p")
+
+
 def utc_to_est(t):
     """Convert utc to est."""
     from_zone = tz.gettz('UTC')
