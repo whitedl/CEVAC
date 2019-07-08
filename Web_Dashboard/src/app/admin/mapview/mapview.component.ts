@@ -8,7 +8,7 @@ import { MapdataService } from '@services/mapdata.service';
 })
 export class MapviewComponent implements OnInit {
   showOthers = true;
-  map;
+  map!: L.Map;
 
   constructor(private loadGISService: MapdataService) {}
 
