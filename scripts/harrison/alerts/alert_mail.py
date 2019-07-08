@@ -22,9 +22,15 @@ email = "cevac5733@gmail.com"
 password = "cevacsteve5733"
 to_list = {
     "Harrison Hall": "hchall@g.clemson.edu",
+<<<<<<< HEAD
+    "Bennett Meares": "bmeares@g.clemson.edu",
+    "Inscribe boi": "bmeares@inscribe.productions",
+    #  "Zach Smith": "ztsmith@g.clemson.edu",
+=======
     # "Bennett Meares": "bmeares@g.clemson.edu",
     # "Inscribe boi": "bmeares@inscribe.productions",
     # "Zach Smith": "ztsmith@g.clemson.edu",
+>>>>>>> fb052c7646d78c06275a297589ddb700cffff2fb
     # "Zach Klein": "ztklein@g.clemson.edu",
     # "Drewboi": "abemery@clemson.edu",
     # "Tim": "timh@clemson.edu",

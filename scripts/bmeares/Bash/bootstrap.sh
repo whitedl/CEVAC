@@ -30,9 +30,9 @@ HIST_VIEW="CEVAC_"$Building"_"$Metric"_HIST_VIEW"
 # Drop _CACHE table
 /cevac/scripts/seperator.sh
 echo "Phase 1: Drop caches"
-/cevac/scripts/exec_sql.sh "DROP TABLE $HIST_CACHE"
+/cevac/scripts/exec_sql.sh "IF OBJECT_ID('$HIST_CACHE', 'U') IS NOT NULL DROP TABLE $HIST_CACHE"
 # Drop _CSV table
-/cevac/scripts/exec_sql.sh "DROP TABLE $HIST_CSV"
+/cevac/scripts/exec_sql.sh "IF OBJECT_ID('$HIST_CSV', 'U') IS NOT NULL DROP TABLE $HIST_CSV"
 # Delete /srv/csv/_HIST.scv
 rm -f /srv/csv/$HIST.csv
 
@@ -56,4 +56,4 @@ time /cevac/scripts/exec_sql.sh "EXEC CEVAC_CACHE_INIT @tables = '$HIST_VIEW'"
 /cevac/scripts/seperator.sh
 echo "Phase 4: create CSVs and rsync to LASR"
 time /cevac/scripts/lasr_append.sh $Building $Metric HIST UTCDateTime Alias norun reset
-/cevac/scripts/lasr_append.sh $Building $Metric LATEST UTCDateTime Alias norun reset
+time /cevac/scripts/lasr_append.sh $Building $Metric LATEST UTCDateTime Alias norun reset
