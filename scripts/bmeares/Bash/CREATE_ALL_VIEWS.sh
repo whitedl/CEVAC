@@ -21,6 +21,7 @@ fi
 [ -z $keys_list ] && keys_list="NULL";
 
 
+./CREATE_VIEW.sh $building $metric PXREF $keys_list $unitOfMeasureID
 ./CREATE_VIEW.sh $building $metric HIST $keys_list $unitOfMeasureID
 ./CREATE_VIEW.sh $building $metric DAY $keys_list $unitOfMeasureID
 ./CREATE_VIEW.sh $building $metric LATEST $keys_list $unitOfMeasureID
