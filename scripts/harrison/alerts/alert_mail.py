@@ -6,8 +6,16 @@ import datetime
 import time_handler
 import smtplib
 import ssl
+import base64
 from jinja2 import Template
 from email import message as msg
+
+
+def encode_img(img_file):
+    """Encode html image into base64."""
+    with open(img_file, "rb") as image:
+        encoded_string = base64.b64encode(image.read())
+        return encoded_string
 
 
 email = "cevac5733@gmail.com"
@@ -52,33 +60,33 @@ old_metrics = {
     }
 }
 
-sz = 5
+sz = 10
 pic_path = "/cevac/DEV/scripts/harrison/alerts/pics/"
 metrics = {
     "TEMP": {
         "key": "<TEMP>",
-        "char": (f"<src=\"{pic_path}TEMP.png\" width=\"{sz}em\""
-                 f" height=\"{sz}em\">"),
+        "char": (f"<img src=\"{encode_img(pic_path+'TEMP.png')}"
+                 f" width=\"{sz}%\" height=\"{sz}%\">"),
     },
     "POWER": {
         "key": "<POWER>",
-        "char": (f"<src=\"{pic_path}POWER.png\" width=\"{sz}em\""
-                 f" height=\"{sz}em\">"),
+        "char": (f"<img src=\"\""
+                 f" width=\"{sz}%\" height=\"{sz}%\">"),
     },
     "IAQ": {
         "key": "<IAQ>",
-        "char": (f"<src=\"{pic_path}CO2.png\" width=\"{sz}em\""
-                 f" height=\"{sz}em\">"),
+        "char": (f"<img src=\"\""
+                 f" width=\"{sz}%\" height=\"{sz}%\">"),
     },
     "CHW": {
         "key": "<CHW>",
-        "char": (f"<src=\"{pic_path}CHW.png\" width=\"{sz}em\""
-                 f" height=\"{sz}em\">"),
+        "char": (f"<img src=\"\""
+                 f" width=\"{sz}%\" height=\"{sz}%\">"),
     },
     "STEAM": {
         "key": "<STEAM>",
-        "char": (f"<src=\"{pic_path}STEAM.png\" width=\"{sz}em\""
-                 f" height=\"{sz}em\">"),
+        "char": (f"<img src=\"\""
+                 f" width=\"{sz}%\" height=\"{sz}%\">"),
     },
 
     "UNKNOWN": {
@@ -86,6 +94,7 @@ metrics = {
         "char": "📏",
     }
 }
+
 
 class Alert_Log:
     """Handles sorting alerts."""
