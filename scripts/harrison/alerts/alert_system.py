@@ -378,6 +378,18 @@ def is_occupied():
     return False
 
 
+def building_is_occupied(building):
+    """Return True if in occupied time."""
+    now = datetime.datetime.now()
+    day = now.isoweekday()
+    hour = now.hour
+    correct_day = (day >= 1 and day <= 5)
+    correct_hour = (hour >= 8 and hour < 17)
+    if (correct_day and correct_hour):
+        return True
+    return False
+
+
 # Initialize logging
 if LOG:
     FORMAT = '%(asctime)s %(levelname)s:%(message)s'
@@ -409,13 +421,10 @@ for i, a in enumerate(alerts):
         now = datetime.datetime.now()
         day = now.isoweekday()
         hour = now.hour
-        correct_day = (day >= 1 and day <= 5)
-        correct_hour = (hour >= 8 and hour < 17)
+        occupied = building_is_occupied(alert["building"])
         if (alert["time_dependent"]):
-            if ((alert["occupancy_status"] and ((not correct_day)
-                 or (not correct_hour)))
-                    or (not alert["occupancy_status"] and
-                        ((correct_day) or (correct_hour)))):
+            if ((alert["occupancy_status"] and (not is_occupied()))
+                    or (not alert["occupancy_status"] and (is_occupied()))):
                 safe_log("Not time for alert #" + str(i + 1), "info")
                 continue
 
