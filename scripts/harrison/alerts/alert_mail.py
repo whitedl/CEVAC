@@ -14,18 +14,15 @@ email = "cevac5733@gmail.com"
 password = "cevacsteve5733"
 to_list = {
     "Harrison Hall": "hchall@g.clemson.edu",
-<<<<<<< HEAD
     "Bennett Meares": "bmeares@g.clemson.edu",
     "Inscribe boi": "bmeares@inscribe.productions",
     #  "Zach Smith": "ztsmith@g.clemson.edu",
-=======
     # "Bennett Meares": "bmeares@g.clemson.edu",
     # "Inscribe boi": "bmeares@inscribe.productions",
     # "Zach Smith": "ztsmith@g.clemson.edu",
->>>>>>> fb052c7646d78c06275a297589ddb700cffff2fb
     # "Zach Klein": "ztklein@g.clemson.edu",
     # "Drewboi": "abemery@clemson.edu",
-    # "Tim": "timh@clemson.edu",
+    # "Tim Howard": "timh@clemson.edu",
 }
 f = open("/cevac/CEVAC/scripts/harrison/alerts/alert_email.html", "r")
 page = Template("".join(f.readlines()))
@@ -58,33 +55,32 @@ old_metrics = {
     }
 }
 
-sz = 5
 pic_path = "/cevac/DEV/scripts/harrison/alerts/pics/"
 metrics = {
     "TEMP": {
         "key": "<TEMP>",
-        "char": (f"<src=\"{pic_path}TEMP.png\" width=\"{sz}em\""
-                 f" height=\"{sz}em\">"),
+        "char": (f"<img src=\"https://i.imgur.com/7idtl34.png\""
+                 f" width=\"50\" height=\"50\">"),
     },
     "POWER": {
         "key": "<POWER>",
-        "char": (f"<src=\"{pic_path}POWER.png\" width=\"{sz}em\""
-                 f" height=\"{sz}em\">"),
+        "char": (f"<img src=\"https://i.imgur.com/8dxzfpX.png\""
+                 f" width=\"50\" height=\"50\">"),
     },
     "IAQ": {
         "key": "<IAQ>",
-        "char": (f"<src=\"{pic_path}CO2.png\" width=\"{sz}em\""
-                 f" height=\"{sz}em\">"),
+        "char": (f"<img src=\"https://i.imgur.com/vkFWgSf.png\""
+                 f" width=\"50\" height=\"50\">"),
     },
     "CHW": {
         "key": "<CHW>",
-        "char": (f"<src=\"{pic_path}CHW.png\" width=\"{sz}em\""
-                 f" height=\"{sz}em\">"),
+        "char": (f"<img src=\"https://i.imgur.com/OtTAHcl.png\""
+                 f" width=\"50\" height=\"50\">"),
     },
     "STEAM": {
         "key": "<STEAM>",
-        "char": (f"<src=\"{pic_path}STEAM.png\" width=\"{sz}em\""
-                 f" height=\"{sz}em\">"),
+        "char": (f"<img src=\"https://i.imgur.com/GdXwxMy.png\""
+                 f" width=\"50\" height=\"50\">"),
     },
 
     "UNKNOWN": {
@@ -92,6 +88,7 @@ metrics = {
         "char": "📏",
     }
 }
+
 
 class Alert_Log:
     """Handles sorting alerts."""
@@ -162,7 +159,8 @@ def email_message(email, password, to_list, message, subject):
         server.login(email, password)
         for person in to_list:
             p_email = to_list[person]
-            p_page = page.render(Name=person, message=message, subject=subject)
+            p_page = page.render(Name=person, message=message, subject=subject,
+                                 metrics=metrics)
 
             m_message = msg.Message()
             m_message.add_header('Content-Type', 'text/html')
