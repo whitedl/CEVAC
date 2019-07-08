@@ -106,6 +106,7 @@ if [ ! -f /srv/csv/$table.csv ] || [ ! -z $latest ]; then
   echo "$query"
   # get data
   /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$query" -W -o "/home/bmeares/cache/$table.csv" -h-1 -s"," -w 700
+  sed -i 's/NULL/./g' /cevac/cache/$table.csv
   rows_transferred=$(wc -l < /home/bmeares/cache/$table.csv)
 
   if [ -z "$latest" ] && [ -z "$xref" ]; then
@@ -140,6 +141,7 @@ else # csv exists
   # append new data to top of existing csv
   # sed -i "1i`cat /home/bmeares/cache/$table.csv`" /srv/csv/$table.csv
   echo Appending data to existing $table.csv...
+  sed -i 's/NULL/./g' /cevac/cache/$table.csv
   cat /home/bmeares/cache/$table.csv /srv/csv/$table.csv | sponge /srv/csv/$table.csv
   echo Done appending.
 
