@@ -22,6 +22,8 @@ LOGGING_PATH = "/home/bmeares/cron/alerts/"
 PHONE_PATH = "/home/bmeares/cron/alerts/"
 alert_fname = "alert_parameters.csv"
 json_fname = "/cevac/cron/alert_log.json"
+json_oc = "/cevac/cron/alert_log_oc.json"
+json_unoc = "/cevac/cron/alert_log_unoc.json"
 
 TIMED = True
 
@@ -32,8 +34,8 @@ for arg in sys.argv:
 LOG = True
 DEBUG = False
 CHECK_ALERTS = True
-SEND = True
-UPDATE_CACHE = True
+SEND = False
+UPDATE_CACHE = False
 
 if DEBUG:
     CONDITIONS_FPATH = "C:\\Users\\hchall\\Downloads\\"
@@ -306,17 +308,30 @@ def safe_log(message, type):
             logging.info(message)
 
 
-def parse_json(filename):
-    """Parse json for cron use."""
-    try:
-        f = open(filename, "r")
-        line = f.readlines()[0]
-        new_json = json.loads(line)
-        next_id = new_json["next_id"]
-        f.close()
-        return (next_id, new_json)
-    except Exception:
-        return (0, {})
+def parse_json(*filenames):
+    """Parse json(s) for cron use."""
+    max_id = 0
+    new_json = {}
+    for filename in filenames:
+        try:
+            f = open(filename, "r")
+            line = f.readlines()[0]
+            new_json.update(json.loads(line))
+            next_id = new_json["next_id"]
+            max_id = max(max_id, next_id)
+            f.close()
+        except Exception:
+            continue
+    return (max_id, new_json)
+
+
+def write_json_generic(new_events, next_id):
+    """Write json independent of time."""
+    if is_occupied:
+        write_json(json_oc, new_events, next_id)
+    else:
+        write_json(json_unoc, new_events, next_id)
+    return None
 
 
 def write_json(filename, new_events, next_id):
@@ -351,6 +366,18 @@ def get_alias_or_psid(table_name):
         return r_dict[key]
 
 
+def is_occupied():
+    """Return True if in occupied time."""
+    now = datetime.datetime.now()
+    day = now.isoweekday()
+    hour = now.hour
+    correct_day = (day >= 1 and day <= 5)
+    correct_hour = (hour >= 8 and hour < 17)
+    if (correct_day and correct_hour):
+        return True
+    return False
+
+
 # Initialize logging
 if LOG:
     FORMAT = '%(asctime)s %(levelname)s:%(message)s'
@@ -364,7 +391,7 @@ if LOG:
 alerts, unique_databases = import_conditions(alert_fname, logging)
 
 # JSON
-next_id, last_events = parse_json(json_fname)
+next_id, last_events = parse_json(json_fname, json_oc, json_unoc)
 new_events = {}  # id: { hash : event_id }
 
 # Check alerts for conditions
@@ -661,7 +688,7 @@ if total_issues == 0:
                         f"GETUTCDATE(),'0')")
 
 # Insert into CEVAC_ALL_ALERTS_HIST
-write_json(json_fname, new_events, next_id)
+write_json_generic(new_events, next_id)
 if SEND:
     f = open("/home/bmeares/cache/insert_alert_system.sql", "w")
     f.write(insert_sql_total.replace(';', '\nGO\n'))
