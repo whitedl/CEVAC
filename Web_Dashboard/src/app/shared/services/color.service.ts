@@ -123,7 +123,10 @@ export class ColorService {
   // If name is not passed, assumes first ColorSet (ClemsonPalette).
   // If pos is passed, will return color at position in chosen set
   // If pos is not passed, will return first in set
-  getColor = (name: string = Object.keys(this.colors)[0], pos: number = 0) => {
+  getColor = (
+    name: string = Object.keys(this.colors)[0],
+    pos: number = 0
+  ): string => {
     if (!(name in this.colors)) {
       name = Object.keys(this.colors)[0];
     }
@@ -131,7 +134,7 @@ export class ColorService {
     return set[pos % set.length];
   };
 
-  getScaledColor = (category: string, scale?: string, val?: number) => {
+  getScaledColor = (category: string, scale?: string, val?: number): string => {
     if (typeof val === 'undefined' || typeof scale === 'undefined') {
       return this.crg[category];
     }
@@ -158,8 +161,8 @@ export class ColorService {
     }
   };
 
-  getScale = (scaleType: string) =>
-    scaleType in this.scales ? this.scales[scaleType].domain : null;
+  getScale = (scaleType: string): [number, number] =>
+    scaleType in this.scales ? this.scales[scaleType].domain : [-1, -1];
 
   // if scale is in Scales, return the lower bound
   scaleLowBound = (scaleType: string) =>
@@ -204,12 +207,15 @@ export class ColorService {
     return this.colors.Alerts.warn;
   }
 
-  labDomain = (color: string) => [this.labMax(color), this.labMin(color)];
-  private labMax = (color: string) =>
+  labDomain = (color: string): [string, string] => [
+    this.labMax(color),
+    this.labMin(color)
+  ];
+  private labMax = (color: string): string =>
     chroma(color)
       .set('lab.l', 90)
       .hex();
-  private labMin = (color: string) =>
+  private labMin = (color: string): string =>
     chroma(color)
       .set('lab.l', 10)
       .hex();
