@@ -4,75 +4,13 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import * as L from 'leaflet';
 
+import { Legend } from '@shared/leaflet-extensions/L.Control.Legend';
+
 const geodata = require('src/assets/CU_Building_Footprints.json');
 interface DataSet {
   name: string;
   propertyName: string;
 }
-
-// yes, this is dirty and not the best thing to do in Angular. I'm using a very non-angular library. Might fix it later.
-const Legend = L.Control.extend({
-  options: {
-    position: 'bottomleft'
-  },
-  initialize(
-    scale: [number, number],
-    rangeHead: string,
-    options: L.ControlOptions
-  ) {
-    L.Util.setOptions(this, options);
-    this.scale = scale;
-    this.rangeTitle = rangeHead;
-    this.container = L.DomUtil.create('div', 'legend');
-    const rangeContainer = L.DomUtil.create(
-      'div',
-      'legend-object',
-      this.container
-    );
-    const scaleHeader = L.DomUtil.create('div', '', rangeContainer);
-    this.rangeHeader = L.DomUtil.create('p', 'legend-header', scaleHeader);
-    this.rangeHeader.textContent = rangeHead;
-    this.scaleMax = L.DomUtil.create('div', '', scaleHeader);
-    this.scaleMax.setAttribute('style', 'text-align: center;');
-    this.scaleMax.textContent = this.scale[1];
-    this.scaleMin = L.DomUtil.create('div', '', rangeContainer);
-    this.scaleMin.textContent = this.scale[0];
-  },
-  onAdd(map: L.Map) {
-    return this.container;
-  },
-  onRemove(map: L.Map) {},
-  addCategory(cat: string, domain: ['string', 'string']) {
-    // Not using L.DomUtil.create's option to specify parent, as we need more control over placement
-    const contain = L.DomUtil.create('div', 'legend-object');
-    const title = L.DomUtil.create('p', 'legend-header', contain);
-    title.innerText = cat;
-    const grad = L.DomUtil.create('div', 'gradient-scale', contain);
-    grad.setAttribute(
-      'style',
-      'background-image: linear-gradient(to top, ' +
-        domain[0] +
-        ', ' +
-        domain[1] +
-        ');'
-    );
-    this.container.insertAdjacentElement('beforeEnd', contain);
-  },
-  changeScale(scale: [number, number], rangeHead: string) {
-    this.rangeHeader.textContent = rangeHead;
-    this.scaleMin.textContent = scale[0];
-    this.scaleMax.textContent = scale[1];
-  },
-  update() {
-    if (!this.container) {
-      return this;
-    }
-  }
-});
-
-L.control.legend = (scale: [number, number], options: L.ControlOptions) => {
-  return new Legend(scale, options);
-};
 
 @Injectable({ providedIn: 'root' })
 export class MapdataService {
@@ -158,7 +96,7 @@ export class MapdataService {
     this.untracked = L.geoJSON(geodata, this.untrackedOptions).addTo(this.map);
     this.tracked = L.geoJSON(geodata, this.trackedOptions).addTo(this.map);
     controller.addOverlay(this.untracked, 'show untracked');
-    this.legend = L.control.legend(
+    this.legend = new Legend(
       this.colorService.getScale(this.dataSet.name),
       this.dataSet.name,
       { position: 'bottomleft' }
