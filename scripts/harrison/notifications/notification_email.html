@@ -88,16 +88,13 @@
       <div class="logo">
         <img src="https://www.clemson.edu/brand/resources/logos/wordmark-academic/orange.png">
       </div>
-      <h1>{{ subject }}</h1>
       <h2>{{ Name }}:</h2>
-      <h3>The following warnings are aggregated from the past day.</h3>
-      {{ message }}
-      <h2 class="split">Symbol Key</h2>
-      {% for metric in metrics %}
-        <tr class="keytab">
-            <td>{{metric}}</td>
-            <td>{{metrics[metric]["char"]}}</td>
-        </tr>
+      <h3>The following notifications are aggregated from the past day.</h3>
+      {% for log in logs %}
+        <h2 class="split">{{log}}</h2>
+        {% for issue in logs[log]["issues"] %}
+          <h3>{{issue}}</h3><br>
+        {% endfor %}
       {% endfor %}
     </div>
   </body>
