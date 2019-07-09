@@ -115,8 +115,12 @@ MATERIAL CUSTOMIZATION
 }
 
 // for when you need a heading to overflow (badges, notifications, etc.)
+// originally written for alertbox. May or may not work well elsewhere.
 .mat-child-overflow > .mat-content {
   overflow: visible;
+  .mat-badge-content {
+    margin-top: 2px;
+  }
 }
 
 /******************************************************************************
@@ -159,7 +163,7 @@ LEAFLET CUSTOMIZATION
   max-width: 4em;
 }
 
-// attribution watermarks
+// attribution watermark for mapbox
 .mapbox-wordmark {
   position: relative;
   display: block;
