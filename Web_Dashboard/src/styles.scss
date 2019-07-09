@@ -9,6 +9,10 @@
 //bring in our material theme for use on custom components
 @import 'mat_theming.scss';
 
+/******************************************************************************
+GENERAL CSS
+******************************************************************************/
+
 html,
 body {
   height: 100%;
@@ -39,6 +43,10 @@ body {
   scrollbar-color: mat-color($clemson-accent)
     darken(map-get(map-get($clemson-theme, background), background), 10%);
 }
+
+/******************************************************************************
+FLEX UTILITIES
+******************************************************************************/
 
 // general use flex containers
 .flex-col {
@@ -85,6 +93,10 @@ body {
   flex: 1 1 100%;
 }
 
+/******************************************************************************
+MATERIAL CUSTOMIZATION
+******************************************************************************/
+
 // exactly what it says it is
 .scrollableExpansion {
   display: flex !important;
@@ -101,6 +113,15 @@ body {
   min-height: 0;
   overflow-y: auto;
 }
+
+// for when you need a heading to overflow (badges, notifications, etc.)
+.mat-child-overflow > .mat-content {
+  overflow: visible;
+}
+
+/******************************************************************************
+LEAFLET CUSTOMIZATION
+******************************************************************************/
 
 // leaflet css
 .legend {
