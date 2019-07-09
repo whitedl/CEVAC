@@ -27,4 +27,5 @@ fi
 ./CREATE_VIEW.sh $building $metric LATEST $keys_list $unitOfMeasureID
 ./CREATE_VIEW.sh $building $metric LATEST_FULL $keys_list $unitOfMeasureID
 ./CREATE_VIEW.sh $building $metric LATEST_BROKEN $keys_list $unitOfMeasureID
+./CREATE_VIEW.sh $building $metric OLDEST $keys_list $unitOfMeasureID
 
