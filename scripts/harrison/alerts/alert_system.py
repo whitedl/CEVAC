@@ -2,8 +2,6 @@
 
 This CEVAC alert system script reads from alert_system.csv to populate the
 table `CEVAC_ALL_ALERTS_HIST`.
-
-TODO: Time-based alert conditionals (cache issue)
 """
 
 import os
@@ -34,8 +32,8 @@ for arg in sys.argv:
 LOG = True
 DEBUG = False
 CHECK_ALERTS = True
-SEND = False
-UPDATE_CACHE = False
+SEND = True
+UPDATE_CACHE = True
 
 if DEBUG:
     CONDITIONS_FPATH = "C:\\Users\\hchall\\Downloads\\"
