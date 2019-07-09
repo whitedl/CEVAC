@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 
 import { Alert } from '@app/alert';
@@ -10,12 +10,18 @@ import { Alert } from '@app/alert';
   providedIn: 'root'
 })
 export class AlertService {
-  alerts: Alert[] = [];
+  private alerts$!: Observable<Alert[]>;
   private alertsUrl = 'http://wfic-cevac1/requests/alerts.php';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+    this.initialize();
+  }
+
+  initialize() {
+    this.alerts$ = this.http.get<Alert[]>(this.alertsUrl);
+  }
 
   getAlerts(): Observable<Alert[]> {
-    return this.http.get<Alert[]>(this.alertsUrl);
+    return this.alerts$;
   }
 }
