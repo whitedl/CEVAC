@@ -35,6 +35,7 @@ time /home/bmeares/scripts/lasr_append.sh LEE_III TEMP HIST UTCDateTime Alias $r
 time /home/bmeares/scripts/lasr_append.sh WATT IAQ HIST UTCDateTime Alias $runsas $reset
 time /home/bmeares/scripts/lasr_append.sh WATT POWER HIST UTCDateTime Alias $runsas $reset
 time /home/bmeares/scripts/lasr_append.sh WATT POWER_SUMS HIST UTCDateTime Total_Usage $runsas $reset
+time /home/bmeares/scripts/lasr_append.sh WATT POWER_SUMS_COMPARE HIST P_UTCDateTime P_UTCDateTime $runsas $reset
 time /home/bmeares/scripts/lasr_append.sh WATT TEMP HIST UTCDateTime Alias $runsas $reset
 time /home/bmeares/scripts/lasr_append.sh WATT WAP HIST "time" Alias $runsas $reset
 time /home/bmeares/scripts/lasr_append.sh WATT WAP_DAILY HIST UTCDateTime UTCDateTime $runsas $reset
