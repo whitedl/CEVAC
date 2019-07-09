@@ -5,7 +5,7 @@ import { share, tap } from 'rxjs/operators';
 import { AlertService } from '@services/alert.service';
 import { MapdataService } from '@services/mapdata.service';
 import { ColorService } from '@services/color.service';
-import { Alert } from '@app/alert';
+import { Alert } from '@shared/interfaces/alert';
 
 @Component({
   selector: 'app-alertbox',
