@@ -29,7 +29,7 @@ csv_utc_append_query="
 DECLARE @begin DATETIME;
 DECLARE @now DATETIME;
 SET @now = GETUTCDATE();
-SET @begin = DATEADD(day, -2, @now);
+SET @begin = DATEADD(day, -7, @now);
 
 WITH new AS (
   SELECT * FROM $table
@@ -37,8 +37,8 @@ WITH new AS (
 )
   INSERT INTO $table_CSV
 
-  SELECT new.$UTCDateTime FROM new
-  LEFT JOIN $table_CSV AS CSV ON CSV.$UTCDateTime = new.$UTCDateTime
+  SELECT new.$UTCDateTime, new.$Alias FROM new
+  LEFT JOIN $table_CSV AS CSV ON CSV.$UTCDateTime = new.$UTCDateTime AND CSV.$Alias = new.$Alias
   WHERE CSV.$UTCDateTime IS NULL
 
 "
@@ -48,7 +48,7 @@ DECLARE @begin DATETIME;
 DECLARE @now DATETIME;
 DECLARE @last_UTC DATETIME;
 SET @now = GETUTCDATE();
-SET @begin = DATEADD(day, -2, @now);
+SET @begin = DATEADD(day, -7, @now);
 SET @last_UTC = (
   SELECT TOP 1 last_UTC FROM CEVAC_CACHE_RECORDS 
   WHERE table_name = '$table' AND storage = 'CSV'
@@ -71,15 +71,16 @@ WITH new AS (
 
 csv_utc_query="
 SET NOCOUNT ON
-IF OBJECT_ID('dbo.$table_CSV') IS NOT NULL DROP TABLE $table_CSV
-SELECT $UTCDateTime
+IF OBJECT_ID('dbo.$table_CSV') IS NOT NULL DROP TABLE $table_CSV;
+GO
+SELECT $UTCDateTime, $Alias
 INTO $table_CSV
 FROM $table
 "
 query="
 SET NOCOUNT ON
-SELECT * FROM $table
-ORDER BY LEN($Alias) DESC
+SELECT * FROM $table AS original
+ORDER BY LEN(original.$Alias) DESC
 "
 h='130.127.218.11'
 u='wficcm'
@@ -106,6 +107,7 @@ if [ ! -f /srv/csv/$table.csv ] || [ ! -z $latest ]; then
   echo "$query"
   # get data
   /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$query" -W -o "/home/bmeares/cache/$table.csv" -h-1 -s"," -w 700
+  # Replace NULL with period for LASR
   sed -i 's/NULL/./g' /cevac/cache/$table.csv
   rows_transferred=$(wc -l < /home/bmeares/cache/$table.csv)
 
@@ -141,12 +143,10 @@ else # csv exists
   # append new data to top of existing csv
   # sed -i "1i`cat /home/bmeares/cache/$table.csv`" /srv/csv/$table.csv
   echo Appending data to existing $table.csv...
+  # Replace NULL with period for LASR
   sed -i 's/NULL/./g' /cevac/cache/$table.csv
   cat /home/bmeares/cache/$table.csv /srv/csv/$table.csv | sponge /srv/csv/$table.csv
   echo Done appending.
-
-  # append columns to cache CSV for Append
-  # cat /home/bmeares/cache/cols_$table.csv /home/bmeares/cache/$table.csv > /home/bmeares/cache/temp_$table.csv && mv /home/bmeares/cache/temp_$table.csv /home/bmeares/cache/$table.csv
 
 fi
 echo Calculating row_count...
