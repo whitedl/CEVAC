@@ -102,10 +102,12 @@ export class MapdataService {
       { position: 'bottomleft' }
     );
     for (const cat of this.categories) {
+      if (typeof cat !== 'undefined') {
       this.legend.addCategory(
         cat,
         this.colorService.labDomain(this.colorService.getScaledColor(cat))
       );
+    }
     }
     this.legend.addTo(this.map);
     this.getBuilding('WATT');
