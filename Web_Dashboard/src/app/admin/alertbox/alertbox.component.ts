@@ -1,4 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { Observable } from 'rxjs';
+import { share, tap } from 'rxjs/operators';
+
 import { AlertService } from '@services/alert.service';
 import { MapdataService } from '@services/mapdata.service';
 import { ColorService } from '@services/color.service';
@@ -10,7 +13,7 @@ import { Alert } from '@app/alert';
   styleUrls: ['./alertbox.component.scss']
 })
 export class AlertboxComponent implements OnInit {
-  alerts: Alert[] = [];
+  alerts$!: Observable<Alert[]>;
 
   constructor(
     private alertService: AlertService,
@@ -19,7 +22,7 @@ export class AlertboxComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.getAlerts();
+    this.alerts$ = this.alertService.getAlerts().pipe(share());
   }
 
   getAlertColor(type: string) {
@@ -39,13 +42,5 @@ export class AlertboxComponent implements OnInit {
 
   focus(alert: Alert) {
     this.mapdataService.focusBldg(alert.BuildingSName);
-  }
-
-  alertAll(): Alert[] {
-    return this.alerts.filter(alert => alert.EventID === 1);
-  }
-
-  getAlerts(): void {
-    this.alertService.getAlerts().subscribe(alerts => (this.alerts = alerts));
   }
 }
