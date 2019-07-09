@@ -44,6 +44,8 @@ export class ColorService {
     ClemsonPalette: {
       clemsonOrange: '#F66733',
       regalia: '#522D80',
+      bowmansField: '#566127',
+      centennialOak: '#562E19',
       hartwellMoon: '#D4C99E',
       howardsRock: '#685C53',
       blueRidge: '#3A4958',
@@ -114,7 +116,7 @@ export class ColorService {
     }
   };
   private crg: BuildingRegistry = {};
-  private crgPalette = 'ClemsonComplementary';
+  private crgPalette = 'ClemsonPalette';
 
   constructor() {
     this.crg['undefined'] = this.getPassive();
