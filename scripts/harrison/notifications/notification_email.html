@@ -92,9 +92,9 @@
       <h3>The following notifications are aggregated from the past day.</h3>
       {% for log in logs %}
         <h2 class="split">{{log}}</h2>
-        <tr class="keytab">
-            <td>{{logs[log]["issues"]}}</td>
-        </tr>
+        {% for issue in logs[log]["issues"] %}
+          <h3>{{issue}}</h3><br>
+        {% endfor %}
       {% endfor %}
     </div>
   </body>
