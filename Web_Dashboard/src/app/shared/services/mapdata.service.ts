@@ -6,21 +6,16 @@ import * as L from 'leaflet';
 
 import { Legend } from '@shared/leaflet-extensions/L.Control.Legend';
 
+import { Dataset } from '@shared/interfaces/dataset';
+
 const geodata = require('src/assets/CU_Building_Footprints.json');
-interface DataSet {
-  name: string;
-  propertyName: string;
-}
 
 @Injectable({ providedIn: 'root' })
 export class MapdataService {
   // be sure the names match with the values in color service, otherwise you'll get the default scale
-  dataSets: DataSet[] = [
-    { name: 'Power', propertyName: 'power_latest_sum' },
-    { name: 'Temperature', propertyName: 'temp_latest_avg' },
-    { name: 'CO2', propertyName: 'co2_latest_avg' }
+  dataSets: Dataset[] = [
   ];
-  dataSet: DataSet = this.dataSets[0];
+  dataSet: Dataset = this.dataSets[0];
 
   private dataUrl = 'http://wfic-cevac1/requests/stats.php';
   private sasBaseURL =
