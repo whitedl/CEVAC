@@ -2,6 +2,8 @@
 
 This reads from log files and checks a modification csv to notify when
 something needs fixing.
+
+To add yourself to the email list, just add name and email to `to_list`.
 """
 
 import datetime
@@ -11,7 +13,6 @@ import ssl
 from email import message as msg
 
 DEBUG = False
-CHECK_ALERTS = True
 SEND = True
 
 email = "cevac5733@gmail.com"
@@ -41,20 +42,21 @@ logs = {
 }
 
 
-def check_log(f_location, logfile=None):
+def check_log(f_location, logfile=None, yesterday=False):
     """Check log, return errors."""
     errors = []
     if logfile is None:
         now = datetime.datetime.now()
+        if yesterday:
+            now = now - datetime.timedelta(1)
         log = f_location + now.strftime("%Y-%m-%d") + ".log"
     else:
         log = f_location + logfile
-    print(logfile)
+    print(log)
     try:
         f = open(log, "r")
         for line in f.readlines():
             if "Error" in line:
-                print(line)
                 errors.append(line)
     except Exception:
         errors.append("Could not find log")
@@ -66,7 +68,6 @@ def email_message(email, password, to_email, message, subject):
     port = 587
     context = ssl.create_default_context()
     smtp_server = "smtp.gmail.com"
-    # message = message.replace("\n", "<br>")
     with smtplib.SMTP(smtp_server, port) as server:
         server.ehlo()
         server.starttls(context=context)
@@ -80,19 +81,26 @@ def email_message(email, password, to_email, message, subject):
         new_message = m_message.as_string()
 
         print(new_message.encode("utf-8"))
-        server.sendmail(email, to_email, new_message)
+        if SEND:
+            server.sendmail(email, to_email, new_message.encode("utf-8"))
 
 
 errors = []
 for i, log in enumerate(logs):
     issues = check_log(logs[log]["location"])
-    if len(issues) != 0:
-        logs[log]["issues"] += issues
-    else:
+    if len(issues) == 0:
         logs[log]["issues"].append("No issues")
+    elif len(issues) > 1:
+        logs[log]["issues"] += issues
+    elif (issues[0] == "Could not find log"):
+        issues = check_log(logs[log]["location"], yesterday=True)
+        if len(issues) == 0:
+            logs[log]["issues"].append("No issues")
+        else:
+            logs[log]["issues"] += issues
 
-email = "".join(open("notification_email.html", "r").readlines())
-T = Template(email)
+email_msg = "".join(open("notification_email.html", "r").readlines())
+T = Template(email_msg)
 for person in to_list:
     filled_email = T.render(logs=logs, Name=person)
     hr_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
