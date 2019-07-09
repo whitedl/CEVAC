@@ -325,7 +325,7 @@ def parse_json(*filenames):
 
 def write_json_generic(new_events, next_id):
     """Write json independent of time."""
-    if is_occupied:
+    if is_occupied():
         write_json(json_oc, new_events, next_id)
     else:
         write_json(json_unoc, new_events, next_id)
