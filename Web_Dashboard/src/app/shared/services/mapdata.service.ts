@@ -6,16 +6,19 @@ import * as L from 'leaflet';
 
 import { Legend } from '@shared/leaflet-extensions/L.Control.Legend';
 
-import { Dataset } from '@shared/interfaces/dataset';
+import { Measurement } from '@shared/interfaces/measurement';
 
 const geodata = require('src/assets/CU_Building_Footprints.json');
 
 @Injectable({ providedIn: 'root' })
 export class MapdataService {
   // be sure the names match with the values in color service, otherwise you'll get the default scale
-  dataSets: Dataset[] = [
+  dataSets: Measurement[] = [
+    { name: 'Power', propertyName: 'power_latest_sum', unit: 'kW' },
+    { name: 'Temperature', propertyName: 'temp_latest_avg', unit: 'F' },
+    { name: 'CO2', propertyName: 'co2_latest_avg', unit: 'ppm' }
   ];
-  dataSet: Dataset = this.dataSets[0];
+  dataSet: Measurement = this.dataSets[0];
 
   private dataUrl = 'http://wfic-cevac1/requests/stats.php';
   private sasBaseURL =
@@ -98,11 +101,11 @@ export class MapdataService {
     );
     for (const cat of this.categories) {
       if (typeof cat !== 'undefined') {
-      this.legend.addCategory(
-        cat,
-        this.colorService.labDomain(this.colorService.getScaledColor(cat))
-      );
-    }
+        this.legend.addCategory(
+          cat,
+          this.colorService.labDomain(this.colorService.getScaledColor(cat))
+        );
+      }
     }
     this.legend.addTo(this.map);
     this.getBuilding('WATT');
