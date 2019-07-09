@@ -4,25 +4,40 @@ This reads from log files and checks a modification csv to notify when
 something needs fixing.
 """
 
-import os
-import sys
-import csv
-import json
 import datetime
-import pytz
-import logging
-import urllib.request
-from copy import deepcopy
+from jinja2 import Template
+import smtplib
+import ssl
+from email import message as msg
 
 DEBUG = False
 CHECK_ALERTS = True
-SEND = False
+SEND = True
+
+email = "cevac5733@gmail.com"
+password = "cevacsteve5733"
+
+to_list = {
+    "Harrison Hall": "hchall@g.clemson.edu",
+}
 
 logs = {
-    "WAP Hourly/Floor": "",
-    "WAP Daily": "",
-    "Chilled Water": "/mnt/bldg/Campus_CHW/logs/",
-    "Power Meters": "/mnt/bldg/Campus_Power/logs/",
+    "WAP Hourly/Floor": {
+        "location": "/mnt/bldg/WAP/logs/",
+        "issues": [],
+    },
+    "WAP Daily": {
+        "location": "/cevac/cron/wap/log/",
+        "issues": [],
+    },
+    "Chilled Water": {
+        "location": "/mnt/bldg/Campus_CHW/logs/",
+        "issues": [],
+    },
+    "Power Meters": {
+        "location": "/mnt/bldg/Campus_Power/logs/",
+        "issues": [],
+    },
 }
 
 
@@ -45,9 +60,44 @@ def check_log(f_location, logfile=None):
         errors.append("Could not find log")
     return errors
 
-for i, log in enumerate(logs):
-    pass
 
+def email_message(email, password, to_email, message, subject):
+    """Send email."""
+    port = 587
+    context = ssl.create_default_context()
+    smtp_server = "smtp.gmail.com"
+    # message = message.replace("\n", "<br>")
+    with smtplib.SMTP(smtp_server, port) as server:
+        server.ehlo()
+        server.starttls(context=context)
+        server.ehlo()
+        server.login(email, password)
+
+        m_message = msg.Message()
+        m_message.add_header('Content-Type', 'text/html')
+        m_message.set_payload(message)
+        m_message["Subject"] = subject
+        new_message = m_message.as_string()
+
+        print(new_message.encode("utf-8"))
+        server.sendmail(email, to_email, new_message)
+
+
+errors = []
+for i, log in enumerate(logs):
+    issues = check_log(logs[log]["location"])
+    if len(issues) != 0:
+        logs[log]["issues"] += issues
+    else:
+        logs[log]["issues"].append("No issues")
+
+email = "".join(open("notification_email.html", "r").readlines())
+T = Template(email)
+for person in to_list:
+    filled_email = T.render(logs=logs, Name=person)
+    hr_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    subject = f"Issues at {hr_time}"
+    email_message(email, password, to_list[person], filled_email, subject)
 
 """
       /##.*/
