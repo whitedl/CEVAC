@@ -6,6 +6,7 @@ from alerts import alert_mail
 
 script_table = {
     "alert_mail.py": alert_mail.main,
+    "alertmail": alert_mail.main,
 }
 
 for arg in argv:

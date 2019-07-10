@@ -649,7 +649,8 @@ for i, a in enumerate(alerts):
                 dt_formatted = datetime_object.strftime("%m/%d/%y %I:%M %p")
                 today = datetime.datetime.now()
                 today = pytz.utc.localize(today)
-                time_diff = today - now_aware
+                time_diff = (today - now_aware) + datetime.timedelta(1)
+                print(time_diff)
                 days_since = time_diff.days
 
                 # Add to alerts to send
@@ -661,6 +662,7 @@ for i, a in enumerate(alerts):
                                         a["message"], "alias", alias)
                     a["message"] = angle_brackets_replace_specific(
                                         a["message"], "days", days_since)
+                    print(a["message"])
                     event_id, next_id, new_events = assign_event_id(
                                                         next_id,
                                                         last_events,
