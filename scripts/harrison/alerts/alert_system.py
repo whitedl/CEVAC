@@ -18,7 +18,7 @@ from copy import deepcopy
 CONDITIONS_FPATH = "/home/bmeares/cron/alerts/"
 LOGGING_PATH = "/home/bmeares/cron/alerts/"
 PHONE_PATH = "/home/bmeares/cron/alerts/"
-alert_fname = "alert_parameters.csv"
+alert_fname = "/cevac/CEVAC/alerts/alert_parameters.csv"
 json_fname = "/cevac/cron/alert_log.json"
 json_oc = "/cevac/cron/alert_log_oc.json"
 json_unoc = "/cevac/cron/alert_log_unoc.json"
@@ -148,7 +148,7 @@ def import_conditions(fname, logger):
     """Move a CSV file to dict of alert condtions."""
     alerts = {}
     unique_databases = {}
-    with open(CONDITIONS_FPATH + fname) as csvfile:
+    with open(fname) as csvfile:
         csvfile = csv.reader(csvfile)
         next(csvfile)
         for i, row in enumerate(csvfile):
@@ -649,9 +649,9 @@ for i, a in enumerate(alerts):
                 dt_formatted = datetime_object.strftime("%m/%d/%y %I:%M %p")
                 today = datetime.datetime.now()
                 today = pytz.utc.localize(today)
-                time_diff = (today - now_aware) + datetime.timedelta(1)
+                time_diff = (today - now_aware)
                 print(time_diff)
-                days_since = time_diff.days
+                days_since = time_diff.days + 1  # ceil
 
                 # Add to alerts to send
                 if True:
