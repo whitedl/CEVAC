@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+
 import { Observable } from 'rxjs';
-import { share, tap } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 
 import { AlertService } from '@services/alert.service';
 import { MapdataService } from '@services/mapdata.service';
@@ -14,6 +15,9 @@ import { Alert } from '@shared/interfaces/alert';
 })
 export class AlertboxComponent implements OnInit {
   alerts$!: Observable<Alert[]>;
+  critical$!: Observable<Alert[]>;
+  noncritical$!: Observable<Alert[]>;
+  buildingAlerts$!: Observable<Map<string, Alert[]>>;
 
   constructor(
     private alertService: AlertService,
@@ -22,7 +26,13 @@ export class AlertboxComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.alerts$ = this.alertService.getAlerts().pipe(share());
+    this.alerts$ = this.alertService.getAlerts();
+    this.critical$ = this.alerts$.pipe(
+      map(v => v.filter(alert => alert.AlertType === 'alert'))
+    );
+    this.noncritical$ = this.alerts$.pipe(
+      map(v => v.filter(alert => alert.AlertType === 'warning'))
+    );
   }
 
   getAlertColor(type: string) {

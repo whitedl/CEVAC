@@ -17,18 +17,22 @@
     <mat-action-list dense>
       <button
         mat-list-item
-        *ngFor="let alert of alerts$ | async"
+        *ngFor="let alert of critical$ | async"
         (click)="focus(alert)"
       >
         <mat-icon matListIcon [ngStyle]="getAlertColor(alert.AlertType)">
-          <ng-container [ngSwitch]="alert.AlertType">
-            <ng-container *ngSwitchCase="'alert'">
-              warning
-            </ng-container>
-            <ng-container *ngSwitchCase="'warning'">
-              notification_important
-            </ng-container>
-          </ng-container>
+          warning
+        </mat-icon>
+        <h5 mat-line>{{ alert.AlertMessage }}</h5>
+        <p mat-line>{{ alert.BuildingDName }}</p>
+      </button>
+      <button
+        mat-list-item
+        *ngFor="let alert of noncritical$ | async"
+        (click)="focus(alert)"
+      >
+        <mat-icon matListIcon [ngStyle]="getAlertColor(alert.AlertType)">
+          notification_important
         </mat-icon>
         <h5 mat-line>{{ alert.AlertMessage }}</h5>
         <p mat-line>{{ alert.BuildingDName }}</p>

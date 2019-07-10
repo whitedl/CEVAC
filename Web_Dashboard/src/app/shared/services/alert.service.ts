@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
-import { Observable } from 'rxjs';
+import { Observable, from } from 'rxjs';
+import { shareReplay } from 'rxjs/operators';
+
 import { Alert } from '@shared/interfaces/alert';
 
 @Injectable({
@@ -16,7 +18,7 @@ export class AlertService {
   }
 
   initialize() {
-    this.alerts$ = this.http.get<Alert[]>(this.alertsUrl);
+    this.alerts$ = this.http.get<Alert[]>(this.alertsUrl).pipe(shareReplay(1));
   }
 
   getAlerts(): Observable<Alert[]> {
