@@ -92,6 +92,7 @@ def formatConditions(df):
     with open('combinedData.json', 'w') as f:
         json.dump(cJSON, f)
 
+# adds a prescribed number of hours `addition` to the time 'dateTime'
 def addHour(dateTime, addition):
     year = str(dateTime[0:4])
     month = str(dateTime[5:7])
