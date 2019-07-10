@@ -1,0 +1,6 @@
+Last Updated,7/9/2019,,Note: date should follow the format: ,,,,month/day/year,,ex//,4/3/2008
+,,,Reference Crontab for formatting:,,,,https://crontab.guru/#0_2_*_*_*,,,
+,,,,,,,,,,
+Occupancy,,,,,,,,,,
+BuildingSName,Blacklist,Minutes,Hour ,Day_month,Month,Day_week,,,,
+*,,*,15-Aug,,,,,,,
