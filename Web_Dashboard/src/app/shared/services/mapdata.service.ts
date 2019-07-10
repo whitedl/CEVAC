@@ -26,7 +26,7 @@ export class MapdataService {
   private map!: L.Map;
   private tracked!: L.GeoJSON;
   private untracked!: L.GeoJSON;
-  private mapOptions = {
+  private mapOptions: L.MapOptions = {
     minZoom: 15,
     maxZoom: 18
   };
