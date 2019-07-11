@@ -5,3 +5,6 @@
 combinedData.json
 api.json
 CEVAC_WATT_POWER_SUMS_HIST.csv
+Pipfile
+Pipfile.lock
+historicWeather.csv
