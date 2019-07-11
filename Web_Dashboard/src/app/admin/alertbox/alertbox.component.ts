@@ -19,8 +19,8 @@ export class AlertboxComponent implements OnInit {
   noncritical$!: Observable<Alert[]>;
   buildingAlerts$!: Observable<Map<string, Alert[]>>;
 
-  critD: boolean = true;
-  noncritD: boolean = true;
+  critD = true;
+  noncritD = true;
 
   constructor(
     private alertService: AlertService,
