@@ -41,14 +41,18 @@ export class MapdataService {
 
   getMap = () => (!this.map ? this.initMap() : this.map);
 
-  getBuilding = (bName: string) => {
-    let building;
-    this.tracked.eachLayer(layer => {
+  getBuilding = (bName: string | null) => {
+    let building!: { [index: string]: any };
+    this.map.eachLayer(layer => {
       const l = layer as L.Polygon;
-      l.feature && l.feature.properties.Short_Name === bName
-        ? (building = l.feature.properties)
-        : (building = 'BLDG not found');
+      if (!building && l.feature && l.feature.properties.Short_Name === bName) {
+        building = l.feature.properties;
+        return building;
+      }
     });
+    if (!building || bName === ' ' || bName === null) {
+      building = { Short_Name: 'Building not found' };
+    }
     return building;
   };
 
@@ -215,6 +219,7 @@ export class MapdataService {
       .get(this.dataUrl + '?building=' + feature.properties.Short_Name)
       .subscribe(bData => {
         if (bData) {
+          bData.report_link = this.sasBaseURL + bData.report_link;
           feature.properties.bData = bData;
           this.tracked.resetStyle(layer);
         }
