@@ -2,18 +2,21 @@
   expanded="{{ (alerts$ | async)?.length > 0 }}"
   class="scrollableExpansion"
 >
-  <mat-expansion-panel-header class="mat-child-overflow">
-    <mat-panel-title
-      matBadge="{{ (alerts$ | async)?.length }}"
-      matBadgeOverlap="false"
-      matBadgePosition="above before"
-      matBadgeColor="accent"
-    >
+  <mat-expansion-panel-header class="center-header">
+    <mat-panel-title>
       Alerts
     </mat-panel-title>
-    <mat-chip-list>
-      <mat-chip>Critical</mat-chip>
-      <mat-chip>Warning</mat-chip>
+    <mat-chip-list class="flex-auto">
+      <mat-chip color="warn" selected *ngIf="critical$ | async as critical">
+        Critical: {{ critical.length }}
+      </mat-chip>
+      <mat-chip
+        color="accent"
+        selected
+        *ngIf="noncritical$ | async as noncritical"
+      >
+        Warning: {{ noncritical.length }}
+      </mat-chip>
     </mat-chip-list>
   </mat-expansion-panel-header>
   <ng-template matExpansionPanelContent>
