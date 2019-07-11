@@ -216,10 +216,7 @@ export class MapdataService {
       mouseout: this.resetHighlight
     };
     layer.on(opt);
-    if (
-      feature.properties.Short_Name &&
-      feature.properties.Short_Name !== ' '
-    ) {
+    if (feature.properties.Status === 'Active') {
       this.http
         .get(this.dataUrl + '?building=' + feature.properties.Short_Name)
         .subscribe((bData: BuildingData) => {
