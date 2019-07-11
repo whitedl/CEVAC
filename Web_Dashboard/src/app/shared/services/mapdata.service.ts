@@ -7,6 +7,7 @@ import * as L from 'leaflet';
 import { Legend } from '@shared/leaflet-extensions/L.Control.Legend';
 
 import { Measurement } from '@shared/interfaces/measurement';
+import { BuildingData } from '@shared/interfaces/buildingdata';
 
 const geodata = require('src/assets/CU_Building_Footprints.json');
 
@@ -141,7 +142,7 @@ export class MapdataService {
     if (feature) {
       const bclass: string = feature.properties.BLDG_Class;
       style.fill = true;
-      style.weight = 3;
+      style.weight = 1;
       style.opacity = 1;
       style.fillOpacity = 1;
       style.color = this.colorService.getScaledColor(bclass);
@@ -217,7 +218,7 @@ export class MapdataService {
     layer.on(opt);
     this.http
       .get(this.dataUrl + '?building=' + feature.properties.Short_Name)
-      .subscribe(bData => {
+      .subscribe((bData: BuildingData) => {
         if (bData) {
           bData.report_link = this.sasBaseURL + bData.report_link;
           feature.properties.bData = bData;
