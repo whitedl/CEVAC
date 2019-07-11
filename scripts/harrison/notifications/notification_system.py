@@ -18,6 +18,9 @@ SEND = True
 email = "cevac5733@gmail.com"
 password = "cevacsteve5733"
 
+email_fpath = ("/cevac/DEV/scripts/harrison/notifications/"
+               "notification_email.html")
+
 to_list = {
     "Harrison Hall": "hchall@g.clemson.edu",
 }
@@ -99,7 +102,7 @@ for i, log in enumerate(logs):
         else:
             logs[log]["issues"] += issues
 
-email_msg = "".join(open("notification_email.html", "r").readlines())
+email_msg = "".join(open(email_fpath, "r").readlines())
 T = Template(email_msg)
 for person in to_list:
     filled_email = T.render(logs=logs, Name=person)
