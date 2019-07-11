@@ -9,16 +9,17 @@ import { switchMap } from 'rxjs/operators';
   styleUrls: ['./building-detail.component.scss']
 })
 export class BuildingDetailComponent implements OnInit {
-  building$!: string | null;
+  building$!: { [index: string]: any };
 
   constructor(
     private route: ActivatedRoute,
-    private mapDataService: MapdataService
+    private mapdataService: MapdataService
   ) {}
 
   ngOnInit() {
     this.route.paramMap.subscribe(
-      (params: ParamMap) => (this.building$ = params.get('bldg'))
+      (params: ParamMap) =>
+        (this.building$ = this.mapdataService.getBuilding(params.get('bldg')))
     );
   }
 }
