@@ -216,23 +216,37 @@ export class MapdataService {
       mouseout: this.resetHighlight
     };
     layer.on(opt);
-    this.http
-      .get(this.dataUrl + '?building=' + feature.properties.Short_Name)
-      .subscribe((bData: BuildingData) => {
-        if (bData) {
-          bData.report_link = this.sasBaseURL + bData.report_link;
-          feature.properties.bData = bData;
-          this.tracked.resetStyle(layer);
-        }
-        layer.bindPopup(
-          '<pre>' +
-            JSON.stringify(feature.properties, null, ' ').replace(
-              /[\{\}"]/g,
-              ''
-            ) +
-            '</pre>'
-        );
-      });
+    if (
+      feature.properties.Short_Name &&
+      feature.properties.Short_Name !== ' '
+    ) {
+      this.http
+        .get(this.dataUrl + '?building=' + feature.properties.Short_Name)
+        .subscribe((bData: BuildingData) => {
+          if (bData) {
+            bData.report_link = this.sasBaseURL + bData.report_link;
+            feature.properties.bData = bData;
+            this.tracked.resetStyle(layer);
+          }
+          layer.bindPopup(
+            '<pre>' +
+              JSON.stringify(feature.properties, null, ' ').replace(
+                /[\{\}"]/g,
+                ''
+              ) +
+              '</pre>'
+          );
+        });
+    } else {
+      layer.bindPopup(
+        '<pre>' +
+          JSON.stringify(feature.properties, null, ' ').replace(
+            /[\{\}"]/g,
+            ''
+          ) +
+          '</pre>'
+      );
+    }
   };
 
   private longNameTooltip = (layer: L.Polygon) =>
