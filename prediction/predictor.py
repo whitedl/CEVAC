@@ -19,7 +19,7 @@ import time
 from datetime import date
 import numpy as np
 import csv
-# import matplotlib as plt
+
 
 class predictor():
 
@@ -29,6 +29,7 @@ class predictor():
         with open('api.json') as f:
             credentials = json.load(f)
 
+        # api token for [DarkSky][www.darksky.net]
         self.key = credentials['key']
 
         # dictionary of all of the hourly data from the range(yesterday -> tomorrow)
@@ -42,13 +43,13 @@ class predictor():
                     'clouds' : []
                     }
 
-        print(self.hourly)
+        # input is the array that fetch is going to populate
+        self.input = []
         self.predictions = []
-        self.model = None
+        self.model = self.createModel()
         self.urlEndings = ['/33.662333,-79.830875,' + str(int(time.time() - 86400)),
                             '/33.662333,-79.830875,' + str(int(time.time())),
                             '/33.662333,-79.830875']
-
 
     # fetch our weather forecast
     def fetch(self):
@@ -109,33 +110,32 @@ class predictor():
     # prediction with the built-in keras model
     def createModel(self):
 
-    	# create the keras instance
-    	self.model = keras.Sequential()
+        # create the keras instance
+        model = keras.Sequential()
 
-    	# make our initial layer
-    	self.model.add(LSTM(256, input_shape=(12, 47), return_sequences=True))
-    	self.model.add(Activation('sigmoid'))
+        # make our initial layer
+        model.add(LSTM(256, input_shape=(12, 47), return_sequences=True))
+        model.add(Activation('sigmoid'))
 
         # make our final layer
-    	self.model.add(LSTM(units=1))
-    	self.model.add(Activation('sigmoid'))
+        model.add(LSTM(units=1))
+        model.add(Activation('sigmoid'))
 
         # specify compiler, loss function, and metrics we want printed out
-    	self.model.compile(optimizer='adam',loss=losses.mse, metrics=['accuracy'])
+        model.compile(optimizer='adam',loss=losses.mse, metrics=['accuracy'])
 
-    def predict(self, model):
+        return model
+
+    def predict(self):
 
         # load jonathan's brain
         self.model.load_weights('powerModel.h5')
         # model.load_weights('/home/bmeares/CEVAC/prediction/powerModel.h5')
 
-        # list that we are going to append 12 hours of data to
-        # then turn into a numpy array
-        input = []
-
         # get the first 12 hours of data for now
         for i in range(0,12):
 
+            # pull time data from 12 indexes
             hour = self.hourly['hours'][i]
             day = self.hourly['days'][i]
             month = self.hourly['months'][i]
@@ -147,30 +147,15 @@ class predictor():
             temperature = [self.hourly['temperatures'][i]]
             cloudCoverage = [self.hourly['clouds'][i]]
             temp = np.concatenate((hour, day, month, throughMonth, temperature, humidity, cloudCoverage), axis = -1)
-            input.append(temp)
+            self.input.append(temp)
+            self.input()
 
-        input = np.array(input)
-        print(input.shape)
-        prediction = model.predict(input)
-        # prediction = model.predict(input.reshape(1,-1))[0][0] * 275
-        print(prediction)
-        # self.predictions.append(prediction)
-
-        # str = ''
-
-        # for i, prediction in enumerate(self.predictions):
-        #     date =  '/'.join((str(hourly['months'][i]), str(hourly['days'][i]), str(hourly['years'][i]))) + ' ' + str(hourly['hours'][i])
-        #     # str = 'INSERT INTO [] ({},{},{})'.format(date, prediction, building, metric)
-        #     str += 'ESTIMATE {} ON {}/{} AT HOUR {}\n'.format(prediction, hourly['days'][i], hourly['months'][i], hourly['hours'][i])
-
-        # # write to our predictions text file
-        # with open('predictions.txt', 'w') as f:
-        #     f.write(str)
+        self.input = np.array(self.input)
+        prediction = self.model.predict((self.input))
 
 if __name__ == '__main__':
 
     # make a predictor instance
     predictor = predictor()
-    predictor.createModel()
     predictor.fetch()
-    predictor.predict(predictor.model)
+    predictor.predict()
