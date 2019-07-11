@@ -123,6 +123,11 @@ MATERIAL CUSTOMIZATION
   }
 }
 
+// Sometimes expansion panel headers are wonky if you don't center content
+.center-header > .mat-content {
+  align-items: center;
+}
+
 /******************************************************************************
 LEAFLET CUSTOMIZATION
 ******************************************************************************/
