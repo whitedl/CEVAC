@@ -1,4 +1,5 @@
 import * as L from 'leaflet';
+import { Measurement } from '@shared/interfaces/measurement';
 
 export class Legend extends L.Control {
   options: L.ControlOptions = { position: 'bottomleft' };
@@ -10,7 +11,7 @@ export class Legend extends L.Control {
 
   constructor(
     scale: [number, number],
-    rangeTitle: string,
+    measurement: Measurement,
     options: L.ControlOptions
   ) {
     super(options);
@@ -24,12 +25,12 @@ export class Legend extends L.Control {
     );
     const scaleHeader = L.DomUtil.create('div', '', rangeContainer);
     this.rangeHeader = L.DomUtil.create('p', 'legend-header', scaleHeader);
-    this.rangeHeader.textContent = rangeTitle;
+    this.rangeHeader.textContent = measurement.name;
     this.scaleMax = L.DomUtil.create('div', '', scaleHeader);
     this.scaleMax.setAttribute('style', 'text-align: center;');
-    this.scaleMax.textContent = this.scale[1].toString();
+    this.scaleMax.textContent = this.scale[1].toString() + measurement.unit;
     this.scaleMin = L.DomUtil.create('div', '', rangeContainer);
-    this.scaleMin.textContent = this.scale[0].toString();
+    this.scaleMin.textContent = this.scale[0].toString() + measurement.unit;
   }
   onAdd(map: L.Map) {
     return this.container;
@@ -51,10 +52,10 @@ export class Legend extends L.Control {
     );
     this.container.insertAdjacentElement('beforeend', contain);
   }
-  changeScale(scale: [number, number], rangeHead: string) {
-    this.rangeHeader.textContent = rangeHead;
-    this.scaleMin.textContent = scale[0].toString();
-    this.scaleMax.textContent = scale[1].toString();
+  changeScale(scale: [number, number], measurement: Measurement) {
+    this.rangeHeader.textContent = measurement.name;
+    this.scaleMin.textContent = scale[0].toString() + measurement.unit;
+    this.scaleMax.textContent = scale[1].toString() + measurement.unit;
   }
   update() {
     if (!this.container) {
