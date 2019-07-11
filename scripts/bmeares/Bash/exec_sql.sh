@@ -12,7 +12,7 @@ p='5wattcevacmaint$'
 
 if [ ! -z "$2" ]; then
   output="$2"
-  echo "Outputting to /home/bmeares/cache/$output"
+  echo "Outputting to /cevac/cache/$output"
   if [[ "$query" != *"NOCOUNT"*  ]]; then
     query="
     SET NOCOUNT ON
@@ -24,9 +24,9 @@ if [ ! -z "$2" ]; then
   /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$query" -W -b -o "/home/bmeares/cache/$output" -s"," -w 700
   if [ $? -eq 0 ]; then
     # remove separator
-    sed -i 2d /home/bmeares/cache/$output
+    sed -i 2d /cevac/cache/$output
   else
-    cat /home/bmeares/cache/$output  
+    cat /cevac/cache/$output  
   fi
   
 else
