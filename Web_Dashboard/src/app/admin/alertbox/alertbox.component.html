@@ -6,14 +6,23 @@
     <mat-panel-title>
       Alerts
     </mat-panel-title>
-    <mat-chip-list class="flex-auto">
-      <mat-chip color="warn" selected *ngIf="critical$ | async as critical">
+    <mat-chip-list class="flex-auto" multiple="true">
+      <mat-chip
+        color="warn"
+        *ngIf="critical$ | async as critical"
+        [selected]="critD"
+        (selectionChange)="changeSelected($event)"
+        (click)="critD = !critD"
+      >
         Critical: {{ critical.length }}
       </mat-chip>
       <mat-chip
         color="accent"
         selected
         *ngIf="noncritical$ | async as noncritical"
+        [selected]="noncritD"
+        (selectionChange)="changeSelected($event)"
+        (click)="noncritD = !noncritD"
       >
         Warning: {{ noncritical.length }}
       </mat-chip>
@@ -21,28 +30,32 @@
   </mat-expansion-panel-header>
   <ng-template matExpansionPanelContent>
     <mat-action-list dense>
-      <button
-        mat-list-item
-        *ngFor="let alert of critical$ | async"
-        (click)="focus(alert)"
-      >
-        <mat-icon matListIcon [ngStyle]="getAlertColor(alert.AlertType)">
-          warning
-        </mat-icon>
-        <h5 mat-line>{{ alert.AlertMessage }}</h5>
-        <p mat-line>{{ alert.BuildingDName }}</p>
-      </button>
-      <button
-        mat-list-item
-        *ngFor="let alert of noncritical$ | async"
-        (click)="focus(alert)"
-      >
-        <mat-icon matListIcon [ngStyle]="getAlertColor(alert.AlertType)">
-          notification_important
-        </mat-icon>
-        <h5 mat-line>{{ alert.AlertMessage }}</h5>
-        <p mat-line>{{ alert.BuildingDName }}</p>
-      </button>
+      <ng-container *ngIf="critD">
+        <button
+          mat-list-item
+          *ngFor="let alert of critical$ | async"
+          (click)="focus(alert)"
+        >
+          <mat-icon matListIcon [ngStyle]="getAlertColor(alert.AlertType)">
+            warning
+          </mat-icon>
+          <h5 mat-line>{{ alert.AlertMessage }}</h5>
+          <p mat-line>{{ alert.BuildingDName }}</p>
+        </button>
+      </ng-container>
+      <ng-container *ngIf="noncritD">
+        <button
+          mat-list-item
+          *ngFor="let alert of noncritical$ | async"
+          (click)="focus(alert)"
+        >
+          <mat-icon matListIcon [ngStyle]="getAlertColor(alert.AlertType)">
+            notification_important
+          </mat-icon>
+          <h5 mat-line>{{ alert.AlertMessage }}</h5>
+          <p mat-line>{{ alert.BuildingDName }}</p>
+        </button>
+      </ng-container>
     </mat-action-list>
   </ng-template>
 </mat-expansion-panel>
