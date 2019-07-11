@@ -5,7 +5,8 @@ metric=$2
 keys_list=$3
 if [ -z $4 ]; then unitOfMeasureID="NULL"; else unitOfMeasureID=$4; fi
 
-if [ -z $1 ] || [ -z $2 ] || [ -z $3 ]; then
+if [ -z "$1" ] || [ -z "$2" ]; then
+  echo "Usage: $0 [BuildingSName] [Metric] {keys_list} {unitOfMeasureID}"
   echo $'Enter the following information.\n'
   echo $'Building (e.g. WATT): '; read building
   echo $'Metric   (e.g. TEMP): '; read metric
@@ -13,12 +14,12 @@ if [ -z $1 ] || [ -z $2 ] || [ -z $3 ]; then
   echo $'UnitOfMeasureID\n     (empty to omit): '; read unitOfMeasureID
 fi
 
-if [ -z $building ] || [ -z $metric ]; then
+if [ -z "$building" ] || [ -z "$metric" ]; then
   echo Error!
   exit 1
 fi
-[ -z $unitOfMeasureID ] && unitOfMeasureID="NULL";
-[ -z $keys_list ] && keys_list="NULL";
+[ -z "$unitOfMeasureID" ] && unitOfMeasureID="NULL";
+[ -z "$keys_list" ] && keys_list="NULL";
 
 
 ./CREATE_VIEW.sh $building $metric PXREF $keys_list $unitOfMeasureID
