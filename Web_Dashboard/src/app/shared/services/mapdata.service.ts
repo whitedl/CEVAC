@@ -61,7 +61,7 @@ export class MapdataService {
     this.tracked.setStyle(this.style);
     this.legend.changeScale(
       this.colorService.getScale(this.dataSet.name),
-      this.dataSet.name
+      this.dataSet
     );
   };
 
@@ -101,7 +101,7 @@ export class MapdataService {
     controller.addOverlay(this.untracked, 'show untracked');
     this.legend = new Legend(
       this.colorService.getScale(this.dataSet.name),
-      this.dataSet.name,
+      this.dataSet,
       { position: 'bottomleft' }
     );
     for (const cat of this.categories) {
