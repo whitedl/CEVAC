@@ -1,7 +1,7 @@
 # Alerts
 ## `alert_system.py`
 * Populates the `CEVAC_ALL_ALERTS_HIST_RAW` table with events read from
-alert_parameters.csv
+alert_parameters.csv located in
 * Run `python3 alert_system.py`
 ## `alert_mail.py`
 * Run `python3 run.py alertmail` or `python3 run_script.py alert_mail.py`
