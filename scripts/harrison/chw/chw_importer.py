@@ -141,6 +141,7 @@ def cleanup():
                     os.path.getatime(fpath) < cutoff):
                 os.remove(fpath)
 
+
 def debug_log(message, LOG):
     """Safely log files."""
     if LOG:
