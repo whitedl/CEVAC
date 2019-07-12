@@ -1,6 +1,5 @@
 """Parse alerts from CEVAC_ALL_ALERTS_HIST."""
 
-
 import bsql
 import datetime
 import time_handler
