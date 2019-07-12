@@ -33,8 +33,8 @@ for arg in sys.argv:
 LOG = True
 DEBUG = False
 CHECK_ALERTS = True
-SEND = False
-UPDATE_CACHE = False
+SEND = True
+UPDATE_CACHE = True
 
 if DEBUG:
     CONDITIONS_FPATH = "C:\\Users\\hchall\\Downloads\\"
