@@ -7,6 +7,14 @@ data aggregation from chilled water and power meters on the WATT building
 server. `misc` holds arbitrary code that should be versioned "just in case."
 
 
+## Alerts
+Info about the alert system and scripts can be found in [`alerts`](alerts).
+
+
+## Notifications
+Very similar to alerts, but specific to Harrison and tied to his workflow.
+
+
 ## `generic_importer.py`
 `generic_importer.py` is a csv importer script that is works on both linux
 and windows. Simply change the modular variables at the beginning of the
@@ -25,6 +33,17 @@ dictionary of data made from the query
 
 
 ## `time_handler.py`
-when inserting via `bsql`, a string is required. When querying via `bsql`,
+When inserting via `bsql`, a string is required. When querying via `bsql`,
 strings are returned. UTC and EST conversion is another necessary conversion.
 This can all be handled with `time_handler.py`.
+
+
+## `chw/chw_importer.py`
+Imports chw data from the East, West, Central, and Hinson plants located
+in `mnt/bldg/CAMPUS_CHW` into `CEVAC_PLANTS_CHW_HIST_RAW` (KW) and
+`CEVAC_PLANTS_CHW_RATE_HIST_RAW` (BTU/hr).
+
+
+## `power/powermeters_importer.py`
+Imports power info in from `mnt/bldg/CAMPUS_POWER` into
+`CEVAC_CAMPUS_ENERGY_HIST_RAW` (KW).

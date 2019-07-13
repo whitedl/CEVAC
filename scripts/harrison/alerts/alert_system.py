@@ -14,6 +14,7 @@ import logging
 import urllib.request
 import urllib.parse
 from copy import deepcopy
+from croniter import croniter
 
 CONDITIONS_FPATH = "/home/bmeares/cron/alerts/"
 LOGGING_PATH = "/home/bmeares/cron/alerts/"
@@ -334,7 +335,6 @@ def write_json_generic(new_events, next_id):
 
 def write_json(filename, new_events, next_id):
     """Write json to file."""
-    print(filename, new_events, next_id)
     new_events["next_id"] = next_id
     f = open(filename, "w")
     f.write(json.dumps(new_events))
@@ -345,7 +345,6 @@ def write_json(filename, new_events, next_id):
 def assign_event_id(next_id, old_json, new_json, alert, alias):
     """Assign event id."""
     key = alias+alert["message_id"]
-    print(key, old_json)
     event_id = next_id
     if key in old_json:
         event_id = old_json[key]
@@ -384,6 +383,17 @@ def building_is_occupied(building):
     correct_day = (day >= 1 and day <= 5)
     correct_hour = (hour >= 8 and hour < 17)
     if (correct_day and correct_hour):
+        return True
+    return False
+
+
+def cron_is_now(cron, offset=5):
+    """Return True if cron is within 5 minutes of now."""
+    now = datetime.datetime.utcnow()
+    c = croniter(cron)
+    td = (now - c.get_next(datetime.datetime))
+    td_min = abs(td.total_seconds()/60)
+    if td_min < offset:
         return True
     return False
 
@@ -518,22 +528,27 @@ for i, a in enumerate(alerts):
 
                     # Modify value
                     room_vals = temps[room]
+                    val = 0
                     try:
-                        if "+" in alert["value"].split()[-1]:
+                        if "+" in alert["value"]:
                             val_str = alert["value"].split()[-1]
                             val = float(val_str[val_str.find("+") + 1:])
                             room_vals["Cooling SP"] += val
                             room_vals["Heating SP"] += val
-                        elif "-" in alert["value"].split()[-1]:
+                        elif "-" in alert["value"].split():
                             val_str = alert["value"].split()[-1]
                             val = float(val_str[val_str.find("-") + 1:])
                             room_vals["Cooling SP"] -= val
                             room_vals["Heating SP"] -= val
                     except Exception:
-                        pass
+                        print("exception")
+                        continue
 
                     # Check value
                     send_alert = False
+                    print(room_vals[Alias_Temp], room_vals["Cooling SP"]+val,
+                          room_vals["Heating SP"]-val, val, alert["value"])
+                    print("xxx")
 
                     if ">" in alert["condition"]:
                         if "Cooling SP" in alert["value"]:
@@ -557,20 +572,19 @@ for i, a in enumerate(alerts):
                                 send_alert = (
                                     room_vals["Heating SP"] >
                                     room_vals[Alias_Temp])
-
+                    print("send is ", send_alert)
                     if send_alert:
                         a = deepcopy(alert)
                         total_issues += 1
-
                         a["message"] = angle_brackets_replace_specific(
                                         a["message"], "alias",
                                         room + str(" Temp"))
                         a["message"] = angle_brackets_replace_specific(
                                         a["message"], "Cooling SP",
-                                        f"{room_vals['Cooling SP']:.1f}")
+                                        f"{(room_vals['Cooling SP']-val):.1f}")
                         a["message"] = angle_brackets_replace_specific(
                                         a["message"], "Heating SP",
-                                        f"{room_vals['Heating SP']:.1f}")
+                                        f"{(room_vals['Heating SP']+val):.1f}")
                         a["message"] = angle_brackets_replace_specific(
                                         a["message"], "ActualValue",
                                         f"{room_vals[Alias_Temp]:.1f}")
@@ -600,9 +614,6 @@ for i, a in enumerate(alerts):
 
         # Check if aliases have reported within a given time
         elif ("<now>" in alert["value"]):
-            if not TIMED:
-                continue
-
             # Find all aliases
             selection_command = (f"SELECT {a_or_psid}, UTCDateTime FROM "
                                  f"{alert['database']+'_BROKEN_CACHE'}")
@@ -650,7 +661,6 @@ for i, a in enumerate(alerts):
                 today = datetime.datetime.now()
                 today = pytz.utc.localize(today)
                 time_diff = (today - now_aware)
-                print(time_diff)
                 days_since = time_diff.days + 1  # ceil
 
                 # Add to alerts to send
@@ -697,7 +707,8 @@ if total_issues == 0:
                         f"GETUTCDATE(),'0')")
 
 # Insert into CEVAC_ALL_ALERTS_HIST
-write_json_generic(new_events, next_id)
+if LOG:
+    write_json_generic(new_events, next_id)
 if SEND:
     f = open("/home/bmeares/cache/insert_alert_system.sql", "w")
     f.write(insert_sql_total.replace(';', '\nGO\n'))

@@ -1,6 +1,5 @@
 """Parse alerts from CEVAC_ALL_ALERTS_HIST."""
 
-
 import bsql
 import datetime
 import time_handler
@@ -10,7 +9,6 @@ from jinja2 import Template
 from email import message as msg
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 
 import base64
 
@@ -243,7 +241,7 @@ def main():
     alerts = bsql.Query(f" DECLARE @yesterday DATETIME; SET @yesterday = "
                         f"DATEADD(day,"
                         f" -1, GETDATE());"
-                        f" SELECT * FROM CEVAC_ALL_ALERTS_EVENTS_HIST "
+                        f" SELECT TOP 100 * FROM CEVAC_ALL_ALERTS_EVENTS_HIST "
                         f" WHERE ETDateTime >= @yesterday "
                         f" ORDER BY ETDateTime DESC")
     now_etc = time_handler.utc_to_est(now)
@@ -272,9 +270,9 @@ def main():
                 total_msg += "<tr>"
                 if al.acknowledged:
                     continue
-                e_msg = (f"<td>{al.etc_str}</td>"
-                         f"<td>{al.metric}</td>"
-                         f"<td>{al.message}</td>")
+                e_msg = (f"<td width=\"20%\">{al.etc_str}</td>"
+                         f"<td width=\"10%\">{al.metric}</td>"
+                         f"<td width=\"70%\">{al.message}</td>")
                 total_msg += e_msg + "</tr>"
             total_msg += "</table>"
 
