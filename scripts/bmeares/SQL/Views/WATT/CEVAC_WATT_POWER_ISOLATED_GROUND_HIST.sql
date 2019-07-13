@@ -21,5 +21,6 @@ WITH original AS (
 		WHERE (Type = 'Isolated Ground')
 	) GROUP BY UTCDateTime
 )
-SELECT *, DATEPART(year, ETDateTime) AS Year, DATEPART(month, ETDateTime) AS Month, DATEPART(day, ETDateTime) AS Day
+SELECT *
+--, DATEPART(year, ETDateTime) AS Year, DATEPART(month, ETDateTime) AS Month, DATEPART(day, ETDateTime) AS Day
 FROM original

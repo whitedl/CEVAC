@@ -101,12 +101,10 @@ DECLARE @now DATETIME;
 DECLARE @update_time DATETIME;
 SET @now = GETUTCDATE();
 SET @begin = DATEADD(day, -31, @now);
-SET @update_time = ISNULL((SELECT TOP 1 update_time FROM CEVAC_TABLES
-  WHERE TableName = '$table' ORDER BY update_time DESC),0);
+SET @update_time = ISNULL((SELECT TOP 1 update_time FROM CEVAC_CACHE_RECORDS
+  WHERE table_name = '$table' ORDER BY update_time DESC),0);
 
-IF DATEDIFF(day, @update_time, @begin) > 0 BEGIN
-  SET @begin = DATEADD(day, -31,@update_time);
-END
+IF DATEDIFF(day, @update_time, @begin) > 0 SET @begin = DATEADD(day, -31,@update_time);
 
 WITH new AS (
   SELECT * FROM $table
