@@ -25,29 +25,56 @@ to_list = {
     "Harrison Hall": "hchall@g.clemson.edu",
 }
 
+
+def check_plants(fname):
+    """Check for all plants in log."""
+    find_list = ["Central", "East", "Hinson", "West"]
+    with open(fname, "r") as f:
+        lines = f.readlines()
+        for line in lines:
+            for plant in find_list:
+                if plant in line:
+                    find_list.remove(plant)
+    return [plant + " not found." for plant in find_list]
+
+
+def check_update_time(table_name):
+    """Check for last update time of table."""
+    return
+
+
 logs = {
     "WAP Hourly/Floor": {
         "location": "/mnt/bldg/WAP/logs/",
         "issues": [],
+        "conditions": [],
+        "yconditions": [],
     },
     "WAP Daily": {
         "location": "/cevac/cron/wap/log/",
         "issues": [],
+        "conditions": [],
+        "yconditions": [],
     },
     "Chilled Water": {
         "location": "/mnt/bldg/Campus_CHW/logs/",
         "issues": [],
+        "conditions": [check_plants],
+        "yconditions": [check_plants],
     },
     "Power Meters": {
         "location": "/mnt/bldg/Campus_Power/logs/",
         "issues": [],
+        "conditions": [],
+        "yconditions": [],
     },
 }
 
 
-def check_log(f_location, logfile=None, yesterday=False):
+def check_log(f_location, functions, logfile=None, yesterday=False):
     """Check log, return errors."""
     errors = []
+    log = ""
     if logfile is None:
         now = datetime.datetime.now()
         if yesterday:
@@ -55,7 +82,6 @@ def check_log(f_location, logfile=None, yesterday=False):
         log = f_location + now.strftime("%Y-%m-%d") + ".log"
     else:
         log = f_location + logfile
-    print(log)
     try:
         f = open(log, "r")
         for line in f.readlines():
@@ -63,6 +89,8 @@ def check_log(f_location, logfile=None, yesterday=False):
                 errors.append(line)
     except Exception:
         errors.append("Could not find log")
+    for f in functions:
+        errors = errors + f(log)
     return errors
 
 
@@ -90,17 +118,22 @@ def email_message(email, password, to_email, message, subject):
 
 errors = []
 for i, log in enumerate(logs):
-    issues = check_log(logs[log]["location"])
+    issues = check_log(logs[log]["location"], logs[log]["conditions"])
+    print(issues)
     if len(issues) == 0:
         logs[log]["issues"].append("No issues")
     elif len(issues) > 1:
         logs[log]["issues"] += issues
     elif (issues[0] == "Could not find log"):
-        issues = check_log(logs[log]["location"], yesterday=True)
+        issues = check_log(logs[log]["location"], logs[log]["yconditions"],
+                           yesterday=True)
         if len(issues) == 0:
             logs[log]["issues"].append("No issues")
         else:
             logs[log]["issues"] += issues
+    else:
+        logs[log]["issues"] += issues
+    print(log, logs[log]["issues"])
 
 email_msg = "".join(open(email_fpath, "r").readlines())
 T = Template(email_msg)
