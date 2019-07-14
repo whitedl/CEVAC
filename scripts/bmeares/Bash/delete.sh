@@ -9,6 +9,7 @@ if [ -z "$1" ] || [ -z "$2" ]; then
   echo $'Metric   (e.g. TEMP): '; read Metric
 fi
 
+HIST_VIEW="CEVAC_$Building""_$Metric""_HIST_VIEW"
 echo "Warning: This will completely remove all traces of a BuildingSName/Metric"
 echo "To recreate the tables, run bootstrap.sh (THIS MAY TAKE > 1 HOUR)"
 echo "Custom tables MUST be reconfigured with CREATE_CUSTOM.sh if recreated."
@@ -22,11 +23,22 @@ if [ "$cont" != "y" ] || [ "$cont" != "Y" ] || [ -z "$cont" ]; then
 else
   exit 1
 fi
+isCustom=`/cevac/scripts/sql_value.sh "SELECT isCustom FROM CEVAC_TABLES WHERE TableName = '$HIST_VIEW'"`
+exclude_array=("RAW" "XREF")
+exclude_query=""
+[ "$isCustom" == "1" ] && exclude_array+=('HIST_VIEW')
+for t in "${exclude_array[@]}"; do
+  exclude_query="$exclude_query
+  AND TableName NOT LIKE '%$t%'"
+done
 
 tables_query="
 SELECT RTRIM(TableName) FROM CEVAC_TABLES
-WHERE BuildingSName = '$Building' AND Metric = '$Metric' AND TableName NOT LIKE '%RAW%' AND TableName NOT LIKE '%XREF%'
+WHERE BuildingSName = '$Building' AND Metric = '$Metric' "$exclude_query"
 "
+echo "$tables_query"
+exit 1
+
 /cevac/scripts/exec_sql.sh "$tables_query" "tables_temp.csv"
 
 # Remove header from csv
