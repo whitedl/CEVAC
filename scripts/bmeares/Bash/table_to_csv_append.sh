@@ -18,7 +18,6 @@ fi
 
 table="$1"
 table_CSV="$table"_CSV
-echo "table_CSV is $table_CSV"
 UTCDateTime=`/cevac/scripts/sql_value.sh "SET NOCOUNT ON; SELECT TOP 1 RTRIM(DateTimeName) FROM CEVAC_TABLES WHERE TableName = '$table'"`
 Alias=`/cevac/scripts/sql_value.sh "SET NOCOUNT ON; SELECT TOP 1 RTRIM(AliasName) FROM CEVAC_TABLES WHERE TableName = '$table'"`
 
@@ -239,13 +238,14 @@ SET @last_UTC = (
   ORDER BY $UTCDateTime DESC
 );
 INSERT INTO CEVAC_CACHE_RECORDS(table_name,update_time,storage,last_UTC,row_count,rows_transferred)
-VALUES ('$table',GETUTCDATE(),'CSV', @last_UTC,($row_count - 1),$rows_transferred)
+VALUES ('$table',GETUTCDATE(),'CSV', ISNULL(@last_UTC,0),($row_count - 1),$rows_transferred)
 "
 
 if [ -z "$xref" ]; then
   echo Inserting into CEVAC_CACHE_RECORDS
   # insert interaction into CEVAC_CACHE_RECORDS
-  /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$record_query"
+  /cevac/scripts/exec_sql.sh "$record_query"
+  # /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$record_query"
 fi
 
 echo "Adding to CEVAC_TABLES"

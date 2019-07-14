@@ -3,6 +3,7 @@
 building="$1"
 metric="$2"
 keys_list="$3"
+HIST_VIEW="CEVAC_$building""_$metric""_HIST_VIEW"
 if [ -z "$4" ]; then unitOfMeasureID="NULL"; else unitOfMeasureID="$4"; fi
 
 if [ -z "$1" ] || [ -z "$2" ]; then
@@ -11,8 +12,9 @@ if [ -z "$1" ] || [ -z "$2" ]; then
   echo $'Building (e.g. WATT): '; read building
   echo $'Metric   (e.g. TEMP): '; read metric
 fi
+isCustom=`/cevac/scripts/sql_value.sh "SELECT isCustom FROM CEVAC_TABLES WHERE TableName = '$HIST_VIEW'"`
 checkXREF=`/cevac/scripts/sql_value.sh "EXEC CHECK_XREF @BuildingSName = '$building', @Metric = '$metric'"`
-if [ "$checkXREF" != "XREF" ]; then
+if [ "$checkXREF" != "XREF" ] && [ "$isCustom" != "1" ]; then
   echo "Warning: CEVAC_$building""_$metric""_XREF"" not found."
   uid=`/cevac/scripts/sql_value.sh "SELECT TOP 1 unitOfMeasureID FROM CEVAC_METRIC WHERE Metric = '$metric'"`
   if [ ! -z "$uid" ]; then # new metric
@@ -33,7 +35,11 @@ fi
 [ -z "$unitOfMeasureID" ] && unitOfMeasureID="NULL";
 [ -z "$keys_list" ] && keys_list="NULL";
 
-ages_array=("PXREF" "HIST" "DAY" "LATEST" "LATEST_FULL" "LATEST_BROKEN" "OLDEST")
+if [ "$isCustom" == "1" ]; then
+  ages_array=("HIST" "DAY" "LATEST" "LATEST_FULL" "LATEST_BROKEN" "OLDEST")
+else
+  ages_array=("PXREF" "HIST" "DAY" "LATEST" "LATEST_FULL" "LATEST_BROKEN" "OLDEST")
+fi
 
 for a in "${ages_array[@]}"; do
   echo "Creating CEVAC_$building""_$metric""_$a"
@@ -51,7 +57,6 @@ for a in "${ages_array[@]}"; do
     if [ "$choice" == "y" ] || [ "$choice" == "Y" ]; then
       echo "$out"
     fi
-
     exit 1
   fi
 done

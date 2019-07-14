@@ -6,16 +6,22 @@ DateTimeName="$3"
 AliasName="$4"
 Dependencies="$5"
 
-if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] || [ -z "$4" ] || [ -z "$5" ] ; then
-  echo "Usage: $0 [BuildingSName] [Metric] [DateTimeName] [AliasName] [Dependencies]"
-  echo $'Enter the table information.\n'
+if [ -z "$1" ]; then
   echo $'Building            (e.g. WATT): '; read BuildingSName
+fi
+if [ -z "$2" ]; then
   echo $'Metric              (e.g. TEMP): '; read Metric
+fi
+if [ -z "$3" ]; then
   echo $'DateTimeName (e.g. UTCDateTime):'; read DateTimeName
-  echo $'AliasName        (e.g. : Alias):'; read AliasName
+fi
+if [ -z "$4" ]; then
+  echo $'AliasName/ID     (e.g. : Alias):'; read AliasName
+fi
+if [ -z "$5" ]; then
   echo $'Dependencies   (comma-separated):'; read Dependencies
 fi
-# Dependencies="'"$Dependencies"'"
+
 HIST_VIEW="CEVAC_$BuildingSName""_$Metric"_"HIST_VIEW"
 
 def_file="/cevac/CUSTOM_DEFS/$HIST_VIEW.sql"

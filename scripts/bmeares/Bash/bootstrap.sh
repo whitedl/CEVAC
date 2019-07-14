@@ -84,7 +84,7 @@ else # isCustom does not exist therefore not in CEVAC_TABLES
     read choice
     if [ "$choice" == "1" ]; then # rebuild custom
       echo "Executing CREATE_CUSTOM.sh"
-      /cevac/scripts/CREATE_CUSTOM.sh
+      /cevac/scripts/CREATE_CUSTOM.sh "$Building" "$Metric"
     elif [ "$choice" == "2" ]; then
       continue
     fi
@@ -97,7 +97,7 @@ fi
 /cevac/scripts/seperator.sh
 echo "Phase 1: Delete everything"
 # Delete everything
-/cevac/scripts/delete.sh $Building $Metric
+/cevac/scripts/delete.sh "$Building" "$Metric"
 
 ###
 # Phase 2: Create CEVAC tables system
