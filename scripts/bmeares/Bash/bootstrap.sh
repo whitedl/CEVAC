@@ -57,7 +57,7 @@ if [ ! -z "$isCustom" ]; then
   if [ "$isCustom" == "1" ]; then
     echo "Custom table detected. Please choose:"
     echo $'   1: Reuse previous table structure (no change)'
-    echo $'   2: New table structure\n   (/cevac/CUSTOM_DEFS/$HIST_VIEW has changed)'
+    echo $'   2: New table structure\n   (/cevac/CUSTOM_DEFS/'"$HIST_VIEW"' has changed)'
     read choice
 
     if [ "$choice" == "1" ]; then

@@ -59,7 +59,7 @@ for t in "${tables_array[@]}"; do
 done
 
 # Delete all from CEVAC_TABLES
-/cevac/scripts/exec_sql.sh "DELETE FROM CEVAC_TABLES WHERE BuildingSName = '$Building' AND Metric = '$Metric'"
+/cevac/scripts/exec_sql.sh "DELETE FROM CEVAC_TABLES WHERE BuildingSName = '$Building' AND Metric = '$Metric'""$exclude_query"
 
 # Delete /srv/csv/_HIST.scv
 rm -f /srv/csv/$HIST.csv
