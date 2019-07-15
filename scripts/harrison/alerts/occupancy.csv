@@ -4,7 +4,7 @@ Last Updated,7/12/2019,,,Note: date should follow the format: ,,,,month/day/year
 ,,,,"If rows disagree, the latter will override",,,,,,,,,,,,,,
 Occupancy,,,,,,,,,,,,,,,,,,
 BuildingSName,Blacklist,Cron-Occupancy,Occupied,Minutes,Hour ,Day_month,Month,Day_week,WAP Occupancy,WAP Table,,,,,,,,
-*,,TRUE,TRUE,*,5-8,*,*,1-5,FALSE,,,,,,,,,
+*,,TRUE,TRUE,*,5-20,*,*,1-5,FALSE,,,,,,,,,
 COOPER,,TRUE,TRUE,*,6-23,*,*,*,FALSE,,,,,,,,,
 ,,,,,,,,,,,,,,,,,,
 ,,,,,,,,,,,,,,,,,,
