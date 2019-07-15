@@ -11,12 +11,12 @@ import json
 import datetime
 import pytz
 import logging
-import urllib.request
-import urllib.parse
 from copy import deepcopy
 from croniter import croniter
 
 CONDITIONS_FPATH = "/home/bmeares/cron/alerts/"
+KNOWN_ISSUES_FPATH = "/cevac/DEV/known issues/Known Data Issues.csv"
+OCCUPANCY_FPATH  = "/cevac/DEV/scripts/harrison/alerts/occupancy.csv"
 LOGGING_PATH = "/home/bmeares/cron/alerts/"
 PHONE_PATH = "/home/bmeares/cron/alerts/"
 alert_fname = "/cevac/CEVAC/alerts/alert_parameters.csv"
@@ -24,23 +24,11 @@ json_fname = "/cevac/cron/alert_log.json"
 json_oc = "/cevac/cron/alert_log_oc.json"
 json_unoc = "/cevac/cron/alert_log_unoc.json"
 
-TIMED = True
 
-for arg in sys.argv:
-    if "timed_alerts" in arg.lower():
-        TIMED = True
-
-LOG = True
-DEBUG = False
+LOG = False
 CHECK_ALERTS = True
-SEND = True
-UPDATE_CACHE = True
-
-if DEBUG:
-    CONDITIONS_FPATH = "C:\\Users\\hchall\\Downloads\\"
-    LOGGING_PATH = "C:\\Users\\hchall\\Downloads\\"
-    PHONE_PATH = "/home/bmeares/cron/alerts/"
-    alert_fname = "Alert Parameters (working).csv"
+SEND = False
+UPDATE_CACHE = False
 
 COLUMNS = {
     "alert_name": 0,
@@ -181,10 +169,78 @@ def import_conditions(fname, logger):
     return (alerts, unique_databases)
 
 
-def command_to_query(command):
-    """[Defunct] Returns a query-able string from a sql command."""
-    req = "http://wfic-cevac1/requests/query.php?q="
-    return req + urllib.parse.quote_plus(command)
+def import_known_issues(fname):
+    """Return dict of buildingsname to list of blacklists."""
+    d = {}
+    with open(fname, "r") as csvfile:
+        csvfile = csv.reader(csvfile)
+        next(csvfile)  # header
+        for row in csvfile:
+            bldg = row[1]
+            message = row[0]
+            if "decomissioned" in message:
+                if bldg in d:
+                    d[bldg].append(message)
+                else:
+                    d[bldg] = [message]
+    return d
+
+
+def skip_alias(known_issues, bldg, alias):
+    """Check known issues for decomissioned alias."""
+    alias_in_issues = False
+    if bldg not in known_issues:
+        return alias_in_issues
+    for message in known_issues[bldg]:
+        if alias in message:
+            return alias_in_issues
+    return alias_in_issues
+
+
+def cron_is_now(cron, offset=5):
+    """Return True if cron is within 5 minutes of now."""
+    now = datetime.datetime.utcnow()
+    print(cron)
+    c = croniter(cron)
+    td = (now - c.get_next(datetime.datetime))
+    td_min = abs(td.total_seconds()/60)
+    if td_min < offset:
+        return True
+    return False
+
+
+def str_to_bool(some_str):
+    """Return True/False for 'true/false'."""
+    if "true" in some_str.lower():
+        return True
+    return False
+
+
+def import_occupancy():
+    """Import occupancy for each building."""
+    d = {"*": False}
+    past_header = False
+    with open(OCCUPANCY_FPATH, "r") as csvfile:
+        csvfile = csv.reader(csvfile)
+        for row in csvfile:
+            if ("BuildingSName" in row[0]):
+                past_header = True
+                continue
+            if not past_header:
+                continue
+            bldgsname = row[0]
+            cron_occupancy = str_to_bool(row[2])
+            is_occupied = str_to_bool(row[3])
+            crontab = f"{row[4]} {row[5]} {row[6]} {row[7]} {row[8]}"
+            print(crontab)
+            if cron_is_now(crontab) and cron_occupancy:
+                if "*" in bldgsname:
+                    for item in d:
+                        d[item] = is_occupied
+                else:
+                    d[bldgsname] = is_occupied
+
+    return d
 
 
 def rebuild_broken_cache(table):
@@ -243,42 +299,6 @@ def command_to_list_multiple(command, num_args):
     data = command_to_json_string(command)
 
     data_readable = data.replace("}{", "} {").replace("\'", "\"")
-    data_list = data_readable.split("} {")
-    dict_list = []
-    for i, d in enumerate(data_list):
-        d = d if d[0] == "{" else "{" + d
-        d = d if d[-1] == "}" else d + "}"
-        dict_list.append(json.loads(d))
-
-    data_list = []
-    for sd in dict_list:
-        try:
-            dl = []
-            for k in sd:
-                dl.append(sd[k])
-            data_list.append(dl)
-        except Exception:
-            pass
-    return data_list
-
-
-def request_to_list_single(query):
-    """[Defunct] Returns a list of data from a query."""
-    data = urllib.request.urlopen(query)
-    data_readable = data.read().decode('utf-8').replace("}{", "} {")
-    data_list = data_readable.split("} {")
-    dict_list = [json.loads(d) for d in data_list]
-    data_list = [sd[list(sd.keys())[0]] for sd in dict_list]
-    return data_list
-
-
-def request_to_list_multiple(query, num_args):
-    """[Defunct] Returns a list of lists.
-
-    list of lists (with length up to num_args) of data from a query.
-    """
-    data = urllib.request.urlopen(query)
-    data_readable = data.read().decode('utf-8').replace("}{", "} {")
     data_list = data_readable.split("} {")
     dict_list = []
     for i, d in enumerate(data_list):
@@ -375,26 +395,21 @@ def is_occupied():
     return False
 
 
-def building_is_occupied(building):
+def building_is_occupied(occupancy_dict, building):
     """Return True if in occupied time."""
-    now = datetime.datetime.now()
-    day = now.isoweekday()
-    hour = now.hour
-    correct_day = (day >= 1 and day <= 5)
-    correct_hour = (hour >= 8 and hour < 17)
-    if (correct_day and correct_hour):
-        return True
-    return False
-
-
-def cron_is_now(cron, offset=5):
-    """Return True if cron is within 5 minutes of now."""
-    now = datetime.datetime.utcnow()
-    c = croniter(cron)
-    td = (now - c.get_next(datetime.datetime))
-    td_min = abs(td.total_seconds()/60)
-    if td_min < offset:
-        return True
+    if occupancy_dict is None:
+        now = datetime.datetime.now()
+        day = now.isoweekday()
+        hour = now.hour
+        correct_day = (day >= 1 and day <= 5)
+        correct_hour = (hour >= 8 and hour < 17)
+        if (correct_day and correct_hour):
+            return True
+        return False
+    elif building not in occupancy_dict:
+        return occupancy_dict["*"]
+    else:
+        return occupancy_dict
     return False
 
 
@@ -409,6 +424,10 @@ if LOG:
 
 # Get alert conditions
 alerts, unique_databases = import_conditions(alert_fname, logging)
+known_issues = import_known_issues(KNOWN_ISSUES_FPATH)
+occupancy = import_occupancy()
+print(occupancy)
+sys.exit()
 
 # JSON
 next_id, last_events = parse_json(json_fname, json_oc, json_unoc)
@@ -429,7 +448,7 @@ for i, a in enumerate(alerts):
         now = datetime.datetime.now()
         day = now.isoweekday()
         hour = now.hour
-        occupied = building_is_occupied(alert["building"])
+        occupied = building_is_occupied(None, alert["building"])
         if (alert["time_dependent"]):
             if ((alert["occupancy_status"] and (not is_occupied()))
                     or (not alert["occupancy_status"] and (is_occupied()))):
@@ -515,6 +534,11 @@ for i, a in enumerate(alerts):
                     ec += 1
 
             for room in temps:
+                if skip_alias(known_issues, alert["building"], room+" Temp"):
+                    print(room+" Temp", " is decomissioned")
+                    continue
+                else:
+                    print(room + " Temp")
                 try:
                     Alias_Temp = "Temp"
                     for key in temps[room].keys():
@@ -651,6 +675,11 @@ for i, a in enumerate(alerts):
 
             for data in aliases:
                 alias = data
+                if skip_alias(known_issues, alert["building"], alias):
+                    print(alias, " is decomissioned")
+                    continue
+                else:
+                    print(alias)
                 t = aliases[alias]
 
                 datetime_object = datetime.datetime.strptime(
