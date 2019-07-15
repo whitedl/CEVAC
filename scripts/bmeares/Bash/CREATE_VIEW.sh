@@ -1,12 +1,13 @@
 #! /bin/sh
 # ./seperator.sh
-building=$1
-metric=$2
-age=$3
-keys_list=$4
-if [ -z $5 ]; then unitOfMeasureID="NULL"; else unitOfMeasureID=$5; fi
+building="$1"
+metric="$2"
+age="$3"
+keys_list="$4"
+if [ -z "$5" ]; then unitOfMeasureID="NULL"; else unitOfMeasureID="$5"; fi
 
-if [ -z $1 ] || [ -z $2 ] || [ -z $3 ] || [ -z $4 ]; then
+if [ -z $1 ] || [ -z $2 ]; then
+  echo "Usage: $0 [BuildingSName] [Metric] [Age] {Keywords} {UnitOfMeasureID}"
   echo $'Enter the following information.\n'
   echo $'Building (e.g. WATT): '; read building
   echo $'Metric   (e.g. TEMP): '; read metric
@@ -16,13 +17,13 @@ if [ -z $1 ] || [ -z $2 ] || [ -z $3 ] || [ -z $4 ]; then
 fi
 
 
-if [ -z $building ] || [ -z $metric ] || [ -z $age ]; then
+if [ -z "$building" ] || [ -z "$metric" ] || [ -z "$age" ]; then
   echo Error!
   exit 1
 fi
-if [ -z $unitOfMeasureID ] || [ "$unitOfMeasureID" = "NULL" ]; then
+if [ -z "$unitOfMeasureID" ] || [ "$unitOfMeasureID" = "NULL" ]; then
   unitOfMeasureID="NULL"; fi
-if [ -z $keys_list ] || [ "$keys_list" = "NULL" ]; then keys_list=""; fi
+if [ -z "$keys_list" ] || [ "$keys_list" = "NULL" ]; then keys_list=""; fi
 
 building="'"$building"'"
 metric="'"$metric"'"
