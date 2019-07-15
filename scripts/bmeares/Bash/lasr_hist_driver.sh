@@ -19,27 +19,33 @@ if [ "$runsas" == "runsas" ]; then
   echo "Note: runsas detected. Every table will trigger runsas.sh."
   echo "This may harm performance. Omit or use norun for argument 2 to only upload to LASR"
 fi
-
-
+# update HIST_CACHE tables
 time /home/bmeares/scripts/append_tables.sh
 
-time /home/bmeares/scripts/lasr_append.sh ALL ALERTS HIST UTCDateTime AlertMessage $runsas $reset
-time /home/bmeares/scripts/lasr_append.sh ASC TEMP HIST UTCDateTime Alias $runsas $reset
-time /home/bmeares/scripts/lasr_append.sh ASC IAQ HIST UTCDateTime Alias $runsas $reset
+hist_views_query="
+SELECT RTRIM(BuildingSName), RTRIM(Metric), RTRIM(Age) FROM CEVAC_TABLES
+WHERE TableName LIKE '%HIST_VIEW%'
+"
+/cevac/scripts/exec_sql.sh "$hist_views_query" "hist_views.csv"
 
-time /home/bmeares/scripts/lasr_append.sh COOPER TEMP HIST UTCDateTime Alias $runsas $reset
-# time /home/bmeares/scripts/lasr_append.sh COOPER POWER HIST UTCDateTime PointSliceID $runsas $reset
+# Remove header from csv
+sed -i '1d' /cevac/cache/hist_views.csv
+readarray tables_array < /cevac/cache/hist_views.csv
 
-time /home/bmeares/scripts/lasr_append.sh LEE_III TEMP HIST UTCDateTime Alias $runsas $reset
+for t in "${tables_array[@]}"; do
+  t=`echo "$t" | tr -d '\n'`
+  if [ -z "$t" ]; then
+    continue
+  fi
+  t=`echo "$t" | sed 's/,/\n/g'`
+  B=`echo "$t" | sed '1!d'`
+  M=`echo "$t" | sed '2!d'`
+  A=`echo "$t" | sed '3!d'`
 
-time /home/bmeares/scripts/lasr_append.sh WATT IAQ HIST UTCDateTime Alias $runsas $reset
-time /home/bmeares/scripts/lasr_append.sh WATT POWER HIST UTCDateTime Alias $runsas $reset
-time /home/bmeares/scripts/lasr_append.sh WATT POWER_SUMS HIST UTCDateTime Total_Usage $runsas $reset
-time /home/bmeares/scripts/lasr_append.sh WATT POWER_SUMS_COMPARE HIST P_UTCDateTime P_UTCDateTime $runsas $reset
-time /home/bmeares/scripts/lasr_append.sh WATT TEMP HIST UTCDateTime Alias $runsas $reset
-time /home/bmeares/scripts/lasr_append.sh WATT WAP HIST "time" Alias $runsas $reset
-time /home/bmeares/scripts/lasr_append.sh WATT WAP_DAILY HIST UTCDateTime UTCDateTime $runsas $reset
-time /home/bmeares/scripts/lasr_append.sh WATT WAP_FLOOR HIST UTCDateTime UTCDateTime $runsas $reset
+  /cevac/scripts/seperator.sh
+  time /cevac/scripts/lasr_append.sh $B $M $A $runsas $reset
+
+done
 
 echo "All _HIST tables have been loaded."
 if [ "$runsas" != "norun" ]; then

@@ -1,6 +1,5 @@
 """Parse alerts from CEVAC_ALL_ALERTS_HIST."""
 
-
 import bsql
 import datetime
 import time_handler
@@ -8,6 +7,10 @@ import smtplib
 import ssl
 from jinja2 import Template
 from email import message as msg
+from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
+
+import base64
 
 
 email = "cevac5733@gmail.com"
@@ -15,19 +18,24 @@ password = "cevacsteve5733"
 to_list = {
     "Harrison Hall": "hchall@g.clemson.edu",
     "Bennett Meares": "bmeares@g.clemson.edu",
-    "Inscribe boi": "bmeares@inscribe.productions",
+    #  "Inscribe boi": "bmeares@inscribe.productions",
     "Zach Smith": "ztsmith@g.clemson.edu",
-    # "Bennett Meares": "bmeares@g.clemson.edu",
-    # "Inscribe boi": "bmeares@inscribe.productions",
-    # "Zach Smith": "ztsmith@g.clemson.edu",
     # "Zach Klein": "ztklein@g.clemson.edu",
     # "Drewboi": "abemery@clemson.edu",
     "Tim Howard": "timh@clemson.edu",
 }
-f = open("/cevac/CEVAC/scripts/harrison/alerts/alert_email.html", "r")
+
+f = open("/cevac/DEV/scripts/harrison/alerts/alert_email.html", "r")
 page = Template("".join(f.readlines()))
 
-old_metrics = {
+
+def encode64(image_fpath):
+    """Base64 encode image."""
+    return base64.b64encode(open(image_fpath, 'rb').read()).decode('utf-8')
+
+
+pic_path = "/cevac/DEV/scripts/harrison/alerts/pics/"
+metrics_a = {
     "TEMP": {
         "key": "<TEMP>",
         "char": "🌡",
@@ -54,9 +62,7 @@ old_metrics = {
         "char": "📏",
     }
 }
-
-pic_path = "/cevac/DEV/scripts/harrison/alerts/pics/"
-metrics = {
+metrics_b = {
     "TEMP": {
         "key": "<TEMP>",
         "char": (f"<img src=\"https://i.imgur.com/7idtl34.png\""
@@ -86,6 +92,46 @@ metrics = {
     "UNKNOWN": {
         "key": "<UNKNOWN>",
         "char": "📏",
+    }
+}
+
+metrics = {
+    "TEMP": {
+        "key": "<TEMP>",
+        "char": (f"<img src=\"cid:image1\"  width=\"50\" height=\"50\">"),
+        "fpath": pic_path + "TEMP.png",
+        "cid": "image1",
+    },
+    "POWER": {
+        "key": "<POWER>",
+        "char": (f"<img src=\"cid:image2\"  width=\"50\" height=\"50\">"),
+        "fpath": pic_path + "POWER.png",
+        "cid": "image2",
+    },
+    "IAQ": {
+        "key": "<IAQ>",
+        "char": (f"<img src=\"cid:image3\"  width=\"50\" height=\"50\">"),
+        "fpath": pic_path + "CO2.png",
+        "cid": "image3",
+    },
+    "CHW": {
+        "key": "<CHW>",
+        "char": (f"<img src=\"cid:image4\"  width=\"50\" height=\"50\">"),
+        "fpath": pic_path + "CHW.png",
+        "cid": "image4",
+    },
+    "STEAM": {
+        "key": "<STEAM>",
+        "char": (f"<img src=\"cid:image5\"  width=\"50\" height=\"50\">"),
+        "fpath": pic_path + "STEAM.png",
+        "cid": "image5",
+    },
+
+    "UNKNOWN": {
+        "key": "<?>",
+        "char": (f"<p>?</p>"),
+        "fpath": pic_path + "TEMP.png",
+        "cid": "image6",
     }
 }
 
@@ -162,14 +208,28 @@ def email_message(email, password, to_list, message, subject):
             p_page = page.render(Name=person, message=message, subject=subject,
                                  metrics=metrics)
 
-            m_message = msg.Message()
-            m_message.add_header('Content-Type', 'text/html')
-            m_message.set_payload(p_page)
+            m_message = MIMEMultipart()
+
+            a_msg = msg.Message()
+            a_msg.add_header('Content-Type', 'text/html')
+            a_msg.set_payload(p_page)
             m_message["Subject"] = subject
 
+            for i, metric in enumerate(metrics):
+                m = metrics[metric]
+                fp = open(m["fpath"], 'rb')
+                msgImage = MIMEImage(fp.read())
+                fp.close()
+                print(f"<{m['cid']}>")
+                msgImage.add_header('Content-ID', f"<{m['cid']}>")
+                m_message.attach(msgImage)
+
+            # Define the image's ID as referenced above
+            m_message.attach(a_msg)
+
             new_message = replace_metric(m_message.as_string())
-            print(new_message.encode("utf-8"))
-            server.sendmail(email, p_email, new_message.encode("utf-8"))
+            print(new_message)  # .encode("utf-8"))
+            server.sendmail(email, p_email, new_message)  # .encode("utf-8"))
 
 
 def main():
@@ -181,7 +241,7 @@ def main():
     alerts = bsql.Query(f" DECLARE @yesterday DATETIME; SET @yesterday = "
                         f"DATEADD(day,"
                         f" -1, GETDATE());"
-                        f" SELECT * FROM CEVAC_ALL_ALERTS_EVENTS_HIST "
+                        f" SELECT TOP 100 * FROM CEVAC_ALL_ALERTS_EVENTS_HIST "
                         f" WHERE ETDateTime >= @yesterday "
                         f" ORDER BY ETDateTime DESC")
     now_etc = time_handler.utc_to_est(now)
@@ -210,9 +270,9 @@ def main():
                 total_msg += "<tr>"
                 if al.acknowledged:
                     continue
-                e_msg = (f"<td>{al.etc_str}</td>"
-                         f"<td>{al.metric}</td>"
-                         f"<td>{al.message}</td>")
+                e_msg = (f"<td width=\"20%\">{al.etc_str}</td>"
+                         f"<td width=\"10%\">{al.metric}</td>"
+                         f"<td width=\"70%\">{al.message}</td>")
                 total_msg += e_msg + "</tr>"
             total_msg += "</table>"
 

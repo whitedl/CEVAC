@@ -8,16 +8,38 @@ DROP VIEW CEVAC_WATT_POWER_SUMS_HIST_VIEW
 END
 GO
 
+DELETE FROM CEVAC_TABLES WHERE TableName = 'CEVAC_WATT_POWER_SUMS_HIST';
+INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, AliasName)
+VALUES(
+	'WATT',
+	'POWER_SUMS',
+	'HIST',
+	'CEVAC_WATT_POWER_SUMS_HIST',
+	'UTCDateTime',
+	'Total_Usage'
+)
+
+
+GO
+
 CREATE VIEW CEVAC_WATT_POWER_SUMS_HIST_VIEW AS
 
-WITH original AS (
+WITH all_utc AS (
+	SELECT UTCDateTime, COUNT(UTCDateTime) AS UTCCount FROM CEVAC_WATT_POWER_HIST
+	WHERE Alias LIKE 'Building%'
+	GROUP BY UTCDateTime
+), full_utc AS (
+	SELECT UTCDateTime
+	FROM all_utc
+	WHERE UTCCount >= 7
+), original AS (
 	SELECT UTCDateTime, dbo.ConvertUTCToLocal(UTCDateTime) AS ETDateTime, SUM(ActualValue) AS Total_Usage
 	FROM
 	(SELECT * FROM CEVAC_WATT_POWER_HIST
 	 WHERE Alias LIKE 'Building%'
-	 AND DATEPART(minute,UTCDateTime) = 0
+	 AND UTCDateTime IN (SELECT UTCDateTime FROM full_utc)
 	 ) AS Building
 	GROUP BY UTCDateTime
 )
-SELECT *, DATEPART(year, ETDateTime) AS Year, DATEPART(month, ETDateTime) AS Month, DATEPART(day, ETDateTime) AS Day
+SELECT *
 FROM original
