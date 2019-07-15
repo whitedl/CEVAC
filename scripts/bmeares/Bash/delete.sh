@@ -37,7 +37,6 @@ SELECT RTRIM(TableName) FROM CEVAC_TABLES
 WHERE BuildingSName = '$Building' AND Metric = '$Metric' "$exclude_query"
 "
 echo "$tables_query"
-exit 1
 
 /cevac/scripts/exec_sql.sh "$tables_query" "tables_temp.csv"
 
