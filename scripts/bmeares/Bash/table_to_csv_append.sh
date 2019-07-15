@@ -172,8 +172,8 @@ u='wficcm'
 db='WFIC-CEVAC'
 p='5wattcevacmaint$'
 
-latest=$(echo $table | grep LATEST)
-xref=$(echo $table | grep XREF)
+latest=$(echo "$table" | grep LATEST)
+xref=$(echo "$table" | grep XREF)
 if [ ! -z "$latest" ] || [ ! -z "$xref" ]; then
   echo LATEST or XREF detected. Will overwrite $table.csv
   rm -f /srv/csv/$table.csv
