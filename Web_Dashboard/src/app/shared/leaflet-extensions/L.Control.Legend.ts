@@ -20,10 +20,14 @@ export class Legend extends L.Control {
     this.container = L.DomUtil.create('div', 'legend');
     const rangeContainer = L.DomUtil.create(
       'div',
-      'legend-object',
+      'legend-object-left',
       this.container
     );
-    const scaleHeader = L.DomUtil.create('div', '', rangeContainer);
+    const scaleHeader = L.DomUtil.create(
+      'div',
+      'flex-col-start',
+      rangeContainer
+    );
     this.rangeHeader = L.DomUtil.create('p', 'legend-header', scaleHeader);
     this.rangeHeader.textContent = measurement.name;
     this.scaleMax = L.DomUtil.create('div', '', scaleHeader);

@@ -54,6 +54,12 @@ FLEX UTILITIES
   flex-direction: column;
 }
 
+.flex-col-start {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
 .flex-row {
   display: flex;
   flex-direction: row;
@@ -153,6 +159,15 @@ LEAFLET CUSTOMIZATION
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
+  padding: 0.5em;
+}
+
+.legend-object-left {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
   padding: 0.5em;
 }
 
