@@ -200,7 +200,7 @@ def skip_alias(known_issues, bldg, alias):
 def cron_is_now(cron, offset=5):
     """Return True if cron is within 5 minutes of now."""
     now = datetime.datetime.utcnow()
-    print(cron)
+    print("["+cron+"]")
     c = croniter(cron)
     td = (now - c.get_next(datetime.datetime))
     td_min = abs(td.total_seconds()/60)
@@ -228,17 +228,20 @@ def import_occupancy():
                 continue
             if not past_header:
                 continue
-            bldgsname = row[0]
-            cron_occupancy = str_to_bool(row[2])
-            is_occupied = str_to_bool(row[3])
-            crontab = f"{row[4]} {row[5]} {row[6]} {row[7]} {row[8]}"
-            print(crontab)
-            if cron_is_now(crontab) and cron_occupancy:
-                if "*" in bldgsname:
-                    for item in d:
-                        d[item] = is_occupied
-                else:
-                    d[bldgsname] = is_occupied
+            try:
+                bldgsname = row[0]
+                cron_occupancy = str_to_bool(row[2])
+                is_occupied = str_to_bool(row[3])
+                crontab = f"{row[4]} {row[5]} {row[6]} {row[7]} {row[8]}"
+                if cron_is_now(crontab) and cron_occupancy:
+                    print(crontab)
+                    if "*" in bldgsname:
+                        for item in d:
+                            d[item] = is_occupied
+                    else:
+                        d[bldgsname] = is_occupied
+            except Exception:
+                continue
 
     return d
 
