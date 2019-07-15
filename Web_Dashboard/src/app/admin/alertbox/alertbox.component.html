@@ -11,17 +11,14 @@
         color="warn"
         *ngIf="critical$ | async as critical"
         [selected]="critD"
-        (selectionChange)="changeSelected($event)"
         (click)="critD = !critD"
       >
         Critical: {{ critical.length }}
       </mat-chip>
       <mat-chip
         color="accent"
-        selected
         *ngIf="noncritical$ | async as noncritical"
         [selected]="noncritD"
-        (selectionChange)="changeSelected($event)"
         (click)="noncritD = !noncritD"
       >
         Warning: {{ noncritical.length }}

@@ -14,9 +14,13 @@ import { Alert } from '@shared/interfaces/alert';
   styleUrls: ['./alertbox.component.scss']
 })
 export class AlertboxComponent implements OnInit {
-  alerts$!: Observable<Alert[]>;
-  critical$!: Observable<Alert[]>;
-  noncritical$!: Observable<Alert[]>;
+  alerts$: Observable<Alert[]> = this.alertService.getAlerts();
+  critical$: Observable<Alert[]> = this.alerts$.pipe(
+    map(v => v.filter(alert => alert.AlertType === 'alert'))
+  );
+  noncritical$: Observable<Alert[]> = this.alerts$.pipe(
+    map(v => v.filter(alert => alert.AlertType === 'warning'))
+  );
   buildingAlerts$!: Observable<Map<string, Alert[]>>;
 
   critD = true;
@@ -28,15 +32,7 @@ export class AlertboxComponent implements OnInit {
     private colorService: ColorService
   ) {}
 
-  ngOnInit() {
-    this.alerts$ = this.alertService.getAlerts();
-    this.critical$ = this.alerts$.pipe(
-      map(v => v.filter(alert => alert.AlertType === 'alert'))
-    );
-    this.noncritical$ = this.alerts$.pipe(
-      map(v => v.filter(alert => alert.AlertType === 'warning'))
-    );
-  }
+  ngOnInit() {}
 
   getAlertColor(type: string) {
     let col;
