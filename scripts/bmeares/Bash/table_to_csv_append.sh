@@ -1,23 +1,28 @@
 #! /bin/bash
 if [ -z "$1" ]; then
   echo Error: Missing table name
-  echo "Usage: ./table_to_csv_append.sh [TABLE] [UTCDateTime] [Alias]"
+  echo "Usage: $0 [TABLE] {reset}"
   exit 1
 fi
-# if [ -z "$2" ]; then
-  # echo "Error: Missing time metric (e.g. UTCDateTime)"
-  # echo "Usage: ./table_to_csv_append.sh [TABLE] [UTCDateTime] [Alias]"
-  # exit 1
-# fi
-# if [ -z "$3" ]; then
-  # echo "Error: Missing name metric (e.g. Alias)"
-  # echo "Usage: ./table_to_csv_append.sh [TABLE] [UTCDateTime] [Alias]"
-  # exit 1
-# fi
-
-
 table="$1"
 table_CSV="$table"_CSV
+if [ -z "$2" ]; then
+  if [ "$2" == "reset" ]; then
+    echo "Reset! Removing /srv/csv/$table.csv"
+    rm -f /srv/csv/$table.csv
+    echo "Dropping $table_CSV"
+    /cevac/scripts/exec_sql.sh "IF OBJECT_ID('$table_CSV') IS NOT NULL DROP TABLE $table_CSV"
+  fi
+fi
+
+table_CSV_exists_query="IF OBJECT_ID('$table_CSV') IS NOT NULL SELECT 'EXISTS' ELSE SELECT 'DNE'"
+table_CSV_exists=`/cevac/scripts/sql_value.sh "$table_CSV_exists_query"`
+if [ "$table_CSV_exists" != "EXISTS" ]; then
+  echo "$table_CSV does not exist. Removing local CSV"
+  rm -f /srv/csv/$table.csv
+fi
+
+
 UTCDateTime=`/cevac/scripts/sql_value.sh "SET NOCOUNT ON; SELECT TOP 1 RTRIM(DateTimeName) FROM CEVAC_TABLES WHERE TableName = '$table'"`
 Alias=`/cevac/scripts/sql_value.sh "SET NOCOUNT ON; SELECT TOP 1 RTRIM(AliasName) FROM CEVAC_TABLES WHERE TableName = '$table'"`
 
@@ -108,11 +113,14 @@ IF DATEDIFF(day, @update_time, @begin) > 0 SET @begin = DATEADD(day, -31,@update
 WITH new AS (
   SELECT * FROM $table
   WHERE $UTCDateTime > isnull(@begin, 0) AND $UTCDateTime <= @now
+), new_csv AS (
+  SELECT * FROM $table_CSV
+  WHERE $UTCDateTime > isnull(@begin, 0) AND $UTCDateTime <= @now
 )
   INSERT INTO $table_CSV
 
   SELECT new.$UTCDateTime, new.$Alias FROM new
-  LEFT JOIN $table_CSV AS CSV ON CSV.$UTCDateTime = new.$UTCDateTime AND CSV.$Alias = new.$Alias
+  LEFT JOIN new_csv AS CSV ON CSV.$UTCDateTime = new.$UTCDateTime AND CSV.$Alias = new.$Alias
   WHERE CSV.$UTCDateTime IS NULL
 
 "
@@ -122,7 +130,7 @@ DECLARE @begin DATETIME;
 DECLARE @now DATETIME;
 DECLARE @last_UTC DATETIME;
 SET @now = GETUTCDATE();
-SET @begin = DATEADD(day, -7, @now);
+SET @begin = DATEADD(day, -31, @now);
 SET @last_UTC = (
   SELECT TOP 1 last_UTC FROM CEVAC_CACHE_RECORDS 
   WHERE table_name = '$table' AND storage = 'CSV'
@@ -135,9 +143,12 @@ END;
 WITH new AS (
   SELECT * FROM $table
   WHERE $UTCDateTime > isnull(@begin, 0) AND $UTCDateTime <= @now
+), new_csv AS (
+  SELECT * FROM $table_CSV
+  WHERE $UTCDateTime > isnull(@begin, 0) AND $UTCDateTime <= @now
 )
   SELECT new.* FROM new
-  LEFT JOIN $table_CSV AS CSV ON CSV.$UTCDateTime = new.$UTCDateTime
+  LEFT JOIN new_csv AS CSV ON CSV.$UTCDateTime = new.$UTCDateTime
   WHERE CSV.$UTCDateTime IS NULL
   ORDER BY LEN(new.$Alias) DESC
 "
@@ -161,11 +172,13 @@ u='wficcm'
 db='WFIC-CEVAC'
 p='5wattcevacmaint$'
 
-latest=$(echo $table | grep LATEST)
-xref=$(echo $table | grep XREF)
+latest=$(echo "$table" | grep LATEST)
+xref=$(echo "$table" | grep XREF)
 if [ ! -z "$latest" ] || [ ! -z "$xref" ]; then
   echo LATEST or XREF detected. Will overwrite $table.csv
   rm -f /srv/csv/$table.csv
+  echo "Dropping $table_CSV"
+  /cevac/scripts/exec_sql.sh "IF OBJECT_ID('$table_CSV') IS NOT NULL DROP TABLE $table_CSV"
 fi
 
 # If $table.csv doesn't exist, initialize data
