@@ -37,7 +37,10 @@
             warning
           </mat-icon>
           <h5 mat-line>{{ alert.AlertMessage }}</h5>
-          <p mat-line>{{ alert.BuildingDName }}</p>
+          <p mat-line>{{ alert.EventID }}</p>
+          <button mat-icon-button (click)="acknowledge(alert, $event)">
+            <mat-icon>clear</mat-icon>
+          </button>
         </button>
       </ng-container>
       <ng-container *ngIf="noncritD">
@@ -51,6 +54,9 @@
           </mat-icon>
           <h5 mat-line>{{ alert.AlertMessage }}</h5>
           <p mat-line>{{ alert.BuildingDName }}</p>
+          <button mat-icon-button (click)="acknowledge(alert, $event)">
+            <mat-icon>clear</mat-icon>
+          </button>
         </button>
       </ng-container>
     </mat-action-list>

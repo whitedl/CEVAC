@@ -24,4 +24,12 @@ export class AlertService {
   getAlerts(): Observable<Alert[]> {
     return this.alerts$;
   }
+
+  acknowledge(alert: Alert) {
+    const eid = 'EventID=' + alert.EventID;
+    return this.http.patch(
+      'http://wfic-cevac1/requests/acknowledge.php?' + eid + '&ACK=1',
+      null
+    );
+  }
 }

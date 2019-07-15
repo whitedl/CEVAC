@@ -52,4 +52,9 @@ export class AlertboxComponent implements OnInit {
   focus(alert: Alert) {
     this.mapdataService.focusBldg(alert.BuildingSName);
   }
+
+  acknowledge(alert: Alert, e: Event) {
+    e.stopPropagation();
+    this.alertService.acknowledge(alert).subscribe();
+  }
 }
