@@ -148,7 +148,6 @@ class predictor():
             cloudCoverage = [self.hourly['clouds'][i]]
             temp = np.concatenate((hour, day, month, throughMonth, temperature, humidity, cloudCoverage), axis = -1)
             self.input.append(temp)
-            self.input()
 
         self.input = np.array(self.input)
         prediction = self.model.predict((self.input))
