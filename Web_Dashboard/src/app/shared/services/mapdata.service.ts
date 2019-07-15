@@ -79,6 +79,7 @@ export class MapdataService {
       if (layer.feature && layer.feature.properties.Short_Name === bldg) {
         this.map.fitBounds(layer.getBounds());
         this.router.navigate(['map', bldg]);
+        return;
       }
     }
   };
