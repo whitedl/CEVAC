@@ -236,6 +236,7 @@ def import_occupancy():
                     if "*" in bldgsname:
                         for item in d:
                             d[item] = is_occupied
+                        d["*"] = is_occupied
                     else:
                         d[bldgsname] = is_occupied
             except Exception:
