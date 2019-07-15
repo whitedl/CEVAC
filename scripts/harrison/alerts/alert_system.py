@@ -15,8 +15,8 @@ from copy import deepcopy
 from croniter import croniter
 
 CONDITIONS_FPATH = "/home/bmeares/cron/alerts/"
-KNOWN_ISSUES_FPATH = "/cevac/DEV/known issues/Known Data Issues.csv"
-OCCUPANCY_FPATH  = "/cevac/DEV/scripts/harrison/alerts/occupancy.csv"
+KNOWN_ISSUES_FPATH = "/cevac/CEVAC/known issues/Known Data Issues.csv"
+OCCUPANCY_FPATH = "/cevac/CEVAC/scripts/harrison/alerts/occupancy.csv"
 LOGGING_PATH = "/home/bmeares/cron/alerts/"
 PHONE_PATH = "/home/bmeares/cron/alerts/"
 alert_fname = "/cevac/CEVAC/alerts/alert_parameters.csv"
@@ -25,10 +25,10 @@ json_oc = "/cevac/cron/alert_log_oc.json"
 json_unoc = "/cevac/cron/alert_log_unoc.json"
 
 
-LOG = False
+LOG = True
 CHECK_ALERTS = True
-SEND = False
-UPDATE_CACHE = False
+SEND = True
+UPDATE_CACHE = True
 
 COLUMNS = {
     "alert_name": 0,
@@ -200,7 +200,6 @@ def skip_alias(known_issues, bldg, alias):
 def cron_is_now(cron, offset=5):
     """Return True if cron is within 5 minutes of now."""
     now = datetime.datetime.utcnow()
-    print("["+cron+"]")
     c = croniter(cron)
     td = (now - c.get_next(datetime.datetime))
     td_min = abs(td.total_seconds()/60)
@@ -234,7 +233,6 @@ def import_occupancy():
                 is_occupied = str_to_bool(row[3])
                 crontab = f"{row[4]} {row[5]} {row[6]} {row[7]} {row[8]}"
                 if cron_is_now(crontab) and cron_occupancy:
-                    print(crontab)
                     if "*" in bldgsname:
                         for item in d:
                             d[item] = is_occupied
@@ -412,7 +410,7 @@ def building_is_occupied(occupancy_dict, building):
     elif building not in occupancy_dict:
         return occupancy_dict["*"]
     else:
-        return occupancy_dict
+        return occupancy_dict[building]
     return False
 
 
@@ -430,7 +428,6 @@ alerts, unique_databases = import_conditions(alert_fname, logging)
 known_issues = import_known_issues(KNOWN_ISSUES_FPATH)
 occupancy = import_occupancy()
 print(occupancy)
-sys.exit()
 
 # JSON
 next_id, last_events = parse_json(json_fname, json_oc, json_unoc)
@@ -451,10 +448,10 @@ for i, a in enumerate(alerts):
         now = datetime.datetime.now()
         day = now.isoweekday()
         hour = now.hour
-        occupied = building_is_occupied(None, alert["building"])
+        occupied = building_is_occupied(occupancy, alert["building"])
         if (alert["time_dependent"]):
-            if ((alert["occupancy_status"] and (not is_occupied()))
-                    or (not alert["occupancy_status"] and (is_occupied()))):
+            if ((alert["occupancy_status"] and (not occupied))
+                    or (not alert["occupancy_status"] and (occupied))):
                 safe_log("Not time for alert #" + str(i + 1), "info")
                 continue
 
