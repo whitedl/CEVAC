@@ -109,6 +109,7 @@ WITH new AS (
   SELECT * FROM $table
   WHERE $UTCDateTime > isnull(@begin, 0) AND $UTCDateTime <= @now
 )
+
   INSERT INTO $table_CSV
 
   SELECT new.$UTCDateTime, new.$Alias FROM new
@@ -122,7 +123,7 @@ DECLARE @begin DATETIME;
 DECLARE @now DATETIME;
 DECLARE @last_UTC DATETIME;
 SET @now = GETUTCDATE();
-SET @begin = DATEADD(day, -7, @now);
+SET @begin = DATEADD(day, -31, @now);
 SET @last_UTC = (
   SELECT TOP 1 last_UTC FROM CEVAC_CACHE_RECORDS 
   WHERE table_name = '$table' AND storage = 'CSV'
