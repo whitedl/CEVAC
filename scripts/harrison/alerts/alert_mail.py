@@ -12,7 +12,7 @@ from email.mime.multipart import MIMEMultipart
 
 import base64
 
-
+KNOWN_ISSUES_FPATH = "/cevac/CEVAC/known issues/Known Data Issues.csv"
 email = "cevac5733@gmail.com"
 password = "cevacsteve5733"
 to_list = {
@@ -159,6 +159,16 @@ class Alert_Log:
         if (sorted([self.building, other.building])[1] ==
                 self.building and self.building != other.building):
             return False
+        if self.metric != other.metric:
+            if self.metric < other.metric:
+                return True
+            else:
+                return False
+        if (self.get_room_number() != other.get_room_number()):
+            if (self.get_room_number() < other.get_room_number()):
+                return True
+            else:
+                return False
         if self.etc < other.etc:
             return True
         return True
@@ -182,6 +192,22 @@ class Alert_Log:
             dict[self.type] = {
                 self.building: [self],
             }
+
+    def get_room_number(self):
+        """Get room number from phrase."""
+        phrase = self.message.split(" ")[0]
+        if not self.contains_number(phrase):
+            print("")
+            return ""
+        print(phrase)
+        return phrase
+
+    def contains_number(self, phrase):
+        """Return True if string contains number."""
+        for i in phrase:
+            if str.isdigit(i):
+                return True
+        return False
 
 
 def replace_metric(rep_str):
