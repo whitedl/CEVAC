@@ -69,7 +69,7 @@ export class ColorService {
     }
   };
   private scales: ScaleSet = {
-    Power: new Scale([0, 50, 1000]),
+    Power: new Scale([0, 1000]),
     Temperature: new Scale([50, 100]),
     CO2: new Scale([0, 500]),
     BuildingHealth: new Scale([0, 500, 800, 1000, 1200])
@@ -105,12 +105,20 @@ export class ColorService {
     if (typeof val === 'undefined' || typeof scale === 'undefined') {
       return this.crg[category];
     }
-    return chroma
+    const domain = this.scales[scale].domain;
+    const retScale = chroma
       .bezier(this.labDomain(this.crg[category]))
       .scale()
-      .domain(this.scales[scale].domain)
-      .correctLightness()(val)
-      .name();
+      .correctLightness();
+    if (domain.length !== 2) {
+      return retScale
+        .classes([...domain, domain[domain.length - 1]])(val)
+        .name();
+    } else {
+      return retScale
+        .domain(domain)(val)
+        .name();
+    }
   };
 
   registerCategory = (cat: string) => {
