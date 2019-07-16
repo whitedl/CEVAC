@@ -2,8 +2,6 @@
 
 This CEVAC alert system script reads from alert_system.csv to populate the
 table `CEVAC_ALL_ALERTS_HIST`.
-
-TODO: Time-based alert conditionals (cache issue)
 """
 
 import os
@@ -13,33 +11,24 @@ import json
 import datetime
 import pytz
 import logging
-import urllib.request
-import urllib.parse
 from copy import deepcopy
+from croniter import croniter
 
 CONDITIONS_FPATH = "/home/bmeares/cron/alerts/"
+KNOWN_ISSUES_FPATH = "/cevac/CEVAC/known issues/Known Data Issues.csv"
+OCCUPANCY_FPATH = "/cevac/CEVAC/scripts/harrison/alerts/occupancy.csv"
 LOGGING_PATH = "/home/bmeares/cron/alerts/"
 PHONE_PATH = "/home/bmeares/cron/alerts/"
-alert_fname = "alert_parameters.csv"
+alert_fname = "/cevac/CEVAC/alerts/alert_parameters.csv"
 json_fname = "/cevac/cron/alert_log.json"
+json_oc = "/cevac/cron/alert_log_oc.json"
+json_unoc = "/cevac/cron/alert_log_unoc.json"
 
-TIMED = True
-
-for arg in sys.argv:
-    if "timed_alerts" in arg.lower():
-        TIMED = True
 
 LOG = True
-DEBUG = False
 CHECK_ALERTS = True
 SEND = True
 UPDATE_CACHE = True
-
-if DEBUG:
-    CONDITIONS_FPATH = "C:\\Users\\hchall\\Downloads\\"
-    LOGGING_PATH = "C:\\Users\\hchall\\Downloads\\"
-    PHONE_PATH = "/home/bmeares/cron/alerts/"
-    alert_fname = "Alert Parameters (working).csv"
 
 COLUMNS = {
     "alert_name": 0,
@@ -148,7 +137,7 @@ def import_conditions(fname, logger):
     """Move a CSV file to dict of alert condtions."""
     alerts = {}
     unique_databases = {}
-    with open(CONDITIONS_FPATH + fname) as csvfile:
+    with open(fname) as csvfile:
         csvfile = csv.reader(csvfile)
         next(csvfile)
         for i, row in enumerate(csvfile):
@@ -180,10 +169,80 @@ def import_conditions(fname, logger):
     return (alerts, unique_databases)
 
 
-def command_to_query(command):
-    """[Defunct] Returns a query-able string from a sql command."""
-    req = "http://wfic-cevac1/requests/query.php?q="
-    return req + urllib.parse.quote_plus(command)
+def import_known_issues(fname):
+    """Return dict of buildingsname to list of blacklists."""
+    d = {}
+    with open(fname, "r") as csvfile:
+        csvfile = csv.reader(csvfile)
+        next(csvfile)  # header
+        for row in csvfile:
+            bldg = row[1]
+            message = row[0]
+            if "decomissioned" in message:
+                if bldg in d:
+                    d[bldg].append(message)
+                else:
+                    d[bldg] = [message]
+    return d
+
+
+def skip_alias(known_issues, bldg, alias):
+    """Check known issues for decomissioned alias."""
+    alias_in_issues = False
+    if bldg not in known_issues:
+        return alias_in_issues
+    for message in known_issues[bldg]:
+        if alias in message:
+            return alias_in_issues
+    return alias_in_issues
+
+
+def cron_is_now(cron, offset=5):
+    """Return True if cron is within 5 minutes of now."""
+    now = datetime.datetime.utcnow()
+    c = croniter(cron)
+    td = (now - c.get_next(datetime.datetime))
+    td_min = abs(td.total_seconds()/60)
+    if td_min < offset:
+        return True
+    return False
+
+
+def str_to_bool(some_str):
+    """Return True/False for 'true/false'."""
+    if "true" in some_str.lower():
+        return True
+    return False
+
+
+def import_occupancy():
+    """Import occupancy for each building."""
+    d = {"*": False}
+    past_header = False
+    with open(OCCUPANCY_FPATH, "r") as csvfile:
+        csvfile = csv.reader(csvfile)
+        for row in csvfile:
+            if ("BuildingSName" in row[0]):
+                past_header = True
+                continue
+            if not past_header:
+                continue
+            try:
+                bldgsname = row[0]
+                cron_occupancy = str_to_bool(row[2])
+                is_occupied = str_to_bool(row[3])
+                crontab = f"{row[4]} {row[5]} {row[6]} {row[7]} {row[8]}"
+                if cron_is_now(crontab) and cron_occupancy:
+                    if "*" in bldgsname:
+                        for item in d:
+                            d[item] = is_occupied
+                        d["*"] = is_occupied
+                    else:
+                        d[bldgsname] = is_occupied
+            except Exception:
+                continue
+
+    return d
 
 
 def rebuild_broken_cache(table):
@@ -261,42 +320,6 @@ def command_to_list_multiple(command, num_args):
     return data_list
 
 
-def request_to_list_single(query):
-    """[Defunct] Returns a list of data from a query."""
-    data = urllib.request.urlopen(query)
-    data_readable = data.read().decode('utf-8').replace("}{", "} {")
-    data_list = data_readable.split("} {")
-    dict_list = [json.loads(d) for d in data_list]
-    data_list = [sd[list(sd.keys())[0]] for sd in dict_list]
-    return data_list
-
-
-def request_to_list_multiple(query, num_args):
-    """[Defunct] Returns a list of lists.
-
-    list of lists (with length up to num_args) of data from a query.
-    """
-    data = urllib.request.urlopen(query)
-    data_readable = data.read().decode('utf-8').replace("}{", "} {")
-    data_list = data_readable.split("} {")
-    dict_list = []
-    for i, d in enumerate(data_list):
-        d = d if d[0] == "{" else "{" + d
-        d = d if d[-1] == "}" else d + "}"
-        dict_list.append(json.loads(d))
-
-    data_list = []
-    for sd in dict_list:
-        try:
-            dl = []
-            for k in sd:
-                dl.append(sd[k])
-            data_list.append(dl)
-        except Exception:
-            pass
-    return data_list
-
-
 def safe_log(message, type):
     """Log a message safely."""
     if LOG:
@@ -306,17 +329,30 @@ def safe_log(message, type):
             logging.info(message)
 
 
-def parse_json(filename):
-    """Parse json for cron use."""
-    try:
-        f = open(filename, "r")
-        line = f.readlines()[0]
-        new_json = json.loads(line)
-        next_id = new_json["next_id"]
-        f.close()
-        return (next_id, new_json)
-    except Exception:
-        return (0, {})
+def parse_json(*filenames):
+    """Parse json(s) for cron use."""
+    max_id = 0
+    new_json = {}
+    for filename in filenames:
+        try:
+            f = open(filename, "r")
+            line = f.readlines()[0]
+            new_json.update(json.loads(line))
+            next_id = new_json["next_id"]
+            max_id = max(max_id, next_id)
+            f.close()
+        except Exception:
+            continue
+    return (max_id, new_json)
+
+
+def write_json_generic(new_events, next_id):
+    """Write json independent of time."""
+    if is_occupied():
+        write_json(json_oc, new_events, next_id)
+    else:
+        write_json(json_unoc, new_events, next_id)
+    return None
 
 
 def write_json(filename, new_events, next_id):
@@ -331,7 +367,6 @@ def write_json(filename, new_events, next_id):
 def assign_event_id(next_id, old_json, new_json, alert, alias):
     """Assign event id."""
     key = alias+alert["message_id"]
-    print(key, old_json)
     event_id = next_id
     if key in old_json:
         event_id = old_json[key]
@@ -340,6 +375,44 @@ def assign_event_id(next_id, old_json, new_json, alert, alias):
         next_id += 1
         new_json[key] = event_id
     return event_id, next_id, new_json
+
+
+def get_alias_or_psid(table_name):
+    """Return whether a table uses alias or point slice id."""
+    request_str = f"EXEC CEVAC_ALIAS_OR_PSID @table = '{table_name}'"
+    r_dict = json.loads(command_to_json_string(request_str).replace("'", '"'))
+    for key in r_dict:
+        return r_dict[key]
+
+
+def is_occupied():
+    """Return True if in occupied time."""
+    now = datetime.datetime.now()
+    day = now.isoweekday()
+    hour = now.hour
+    correct_day = (day >= 1 and day <= 5)
+    correct_hour = (hour >= 8 and hour < 17)
+    if (correct_day and correct_hour):
+        return True
+    return False
+
+
+def building_is_occupied(occupancy_dict, building):
+    """Return True if in occupied time."""
+    if occupancy_dict is None:
+        now = datetime.datetime.now()
+        day = now.isoweekday()
+        hour = now.hour
+        correct_day = (day >= 1 and day <= 5)
+        correct_hour = (hour >= 8 and hour < 17)
+        if (correct_day and correct_hour):
+            return True
+        return False
+    elif building not in occupancy_dict:
+        return occupancy_dict["*"]
+    else:
+        return occupancy_dict[building]
+    return False
 
 
 # Initialize logging
@@ -353,9 +426,12 @@ if LOG:
 
 # Get alert conditions
 alerts, unique_databases = import_conditions(alert_fname, logging)
+known_issues = import_known_issues(KNOWN_ISSUES_FPATH)
+occupancy = import_occupancy()
+print(occupancy)
 
 # JSON
-next_id, last_events = parse_json(json_fname)
+next_id, last_events = parse_json(json_fname, json_oc, json_unoc)
 new_events = {}  # id: { hash : event_id }
 
 # Check alerts for conditions
@@ -365,6 +441,7 @@ utcdatetimenow = datetime.datetime.utcnow()
 utcdatetimenow_str = sql_time_str(utcdatetimenow)
 for i, a in enumerate(alerts):
     alert = alerts[a]
+    a_or_psid = get_alias_or_psid(alert["database"])
     try:
         # Check time conditional to make sure it is the correct time for the
         # alert
@@ -372,13 +449,10 @@ for i, a in enumerate(alerts):
         now = datetime.datetime.now()
         day = now.isoweekday()
         hour = now.hour
-        correct_day = (day >= 1 and day <= 5)
-        correct_hour = (hour >= 8 and hour <= 5)
+        occupied = building_is_occupied(occupancy, alert["building"])
         if (alert["time_dependent"]):
-            if ((alert["occupancy_status"] and ((not correct_day)
-                 or (not correct_hour)))
-                    or (not alert["occupancy_status"] and
-                        ((correct_day) or (correct_hour)))):
+            if ((alert["occupancy_status"] and (not occupied))
+                    or (not alert["occupancy_status"] and (occupied))):
                 safe_log("Not time for alert #" + str(i + 1), "info")
                 continue
 
@@ -421,19 +495,21 @@ for i, a in enumerate(alerts):
                 total_issues += 1
                 safe_log("An alert was sent for " + str(alert), "info")
                 com = (f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType, "
-                       f"AlertMessage, Metric, BLDG, UTCDateTime, MessageID,"
-                       " Alias, EventID)"
+                       f"AlertMessage, Metric, BuildingDName, UTCDateTime, "
+                       "MessageID,"
+                       " Alias, EventID, BuildingSName)"
                        f" VALUES('{alert['operation']}',"
                        f"'{alert['message']}',"
                        f"'{alert['type']}',"
                        f"'{alert['bldg_disp']}','{utcdatetimenow_str}',"
-                       f"'{alert['message_id']}', {alias}, '{event_id}')")
+                       f"'{alert['message_id']}', {alias}, '{event_id}',"
+                       f"'{alert['building']}')")
                 insert_sql_total += com + "; "
             safe_log("Checked " + str(i + 1), "info")
 
         # Check each alias for temperature
         elif ("SP" in alert["value"]):
-            selection_command = (f"SELECT ALIAS, {alert['column']} FROM "
+            selection_command = (f"SELECT {a_or_psid}, {alert['column']} FROM "
                                  f"{alert['database']} ORDER BY "
                                  f"{alert['sort_column']}")
             print(selection_command)
@@ -459,6 +535,11 @@ for i, a in enumerate(alerts):
                     ec += 1
 
             for room in temps:
+                if skip_alias(known_issues, alert["building"], room):
+                    print(room, " is decomissioned")
+                    continue
+                else:
+                    print(room + " Temp")
                 try:
                     Alias_Temp = "Temp"
                     for key in temps[room].keys():
@@ -472,22 +553,27 @@ for i, a in enumerate(alerts):
 
                     # Modify value
                     room_vals = temps[room]
+                    val = 0
                     try:
-                        if "+" in alert["value"].split()[-1]:
+                        if "+" in alert["value"]:
                             val_str = alert["value"].split()[-1]
                             val = float(val_str[val_str.find("+") + 1:])
                             room_vals["Cooling SP"] += val
                             room_vals["Heating SP"] += val
-                        elif "-" in alert["value"].split()[-1]:
+                        elif "-" in alert["value"].split():
                             val_str = alert["value"].split()[-1]
                             val = float(val_str[val_str.find("-") + 1:])
                             room_vals["Cooling SP"] -= val
                             room_vals["Heating SP"] -= val
                     except Exception:
-                        pass
+                        print("exception")
+                        continue
 
                     # Check value
                     send_alert = False
+                    print(room_vals[Alias_Temp], room_vals["Cooling SP"]+val,
+                          room_vals["Heating SP"]-val, val, alert["value"])
+                    print("xxx")
 
                     if ">" in alert["condition"]:
                         if "Cooling SP" in alert["value"]:
@@ -511,37 +597,39 @@ for i, a in enumerate(alerts):
                                 send_alert = (
                                     room_vals["Heating SP"] >
                                     room_vals[Alias_Temp])
-
+                    print("send is ", send_alert)
                     if send_alert:
                         a = deepcopy(alert)
                         total_issues += 1
-
                         a["message"] = angle_brackets_replace_specific(
                                         a["message"], "alias",
                                         room + str(" Temp"))
                         a["message"] = angle_brackets_replace_specific(
                                         a["message"], "Cooling SP",
-                                        f"{room_vals['Cooling SP']:.1f}")
+                                        f"{(room_vals['Cooling SP']-val):.1f}")
                         a["message"] = angle_brackets_replace_specific(
                                         a["message"], "Heating SP",
-                                        f"{room_vals['Heating SP']:.1f}")
+                                        f"{(room_vals['Heating SP']+val):.1f}")
                         a["message"] = angle_brackets_replace_specific(
                                         a["message"], "ActualValue",
                                         f"{room_vals[Alias_Temp]:.1f}")
 
-                        event_id, next_id,
-                        new_events = assign_event_id(next_id, last_events,
-                                                     new_events, alert, room)
+                        event_id, next_id, new_events = assign_event_id(
+                                                            next_id,
+                                                            last_events,
+                                                            new_events,
+                                                            alert, room)
 
                         com = (f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW("
                                f"AlertType,"
-                               f" AlertMessage, Metric,BLDG,UTCDateTime,"
-                               f"MessageID, Alias, EventID)"
+                               f" AlertMessage, Metric,BuildingDName,"
+                               "UTCDateTime,"
+                               f"MessageID, Alias, EventID, BuildingSName)"
                                f" VALUES('{a['operation']}','{a['message']}',"
                                f"'{a['type']}','{a['bldg_disp']}',"
                                f"'{utcdatetimenow_str}',"
                                f"'{alert['message_id']}', '{room}', "
-                               f"'{event_id}')")
+                               f"'{event_id}', '{alert['building']}')")
                         insert_sql_total += com + "; "
                         safe_log("An alert was sent for " + str(a), "info")
                 except Exception:
@@ -551,11 +639,8 @@ for i, a in enumerate(alerts):
 
         # Check if aliases have reported within a given time
         elif ("<now>" in alert["value"]):
-            if not TIMED:
-                continue
-
             # Find all aliases
-            selection_command = (f"SELECT Alias, UTCDateTime FROM "
+            selection_command = (f"SELECT {a_or_psid}, UTCDateTime FROM "
                                  f"{alert['database']+'_BROKEN_CACHE'}")
             print(selection_command)
             if not CHECK_ALERTS:
@@ -591,33 +676,48 @@ for i, a in enumerate(alerts):
 
             for data in aliases:
                 alias = data
+                if skip_alias(known_issues, alert["building"], alias):
+                    print(alias, " is decomissioned")
+                    continue
+                else:
+                    print(alias)
                 t = aliases[alias]
 
                 datetime_object = datetime.datetime.strptime(
                     t, '%Y-%m-%d %H:%M:%S.%f')
                 now_aware = pytz.utc.localize(datetime_object)
                 minutes_off = (utc_dt - now_aware).total_seconds() / 60
+                dt_formatted = datetime_object.strftime("%m/%d/%y %I:%M %p")
+                today = datetime.datetime.now()
+                today = pytz.utc.localize(today)
+                time_diff = (today - now_aware)
+                days_since = time_diff.days + 1  # ceil
 
                 # Add to alerts to send
                 if True:
                     total_issues += 1
                     safe_log("An alert was sent for " + str(alert), "info")
                     a = deepcopy(alert)
-                    a["message"] = angle_brackets_replace_single(
-                        a["message"], alias) + " " + t
-                    event_id, next_id, new_events = assign_event_id(next_id,
-                                                                    last_events,
-                                                                    new_events,
-                                                                    alert,
-                                                                    alias)
+                    a["message"] = angle_brackets_replace_specific(
+                                        a["message"], "alias", alias)
+                    a["message"] = angle_brackets_replace_specific(
+                                        a["message"], "days", days_since)
+                    print(a["message"])
+                    event_id, next_id, new_events = assign_event_id(
+                                                        next_id,
+                                                        last_events,
+                                                        new_events,
+                                                        alert,
+                                                        alias)
+
                     com = (f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType, "
-                           f"AlertMessage, Metric,BLDG,UTCDateTime, "
-                           f"MessageID, Alias, EventID)"
+                           f"AlertMessage, Metric,BuildingDName,UTCDateTime, "
+                           f"MessageID, Alias, EventID, BuildingSName)"
                            f" VALUES('{a['operation']}','{a['message']}',"
                            f"'{a['type']}','{a['bldg_disp']}',"
                            f"'{utcdatetimenow_str}',"
                            f"'{alert['message_id']}', '{alias}',"
-                           f" '{event_id}')")
+                           f" '{event_id}', '{alert['building']}')")
                     insert_sql_total += com + "; "
             safe_log("Checked " + str(i + 1), "info")
 
@@ -632,19 +732,19 @@ for i, a in enumerate(alerts):
 
 if total_issues == 0:
     insert_sql_total = ("INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType,"
-                        "AlertMessage,Metric,BLDG,UTCDateTime,MessageID) "
-                        f"VALUES('All Clear''All Clear','N/A','All',"
+                        "AlertMessage,Metric,UTCDateTime,MessageID) "
+                        f"VALUES('All Clear','All Clear','N/A',"
                         f"GETUTCDATE(),'0')")
 
 # Insert into CEVAC_ALL_ALERTS_HIST
-write_json(json_fname, new_events, next_id)
+if LOG:
+    write_json_generic(new_events, next_id)
 if SEND:
     f = open("/home/bmeares/cache/insert_alert_system.sql", "w")
     f.write(insert_sql_total.replace(';', '\nGO\n'))
     f.close()
     os.system("/home/bmeares/scripts/exec_sql_script.sh "
               "/home/bmeares/cache/insert_alert_system.sql")
-    os.remove("/home/bmeares/cache/insert_alert_system.sql")
 else:
     print(insert_sql_total.replace(';', '\nGO\n'))
 

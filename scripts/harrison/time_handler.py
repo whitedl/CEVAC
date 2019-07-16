@@ -1,6 +1,6 @@
-"""Handle time functions."""
+"""Handle time functions for sql-python interactions."""
 
-import dateutil as tz
+from dateutil import tz
 import datetime
 
 
@@ -11,7 +11,7 @@ def sql_time_str(t):
 
 def time_of_sql(time_str):
     """Return datetime object of time string."""
-    t = datetime.datetime.strptime('%Y-%m-%d %H:%M:%S')
+    t = datetime.datetime.strptime(time_str, '%Y-%m-%d %H:%M:%S.%f')
     return t
 
 
@@ -25,6 +25,11 @@ def est_to_utc(t):
     return utc
 
 
+def human_readable(t):
+    """Return human readable string of time."""
+    return t.strptime("%m/%d/%y %I:%M %p")
+
+
 def utc_to_est(t):
     """Convert utc to est."""
     from_zone = tz.gettz('UTC')
@@ -33,3 +38,15 @@ def utc_to_est(t):
     utc = t.replace(tzinfo=from_zone)
     est = utc.astimezone(to_zone)
     return est
+
+
+'''
+        /##.*/
+       /#%&&%#/
+      ./%%%&%%#
+      %%%%&%&%%#
+     %&&  %%%&%%.
+     %&%  &%%&%%*
+     *%&@&@%&%%(
+       %%%%%%%%
+'''
