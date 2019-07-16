@@ -76,11 +76,11 @@ export class Legend extends L.Control {
     if (this.scale.length !== scale.length) {
       this.scale = scale;
       i = this.scales.length;
-      if (this.scale.length === 2) {
-        while (i--) {
-          this.removeChildren(this.scales[i][0]);
-        }
-      } else {
+      while (i--) {
+        this.removeChildren(this.scales[i][0]);
+      }
+      if (this.scale.length !== 2) {
+        i = this.scales.length;
         while (i--) {
           this.makeSteps(i);
         }
