@@ -15,7 +15,7 @@ from copy import deepcopy
 from croniter import croniter
 
 CONDITIONS_FPATH = "/home/bmeares/cron/alerts/"
-KNOWN_ISSUES_FPATH = "/cevac/CEVAC/known issues/Known Data Issues.csv"
+KNOWN_ISSUES_FPATH = "/cevac/DEV/known issues/Known Data Issues.csv"
 OCCUPANCY_FPATH = "/cevac/CEVAC/scripts/harrison/alerts/occupancy.csv"
 LOGGING_PATH = "/home/bmeares/cron/alerts/"
 PHONE_PATH = "/home/bmeares/cron/alerts/"
@@ -188,13 +188,15 @@ def import_known_issues(fname):
 
 def skip_alias(known_issues, bldg, alias):
     """Check known issues for decomissioned alias."""
-    alias_in_issues = False
+    if "344A" in alias:
+        print(known_issues, bldg, alias)
+        print("here")
     if bldg not in known_issues:
-        return alias_in_issues
+        return False
     for message in known_issues[bldg]:
         if alias in message:
-            return alias_in_issues
-    return alias_in_issues
+            return True
+    return False
 
 
 def cron_is_now(cron, offset=5):
@@ -427,6 +429,7 @@ if LOG:
 # Get alert conditions
 alerts, unique_databases = import_conditions(alert_fname, logging)
 known_issues = import_known_issues(KNOWN_ISSUES_FPATH)
+print("ki",known_issues)
 occupancy = import_occupancy()
 print(occupancy)
 
@@ -566,14 +569,10 @@ for i, a in enumerate(alerts):
                             room_vals["Cooling SP"] -= val
                             room_vals["Heating SP"] -= val
                     except Exception:
-                        print("exception")
                         continue
 
                     # Check value
                     send_alert = False
-                    print(room_vals[Alias_Temp], room_vals["Cooling SP"]+val,
-                          room_vals["Heating SP"]-val, val, alert["value"])
-                    print("xxx")
 
                     if ">" in alert["condition"]:
                         if "Cooling SP" in alert["value"]:
@@ -597,7 +596,6 @@ for i, a in enumerate(alerts):
                                 send_alert = (
                                     room_vals["Heating SP"] >
                                     room_vals[Alias_Temp])
-                    print("send is ", send_alert)
                     if send_alert:
                         a = deepcopy(alert)
                         total_issues += 1
