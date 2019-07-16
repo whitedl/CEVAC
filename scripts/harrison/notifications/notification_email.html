@@ -1,0 +1,101 @@
+<html>
+  <head>
+    <style>
+      h1 {
+        color: #FFFFFF;
+        background-color: #F66733;
+        text-align: center;
+        padding-top: 5%;
+        padding-bottom: 5%;
+      }
+      h2 {
+        color: #FFFFFF;
+        padding-left: 5%;
+        padding-right: 5%;
+      }
+      h3 {
+        color: #FFFFFF;
+        padding-left: 10%;
+        padding-right: 10%;
+        font-size: 18px;
+        text-align: justify;
+        padding-bottom: 0%;
+      }
+      h4 {
+        color: #FFFFFF;
+        padding-left: 10%;
+        padding-right: 10%;
+        font-size: 18px;
+        text-align: center;
+        padding-bottom: 0%;
+      }
+      p {
+        color: #FFFFFF;
+        padding-left: 10%;
+        padding-right: 10%;
+        font-size: 18px;
+        text-align: justify;
+      }
+      table {
+        color: #FFFFFF;
+        margin-left: 8%;
+        margin-right: 8%;
+        font-size: 18px;
+        text-align: left;
+      }
+      .keytab {
+        margin-left: auto;
+        margin-right: auto;
+      }
+      tr {
+        margin-bottom: 5%;
+      }
+      .parted {
+        margin-right: 15%;
+        margin-left: 15%;
+        background-color: #522D80;
+        padding-bottom: 5%;
+      }
+      .logo {
+        padding-top: 5%;
+        padding-bottom: 5%;
+        text-align: center;
+      }
+      .split {
+        color: #FFFFFF;
+        background-color: #F66733;
+      }
+      @media (max-width: 1200px) {
+        .parted {
+          margin-right: 0%;
+          margin-left: 0%;
+          background-color: #522D80;
+          padding-bottom: 5%;
+        }
+        table {
+          color: #FFFFFF;
+          margin-left: 2%;
+          margin-right: 2%;
+          font-size: 14px;
+          text-align: left;
+        }
+      }
+    </style>
+    <meta charset='utf-8'>
+  </head>
+  <body>
+    <div class="parted">
+      <div class="logo">
+        <img src="https://www.clemson.edu/brand/resources/logos/wordmark-academic/orange.png">
+      </div>
+      <h2>{{ Name }}:</h2>
+      <h3>The following notifications are aggregated from the past day.</h3>
+      {% for log in logs %}
+        <h2 class="split">{{log}}</h2>
+        {% for issue in logs[log]["issues"] %}
+          <h3>{{issue}}</h3><br>
+        {% endfor %}
+      {% endfor %}
+    </div>
+  </body>
+</html>

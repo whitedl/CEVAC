@@ -1,20 +1,25 @@
 #! /bin/bash
 
 /home/bmeares/scripts/seperator.sh
+
+hist_views_query="
+SELECT RTRIM(TableName) FROM CEVAC_TABLES
+WHERE TableName LIKE '%HIST_VIEW%'
+"
+/cevac/scripts/exec_sql.sh "$hist_views_query" "hist_views.csv"
+
 echo Appending tables...
-tables_array=(
-CEVAC_WATT_TEMP_HIST_VIEW
-CEVAC_WATT_IAQ_HIST_VIEW
-CEVAC_WATT_POWER_RAW_HIST_VIEW
-CEVAC_WATT_POWER_HIST_VIEW
-CEVAC_WATT_POWER_SUMS_HIST_VIEW
-CEVAC_ASC_IAQ_HIST_VIEW
-CEVAC_ASC_TEMP_HIST_VIEW
-CEVAC_LEE_III_TEMP_HIST_VIEW
-CEVAC_COOPER_TEMP_HIST_VIEW
-# CEVAC_COOPER_POWER_HIST_VIEW
-)
+
+# Remove header from csv
+sed -i '1d' /cevac/cache/hist_views.csv
+readarray tables_array < /cevac/cache/hist_views.csv
+
 for t in "${tables_array[@]}"; do
+  t=`echo "$t" | tr -d '\n'`
+  if [ -z "$t" ]; then
+    continue
+  fi
+  echo "$t"
   sql="EXEC CEVAC_CACHE_APPEND @tables = '"$t"'"
   /home/bmeares/scripts/exec_sql.sh "$sql"
 done

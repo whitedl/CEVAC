@@ -141,8 +141,6 @@ def cleanup():
                     os.path.getatime(fpath) < cutoff):
                 os.remove(fpath)
 
-# Logging during debug
-
 
 def debug_log(message, LOG):
     """Safely log files."""
@@ -182,7 +180,6 @@ for fname in next(os.walk(import_dir))[2]:
             print("not moved")
 
 if SEND:
-    # urllib.request.urlopen(command_to_query(insert_sql_total)).read()
     f = open("/home/bmeares/cache/insert_chw.sql", "w")
     f.write(insert_sql_total.replace(';', '\nGO\n'))
     f.close()
