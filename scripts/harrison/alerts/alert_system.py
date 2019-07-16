@@ -15,7 +15,7 @@ from copy import deepcopy
 from croniter import croniter
 
 CONDITIONS_FPATH = "/home/bmeares/cron/alerts/"
-KNOWN_ISSUES_FPATH = "/cevac/CEVAC/known issues/Known Data Issues.csv"
+KNOWN_ISSUES_FPATH = "/cevac/DEV/known issues/Known Data Issues.csv"
 OCCUPANCY_FPATH = "/cevac/CEVAC/scripts/harrison/alerts/occupancy.csv"
 LOGGING_PATH = "/home/bmeares/cron/alerts/"
 PHONE_PATH = "/home/bmeares/cron/alerts/"
