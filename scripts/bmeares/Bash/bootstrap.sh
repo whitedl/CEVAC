@@ -112,6 +112,7 @@ fi
 echo "CHECKPOINT 1"
 /cevac/scripts/exec_sql.sh "CHECKPOINT"
 
+# exit 1
 
 ###
 # Phase 3: Init _CACHE

@@ -174,8 +174,9 @@ p='5wattcevacmaint$'
 
 latest=$(echo "$table" | grep LATEST)
 xref=$(echo "$table" | grep XREF)
-if [ ! -z "$latest" ] || [ ! -z "$xref" ]; then
-  echo LATEST or XREF detected. Will overwrite $table.csv
+compare=$(echo "$table" | grep COMPARE)
+if [ ! -z "$latest" ] || [ ! -z "$xref" ] || [ ! -z "$compare"  ]; then
+  echo LATEST, XREF, or COMPARE detected. Will overwrite $table.csv
   rm -f /srv/csv/$table.csv
   echo "Dropping $table_CSV"
   /cevac/scripts/exec_sql.sh "IF OBJECT_ID('$table_CSV') IS NOT NULL DROP TABLE $table_CSV"
