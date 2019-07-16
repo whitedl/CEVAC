@@ -6,5 +6,6 @@ WITH Aggregated AS (
 	LEFT JOIN CEVAC_WATT_POWER_SUMS_HIST AS Reality
 		ON Jonathan.UTCDateTime = Reality.UTCDateTime
 )
-SELECT *, P_Total_Usage - Total_Usage AS 'Absolute Error'
+SELECT *, P_Total_Usage - Total_Usage AS 'Difference', ABS(P_Total_Usage - Total_Usage) AS 'Absolute_Error'
 FROM Aggregated
+

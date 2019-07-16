@@ -52,9 +52,7 @@ for t in "${tables_array[@]}"; do
   table_type=`/cevac/scripts/sql_value.sh "SELECT TABLE_TYPE FROM information_schema.tables WHERE TABLE_NAME = '$t'"`
   table_type=$(echo "$table_type" | sed 's/BASE //g')
   sql="
-  DECLARE @tableName NVARCHAR(500);
-  SET @tableName = '$t';
-  IF OBJECT_ID(@tableName) IS NOT NULL EXEC('DROP $table_type ' + @tableName)"
+  IF OBJECT_ID('$t') IS NOT NULL EXEC('DROP $table_type $t')"
   /cevac/scripts/exec_sql.sh "$sql"
 done
 
