@@ -54,6 +54,11 @@ FLEX UTILITIES
   flex-direction: column;
 }
 
+.flex-rev-col {
+  display: flex;
+  flex-direction: column-reverse;
+}
+
 .flex-col-start {
   display: flex;
   flex-direction: column;
@@ -69,6 +74,10 @@ FLEX UTILITIES
   justify-content: space-between;
 }
 
+.flex-stretch {
+  justify-content: stretch;
+}
+
 .flex-none {
   flex: none;
 }
@@ -82,7 +91,7 @@ FLEX UTILITIES
 }
 
 .flex-fill {
-  flex: 1 0 100%;
+  flex: 1 1 100%;
 }
 
 .filler {
@@ -177,7 +186,9 @@ LEAFLET CUSTOMIZATION
   font-weight: bold;
 }
 
-.gradient-scale {
+.scale {
+  display: flex;
+  flex-direction: column;
   flex: 1 1 auto;
   min-width: 2em;
   max-width: 4em;

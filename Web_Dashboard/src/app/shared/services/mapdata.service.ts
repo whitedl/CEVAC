@@ -107,10 +107,7 @@ export class MapdataService {
     );
     for (const cat of this.categories) {
       if (typeof cat !== 'undefined') {
-        this.legend.addCategory(
-          cat,
-          this.colorService.labDomain(this.colorService.getScaledColor(cat))
-        );
+        this.legend.addCategory(cat, this.colorService.getColorScale(cat));
       }
     }
     this.legend.addTo(this.map);
