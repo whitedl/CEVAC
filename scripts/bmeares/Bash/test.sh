@@ -1,11 +1,8 @@
-#! /bin/sh
-#
-# test.sh
-# Copyright (C) 2019 bmeares <bmeares@wfic-temp1>
-#
-# Distributed under terms of the MIT license.
-#
+/cevac/scripts/exec_sql.sh "EXEC CEVAC_UPDATE_STATS @BuildingSName = 'WATT', @Metric = 'ebrtb'"
 
+if [ $? -eq 0 ]; then
+  echo "Success"
+else
+  echo "Fail"
+fi
 
-
-echo Hello, World!
