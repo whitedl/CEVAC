@@ -17,7 +17,8 @@ export class MapdataService {
   dataSets: Measurement[] = [
     { name: 'Power', propertyName: 'power_latest_sum', unit: 'kW' },
     { name: 'Temperature', propertyName: 'temp_latest_avg', unit: 'F' },
-    { name: 'CO2', propertyName: 'co2_latest_avg', unit: 'ppm' }
+    { name: 'CO2', propertyName: 'co2_latest_avg', unit: 'ppm' },
+    { name: 'BuildingHealth', propertyName: 'co2_latest_avg', unit: 'ppm' }
   ];
   dataSet: Measurement = this.dataSets[0];
 
