@@ -20,7 +20,11 @@ for t in "${tables_array[@]}"; do
     continue
   fi
   echo "$t"
-  sql="EXEC CEVAC_CACHE_APPEND @tables = '"$t"'"
+  compare=$(echo "$t" | grep COMPARE)
+  if [ ! -z "$compare" ]; then
+    sql="EXEC CEVAC_CACHE_APPEND @tables = '"$t"'"
+  else sql="EXEC CEVAC_CACHE_INIT @tables = '$t'"
+  fi
   /home/bmeares/scripts/exec_sql.sh "$sql"
 done
 
