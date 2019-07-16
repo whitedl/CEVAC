@@ -535,8 +535,8 @@ for i, a in enumerate(alerts):
                     ec += 1
 
             for room in temps:
-                if skip_alias(known_issues, alert["building"], room+" Temp"):
-                    print(room+" Temp", " is decomissioned")
+                if skip_alias(known_issues, alert["building"], room):
+                    print(room, " is decomissioned")
                     continue
                 else:
                     print(room + " Temp")
