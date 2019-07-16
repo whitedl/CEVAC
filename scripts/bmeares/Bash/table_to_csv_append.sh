@@ -183,7 +183,8 @@ if [ ! -z "$latest" ] || [ ! -z "$xref" ] || [ ! -z "$compare"  ]; then
 fi
 
 # If $table.csv doesn't exist, initialize data
-if [ ! -f /srv/csv/$table.csv ] || [ ! -z $latest ]; then
+if [ ! -f /srv/csv/$table.csv ]; then
+  /cevac/scripts/exec_sql.sh "IF OBJECT_ID('$table_CSV') IS NOT NULL DROP TABLE $table_CSV"
   echo Generating $table.csv...
    # get columns
   /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$cols_query" -W -o "/cevac/cache/cols_$table.csv" -h-1 -s"," -w 700

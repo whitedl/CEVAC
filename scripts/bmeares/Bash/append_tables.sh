@@ -8,7 +8,7 @@ WHERE TableName LIKE '%HIST_VIEW%'
 "
 /cevac/scripts/exec_sql.sh "$hist_views_query" "hist_views.csv"
 
-echo Appending tables...
+echo "Appending tables..."
 
 # Remove header from csv
 sed -i '1d' /cevac/cache/hist_views.csv
@@ -21,7 +21,7 @@ for t in "${tables_array[@]}"; do
   fi
   echo "$t"
   compare=$(echo "$t" | grep COMPARE)
-  if [ ! -z "$compare" ]; then
+  if [ -z "$compare" ]; then
     sql="EXEC CEVAC_CACHE_APPEND @tables = '"$t"'"
   else sql="EXEC CEVAC_CACHE_INIT @tables = '$t'"
   fi
@@ -29,4 +29,4 @@ for t in "${tables_array[@]}"; do
 done
 
 
-echo Finished appending tables
+echo "Finished appending tables"
