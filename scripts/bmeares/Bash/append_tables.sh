@@ -26,6 +26,10 @@ for t in "${tables_array[@]}"; do
   else sql="EXEC CEVAC_CACHE_INIT @tables = '$t'"
   fi
   /home/bmeares/scripts/exec_sql.sh "$sql"
+  if [ ! $? -eq 0 ]; then
+    echo "Error. Aborting append"
+    exit 1
+  fi
 done
 
 
