@@ -19,10 +19,10 @@ to_list = {
     "Harrison Hall": "hchall@g.clemson.edu",
     "Bennett Meares": "bmeares@g.clemson.edu",
     #  "Inscribe boi": "bmeares@inscribe.productions",
-    "Zach Smith": "ztsmith@g.clemson.edu",
+    # "Zach Smith": "ztsmith@g.clemson.edu",
     # "Zach Klein": "ztklein@g.clemson.edu",
     # "Drewboi": "abemery@clemson.edu",
-    "Tim Howard": "timh@clemson.edu",
+    # "Tim Howard": "timh@clemson.edu",
 }
 
 f = open("/cevac/DEV/scripts/harrison/alerts/alert_email.html", "r")
