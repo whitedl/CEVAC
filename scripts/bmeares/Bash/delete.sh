@@ -10,6 +10,7 @@ if [ -z "$1" ] || [ -z "$2" ]; then
 fi
 
 HIST_VIEW="CEVAC_$Building""_$Metric""_HIST_VIEW"
+HIST="CEVAC_$Building""_$Metric""_HIST"
 echo "Warning: This will completely remove all traces of a BuildingSName/Metric"
 echo "To recreate the tables, run bootstrap.sh (THIS MAY TAKE > 1 HOUR)"
 echo "Custom tables MUST be reconfigured with CREATE_CUSTOM.sh if recreated."
