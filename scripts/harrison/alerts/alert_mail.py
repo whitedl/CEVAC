@@ -197,9 +197,7 @@ class Alert_Log:
         """Get room number from phrase."""
         phrase = self.message.split(" ")[0]
         if not self.contains_number(phrase):
-            print("")
             return ""
-        print(phrase)
         return phrase
 
     def contains_number(self, phrase):
@@ -267,7 +265,7 @@ def main():
     alerts = bsql.Query(f" DECLARE @yesterday DATETIME; SET @yesterday = "
                         f"DATEADD(day,"
                         f" -1, GETDATE());"
-                        f" SELECT TOP 100 * FROM CEVAC_ALL_ALERTS_EVENTS_HIST "
+                        f" SELECT TOP 100 * FROM CEVAC_ALL_ALERTS_EVENTS_LATEST "
                         f" WHERE ETDateTime >= @yesterday "
                         f" ORDER BY ETDateTime DESC")
     now_etc = time_handler.utc_to_est(now)
@@ -276,6 +274,7 @@ def main():
     yesterday_etc_str = yesterday_etc.strftime("%m/%d/%y %I:%M %p")
 
     alert_dict = alerts.as_dict()
+
     total_msg = ""
     all_alerts = []
     for i, key in enumerate(alert_dict):
