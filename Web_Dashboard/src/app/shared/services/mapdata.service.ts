@@ -24,20 +24,30 @@ export class MapdataService {
       active: true
     },
     {
-      name: 'Temperature',
-      propertyName: 'TEMP',
-      unit: 'F',
-      form: 'MAX',
-      display: true,
-      active: true
-    },
-    {
       name: 'Building Health',
       propertyName: 'IAQ',
       unit: 'ppm',
       form: 'MAX',
       display: true,
-      active: true
+      active: true,
+      subMeasures: [
+        {
+          name: 'Temperature',
+          propertyName: 'TEMP',
+          unit: 'F',
+          form: 'MAX',
+          display: true,
+          active: true
+        },
+        {
+          name: 'CO2',
+          propertyName: 'IAQ',
+          unit: 'ppm',
+          form: 'MAX',
+          display: true,
+          active: true
+        }
+      ]
     },
     {
       name: 'Chilled Water',
@@ -177,10 +187,14 @@ export class MapdataService {
         feature.properties && feature.properties[this.dataSet.propertyName]
           ? this.colorService.getScaledColor(
               bclass,
-              this.dataSet.name,
+              this.dataSet.propertyName,
               feature.properties[this.dataSet.propertyName].MAX
             )
-          : this.colorService.getScaledColor(bclass, this.dataSet.name, 0);
+          : this.colorService.getScaledColor(
+              bclass,
+              this.dataSet.propertyName,
+              0
+            );
     }
     return style;
   };

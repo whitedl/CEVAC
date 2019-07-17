@@ -15,6 +15,16 @@
       >
         {{ dataSet.name }}
       </mat-radio-button>
+      <ng-container *ngFor="let subMeas of dataSet.subMeasures">
+        <mat-radio-button
+          *ngIf="subMeas.display"
+          [value]="subMeas"
+          [disabled]="!dataSet.active"
+          style="padding-left:2em"
+        >
+          {{ subMeas.name }}
+        </mat-radio-button>
+      </ng-container>
     </ng-container>
   </mat-radio-group>
 </mat-card>
