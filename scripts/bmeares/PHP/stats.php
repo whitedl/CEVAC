@@ -14,11 +14,11 @@ if(isset($_GET['OP']))
   $OP = clean($_GET['OP']);
 else $OP = "*";
 
-if($OP != "*") $DataName = ", DataName";
-else $DataName = "";
+if($OP != "*") $extra_cols = ", DataName, last_ETDateTime, update_ETDateTime";
+else $extra_cols = "";
 
 $query = "
-SELECT $OP".$DataName." FROM
+SELECT $OP".$extra_cols." FROM
 CEVAC_ALL_LATEST_STATS
 WHERE BuildingSName LIKE '$BuildingSName'
 AND Metric LIKE '$Metric';
