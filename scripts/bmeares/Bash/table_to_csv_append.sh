@@ -196,9 +196,9 @@ if [ ! -f /srv/csv/$table.csv ]; then
   echo Generating $table.csv...
    # get columns
   /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$cols_query" -W -o "/cevac/cache/cols_$table.csv" -h-1 -s"," -w 700
-  tr '\n' ',' < /home/bmeares/cache/cols_$table.csv > /home/bmeares/cache/temp_cols_$table.csv && mv /home/bmeares/cache/temp_cols_$table.csv /home/bmeares/cache/cols_$table.csv
-  truncate -s-1 /home/bmeares/cache/cols_$table.csv
-  echo "" >> /home/bmeares/cache/cols_$table.csv
+  tr '\n' ',' < /cevac/cache/cols_$table.csv > /cevac/cache/temp_cols_$table.csv && mv /cevac/cache/temp_cols_$table.csv /cevac/cache/cols_$table.csv
+  truncate -s-1 /cevac/cache/cols_$table.csv
+  echo "" >> /cevac/cache/cols_$table.csv
 
   echo Executing query:
   echo "$query"
@@ -214,13 +214,8 @@ if [ ! -f /srv/csv/$table.csv ]; then
   sed -i 's/NULL/./g' /cevac/cache/$table.csv
   rows_transferred=$(wc -l < /home/bmeares/cache/$table.csv)
 
-  if [ -z "$latest" ] && [ -z "$xref" ]; then
-    echo "Creating $table_CSV..."
-    /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$csv_utc_query"
-  fi
-
   #append columns to beginning of CSV
-  cat /home/bmeares/cache/cols_$table.csv /home/bmeares/cache/$table.csv > /home/bmeares/cache/temp_$table.csv && mv /home/bmeares/cache/temp_$table.csv /srv/csv/$table.csv
+  cat /cevac/cache/cols_$table.csv /cevac/cache/$table.csv > /cevac/cache/temp_$table.csv && mv /cevac/cache/temp_$table.csv /cevac/cache/$table.csv && cp /cevac/cache/$table.csv /srv/csv/$table.csv
 else # csv exists
   echo $table.csv found. Grabbing newest data...  
 
@@ -248,7 +243,7 @@ else # csv exists
   echo Appending data to existing $table.csv...
   # Replace NULL with period for LASR
   sed -i 's/NULL/./g' /cevac/cache/$table.csv
-  cat /home/bmeares/cache/$table.csv /srv/csv/$table.csv | sponge /srv/csv/$table.csv
+  cat /cevac/cache/$table.csv /srv/csv/$table.csv | sponge /srv/csv/$table.csv
   echo Done appending.
 
 fi

@@ -1,7 +1,7 @@
 #! /bin/bash
 
 runsas="norun"
-reset="append"
+reset="reset"
 
 if [ ! -z "$1" ]; then
   runsas="$1"
