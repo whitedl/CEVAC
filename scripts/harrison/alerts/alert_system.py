@@ -429,9 +429,7 @@ if LOG:
 # Get alert conditions
 alerts, unique_databases = import_conditions(alert_fname, logging)
 known_issues = import_known_issues(KNOWN_ISSUES_FPATH)
-print("ki",known_issues)
 occupancy = import_occupancy()
-print(occupancy)
 
 # JSON
 next_id, last_events = parse_json(json_fname, json_oc, json_unoc)

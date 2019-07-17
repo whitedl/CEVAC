@@ -264,8 +264,8 @@ def main():
     yesterday = now - day
     alerts = bsql.Query(f" DECLARE @yesterday DATETIME; SET @yesterday = "
                         f"DATEADD(day,"
-                        f" -1, GETDATE());"
-                        f" SELECT TOP 100 * FROM CEVAC_ALL_ALERTS_EVENTS_LATEST "
+                        f" -1, GETDATE()); SELECT"
+                        f" TOP 100 * FROM CEVAC_ALL_ALERTS_EVENTS_LATEST "
                         f" WHERE ETDateTime >= @yesterday "
                         f" ORDER BY ETDateTime DESC")
     now_etc = time_handler.utc_to_est(now)
