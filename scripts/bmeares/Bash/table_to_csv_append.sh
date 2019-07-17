@@ -25,9 +25,10 @@ fi
 
 UTCDateTime=`/cevac/scripts/sql_value.sh "SET NOCOUNT ON; SELECT TOP 1 RTRIM(DateTimeName) FROM CEVAC_TABLES WHERE TableName = '$table'"`
 Alias=`/cevac/scripts/sql_value.sh "SET NOCOUNT ON; SELECT TOP 1 RTRIM(AliasName) FROM CEVAC_TABLES WHERE TableName = '$table'"`
+DataName=`/cevac/scripts/sql_value.sh "SET NOCOUNT ON; SELECT TOP 1 RTRIM(DataName) FROM CEVAC_TABLES WHERE TableName = '$table'"`
 
-if [ -z "$UTCDateTime" ] || [ -z "$Alias" ]; then
-  echo "Error: Missing DateTimeName or AliasName for $table"
+if [ -z "$UTCDateTime" ] || [ -z "$Alias" ] || [ -z "$DataName" ]; then
+  echo "Error: Missing DateTimeName, AliasName, or DataName for $table"
   echo "Enter the information below and rerun the script."
   echo "BuildingSName:"
   read BuildingSName
@@ -39,13 +40,15 @@ if [ -z "$UTCDateTime" ] || [ -z "$Alias" ]; then
   read DateTimeName
   echo "AliasName:"
   read AliasName
+  echo "DataName:"
+  read DataName
 
   failure_query="
   DECLARE @isCustom BIT;
   DECLARE @Definition NVARCHAR(MAX);
   SET @Definition = (SELECT TOP 1 Definition FROM CEVAC_TABLES WHERE TableName = '$table');
   SET @isCustom = (SELECT TOP 1 isCustom FROM CEVAC_TABLES WHERE TableName = '$table');
-	INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, AliasName, isCustom, Definition)
+	INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, AliasName, DataName, isCustom, Definition)
 		VALUES (
 			'$BuildingSName',
 			'$Metric',
@@ -53,6 +56,7 @@ if [ -z "$UTCDateTime" ] || [ -z "$Alias" ]; then
 			'$table_CSV',
       '$DateTimeName',
       '$AliasName',
+      '$DataName',
       @isCustom,
       @Definition
 		)
@@ -66,6 +70,7 @@ fi
 
 echo "DateTimeName: $UTCDateTime"
 echo "AliasName: $Alias"
+echo "DataName: $DataName"
 
 cols_query="
 SET NOCOUNT ON
@@ -79,21 +84,24 @@ IF EXISTS (SELECT TableName FROM CEVAC_TABLES WHERE TableName = '$table') BEGIN
 	DECLARE @TableName NVARCHAR(100);
   DECLARE @DateTimeName NVARCHAR(50);
   DECLARE @AliasName NVARCHAR(50);
+  DECLARE @DataName NVARCHAR(50);
 	SET @BuildingSName = (SELECT TOP 1 BuildingSName FROM CEVAC_TABLES WHERE TableName = '$table');
 	SET @Metric = (SELECT TOP 1 Metric FROM CEVAC_TABLES WHERE TableName = '$table');
 	SET @Age = (SELECT TOP 1 Age FROM CEVAC_TABLES WHERE TableName = '$table');
   SET @DateTimeName = (SELECT TOP 1 DateTimeName FROM CEVAC_TABLES WHERE TableName = '$table');
   SET @AliasName = (SELECT TOP 1 AliasName FROM CEVAC_TABLES WHERE TableName = '$table');
+  SET @DataName = (SELECT TOP 1 DataName FROM CEVAC_TABLES WHERE TableName = '$table');
 
 	DELETE FROM CEVAC_TABLES WHERE TableName = '$table_CSV';
-	INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, AliasName)
+	INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, AliasName, DataName)
 		VALUES (
 			@BuildingSName,
 			@Metric,
 			@Age,
 			'$table_CSV',
       '$UTCDateTime',
-      '$Alias'
+      '$Alias',
+      '$DataName'
 		)
 END
 
@@ -137,7 +145,7 @@ SET @last_UTC = (
   ORDER BY update_time DESC
 );
 IF DATEDIFF(day, @last_UTC, @begin) > 0 BEGIN
-  SET @begin = @last_UTC;
+  SET @begin = DATEADD(DAY, -31, @last_UTC);
 END;
 
 WITH new AS (
@@ -174,15 +182,17 @@ p='5wattcevacmaint$'
 
 latest=$(echo "$table" | grep LATEST)
 xref=$(echo "$table" | grep XREF)
-if [ ! -z "$latest" ] || [ ! -z "$xref" ]; then
-  echo LATEST or XREF detected. Will overwrite $table.csv
+compare=$(echo "$table" | grep COMPARE)
+if [ ! -z "$latest" ] || [ ! -z "$xref" ] || [ ! -z "$compare"  ]; then
+  echo LATEST, XREF, or COMPARE detected. Will overwrite $table.csv
   rm -f /srv/csv/$table.csv
   echo "Dropping $table_CSV"
   /cevac/scripts/exec_sql.sh "IF OBJECT_ID('$table_CSV') IS NOT NULL DROP TABLE $table_CSV"
 fi
 
 # If $table.csv doesn't exist, initialize data
-if [ ! -f /srv/csv/$table.csv ] || [ ! -z $latest ]; then
+if [ ! -f /srv/csv/$table.csv ]; then
+  /cevac/scripts/exec_sql.sh "IF OBJECT_ID('$table_CSV') IS NOT NULL DROP TABLE $table_CSV"
   echo Generating $table.csv...
    # get columns
   /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$cols_query" -W -o "/cevac/cache/cols_$table.csv" -h-1 -s"," -w 700
