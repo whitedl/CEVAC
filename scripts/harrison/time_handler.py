@@ -27,7 +27,7 @@ def est_to_utc(t):
 
 def human_readable(t):
     """Return human readable string of time."""
-    return t.strptime("%m/%d/%y %I:%M %p")
+    return t.strftime("%m/%d/%y %I:%M %p")
 
 
 def utc_to_est(t):
