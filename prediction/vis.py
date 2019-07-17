@@ -132,9 +132,9 @@ def addHour(dateTime, addition):
 
     return newDate
 
-
-
+# fill numpy arrays for training and testing data sets
 def makeArrays(df):
+
     df = insertData(df)
 
     # temporary x and temporary y lists for each loop

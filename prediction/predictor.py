@@ -59,8 +59,6 @@ class predictor():
             r = requests.get(requestURL).json()
             hourlyData = r['hourly']['data']
 
-            # print(self.hourly)
-
             # insert every element in the hourly data
             for element in hourlyData:
                 self.hourly['hours'].append(int(time.strftime('%H', time.localtime(element['time']))))
@@ -150,7 +148,10 @@ class predictor():
             self.input.append(temp)
 
         self.input = np.array(self.input)
-        prediction = self.model.predict((self.input))
+        print(self.input)
+        with open('predInput.txt', 'w') as f:
+            f.write(str(self.input))
+        # prediction = self.model.predict((self.input))
 
 if __name__ == '__main__':
 
