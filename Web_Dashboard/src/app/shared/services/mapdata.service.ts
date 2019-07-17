@@ -15,10 +15,38 @@ const geodata = require('src/assets/CU_Building_Footprints.json');
 export class MapdataService {
   // be sure the names match with the values in color service, otherwise you'll get the default scale
   dataSets: Measurement[] = [
-    { name: 'Power', propertyName: 'power_latest_sum', unit: 'kW' },
-    { name: 'Temperature', propertyName: 'temp_latest_avg', unit: 'F' },
-    { name: 'CO2', propertyName: 'co2_latest_avg', unit: 'ppm' },
-    { name: 'BuildingHealth', propertyName: 'co2_latest_avg', unit: 'ppm' }
+    {
+      name: 'Power',
+      propertyName: 'POWER',
+      unit: 'kW',
+      form: 'MAX',
+      display: true,
+      active: true
+    },
+    {
+      name: 'Temperature',
+      propertyName: 'TEMP',
+      unit: 'F',
+      form: 'MAX',
+      display: true,
+      active: true
+    },
+    {
+      name: 'Building Health',
+      propertyName: 'IAQ',
+      unit: 'ppm',
+      form: 'MAX',
+      display: true,
+      active: true
+    },
+    {
+      name: 'Chilled Water',
+      propertyName: 'CHW',
+      unit: 'KBTU',
+      form: 'MAX',
+      display: true,
+      active: true
+    }
   ];
   dataSet: Measurement = this.dataSets[0];
 
@@ -146,13 +174,11 @@ export class MapdataService {
       style.fillOpacity = 1;
       style.color = this.colorService.getScaledColor(bclass);
       style.fillColor =
-        feature.properties &&
-        feature.properties.bData &&
-        feature.properties.bData[this.dataSet.propertyName]
+        feature.properties && feature.properties[this.dataSet.propertyName]
           ? this.colorService.getScaledColor(
               bclass,
               this.dataSet.name,
-              feature.properties.bData[this.dataSet.propertyName]
+              feature.properties[this.dataSet.propertyName].MAX
             )
           : this.colorService.getScaledColor(bclass, this.dataSet.name, 0);
     }
@@ -217,13 +243,15 @@ export class MapdataService {
     layer.on(opt);
     if (feature.properties.Status === 'Active') {
       this.http
-        .get(this.dataUrl + '?building=' + feature.properties.Short_Name)
-        .subscribe((bData: BuildingData) => {
-          if (bData) {
-            bData.report_link = this.sasBaseURL + bData.report_link;
-            feature.properties.bData = bData;
-            this.tracked.resetStyle(layer);
-          }
+        .get<BuildingData[]>(
+          this.dataUrl + '?BuildingSName=' + feature.properties.Short_Name
+        )
+        .subscribe(bData => {
+          bData.forEach((element: any) => {
+            feature.properties[element.Metric] = element;
+          });
+          this.tracked.resetStyle(layer);
+
           layer.bindPopup(
             '<pre>' +
               JSON.stringify(feature.properties, null, ' ').replace(
