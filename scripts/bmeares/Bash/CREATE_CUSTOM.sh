@@ -4,7 +4,10 @@ BuildingSName="$1"
 Metric="$2"
 DateTimeName="$3"
 AliasName="$4"
-Dependencies="$5"
+DataName="$5"
+Dependencies="$6"
+
+echo "Usage: $0 [BuildingSName] [Metric] [DateTimeName] [AliasName] [DataName] [Dependencies]"
 
 if [ -z "$1" ]; then
   echo $'Building            (e.g. WATT): '; read BuildingSName
@@ -16,9 +19,12 @@ if [ -z "$3" ]; then
   echo $'DateTimeName (e.g. UTCDateTime):'; read DateTimeName
 fi
 if [ -z "$4" ]; then
-  echo $'AliasName/ID     (e.g. : Alias):'; read AliasName
+  echo $'AliasName/ID       (e.g. Alias):'; read AliasName
 fi
 if [ -z "$5" ]; then
+  echo $'DataName     (e.g. ActualValue):'; read DataName
+fi
+if [ -z "$6" ]; then
   echo $'Dependencies   (comma-separated):'; read Dependencies
 fi
 
@@ -40,7 +46,7 @@ Definition="$CREATE_VIEW $Definition"
 # Insert into CEVAC_TABLES
 cevac_tables_query="
 DELETE FROM CEVAC_TABLES WHERE TableName = '$HIST_VIEW';
-INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, AliasName, isCustom, Definition, Dependencies)
+INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, AliasName, DataName, isCustom, Definition, Dependencies)
   VALUES (
     '$BuildingSName',
     '$Metric',
@@ -48,6 +54,7 @@ INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, A
     '$HIST_VIEW',
     '$DateTimeName',
     '$AliasName',
+    '$DataName',
     1,
     '$Definition',
     '$Dependencies'
