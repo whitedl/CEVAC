@@ -2,32 +2,37 @@
 include "config.php";
 global $db;
 
-// $vars = json_decode(stripslashes(file_get_contents("php://input")), true);
-$bldg = $_GET['building'];
-$bldg = clean($bldg);
+if(isset($_GET['BuildingSName']))
+  $BuildingSName = clean($_GET['BuildingSName']);
+else $BuildingSName = "%";
 
-$query = "SELECT RTRIM(building) AS building,
-power_latest_sum,
-temp_latest_avg,
-co2_latest_avg,
-report_link,
-update_time 
+if(isset($_GET['Metric']))
+  $Metric = clean($_GET['Metric']);
+else $Metric = "%";
 
-FROM CEVAC_STATS
-WHERE building = '$bldg'
+if(isset($_GET['OP']))
+  $OP = clean($_GET['OP']);
+else $OP = "*";
+
+if($OP != "*") $DataName = ", DataName";
+else $DataName = "";
+
+$query = "
+SELECT $OP".$DataName." FROM
+CEVAC_ALL_LATEST_STATS
+WHERE BuildingSName LIKE '$BuildingSName'
+AND Metric LIKE '$Metric';
 ";
 
+
+$array = array();
 $result = sqlsrv_query($db, $query);
-$row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC);
-$json = json_encode($row);
+while($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)){
+  $array[] = $row;
+}
 
+$json = json_encode($array);
 echo $json;
-
-// while($row = sqlsrv_fetch_array($result)){
-  // for($i = 0; $i < sizeof($row); $i++){
-    // echo $row[$i]." ";
-  // }
-// }
 
 sqlsrv_close($db);
 ?>
