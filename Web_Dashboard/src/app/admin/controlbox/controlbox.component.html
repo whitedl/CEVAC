@@ -7,8 +7,14 @@
     (change)="(update)"
     aria-labelledby="control-label"
   >
-    <mat-radio-button *ngFor="let dataSet of dataSets" [value]="dataSet">
-      {{ dataSet.name }}
-    </mat-radio-button>
+    <ng-container *ngFor="let dataSet of dataSets">
+      <mat-radio-button
+        *ngIf="dataSet.display"
+        [value]="dataSet"
+        [disabled]="!dataSet.active"
+      >
+        {{ dataSet.name }}
+      </mat-radio-button>
+    </ng-container>
   </mat-radio-group>
 </mat-card>

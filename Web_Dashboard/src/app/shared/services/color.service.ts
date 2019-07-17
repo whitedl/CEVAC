@@ -72,7 +72,8 @@ export class ColorService {
     Power: new Scale([0, 1000]),
     Temperature: new Scale([50, 100]),
     CO2: new Scale([0, 500]),
-    BuildingHealth: new Scale([0, 500, 800, 1000, 1200])
+    'Building Health': new Scale([0, 500, 800, 1000, 1200]),
+    'Chilled Water': new Scale([0, 10000])
   };
   private crg: BuildingRegistry = {};
   private crgPalette = 'ClemsonPalette';
