@@ -5,4 +5,5 @@ export interface Measurement {
   form: 'AVG' | 'SUM' | 'MIN' | 'MAX';
   display: boolean;
   active: boolean;
+  subMeasures?: Measurement[];
 }
