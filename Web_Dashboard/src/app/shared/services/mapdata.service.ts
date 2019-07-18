@@ -16,7 +16,7 @@ export class MapdataService {
   // be sure the names match with the values in color service, otherwise you'll get the default scale
   dataSets: Measurement[] = [
     {
-      name: 'Power',
+      name: 'Electric',
       propertyName: 'POWER',
       category: 'Utilities',
       unit: 'kW',
