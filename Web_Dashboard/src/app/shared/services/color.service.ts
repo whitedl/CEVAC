@@ -110,6 +110,9 @@ export class ColorService {
     const retScale = chroma
       .bezier(this.labDomain(this.crg[category]))
       .scale()
+      // @ts-ignore
+      // chroma.js typings don't include the nodata function
+      .nodata(this.crg[category])
       .correctLightness();
     if (domain.length !== 2) {
       return retScale

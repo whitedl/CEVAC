@@ -1,30 +1,26 @@
 <mat-card>
   <mat-card-title>Building Statistics</mat-card-title>
-  <mat-radio-group
-    class="flex-col"
-    name="dataSet"
-    [(ngModel)]="dataSet"
-    (change)="(update)"
-    aria-labelledby="control-label"
-  >
-    <ng-container *ngFor="let dataSet of dataSets">
-      <mat-radio-button
-        *ngIf="dataSet.display"
-        [value]="dataSet"
-        [disabled]="!dataSet.active"
-      >
-        {{ dataSet.name }}
-      </mat-radio-button>
-      <ng-container *ngFor="let subMeas of dataSet.subMeasures">
-        <mat-radio-button
-          *ngIf="subMeas.display"
-          [value]="subMeas"
-          [disabled]="!dataSet.active"
-          style="padding-left:2em"
-        >
-          {{ subMeas.name }}
-        </mat-radio-button>
+  <mat-card-content>
+    <mat-radio-group
+      class="flex-col"
+      name="dataSet"
+      [(ngModel)]="this.mapdataService.dataSet"
+      (change)="(update)"
+      aria-labelledby="control-label"
+    >
+      <ng-container *ngFor="let cat of categories; last as last">
+        <h3>{{ cat }}</h3>
+        <ng-container *ngFor="let measure of dataSets">
+          <mat-radio-button
+            *ngIf="measure.display && measure.category === cat"
+            [value]="measure"
+            [disabled]="!measure.active"
+          >
+            {{ measure.name }}
+          </mat-radio-button>
+        </ng-container>
+        <mat-divider [inset]="true" *ngIf="!last"></mat-divider>
       </ng-container>
-    </ng-container>
-  </mat-radio-group>
+    </mat-radio-group>
+  </mat-card-content>
 </mat-card>

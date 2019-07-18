@@ -10,6 +10,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatCardModule } from '@angular/material/card';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatDividerModule } from '@angular/material/divider';
 
 @NgModule({
   imports: [
@@ -22,7 +23,8 @@ import { MatChipsModule } from '@angular/material/chips';
     MatExpansionModule,
     MatCardModule,
     MatRadioModule,
-    MatChipsModule
+    MatChipsModule,
+    MatDividerModule
   ],
   exports: [
     MatSidenavModule,
@@ -34,7 +36,8 @@ import { MatChipsModule } from '@angular/material/chips';
     MatExpansionModule,
     MatCardModule,
     MatRadioModule,
-    MatChipsModule
+    MatChipsModule,
+    MatDividerModule
   ]
 })
 export class MaterialModule {}
