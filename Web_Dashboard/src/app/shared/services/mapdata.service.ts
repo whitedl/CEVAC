@@ -18,44 +18,56 @@ export class MapdataService {
     {
       name: 'Power',
       propertyName: 'POWER',
+      category: 'Utilities',
       unit: 'kW',
       form: 'MAX',
       display: true,
       active: true
     },
     {
-      name: 'Building Health',
+      name: 'Temperature',
+      propertyName: 'TEMP',
+      category: 'IAQ',
+      unit: 'F',
+      form: 'MAX',
+      display: true,
+      active: true
+    },
+    {
+      name: 'CO2',
       propertyName: 'IAQ',
+      category: 'IAQ',
       unit: 'ppm',
       form: 'MAX',
       display: true,
-      active: true,
-      subMeasures: [
-        {
-          name: 'Temperature',
-          propertyName: 'TEMP',
-          unit: 'F',
-          form: 'MAX',
-          display: true,
-          active: true
-        },
-        {
-          name: 'CO2',
-          propertyName: 'IAQ',
-          unit: 'ppm',
-          form: 'MAX',
-          display: true,
-          active: true
-        }
-      ]
+      active: true
     },
     {
       name: 'Chilled Water',
       propertyName: 'CHW',
+      category: 'Utilities',
       unit: 'KBTU',
       form: 'MAX',
       display: true,
-      active: true
+      active: false
+    },
+    {
+      name: 'Steam',
+      propertyName: 'STEAM',
+      category: 'Utilities',
+      unit: 'lbs',
+      form: 'MAX',
+      display: true,
+      active: false
+    },
+    {
+      name: 'Humidity',
+      propertyName: 'HUMIDITY',
+      category: 'IAQ',
+      unit: 'null',
+      form: 'MAX',
+      display: true,
+      active: false
     }
   ];
   dataSet: Measurement = this.dataSets[0];
@@ -99,7 +111,7 @@ export class MapdataService {
   setDataSet = () => {
     this.tracked.setStyle(this.style);
     this.legend.changeScale(
-      this.colorService.getScale(this.dataSet.name),
+      this.colorService.getScale(this.dataSet.propertyName),
       this.dataSet
     );
   };
@@ -140,7 +152,7 @@ export class MapdataService {
     this.tracked = L.geoJSON(geodata, this.trackedOptions).addTo(this.map);
     controller.addOverlay(this.untracked, 'show untracked');
     this.legend = new Legend(
-      this.colorService.getScale(this.dataSet.name),
+      this.colorService.getScale(this.dataSet.propertyName),
       this.dataSet,
       { position: 'bottomleft' }
     );
