@@ -67,7 +67,7 @@ export class MapdataService {
       unit: 'null',
       form: 'MAX',
       display: true,
-      active: false
+      active: true
     }
   ];
   dataSet: Measurement = this.dataSets[0];
