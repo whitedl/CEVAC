@@ -9,31 +9,41 @@ AS
 DECLARE @execute int;
 SET @execute = 1;
 
-DECLARE @name NVARCHAR(50);
-DECLARE @name_CACHE NVARCHAR(50);
+DECLARE @name NVARCHAR(300);
+DECLARE @name_CACHE NVARCHAR(300);
 DECLARE @Alias_or_PSID NVARCHAR(50);
 DECLARE @select_query NVARCHAR(MAX);
 DECLARE @i INT;
 DECLARE @AliasName NVARCHAR(50);
+DECLARE @DataName NVARCHAR(50);
 DECLARE @DateTimeName NVARCHAR(50);
+DECLARE @cevac_app_data NVARCHAR(300);
+DECLARE @create_app_data NVARCHAR(MAX);
+DECLARE @drop_app_data NVARCHAR(MAX);
+DECLARE @row_count INT;
+DECLARE @rows_transferred INT;
+
+SET @cevac_app_data = 'CEVAC_APPEND_DATA';
 SET @i = 100;
 IF OBJECT_ID('dbo.#cevac_params', 'U') IS NOT NULL DROP TABLE #cevac_params;
 SELECT * INTO #cevac_params FROM ListTable(@tables);
 
+IF OBJECT_ID(@cevac_app_data) IS NULL BEGIN
+	SET @create_app_data = '
+	CREATE TABLE ' + @cevac_app_data + '( 
+		name NVARCHAR(300),
+		rows_transferred INT,
+		runtime DATETIME
+	);
+	';
+	EXEC(@create_app_data);
+END
+
 
 WHILE (EXISTS(SELECT 1 FROM #cevac_params) AND @i > 0) BEGIN
-	IF OBJECT_ID('dbo.cevac_temp', 'U') IS NOT NULL DROP TABLE cevac_temp;
-	CREATE TABLE cevac_temp (
-	name NVARCHAR(100),
-	--row_count int,
-	rows_transferred int,
-	runtime DATETIME
-	);
-	
 	SET @i = @i - 1;
 	SET @name = (SELECT TOP 1 * FROM #cevac_params);
 	DELETE TOP(1) FROM #cevac_params;
---	SELECT COUNT(*) FROM #cevac_params;
 
 	-- Replace _VIEW with _CACHE, else append _CACHE
 	SET @name_CACHE = REPLACE(@name, '_VIEW', '');
@@ -42,6 +52,7 @@ WHILE (EXISTS(SELECT 1 FROM #cevac_params) AND @i > 0) BEGIN
 	EXEC CEVAC_ALIAS_OR_PSID_OUTPUT @table = @name, @Alias_or_PSID_out = @Alias_or_PSID OUTPUT
 	SET @DateTimeName = (SELECT TOP 1 RTRIM(DateTimeName) FROM CEVAC_TABLES WHERE TableName = @name);
 	SET @AliasName = (SELECT TOP 1 RTRIM(AliasName) FROM CEVAC_TABLES WHERE TableName = @name);
+	SET @DataName = (SELECT TOP 1 RTRIM(DataName) FROM CEVAC_TABLES WHERE TableName = @name);
 
 --	DECLARE @where_subquery NVARCHAR(50);
 	DECLARE @now DATETIME;
@@ -51,7 +62,25 @@ WHILE (EXISTS(SELECT 1 FROM #cevac_params) AND @i > 0) BEGIN
 	DECLARE @select_or_insert NVARCHAR(30);
 	SET @select_or_insert = 'SELECT';
 	-- Default: clone _VIEW into _HIST
-	SET @select_query = 'SELECT * INTO ' + @name_CACHE + ' FROM ' + @name;
+	SET @select_query = '
+	DECLARE @rows_transferred INT;
+	DECLARE @now DATETIME;
+	SET @now = GETUTCDATE();
+	SELECT * INTO ' + @name_CACHE + ' FROM ' + @name + '
+	
+	SET @rows_transferred = @@ROWCOUNT;
+
+		IF EXISTS (SELECT * FROM ' + @cevac_app_data + ' WHERE name = ''' + @name + ''') BEGIN
+			UPDATE ' + @cevac_app_data + '
+			SET rows_transferred = @rows_transferred, runtime = @now
+			WHERE name = ''' + @name + '''
+		END ELSE BEGIN
+			INSERT INTO ' + @cevac_app_data + '(name, rows_transferred, runtime)
+			VALUES (
+				''' + @name + ''', @rows_transferred, @now
+			)
+		END
+	';
 
 	-- if cache exists, only grab latest data
 	IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME=@name_CACHE) BEGIN
@@ -73,7 +102,7 @@ WHILE (EXISTS(SELECT 1 FROM #cevac_params) AND @i > 0) BEGIN
 		'
 		DECLARE @now DATETIME; SET @now = ''' + CAST(@now AS NVARCHAR(50)) +  '''; 
 		DECLARE @begin DATETIME; SET @begin = ''' + CAST(@begin AS NVARCHAR(50)) +  ''';
-
+		DECLARE @rows_transferred INT;
 
 		WITH V AS (
 			SELECT * FROM ' + @name + ' WHERE ' + @DateTimeName + ' BETWEEN @begin AND @now
@@ -84,20 +113,25 @@ WHILE (EXISTS(SELECT 1 FROM #cevac_params) AND @i > 0) BEGIN
 		'
 		SELECT V.* FROM V ' +
 		'LEFT JOIN C ON V.' + @DateTimeName + ' = C.' + @DateTimeName + ' AND V.' + @AliasName + ' = C.' + @AliasName
-		+ ' WHERE C.' + @DateTimeName + ' IS NULL AND C.' + @AliasName + ' IS NULL;
+		+ ' WHERE C.' + @DateTimeName + ' IS NULL AND C.' + @AliasName + ' IS NULL
 
-		INSERT INTO cevac_temp (name, rows_transferred, runtime)
-		VALUES (
-			''' + @name_CACHE + ''', @@ROWCOUNT, GETUTCDATE()
-		)';
-	
-	
---		DECLARE @ExecSQL NVARCHAR(300);
---		SET @ExecSQL = CONCAT('DROP TABLE ', @name_CACHE);
---		EXEC(@ExecSQL);
+		SET @rows_transferred = @@ROWCOUNT;
+
+		IF EXISTS (SELECT * FROM ' + @cevac_app_data + ' WHERE name = ''' + @name + ''') BEGIN
+			UPDATE ' + @cevac_app_data + '
+			SET rows_transferred = @rows_transferred, runtime = @now
+			WHERE name = ''' + @name + '''
+		END ELSE BEGIN
+			INSERT INTO ' + @cevac_app_data + '(name, rows_transferred, runtime)
+			VALUES (
+				''' + @name + ''', @rows_transferred, @now
+			)
+		END
+		';
+
 	END;
 
-	SELECT @select_query AS 'Select Query';
+	PRINT @select_query;
 	IF @execute = 1 BEGIN
 		EXEC(@select_query);
 		-- insert into CEVAC_TABLES
@@ -114,7 +148,7 @@ WHILE (EXISTS(SELECT 1 FROM #cevac_params) AND @i > 0) BEGIN
 
 
 			DELETE FROM CEVAC_TABLES WHERE TableName = @name_CACHE;
-			INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, AliasName, isCustom, Dependencies)
+			INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, AliasName, DataName, isCustom, Dependencies)
 				VALUES (
 					@BuildingSName,
 					@Metric,
@@ -122,21 +156,28 @@ WHILE (EXISTS(SELECT 1 FROM #cevac_params) AND @i > 0) BEGIN
 					@name_CACHE,
 					@DateTimeName,
 					@AliasName,
+					@DataName,
 					@isCustom,
 					@name
 				)
 		END
 	END
 
-	DECLARE @row_count INT;
-	DECLARE @rows_transferred INT;
+
 	SET @row_count = (
 		SELECT SUM (row_count)
 		FROM sys.dm_db_partition_stats
 		WHERE object_id=OBJECT_ID(@name_CACHE)   
 --		AND (index_id=0 or index_id=1);
 	);
-	SET @rows_transferred = (SELECT TOP 1 rows_transferred FROM cevac_temp WHERE name = @name_CACHE ORDER BY runtime DESC);	
+	SET @rows_transferred = ISNULL((SELECT TOP 1 rows_transferred FROM CEVAC_APPEND_DATA WHERE name = @name ORDER BY runtime DESC),@row_count);	
+
+	DECLARE @rows_transferred_string NVARCHAR(100);
+	DECLARE @row_count_string NVARCHAR(100);
+
+	SET @row_count_string = ISNULL(CAST(@row_count AS nvarchar(30)), '-1');
+	-- If rows_transferred is NULL, set equal to row_count (e.g. table has been rebuilt)
+	SET @rows_transferred_string = ISNULL(CAST(@rows_transferred AS nvarchar(30)), @row_count_string);
 
 	DECLARE @cache_query NVARCHAR(MAX);
 	SET @cache_query = '
@@ -145,7 +186,7 @@ WHILE (EXISTS(SELECT 1 FROM #cevac_params) AND @i > 0) BEGIN
 
 
 	INSERT INTO CEVAC_CACHE_RECORDS(table_name, update_time, storage, last_UTC, row_count, rows_transferred) VALUES ('''
-	+ @name + ''', ''' + CAST(@now AS nvarchar(50)) + ''', ''SQL'', @last_UTC, ' + isnull(CAST(@row_count AS nvarchar(20)), '-1') + ', ' + isnull(CAST(@rows_transferred AS nvarchar(30)), '-1') + ' )';
+	+ @name + ''', ''' + CAST(@now AS nvarchar(50)) + ''', ''SQL'', @last_UTC, ' + @row_count_string + ', ' + @rows_transferred_string + ' )';
 
 	SELECT @cache_query AS 'Cache query';
 	IF @execute = 1 EXEC(@cache_query);
@@ -169,6 +210,5 @@ WHILE (EXISTS(SELECT 1 FROM #cevac_params) AND @i > 0) BEGIN
 
 	END
 
-	DROP TABLE cevac_temp;
 END
 
