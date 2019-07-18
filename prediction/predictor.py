@@ -74,11 +74,11 @@ class predictor():
                 self.hourly['temperatures'].append(((element['temperature'] - 32) / 1.8 + 20) / 70)
                 self.hourly['clouds'].append(element['cloudCover'])
 
-    # accepts hour, day, month, year; returns normalized h, d, m, y, and throughMonth
+    # returns normalized h, d, m, y, and throughMonth
     def generateInput(self, h, d, m, y):
         numMonth = {
             '1' : 31,
-            '2': 29,
+            '2' : 29,
             '3' : 31,
             '4' : 30,
             '5' : 31,
@@ -157,7 +157,7 @@ class predictor():
 
         with open('predInput.txt', 'w') as f:
             f.write(str(self.input))
-        # prediction = self.model.predict((self.input))
+        prediction = self.model.predict((self.input))
 
 if __name__ == '__main__':
 

@@ -203,7 +203,7 @@ def makeArrays(df):
                 # powerConsumption = [df[powerConsumptionIndex]['intSum'] / 275]
                 tempx.append(np.concatenate((hour, day, month, throughMonth, temperature, humidity, clouds), axis = -1))
         try:
-            tempy = [(rowy['intSum'] / 275)]
+            tempy = [(row['intSum'] / 275)]
         except:
             pass
 
@@ -211,6 +211,8 @@ def makeArrays(df):
             x.append(tempx)
             y.append(tempy)
         tempx = []
+
+    print(len(x))
 
     # empty list of the training and testing sets that we are going to make
     trainingData = []
