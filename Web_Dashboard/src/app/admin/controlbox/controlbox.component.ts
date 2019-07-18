@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { MapdataService } from '@services/mapdata.service';
 import { Measurement } from '@app/shared/interfaces/measurement';
-import { debugOutputAstAsTypeScript } from '@angular/compiler';
 
 @Component({
   selector: 'app-controlbox',
