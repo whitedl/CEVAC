@@ -4,23 +4,12 @@ if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
   echo "Usage: ./lasr_append [BLDG] [METRIC] [AGE] [runsas] [reset]"
   exit 1
 fi
-# if [ -z "$4" ]; then
-  # echo "Error: Missing time metric (e.g. UTCDateTime)"
-  # echo "Usage: ./lasr_append [BLDG] [METRIC] [AGE] [UTCDateTime] [Alias] [runsas] [reset]"
-  # exit 1
-# fi
-# if [ -z "$5" ]; then
-  # echo "Error: Missing name metric (e.g. Alias)"
-  # echo "Usage: ./lasr_append [BLDG] [METRIC] [AGE] [UTCDateTime] [Alias] [runsas] [reset]"
-  # exit 1
-# fi
 if [ "$4" == "runsas" ]; then
   runsas="true"
 fi
 if [ "$5" == "reset" ]; then
   reset="true"
 fi
-
 
 building="$1"
 metric="$2"

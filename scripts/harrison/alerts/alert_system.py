@@ -14,6 +14,7 @@ import logging
 from copy import deepcopy
 from croniter import croniter
 
+
 CONDITIONS_FPATH = "/home/bmeares/cron/alerts/"
 KNOWN_ISSUES_FPATH = "/cevac/DEV/known issues/Known Data Issues.csv"
 OCCUPANCY_FPATH = "/cevac/CEVAC/scripts/harrison/alerts/occupancy.csv"
@@ -25,10 +26,10 @@ json_oc = "/cevac/cron/alert_log_oc.json"
 json_unoc = "/cevac/cron/alert_log_unoc.json"
 
 
-LOG = True
+LOG = False
 CHECK_ALERTS = True
-SEND = True
-UPDATE_CACHE = True
+SEND = False
+UPDATE_CACHE = False
 
 COLUMNS = {
     "alert_name": 0,
@@ -54,6 +55,7 @@ COLUMNS = {
 TIME = {
     "day": 1,
     "hr": 24,
+    "hour": 24,
     "min": 24 * 60,
     "minute": 24 * 60,
     "minutes": 24 * 60,
@@ -188,9 +190,6 @@ def import_known_issues(fname):
 
 def skip_alias(known_issues, bldg, alias):
     """Check known issues for decomissioned alias."""
-    if "344A" in alias:
-        print(known_issues, bldg, alias)
-        print("here")
     if bldg not in known_issues:
         return False
     for message in known_issues[bldg]:
@@ -417,337 +416,371 @@ def building_is_occupied(occupancy_dict, building):
     return False
 
 
-# Initialize logging
-if LOG:
-    FORMAT = '%(asctime)s %(levelname)s:%(message)s'
-    datestring = str(datetime.datetime.now().date())
-    log_file = os.path.join(LOGGING_PATH, datestring + '.log')
-    logging.basicConfig(filename=log_file, format=FORMAT, level=logging.INFO)
-    logging.info("NEW JOB\n---")
+def check_numerical_alias(alias, alert, next_id, last_events, new_events):
+    """Check numerical alias alert."""
+    selection_command = (f"SELECT TOP {str(alert['num_entries'])} "
+                         f"{alert['column']} FROM "
+                         f"{str(alert['database'])}")
+    if alert["aliases"] == ["*"]:
+        selection_command += f" WHERE {a_or_psid} = '{alias}'"
+        selection_command += f" ORDER BY {alert['sort_column']} DESC"
+    else:
+        rem_a = str(alert['aliases']).replace('[', '').replace(']', '')
+        selection_command += (f" WHERE ALIAS IN "
+                              f"({rem_a}) AND Alias = '{alias}'"
+                              f" ORDER BY {alert['sort_column']} DESC")
 
+    print(selection_command)
+    if not CHECK_ALERTS:
+        return ""
 
-# Get alert conditions
-alerts, unique_databases = import_conditions(alert_fname, logging)
-known_issues = import_known_issues(KNOWN_ISSUES_FPATH)
-occupancy = import_occupancy()
+    data_list = command_to_list_single(selection_command)
+    data_list = [float(d) for d in data_list]
+    avg_data = sum(data_list) / len(data_list)
 
-# JSON
-next_id, last_events = parse_json(json_fname, json_oc, json_unoc)
-new_events = {}  # id: { hash : event_id }
+    send_alert = False
+    if alert["condition"] == ">":
+        send_alert = (avg_data > alert["value"])
+    elif alert["condition"] == "<":
+        send_alert = (avg_data < alert["value"])
 
-# Check alerts for conditions
-insert_sql_total = ""
-total_issues = 0
-utcdatetimenow = datetime.datetime.utcnow()
-utcdatetimenow_str = sql_time_str(utcdatetimenow)
-for i, a in enumerate(alerts):
-    alert = alerts[a]
-    a_or_psid = get_alias_or_psid(alert["database"])
-    try:
-        # Check time conditional to make sure it is the correct time for the
-        # alert
-        # TODO: change this for school year
-        now = datetime.datetime.now()
-        day = now.isoweekday()
-        hour = now.hour
-        occupied = building_is_occupied(occupancy, alert["building"])
-        if (alert["time_dependent"]):
-            if ((alert["occupancy_status"] and (not occupied))
-                    or (not alert["occupancy_status"] and (occupied))):
-                safe_log("Not time for alert #" + str(i + 1), "info")
-                continue
-
-        # Check basic value for basic alert
-        if str.isdigit(alert["value"]):
-            alert["value"] = float(alert["value"])
-
-            selection_command = (f"SELECT TOP {str(alert['num_entries'])} "
-                                 f"{alert['column']} FROM "
-                                 f"{str(alert['database'])}")
-            if alert["aliases"] == ["*"]:
-                selection_command += f" ORDER BY {alert['sort_column']} DESC"
-            else:
-                rem_a = str(alert['aliases']).replace('[', '').replace(']', '')
-                selection_command += (f" WHERE ALIAS IN "
-                                      f"({rem_a})"
-                                      f" ORDER BY {alert['sort_column']} DESC")
-
-            print(selection_command)
-            if not CHECK_ALERTS:
-                continue
-
-            data_list = command_to_list_single(selection_command)
-            data_list = [float(d) for d in data_list]
-            avg_data = sum(data_list) / len(data_list)
-
-            send_alert = False
-            if alert["condition"] == ">":
-                send_alert = (avg_data > alert["value"])
-            elif alert["condition"] == "<":
-                send_alert = (avg_data < alert["value"])
-
-            alias = "Alias"
-            if send_alert:
-                event_id, next_id, new_events = assign_event_id(next_id,
-                                                                last_events,
-                                                                new_events,
-                                                                alert,
-                                                                alias)
-                total_issues += 1
-                safe_log("An alert was sent for " + str(alert), "info")
-                com = (f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType, "
-                       f"AlertMessage, Metric, BuildingDName, UTCDateTime, "
-                       "MessageID,"
-                       " Alias, EventID, BuildingSName)"
-                       f" VALUES('{alert['operation']}',"
-                       f"'{alert['message']}',"
-                       f"'{alert['type']}',"
-                       f"'{alert['bldg_disp']}','{utcdatetimenow_str}',"
-                       f"'{alert['message_id']}', {alias}, '{event_id}',"
-                       f"'{alert['building']}')")
-                insert_sql_total += com + "; "
-            safe_log("Checked " + str(i + 1), "info")
-
-        # Check each alias for temperature
-        elif ("SP" in alert["value"]):
-            selection_command = (f"SELECT {a_or_psid}, {alert['column']} FROM "
-                                 f"{alert['database']} ORDER BY "
-                                 f"{alert['sort_column']}")
-            print(selection_command)
-
-            if not CHECK_ALERTS:
-                continue
-
-            data_list = command_to_list_multiple(selection_command, 2)
-
-            temps = {}
-            ec = 0
-            for row in data_list:
-                try:
-                    room = row[0].split()[0]
-                    if room in temps:
-                        temps[room][row[0][row[0].find(
-                            " ") + 1:]] = float(row[1])
-                    else:
-                        temps[room] = {
-                            row[0][row[0].find(" ") + 1:]: float(row[1])
-                        }
-                except Exception:
-                    ec += 1
-
-            for room in temps:
-                if skip_alias(known_issues, alert["building"], room):
-                    print(room, " is decomissioned")
-                    continue
-                else:
-                    print(room + " Temp")
-                try:
-                    Alias_Temp = "Temp"
-                    for key in temps[room].keys():
-                        if (key != "Cooling SP" and key != "Heating SP"
-                                and "TEMP" in key):
-                            Alias_Temp = key
-                        elif ("AHU" in key):
-                            continue
-                        else:
-                            continue
-
-                    # Modify value
-                    room_vals = temps[room]
-                    val = 0
-                    try:
-                        if "+" in alert["value"]:
-                            val_str = alert["value"].split()[-1]
-                            val = float(val_str[val_str.find("+") + 1:])
-                            room_vals["Cooling SP"] += val
-                            room_vals["Heating SP"] += val
-                        elif "-" in alert["value"].split():
-                            val_str = alert["value"].split()[-1]
-                            val = float(val_str[val_str.find("-") + 1:])
-                            room_vals["Cooling SP"] -= val
-                            room_vals["Heating SP"] -= val
-                    except Exception:
-                        continue
-
-                    # Check value
-                    send_alert = False
-
-                    if ">" in alert["condition"]:
-                        if "Cooling SP" in alert["value"]:
-                            if "Cooling SP" in room_vals:
-                                send_alert = (
-                                    room_vals["Cooling SP"] <
-                                    room_vals[Alias_Temp])
-                        if "Heating SP" in alert["value"]:
-                            if "Heating SP" in room_vals:
-                                send_alert = (
-                                    room_vals["Heating SP"] <
-                                    room_vals[Alias_Temp])
-                    elif "<" in alert["condition"]:
-                        if "Cooling SP" in alert["value"]:
-                            if "Cooling SP" in room_vals:
-                                send_alert = (
-                                    room_vals["Cooling SP"] >
-                                    room_vals[Alias_Temp])
-                        if "Heating SP" in alert["value"]:
-                            if "Heating SP" in room_vals:
-                                send_alert = (
-                                    room_vals["Heating SP"] >
-                                    room_vals[Alias_Temp])
-                    if send_alert:
-                        a = deepcopy(alert)
-                        total_issues += 1
-                        a["message"] = angle_brackets_replace_specific(
-                                        a["message"], "alias",
-                                        room + str(" Temp"))
-                        a["message"] = angle_brackets_replace_specific(
-                                        a["message"], "Cooling SP",
-                                        f"{(room_vals['Cooling SP']-val):.1f}")
-                        a["message"] = angle_brackets_replace_specific(
-                                        a["message"], "Heating SP",
-                                        f"{(room_vals['Heating SP']+val):.1f}")
-                        a["message"] = angle_brackets_replace_specific(
-                                        a["message"], "ActualValue",
-                                        f"{room_vals[Alias_Temp]:.1f}")
-
-                        event_id, next_id, new_events = assign_event_id(
-                                                            next_id,
-                                                            last_events,
-                                                            new_events,
-                                                            alert, room)
-
-                        com = (f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW("
-                               f"AlertType,"
-                               f" AlertMessage, Metric,BuildingDName,"
-                               "UTCDateTime,"
-                               f"MessageID, Alias, EventID, BuildingSName)"
-                               f" VALUES('{a['operation']}','{a['message']}',"
-                               f"'{a['type']}','{a['bldg_disp']}',"
-                               f"'{utcdatetimenow_str}',"
-                               f"'{alert['message_id']}', '{room}', "
-                               f"'{event_id}', '{alert['building']}')")
-                        insert_sql_total += com + "; "
-                        safe_log("An alert was sent for " + str(a), "info")
-                except Exception:
-                    pass
-
-            safe_log("Checked " + str(i + 1), "info")
-
-        # Check if aliases have reported within a given time
-        elif ("<now>" in alert["value"]):
-            # Find all aliases
-            selection_command = (f"SELECT {a_or_psid}, UTCDateTime FROM "
-                                 f"{alert['database']+'_BROKEN_CACHE'}")
-            print(selection_command)
-            if not CHECK_ALERTS:
-                continue
-
-            if UPDATE_CACHE:
-                rebuild_broken_cache(alert["database"])
-
-            try:
-                data_list = command_to_list_multiple(selection_command, 2)
-            except Exception:
-                safe_log("Checked " + str(i + 1), "info")
-                continue
-
-            aliases = {}
-            for data in data_list:
-                aliases[data[0]] = data[1]
-
-            # alert["value"] in format "<now> - # day/hr/min"
-            dst = False
-            local = pytz.timezone("America/New_York")
-            naive = datetime.datetime.now()
-            local_dt = local.localize(naive, is_dst=dst)
-            utc_dt = local_dt.astimezone(pytz.utc)
-            try:
-                amount = int(alert["value"].split()[2])
-                unit_str = alert["value"].split()[3]
-                unit = TIME[unit_str]
-            except Exception:
-                amount = 1
-                unit = TIME["hour"]
-            minutes = amount * 24 * 60 / unit
-
-            for data in aliases:
-                alias = data
-                if skip_alias(known_issues, alert["building"], alias):
-                    print(alias, " is decomissioned")
-                    continue
-                else:
-                    print(alias)
-                t = aliases[alias]
-
-                datetime_object = datetime.datetime.strptime(
-                    t, '%Y-%m-%d %H:%M:%S.%f')
-                now_aware = pytz.utc.localize(datetime_object)
-                minutes_off = (utc_dt - now_aware).total_seconds() / 60
-                dt_formatted = datetime_object.strftime("%m/%d/%y %I:%M %p")
-                today = datetime.datetime.now()
-                today = pytz.utc.localize(today)
-                time_diff = (today - now_aware)
-                days_since = time_diff.days + 1  # ceil
-
-                # Add to alerts to send
-                if True:
-                    total_issues += 1
-                    safe_log("An alert was sent for " + str(alert), "info")
-                    a = deepcopy(alert)
-                    a["message"] = angle_brackets_replace_specific(
-                                        a["message"], "alias", alias)
-                    a["message"] = angle_brackets_replace_specific(
-                                        a["message"], "days", days_since)
-                    print(a["message"])
-                    event_id, next_id, new_events = assign_event_id(
-                                                        next_id,
+    alias = "Alias"
+    if send_alert:
+        event_id, next_id, new_events = assign_event_id(next_id,
                                                         last_events,
                                                         new_events,
                                                         alert,
                                                         alias)
+        safe_log("An alert was sent for " + str(alert), "info")
+        com = (f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType, "
+               f"AlertMessage, Metric, BuildingDName, UTCDateTime, "
+               "MessageID,"
+               " Alias, EventID, BuildingSName)"
+               f" VALUES('{alert['operation']}',"
+               f"'{alert['message']}',"
+               f"'{alert['type']}',"
+               f"'{alert['bldg_disp']}','{utcdatetimenow_str}',"
+               f"'{alert['message_id']}', {alias}, '{event_id}',"
+               f"'{alert['building']}')")
+    safe_log("Checked " + str(i + 1), "info")
+    return com + ";"
 
-                    com = (f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType, "
-                           f"AlertMessage, Metric,BuildingDName,UTCDateTime, "
-                           f"MessageID, Alias, EventID, BuildingSName)"
-                           f" VALUES('{a['operation']}','{a['message']}',"
-                           f"'{a['type']}','{a['bldg_disp']}',"
-                           f"'{utcdatetimenow_str}',"
-                           f"'{alert['message_id']}', '{alias}',"
-                           f" '{event_id}', '{alert['building']}')")
-                    insert_sql_total += com + "; "
-            safe_log("Checked " + str(i + 1), "info")
 
-        else:
-            safe_log("Could not find valid condition/value for " +
-                     str(alert), "info")
-            print("invalid condition")
+def check_temp(room, alert, temps, known_issues, next_id, last_events,
+               new_events):
+    """Check temp."""
+    if skip_alias(known_issues, alert["building"], room):
+        print(room, " is decomissioned")
+        return ""
+    else:
+        pass
 
+    try:
+        Alias_Temp = "Temp"
+        for key in temps[room].keys():
+            if (key != "Cooling SP" and key != "Heating SP"
+                    and "TEMP" in key):
+                Alias_Temp = key
+            elif ("AHU" in key):
+                continue
+            else:
+                continue
+
+        # Modify value
+        room_vals = temps[room]
+        val = 0
+        try:
+            if "+" in alert["value"]:
+                val_str = alert["value"].split()[-1]
+                val = float(val_str[val_str.find("+") + 1:])
+                room_vals["Cooling SP"] += val
+                room_vals["Heating SP"] += val
+            elif "-" in alert["value"].split():
+                val_str = alert["value"].split()[-1]
+                val = float(val_str[val_str.find("-") + 1:])
+                room_vals["Cooling SP"] -= val
+                room_vals["Heating SP"] -= val
+        except Exception:
+            return ""
+
+        # Check value
+        send_alert = False
+
+        if ">" in alert["condition"]:
+            if "Cooling SP" in alert["value"]:
+                if "Cooling SP" in room_vals:
+                    send_alert = (
+                        room_vals["Cooling SP"] <
+                        room_vals[Alias_Temp])
+            if "Heating SP" in alert["value"]:
+                if "Heating SP" in room_vals:
+                    send_alert = (
+                        room_vals["Heating SP"] <
+                        room_vals[Alias_Temp])
+        elif "<" in alert["condition"]:
+            if "Cooling SP" in alert["value"]:
+                if "Cooling SP" in room_vals:
+                    send_alert = (
+                        room_vals["Cooling SP"] >
+                        room_vals[Alias_Temp])
+            if "Heating SP" in alert["value"]:
+                if "Heating SP" in room_vals:
+                    send_alert = (
+                        room_vals["Heating SP"] >
+                        room_vals[Alias_Temp])
+
+        if send_alert:
+            a = deepcopy(alert)
+            a["message"] = angle_brackets_replace_specific(
+                            a["message"], "alias",
+                            room + str(" Temp"))
+            a["message"] = angle_brackets_replace_specific(
+                            a["message"], "Cooling SP",
+                            f"{(room_vals['Cooling SP']-val):.1f}")
+            a["message"] = angle_brackets_replace_specific(
+                            a["message"], "Heating SP",
+                            f"{(room_vals['Heating SP']+val):.1f}")
+            a["message"] = angle_brackets_replace_specific(
+                            a["message"], "ActualValue",
+                            f"{room_vals[Alias_Temp]:.1f}")
+
+            event_id, next_id, new_events = assign_event_id(
+                                                next_id,
+                                                last_events,
+                                                new_events,
+                                                alert, room)
+
+            com = (f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW("
+                   f"AlertType,"
+                   f" AlertMessage, Metric,BuildingDName,"
+                   "UTCDateTime,"
+                   f"MessageID, Alias, EventID, BuildingSName)"
+                   f" VALUES('{a['operation']}','{a['message']}',"
+                   f"'{a['type']}','{a['bldg_disp']}',"
+                   f"'{utcdatetimenow_str}',"
+                   f"'{alert['message_id']}', '{room}', "
+                   f"'{event_id}', '{alert['building']}')")
+            safe_log("An alert was sent for " + str(a), "info")
+            return com + ";"
     except Exception:
-        safe_log("Issue on alert " + str(i + 1) + " " + str(alert), "info")
-        print("issue on alert", str(i + 1))
+        pass
 
-if total_issues == 0:
-    insert_sql_total = ("INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType,"
-                        "AlertMessage,Metric,UTCDateTime,MessageID) "
-                        f"VALUES('All Clear','All Clear','N/A',"
-                        f"GETUTCDATE(),'0')")
+    safe_log("Checked " + str(i + 1), "info")
+    return ""
 
-# Insert into CEVAC_ALL_ALERTS_HIST
-if LOG:
-    write_json_generic(new_events, next_id)
-if SEND:
-    f = open("/home/bmeares/cache/insert_alert_system.sql", "w")
-    f.write(insert_sql_total.replace(';', '\nGO\n'))
-    f.close()
-    os.system("/home/bmeares/scripts/exec_sql_script.sh "
-              "/home/bmeares/cache/insert_alert_system.sql")
-else:
-    print(insert_sql_total.replace(';', '\nGO\n'))
 
-if LOG:
-    logging.info(str(datetime.datetime.now()) +
-                 " TOTAL ISSUES: " + str(total_issues))
-    logging.shutdown()
+def check_time(data, alert, next_id, last_events, new_events):
+    """Check time off since last report."""
+    alias = data
+    if skip_alias(known_issues, alert["building"], alias):
+        print(alias, " is decomissioned")
+        return ""
+    else:
+        pass
+    t = aliases[alias]
+
+    datetime_object = datetime.datetime.strptime(
+        t, '%Y-%m-%d %H:%M:%S.%f')
+    now_aware = pytz.utc.localize(datetime_object)
+    today = datetime.datetime.now()
+    today = pytz.utc.localize(today)
+    time_diff = (today - now_aware)
+    days_since = time_diff.days + 1  # ceil
+
+    # Add to alerts to send
+    if True:
+        safe_log("An alert was sent for " + str(alert), "info")
+        a = deepcopy(alert)
+        a["message"] = angle_brackets_replace_specific(
+                            a["message"], "alias", alias)
+        a["message"] = angle_brackets_replace_specific(
+                            a["message"], "days", days_since)
+        event_id, next_id, new_events = assign_event_id(
+                                            next_id,
+                                            last_events,
+                                            new_events,
+                                            alert,
+                                            alias)
+
+        com = (f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType, "
+               f"AlertMessage, Metric,BuildingDName,UTCDateTime, "
+               f"MessageID, Alias, EventID, BuildingSName)"
+               f" VALUES('{a['operation']}','{a['message']}',"
+               f"'{a['type']}','{a['bldg_disp']}',"
+               f"'{utcdatetimenow_str}',"
+               f"'{alert['message_id']}', '{alias}',"
+               f" '{event_id}', '{alert['building']}')")
+        return com + "; "
+    return ""
+
+
+if __name__ == "__main__":
+    # Initialize logging
+    if LOG:
+        FORMAT = '%(asctime)s %(levelname)s:%(message)s'
+        datestring = str(datetime.datetime.now().date())
+        log_file = os.path.join(LOGGING_PATH, datestring + '.log')
+        logging.basicConfig(filename=log_file, format=FORMAT,
+                            level=logging.INFO)
+        logging.info("NEW JOB\n---")
+
+    # Get alert conditions
+    alerts, unique_databases = import_conditions(alert_fname, logging)
+    known_issues = import_known_issues(KNOWN_ISSUES_FPATH)
+    occupancy = import_occupancy()
+
+    # JSON
+    next_id, last_events = parse_json(json_fname, json_oc, json_unoc)
+    new_events = {}  # id: { hash : event_id }
+
+    # Check alerts for conditions
+    insert_sql_total = ""
+    total_issues = 0
+    utcdatetimenow = datetime.datetime.utcnow()
+    utcdatetimenow_str = sql_time_str(utcdatetimenow)
+    for i, a in enumerate(alerts):
+        alert = alerts[a]
+        a_or_psid = get_alias_or_psid(alert["database"])
+        try:
+            # Check time conditional to make sure it is the correct time for
+            # the alert
+            # TODO: change this for school year
+            now = datetime.datetime.now()
+            day = now.isoweekday()
+            hour = now.hour
+            occupied = building_is_occupied(occupancy, alert["building"])
+            if (alert["time_dependent"]):
+                if ((alert["occupancy_status"] and (not occupied))
+                        or (not alert["occupancy_status"] and (occupied))):
+                    safe_log("Not time for alert #" + str(i + 1), "info")
+                    continue
+
+            # Check basic value for basic alert
+            if str.isdigit(alert["value"]):
+                alert["value"] = float(alert["value"])
+                z = (f"SELECT DISTINCT "
+                     f"{a_or_psid} "
+                     f"FROM {alert['database']}")
+                all_aliases = [b[0] for b in command_to_list_multiple(z, 2)]
+
+                for alias in all_aliases:
+                    try:
+                        insert_sql_total += check_numerical_alias(alias, alert,
+                                                                  next_id,
+                                                                  last_events,
+                                                                  new_events)
+                    except Exception:
+                        pass
+
+            # Check each alias for temperature
+            elif ("SP" in alert["value"]):
+                selection_command = (f"SELECT {a_or_psid}, {alert['column']} "
+                                     f"FROM "
+                                     f"{alert['database']} ORDER BY "
+                                     f"{alert['sort_column']}")
+                print(selection_command)
+
+                if not CHECK_ALERTS:
+                    continue
+
+                data_list = command_to_list_multiple(selection_command, 2)
+
+                temps = {}
+                ec = 0
+                for row in data_list:
+                    try:
+                        room = row[0].split()[0]
+                        if room in temps:
+                            temps[room][row[0][row[0].find(
+                                " ") + 1:]] = float(row[1])
+                        else:
+                            temps[room] = {
+                                row[0][row[0].find(" ") + 1:]: float(row[1])
+                            }
+                    except Exception:
+                        ec += 1
+
+                for room in temps:
+                    insert_sql_total += check_temp(room, alert, temps,
+                                                   known_issues,
+                                                   next_id, last_events,
+                                                   new_events)
+
+            # Check if aliases have reported within a given time
+            elif ("<now>" in alert["value"]):
+                # Find all aliases
+                selection_command = (f"SELECT {a_or_psid}, UTCDateTime FROM "
+                                     f"{alert['database']+'_BROKEN_CACHE'}")
+                print(selection_command)
+                if not CHECK_ALERTS:
+                    continue
+
+                if UPDATE_CACHE:
+                    rebuild_broken_cache(alert["database"])
+
+                try:
+                    data_list = command_to_list_multiple(selection_command, 2)
+                except Exception:
+                    safe_log("Checked " + str(i + 1), "info")
+                    continue
+
+                aliases = {}
+                for data in data_list:
+                    aliases[data[0]] = data[1]
+
+                # alert["value"] in format "<now> - # day/hr/min"
+                dst = False
+                local = pytz.timezone("America/New_York")
+                naive = datetime.datetime.now()
+                local_dt = local.localize(naive, is_dst=dst)
+                utc_dt = local_dt.astimezone(pytz.utc)
+                try:
+                    amount = int(alert["value"].split()[2])
+                    unit_str = alert["value"].split()[3]
+                    unit = TIME[unit_str]
+                except Exception:
+                    amount = 1
+                    unit = TIME["hour"]
+                minutes = amount * 24 * 60 / unit
+
+                for data in aliases:
+                    insert_sql_total += check_time(data, alert, next_id,
+                                                   last_events, new_events)
+
+                safe_log("Checked " + str(i + 1), "info")
+
+            else:
+                safe_log("Could not find valid condition/value for " +
+                         str(alert), "info")
+                print("invalid condition")
+
+        except Exception:
+            safe_log("Issue on alert " + str(i + 1) + " " + str(alert),
+                     "error")
+            print("issue on alert", str(i + 1))
+
+    if insert_sql_total == "":
+        insert_sql_total = ("INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType,"
+                            "AlertMessage,Metric,UTCDateTime,MessageID) "
+                            f"VALUES('All Clear','All Clear','N/A',"
+                            f"GETUTCDATE(),'0')")
+
+    # Insert into CEVAC_ALL_ALERTS_HIST
+    if LOG:
+        write_json_generic(new_events, next_id)
+    if SEND:
+        f = open("/home/bmeares/cache/insert_alert_system.sql", "w")
+        f.write(insert_sql_total.replace(';', '\nGO\n'))
+        f.close()
+        os.system("/home/bmeares/scripts/exec_sql_script.sh "
+                  "/home/bmeares/cache/insert_alert_system.sql")
+    else:
+        print(insert_sql_total.replace(';', '\nGO\n'))
+
+    if LOG:
+        logging.info(str(datetime.datetime.now()) +
+                     " TOTAL ISSUES: " + str(total_issues))
+        logging.shutdown()
 
 """
       /##.*/
