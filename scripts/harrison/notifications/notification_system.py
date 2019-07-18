@@ -74,7 +74,6 @@ logs = {
         "conditions": [],
         "yconditions": [],
     },
-
     # "Alert email": {
     #     "location": "/cevac/cron/alerts/",
     #     "issues": [],
