@@ -113,9 +113,10 @@ export class ColorService {
       .scale()
       // @ts-ignore
       // chroma.js typings don't include the nodata function
-      .nodata(this.crg[category])
       .correctLightness();
-    if (domain.length !== 2) {
+    if (!val) {
+      return retScale(0).name();
+    } else if (domain.length !== 2) {
       return retScale
         .classes([...domain, domain[domain.length - 1]])(val)
         .name();
