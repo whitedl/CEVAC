@@ -155,7 +155,7 @@ def makeArrays(df):
 
         initialDateTime = row['ETDateTime'][0:13]
 
-        for i in range(0,12):
+        for i in range(-12, 0):
             newDate = addHour(initialDateTime, i)
 
             # get our weather data for that date
@@ -198,18 +198,15 @@ def makeArrays(df):
                 clouds = weatherData['cloudCover']
                 clouds = [(clouds / 100)]
 
-                try:
-                    powerConsumption = [df[index - i]['intSum'] / 275]
-                    tempx.append(np.concatenate((hour, day, month, throughMonth, temperature, humidity, clouds, powerConsumption), axis = -1))
-                except:
-                    pass
+                powerConsumptionIndex = int(index) + int(i)
 
+                # powerConsumption = [df[powerConsumptionIndex]['intSum'] / 275]
+                tempx.append(np.concatenate((hour, day, month, throughMonth, temperature, humidity, clouds), axis = -1))
         try:
-            tempy = [(df[index + 1]['intSum'] / 275)]
+            tempy = [(rowy['intSum'] / 275)]
         except:
             pass
 
-        print(len(tempx), len(tempy))
         if len(tempx) == 12 and len(tempy) == 1:
             x.append(tempx)
             y.append(tempy)
