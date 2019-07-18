@@ -94,6 +94,8 @@ def formatConditions(df):
 
 # adds a prescribed number of hours `addition` to the time 'dateTime'
 def addHour(dateTime, addition):
+
+    # pull and clean the time series data
     year = str(dateTime[0:4])
     month = str(dateTime[5:7])
     day = str(dateTime[8:10])
@@ -196,11 +198,19 @@ def makeArrays(df):
                 clouds = weatherData['cloudCover']
                 clouds = [(clouds / 100)]
 
-                tempx.append(np.concatenate((hour, day, month, throughMonth, temperature, humidity, clouds), axis = -1))
+                try:
+                    powerConsumption = [df[index - i]['intSum'] / 275]
+                    tempx.append(np.concatenate((hour, day, month, throughMonth, temperature, humidity, clouds, powerConsumption), axis = -1))
+                except:
+                    pass
 
-        tempy = [(row['intSum'] / 275)]
+        try:
+            tempy = [(df[index + 1]['intSum'] / 275)]
+        except:
+            pass
 
-        if len(tempx) == 12:
+        print(len(tempx), len(tempy))
+        if len(tempx) == 12 and len(tempy) == 1:
             x.append(tempx)
             y.append(tempy)
         tempx = []

@@ -20,9 +20,14 @@ from datetime import date
 import numpy as np
 import csv
 
-
 class predictor():
 
+    '''
+    loads api token data; creates hourly dictionary
+    makes empty predictions list to be populated later
+    creates model
+    makes list of URL endings that are used to get yesterday's, todays, and tomorrows weather
+    '''
     def __init__(self):
 
         # open our api json file and pull the darkSky api key from it
@@ -51,7 +56,7 @@ class predictor():
                             '/33.662333,-79.830875,' + str(int(time.time())),
                             '/33.662333,-79.830875']
 
-    # fetch our weather forecast
+    # fetch our weather forecast; populates the predictor.hourly dict
     def fetch(self):
         for ending in self.urlEndings:
             # request url with api key
@@ -69,7 +74,7 @@ class predictor():
                 self.hourly['temperatures'].append(((element['temperature'] - 32) / 1.8 + 20) / 70)
                 self.hourly['clouds'].append(element['cloudCover'])
 
-    # normalize the hours, days, and months
+    # accepts hour, day, month, year; returns normalized h, d, m, y, and throughMonth
     def generateInput(self, h, d, m, y):
         numMonth = {
             '1' : 31,
@@ -105,7 +110,7 @@ class predictor():
 
         return hour, day, month, throughMonth
 
-    # prediction with the built-in keras model
+    # returns the model with correct dimensions
     def createModel(self):
 
         # create the keras instance
@@ -124,13 +129,14 @@ class predictor():
 
         return model
 
+    # predict given a power model and the previous 12 hours of weather data
     def predict(self):
 
         # load jonathan's brain
         self.model.load_weights('powerModel.h5')
         # model.load_weights('/home/bmeares/CEVAC/prediction/powerModel.h5')
 
-        # get the first 12 hours of data for now
+        # get information from the past 12 hours
         for i in range(0,12):
 
             # pull time data from 12 indexes
@@ -148,7 +154,7 @@ class predictor():
             self.input.append(temp)
 
         self.input = np.array(self.input)
-        print(self.input)
+
         with open('predInput.txt', 'w') as f:
             f.write(str(self.input))
         # prediction = self.model.predict((self.input))

@@ -22,6 +22,7 @@ class analyst(object):
         for name in self.data:
             print(name)
         classes = []
+
         for index, row in self.data.iterrows():
             if row['summary'] == 'Clear' and int(row['time'][-2:]) > 8 and int(row['time'][-2:]) < 22 and row['apparentTemperature'] > 90:
                 print(row)
@@ -39,9 +40,15 @@ class analyst(object):
                 classes.append(row[column])
         print(classes)
 
+    # show some random arrays that are in a given numpy array
+    def sampleData(self, arr):
+
+
 if __name__ == '__main__':
     a = analyst('historicWeather.csv')
+    # a.yieldMax()
+    # a.graph()
+    # a.searchdf(1, 2)
     # a.showCategories()
     # a.showClasses('summary')
-    # a.yieldMax('temperature')
-    a.searchdf(1, 2)
+    # a.sampleData()
