@@ -34,8 +34,8 @@ DEBUG = False
 
 def custom_datestring_to_datetime(datestring):
     """Convert UTC to EST."""
-    from_zone = tz.gettz('UTC')
-    to_zone = tz.gettz('America/New_York')
+    to_zone = tz.gettz('UTC')
+    from_zone = tz.gettz('America/New_York')
     naive = datetime.datetime.strptime(datestring, "%b %d, %Y %I:%M:%S %p")
 
     utc = naive.replace(tzinfo=from_zone)
@@ -92,6 +92,7 @@ def ingest_file(fname):
         for row in reader:
             # insert into CEVAC_ALL_CHW_RATE_HIST (BTU/sec)
             try:
+                #test
                 today = custom_datestring_to_datetime(
                     row[0]).strftime('%Y-%m-%d %H:%M:%S')
                 today_utc = custom_datestring_utc(
@@ -112,9 +113,9 @@ def ingest_file(fname):
 
             # insert into CEVAC_ALL_CHW_HIST (kWh)
             try:
-                today = custom_datestring_to_datetime(
+                today_utc = custom_datestring_to_datetime(
                     row[4]).strftime('%Y-%m-%d %H:%M:%S')
-                today_utc = custom_datestring_utc(
+                today = custom_datestring_utc(
                     row[4]).strftime('%Y-%m-%d %H:%M:%S')
                 val = float(row[6].replace(",", ""))
                 com = ("INSERT INTO  CEVAC_PLANTS_CHW_HIST_RAW (UTCDateTime, "
