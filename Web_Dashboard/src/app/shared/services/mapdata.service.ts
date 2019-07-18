@@ -108,7 +108,8 @@ export class MapdataService {
     return building;
   };
 
-  setDataSet = () => {
+  setDataSet = (dataSet: Measurement) => {
+    this.dataSet = dataSet;
     this.tracked.setStyle(this.style);
     this.legend.changeScale(
       this.colorService.getScale(this.dataSet.propertyName),

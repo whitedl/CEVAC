@@ -11,6 +11,7 @@ import { debugOutputAstAsTypeScript } from '@angular/compiler';
 export class ControlboxComponent implements OnInit {
   // define the different views in the MapdataService
   dataSets: Measurement[] = this.mapdataService.dataSets;
+  dataSet: Measurement = this.mapdataService.dataSet;
   categories: Set<string> = new Set<string>(this.dataSets.map(v => v.category));
 
   constructor(private mapdataService: MapdataService) {}
@@ -18,6 +19,6 @@ export class ControlboxComponent implements OnInit {
   ngOnInit() {}
 
   get update() {
-    return this.mapdataService.setDataSet();
+    return this.mapdataService.setDataSet(this.dataSet);
   }
 }
