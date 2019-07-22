@@ -30,6 +30,7 @@
       <ng-container *ngIf="critD">
         <button
           mat-list-item
+          disableRipple="true"
           *ngFor="let alert of critical$ | async"
           (click)="focus(alert)"
         >
@@ -45,6 +46,7 @@
       <ng-container *ngIf="noncritD">
         <button
           mat-list-item
+          disableRipple="true"
           *ngFor="let alert of noncritical$ | async"
           (click)="focus(alert)"
         >
