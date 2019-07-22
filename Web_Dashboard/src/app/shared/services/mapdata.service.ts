@@ -1,121 +1,137 @@
 import { Injectable } from '@angular/core';
 import { ColorService } from '@services/color.service';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
+import * as L from 'leaflet';
 
-declare const L: any;
+import { Legend } from '@shared/leaflet-extensions/L.Control.Legend';
+
+import { Measurement } from '@shared/interfaces/measurement';
+import { BuildingData } from '@shared/interfaces/buildingdata';
+
 const geodata = require('src/assets/CU_Building_Footprints.json');
-interface DataSet {
-  name: string;
-  propertyName: string;
-}
-
-// yes, this is dirty and not the best thing to do in Angular. I'm using a very non-angular library. Might fix it later.
-L.Control.Legend = L.Control.extend({
-  options: {
-    position: 'bottomleft'
-  },
-  initialize(scale: [number, number], rangeHead: string, options) {
-    L.Util.setOptions(this, options);
-    this.scale = scale;
-    this.rangeTitle = rangeHead;
-    this.container = L.DomUtil.create('div', 'legend');
-    const rangeContainer = L.DomUtil.create(
-      'div',
-      'legend-object',
-      this.container
-    );
-    const scaleHeader = L.DomUtil.create('div', '', rangeContainer);
-    this.rangeHeader = L.DomUtil.create('p', 'legend-header', scaleHeader);
-    this.rangeHeader.textContent = rangeHead;
-    this.scaleMax = L.DomUtil.create('div', '', scaleHeader);
-    this.scaleMax.setAttribute('style', 'text-align: center;');
-    this.scaleMax.textContent = this.scale[1];
-    this.scaleMin = L.DomUtil.create('div', '', rangeContainer);
-    this.scaleMin.textContent = this.scale[0];
-  },
-  onAdd(map) {
-    return this.container;
-  },
-  onRemove(map) {},
-  addCategory(cat: string, domain: ['string', 'string']) {
-    // Not using L.DomUtil.create's option to specify parent, as we need more control over placement
-    const contain = L.DomUtil.create('div', 'legend-object');
-    const title = L.DomUtil.create('p', 'legend-header', contain);
-    title.innerText = cat;
-    const grad = L.DomUtil.create('div', 'gradient-scale', contain);
-    grad.setAttribute(
-      'style',
-      'background-image: linear-gradient(to top, ' +
-        domain[0] +
-        ', ' +
-        domain[1] +
-        ');'
-    );
-    this.container.insertAdjacentElement('beforeEnd', contain);
-  },
-  changeScale(scale: [number, number], rangeHead: string) {
-    this.rangeHeader.textContent = rangeHead;
-    this.scaleMin.textContent = scale[0];
-    this.scaleMax.textContent = scale[1];
-  },
-  update() {
-    if (!this.container) {
-      return this;
-    }
-  }
-});
-
-L.control.legend = (scale: [number, number], options) => {
-  return new L.Control.Legend(scale, options);
-};
 
 @Injectable({ providedIn: 'root' })
 export class MapdataService {
   // be sure the names match with the values in color service, otherwise you'll get the default scale
-  dataSets: DataSet[] = [
-    { name: 'Power', propertyName: 'power_latest_sum' },
-    { name: 'Temperature', propertyName: 'temp_latest_avg' },
-    { name: 'CO2', propertyName: 'co2_latest_avg' }
+  dataSets: Measurement[] = [
+    {
+      name: 'Electric',
+      propertyName: 'POWER',
+      category: 'Utilities',
+      unit: 'kW',
+      form: 'MAX',
+      display: true,
+      active: true
+    },
+    {
+      name: 'Temperature',
+      propertyName: 'TEMP_SPACE',
+      category: 'IAQ',
+      unit: 'F',
+      form: 'MAX',
+      display: true,
+      active: true
+    },
+    {
+      name: 'CO2',
+      propertyName: 'IAQ',
+      category: 'IAQ',
+      unit: 'ppm',
+      form: 'MAX',
+      display: true,
+      active: true
+    },
+    {
+      name: 'Chilled Water',
+      propertyName: 'CHW',
+      category: 'Utilities',
+      unit: 'KBTU',
+      form: 'MAX',
+      display: true,
+      active: false
+    },
+    {
+      name: 'Steam',
+      propertyName: 'STEAM',
+      category: 'Utilities',
+      unit: 'lbs',
+      form: 'MAX',
+      display: true,
+      active: false
+    },
+    {
+      name: 'Humidity',
+      propertyName: 'HUM',
+      category: 'IAQ',
+      unit: 'null',
+      form: 'MAX',
+      display: true,
+      active: true
+    }
   ];
-  dataSet: DataSet = this.dataSets[0];
+  dataSet: Measurement = this.dataSets[0];
 
   private dataUrl = 'http://wfic-cevac1/requests/stats.php';
   private sasBaseURL =
     'https://sas.clemson.edu:8343/SASVisualAnalytics/report?location=';
-  private map;
-  private tracked;
-  private untracked;
-  private mapOptions = {
+  private map!: L.Map;
+  private tracked!: L.GeoJSON;
+  private untracked!: L.GeoJSON;
+  private mapOptions: L.MapOptions = {
     minZoom: 15,
-    maxZoom: 20
+    maxZoom: 18
   };
   private categories: Set<string> = new Set();
-  private legend;
+  private legend!: Legend;
 
-  constructor(private colorService: ColorService, private http: HttpClient) {}
+  constructor(
+    private colorService: ColorService,
+    private http: HttpClient,
+    private router: Router
+  ) {}
 
   getMap = () => (!this.map ? this.initMap() : this.map);
 
-  setDataSet = () => {
+  getBuilding = (bName: string | null) => {
+    let building!: { [index: string]: any };
+    this.map.eachLayer(layer => {
+      const l = layer as L.Polygon;
+      if (!building && l.feature && l.feature.properties.Short_Name === bName) {
+        building = l.feature.properties;
+        return building;
+      }
+    });
+    if (!building || bName === ' ' || bName === null) {
+      building = { Short_Name: 'Building not found' };
+    }
+    return building;
+  };
+
+  setDataSet = (dataSet: Measurement) => {
+    this.dataSet = dataSet;
     this.tracked.setStyle(this.style);
     this.legend.changeScale(
-      this.colorService.getScale(this.dataSet.name),
-      this.dataSet.name
+      this.colorService.getScale(this.dataSet.propertyName),
+      this.dataSet
     );
   };
 
   focusBldg = (bldg: string) => {
-    let layers = this.tracked.getLayers();
+    let layers: L.Polygon[] = this.tracked.getLayers() as L.Polygon[];
     for (const layer of layers) {
-      if (layer.feature.properties.Short_Name === bldg) {
+      if (layer.feature && layer.feature.properties.Short_Name === bldg) {
         this.map.fitBounds(layer.getBounds());
+        this.router.navigate(['map', bldg]);
         return;
       }
     }
-    layers = this.untracked.getLayers();
+    layers = this.untracked.getLayers() as L.Polygon[];
     for (const layer of layers) {
-      if (layer.feature.properties.Short_Name === bldg) {
+      if (layer.feature && layer.feature.properties.Short_Name === bldg) {
         this.map.fitBounds(layer.getBounds());
+        this.router.navigate(['map', bldg]);
+        return;
       }
     }
   };
@@ -136,23 +152,18 @@ export class MapdataService {
     this.untracked = L.geoJSON(geodata, this.untrackedOptions).addTo(this.map);
     this.tracked = L.geoJSON(geodata, this.trackedOptions).addTo(this.map);
     controller.addOverlay(this.untracked, 'show untracked');
-    this.legend = L.control.legend(
-      this.colorService.getScale(this.dataSet.name),
-      this.dataSet.name,
+    this.legend = new Legend(
+      this.colorService.getScale(this.dataSet.propertyName),
+      this.dataSet,
       { position: 'bottomleft' }
     );
     for (const cat of this.categories) {
-      console.log(
-        cat +
-          ': ' +
-          this.colorService.labDomain(this.colorService.getScaledColor(cat))
-      );
-      this.legend.addCategory(
-        cat,
-        this.colorService.labDomain(this.colorService.getScaledColor(cat))
-      );
+      if (typeof cat !== 'undefined') {
+        this.legend.addCategory(cat, this.colorService.getColorScale(cat));
+      }
     }
     this.legend.addTo(this.map);
+    this.getBuilding('WATT');
     return this.map;
   };
 
@@ -162,55 +173,55 @@ export class MapdataService {
       {
         attribution:
           // tslint:disable-next-line: max-line-length
-          'Map data &copy; <a href=https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+          '<a href="http://mapbox.com/about/maps" class="mapbox-wordmark" target="_blank"></a>© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank">Improve this map</a></strong>',
         id: 'mapbox.light',
         // Currently my personal token, should change to university token
         access_token:
           'pk.eyJ1IjoienRrbGVpbiIsImEiOiJjanZ3aGdubWkwaWdiNGFwOXE0eW55ZG5jIn0.83eVqOeNMqaAywNFD0YqlQ'
-      }
+      } as L.TileLayerOptions
     );
 
   private getTileLayerOpenMap = () =>
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution:
-        '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+        'Map data and Imagery <a href="https://www.openstreetmap.org/copyright">&#169; OpenStreetMap</a>'
     });
 
-  private style = feature => {
-    const style = {};
-    style['fill'] = true;
-    style['weight'] = 2;
-    style['opacity'] = 1;
-    style['fillOpacity'] = 1;
-    style['color'] = this.colorService.getScaledColor(
-      feature.properties.BLDG_Class
-    );
-    style['fillColor'] =
-      feature.properties.bData &&
-      feature.properties.bData[this.dataSet.propertyName]
-        ? this.colorService.getScaledColor(
-            feature.properties.BLDG_Class,
-            this.dataSet.name,
-            feature.properties.bData[this.dataSet.propertyName]
-          )
-        : this.colorService.getScaledColor(
-            feature.properties.BLDG_Class,
-            this.dataSet.name,
-            0
-          );
+  private style = (feature?: GeoJSON.Feature<GeoJSON.GeometryObject, any>) => {
+    const style: L.PathOptions = {};
+    if (feature) {
+      const bclass: string = feature.properties.BLDG_Class;
+      style.fill = true;
+      style.weight = 1;
+      style.opacity = 1;
+      style.fillOpacity = 1;
+      style.color = this.colorService.getScaledColor(bclass);
+      style.fillColor =
+        feature.properties && feature.properties[this.dataSet.propertyName]
+          ? this.colorService.getScaledColor(
+              bclass,
+              this.dataSet.propertyName,
+              feature.properties[this.dataSet.propertyName].MAX
+            )
+          : this.colorService.getScaledColor(
+              bclass,
+              this.dataSet.propertyName,
+              0
+            );
+    }
     return style;
   };
 
-  private highlightFeat = layer => {
+  private highlightFeat = (layer: L.Polygon) => {
     layer.setStyle({
       weight: 5,
-      color: this.colorService.brighten(layer.options.color),
-      fillColor: this.colorService.brighten(layer.options.fillColor)
+      color: this.colorService.brighten(layer.options.color as string),
+      fillColor: this.colorService.brighten(layer.options.fillColor as string)
     });
     layer.bringToFront();
   };
 
-  private resetHighlight = e => {
+  private resetHighlight = (e: L.LeafletEvent) => {
     const layer = e.target;
     if (this.tracked.hasLayer(layer)) {
       this.tracked.resetStyle(layer);
@@ -219,11 +230,11 @@ export class MapdataService {
     }
   };
 
-  private zoomToFeat = e => {
+  private zoomToFeat = (e: L.LeafletEvent) => {
     this.map.fitBounds(e.target.getBounds());
   };
 
-  private mouseOver = e => {
+  private mouseOver = (e: L.LeafletEvent) => {
     const layer = e.target;
     this.highlightFeat(layer);
     if (!layer.isPopupOpen()) {
@@ -231,65 +242,90 @@ export class MapdataService {
     }
   };
 
-  private hideTooltip = e => {
+  private hideTooltip = (e: L.LeafletEvent) => {
     const layer = e.target;
     layer.unbindTooltip();
   };
 
-  private onEachFeat = (feature, layer) => {
+  private selectBuilding = (e: L.LeafletEvent) => {
+    const layer = e.target;
+    const bldg = layer.feature.properties.Short_Name;
+    this.router.navigate(['map', bldg]);
+  };
+
+  private onClick = (e: L.LeafletEvent) => {
+    this.hideTooltip(e);
+    this.selectBuilding(e);
+  };
+
+  private onEachFeat = (
+    feature: GeoJSON.Feature<GeoJSON.GeometryObject, any>,
+    layer: L.Polygon
+  ) => {
     const opt = {
       mouseover: this.mouseOver,
-      click: this.hideTooltip,
-      dblclick: this.zoomToFeat,
+      click: this.onClick,
       mouseout: this.resetHighlight
     };
     layer.on(opt);
-    this.http
-      .get(this.dataUrl + '?building=' + layer.feature.properties.Short_Name)
-      .subscribe(bData => {
-        if (bData) {
-          layer.feature.properties['bData'] = bData;
+    if (feature.properties.Status === 'Active') {
+      this.http
+        .get<BuildingData[]>(
+          this.dataUrl + '?BuildingSName=' + feature.properties.Short_Name
+        )
+        .subscribe(bData => {
+          bData.forEach((element: any) => {
+            feature.properties[element.Metric] = element;
+          });
           this.tracked.resetStyle(layer);
-        }
-        layer.bindPopup(
-          '<pre>' +
-            JSON.stringify(layer.feature.properties, null, ' ').replace(
-              /[\{\}"]/g,
-              ''
-            ) +
-            '</pre>'
-        );
-      });
+
+          layer.bindPopup(
+            '<pre>' +
+              JSON.stringify(feature.properties, null, ' ').replace(
+                /[\{\}"]/g,
+                ''
+              ) +
+              '</pre>'
+          );
+        });
+    } else {
+      layer.bindPopup(
+        '<pre>' +
+          JSON.stringify(feature.properties, null, ' ').replace(
+            /[\{\}"]/g,
+            ''
+          ) +
+          '</pre>'
+      );
+    }
   };
 
-  private longNameTooltip = layer =>
-    layer.feature.properties.BLDG_NAME !== ' '
+  private longNameTooltip = (layer: L.Polygon) =>
+    layer.feature && layer.feature.properties.BLDG_NAME !== ' '
       ? layer.feature.properties.BLDG_NAME
       : 'Long_Name not set';
 
-  private shortNameTooltip = layer =>
-    layer.feature.properties.Short_Name !== ' '
+  private shortNameTooltip = (layer: L.Polygon) =>
+    layer.feature && layer.feature.properties.Short_Name !== ' '
       ? layer.feature.properties.Short_Name
       : 'Short_Name not set';
 
-  private get untrackedOptions() {
+  private get untrackedOptions(): L.GeoJSONOptions {
     return {
       style: this.style,
       onEachFeature: this.onEachFeat,
-      filter(feature, layer) {
-        return (
-          !feature.properties.Status || feature.properties.Status !== 'Active'
-        );
+      filter(feature: GeoJSON.Feature<GeoJSON.Geometry, any>) {
+        return feature.properties && feature.properties.Status !== 'Active';
       }
     };
   }
 
-  private get trackedOptions() {
+  private get trackedOptions(): L.GeoJSONOptions {
     return {
       style: this.style,
       onEachFeature: this.onEachFeat,
-      filter(feature, layer) {
-        return feature.properties.Status === 'Active';
+      filter(feature: GeoJSON.Feature<GeoJSON.Geometry, any>) {
+        return feature.properties && feature.properties.Status === 'Active';
       }
     };
   }

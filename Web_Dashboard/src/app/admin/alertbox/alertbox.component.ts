@@ -1,8 +1,14 @@
 import { Component, OnInit } from '@angular/core';
+
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+import { MatSnackBar } from '@angular/material/snack-bar';
+
 import { AlertService } from '@services/alert.service';
 import { MapdataService } from '@services/mapdata.service';
 import { ColorService } from '@services/color.service';
-import { Alert } from '@app/alert';
+import { Alert } from '@shared/interfaces/alert';
 
 @Component({
   selector: 'app-alertbox',
@@ -10,16 +16,29 @@ import { Alert } from '@app/alert';
   styleUrls: ['./alertbox.component.scss']
 })
 export class AlertboxComponent implements OnInit {
-  alerts: Alert[] = [];
+  alerts$!: Observable<Alert[]>;
+  critical$!: Observable<Alert[]>;
+  noncritical$!: Observable<Alert[]>;
+  buildingAlerts$!: Observable<Map<string, Alert[]>>;
+
+  critD = true;
+  noncritD = true;
 
   constructor(
     private alertService: AlertService,
     private mapdataService: MapdataService,
-    private colorService: ColorService
+    private colorService: ColorService,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit() {
-    this.getAlerts();
+    this.alerts$ = this.alertService.getAlerts();
+    this.critical$ = this.alerts$.pipe(
+      map(v => v.filter(alert => alert.AlertType === 'alert'))
+    );
+    this.noncritical$ = this.alerts$.pipe(
+      map(v => v.filter(alert => alert.AlertType === 'warning'))
+    );
   }
 
   getAlertColor(type: string) {
@@ -38,17 +57,21 @@ export class AlertboxComponent implements OnInit {
   }
 
   focus(alert: Alert) {
-    this.mapdataService.focusBldg(alert.BLDG_STD);
+    this.mapdataService.focusBldg(alert.BuildingSName);
   }
 
-  alertAll(): Alert[] {
-    return this.alerts.filter(alert => alert.AlertID === 1);
-  }
-  logAl = () => {
-    this.alerts[1].AlertID = 3;
-  };
-
-  getAlerts(): void {
-    this.alertService.getAlerts().subscribe(alerts => (this.alerts = alerts));
+  acknowledge(alert: Alert, e: Event) {
+    e.stopPropagation();
+    this.alertService.acknowledge(alert).subscribe(response => {
+      if (response === alert.EventID) {
+        this.alertService.removeAlert(response as number);
+      } else {
+        this.snackBar.open(
+          'AlertID ' + alert.EventID + ' failed to acknowledge.',
+          'dismiss',
+          { duration: 2000 }
+        );
+      }
+    });
   }
 }
