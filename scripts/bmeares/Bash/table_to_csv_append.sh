@@ -6,7 +6,7 @@ if [ -z "$1" ]; then
 fi
 table="$1"
 table_CSV="$table"_CSV
-if [ -z "$2" ]; then
+if [ ! -z "$2" ]; then
   if [ "$2" == "reset" ]; then
     echo "Reset! Removing /srv/csv/$table.csv"
     rm -f /srv/csv/$table.csv
@@ -17,6 +17,9 @@ fi
 
 table_CSV_exists_query="IF OBJECT_ID('$table_CSV') IS NOT NULL SELECT 'EXISTS' ELSE SELECT 'DNE'"
 table_CSV_exists=`/cevac/scripts/sql_value.sh "$table_CSV_exists_query"`
+
+echo "$table_CSV_exists"
+# exit 1
 if [ "$table_CSV_exists" != "EXISTS" ]; then
   echo "$table_CSV does not exist. Removing local CSV"
   rm -f /srv/csv/$table.csv
@@ -172,7 +175,8 @@ FROM $table
 "
 query="
 SET NOCOUNT ON
-SELECT * FROM $table AS original
+SELECT * 
+FROM $table AS original
 ORDER BY LEN(original.$Alias) DESC
 "
 h='130.127.218.11'
@@ -207,6 +211,10 @@ if [ ! -f /srv/csv/$table.csv ]; then
   csv_error=`grep "Msg.*Level.*State.*Server" /cevac/cache/$table.csv`
   if [ ! -z "$csv_error" ]; then
     echo "Error: /cevac/cache/$table.csv failed."
+    exit 1
+  fi
+  if ! /cevac/scripts/exec_sql.sh "$csv_utc_query"; then
+    echo "Error: Failed to create $table_CSV"
     exit 1
   fi
 
