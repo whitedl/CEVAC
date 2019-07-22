@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 
 import { Observable } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
+
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { AlertService } from '@services/alert.service';
 import { MapdataService } from '@services/mapdata.service';
@@ -25,7 +27,8 @@ export class AlertboxComponent implements OnInit {
   constructor(
     private alertService: AlertService,
     private mapdataService: MapdataService,
-    private colorService: ColorService
+    private colorService: ColorService,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit() {
@@ -63,6 +66,11 @@ export class AlertboxComponent implements OnInit {
       if (response === alert.EventID) {
         this.alertService.removeAlert(response as number);
       } else {
+        this.snackBar.open(
+          'AlertID ' + alert.EventID + ' failed to acknowledge.',
+          'dismiss',
+          { duration: 2000 }
+        );
       }
     });
   }
