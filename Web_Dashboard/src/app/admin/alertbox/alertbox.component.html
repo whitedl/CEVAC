@@ -1,6 +1,7 @@
 <mat-expansion-panel
   expanded="{{ (alerts$ | async)?.length > 0 }}"
   class="scrollableExpansion"
+  style="user-select: false"
 >
   <mat-expansion-panel-header class="center-header">
     <mat-panel-title>
