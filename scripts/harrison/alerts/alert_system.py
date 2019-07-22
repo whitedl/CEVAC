@@ -26,10 +26,10 @@ json_oc = "/cevac/cron/alert_log_oc.json"
 json_unoc = "/cevac/cron/alert_log_unoc.json"
 
 
-LOG = False
+LOG = True
 CHECK_ALERTS = True
-SEND = False
-UPDATE_CACHE = False
+SEND = True
+UPDATE_CACHE = True
 
 COLUMNS = {
     "alert_name": 0,
