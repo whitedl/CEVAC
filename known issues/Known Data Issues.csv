@@ -39,6 +39,8 @@ Several CO2 sensors offline (filtered out),WATT,12/8/2015,None,None,"205, 207, 2
 103 Temp offline,WATT,3/25/2019,None ,103 Temp does not report,None,None
 103 Temp restored,WATT,6/24/2019,None,103 Temp begins reporting,None,None
 433 Temp offline,WATT,8/10/2018,None,433 Temp does not report,None,None
+344A Heating SP intentionally decomissioned,WATT,8/20/2016,None,344A Temp no longer reports,None,None
+344A Cooling SP intentionally decomissioned,WATT,8/20/2016,None,344A Temp no longer reports,None,None
 344A Temp intentionally decomissioned,WATT,8/20/2016,None,344A Temp no longer reports,None,None
 214 Temp offline,WATT,5/31/2018,None,214 Temp does not report,None,None
 214 Temp Restored,WATT,8/3/2018,None,214 Temp begins reporting,None,None

@@ -2,41 +2,37 @@
 include "config.php";
 global $db;
 
+
 $method = $_SERVER['REQUEST_METHOD'];
-if ('PUT' === $method) {
-  parse_str(file_get_contents('php://input'), $_PUT);
-  var_dump($_PUT); //$_PUT contains put fields 
+if ('PATCH' === $method) {
+  parse_str(file_get_contents('php://input'), $_PATCH);
+  // var_dump($_PATCH); //$_PUT contains put fields 
 }
 
-echo $_PUT;
+// if(!isset($_REQUEST['EventID'])) $EventID = $_REQUEST['EventID'];
+// else die('Missing EventID');
+// if(!isset($_REQUEST['ACK'])) $ACK = $_REQUEST['ACK'];
+// else die('Missing ACK');
+//
+$EventID = $_REQUEST['EventID'];
+$ACK = $_REQUEST['ACK'];
+$ACK = clean($ACK);
+$EventID = clean($EventID);
+if ($ACK != 0 && $ACK != 1) die('ACK must be 0 or 1.');
 
-// $vars = json_decode(stripslashes(file_get_contents("php://input")), true);
-// $query = '
-  // SELECT RTRIM(AlertType) AS AlertType, RTRIM(AlertMessage) AS AlertMessage,
-  // RTRIM(Metric) AS Metric, RTRIM(BuildingSName) AS BuildingSName, RTRIM(BuildingDName) AS BuildingDName, Acknowledged, EventID, ETDateTime, DetectionTimeET
-  // FROM CEVAC_ALL_ALERTS_EVENTS_HIST
-  // WHERE Acknowledged = 0
-  // ORDER BY EventID DESC;
-// ';
+// $query = "
+// UPDATE CEVAC_ALL_ALERTS_HIST_RAW
+// SET Acknowledged = $ACK
+// WHERE EventID = $EventID
+// ";
+$query = "EXEC CEVAC_ACKNOWLEDGE_EVENT @EventID = ".strval($EventID).", @ACK = ".strval($ACK);
+// echo "$query";
 
-// if(isset($_GET['debug'])) echo '<pre>';
+$result = sqlsrv_query($db, $query);
+// $row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC);
+// $json = json_encode($row);
 
-// // $out = '[';
-// $array = array();
+// echo $json;
 
-
-// $result = sqlsrv_query($db, $query);
-// while($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)){
-  // // $json = json_encode($row);
-  // $array[] = $row;
-  // // $out .= $json.',';
-// }
-
-// $out = json_encode($array);
-// // $out .= ']';
-// echo $out;
-
-
-// if(isset($_GET['debug'])) echo '</pre>';
 sqlsrv_close($db);
 ?>

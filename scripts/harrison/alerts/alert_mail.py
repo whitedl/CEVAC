@@ -12,7 +12,7 @@ from email.mime.multipart import MIMEMultipart
 
 import base64
 
-
+KNOWN_ISSUES_FPATH = "/cevac/CEVAC/known issues/Known Data Issues.csv"
 email = "cevac5733@gmail.com"
 password = "cevacsteve5733"
 to_list = {
@@ -159,6 +159,16 @@ class Alert_Log:
         if (sorted([self.building, other.building])[1] ==
                 self.building and self.building != other.building):
             return False
+        if self.metric != other.metric:
+            if self.metric < other.metric:
+                return True
+            else:
+                return False
+        if (self.get_room_number() != other.get_room_number()):
+            if (self.get_room_number() < other.get_room_number()):
+                return True
+            else:
+                return False
         if self.etc < other.etc:
             return True
         return True
@@ -182,6 +192,20 @@ class Alert_Log:
             dict[self.type] = {
                 self.building: [self],
             }
+
+    def get_room_number(self):
+        """Get room number from phrase."""
+        phrase = self.message.split(" ")[0]
+        if not self.contains_number(phrase):
+            return ""
+        return phrase
+
+    def contains_number(self, phrase):
+        """Return True if string contains number."""
+        for i in phrase:
+            if str.isdigit(i):
+                return True
+        return False
 
 
 def replace_metric(rep_str):
@@ -240,8 +264,8 @@ def main():
     yesterday = now - day
     alerts = bsql.Query(f" DECLARE @yesterday DATETIME; SET @yesterday = "
                         f"DATEADD(day,"
-                        f" -1, GETDATE());"
-                        f" SELECT TOP 100 * FROM CEVAC_ALL_ALERTS_EVENTS_HIST "
+                        f" -1, GETDATE()); SELECT"
+                        f" TOP 100 * FROM CEVAC_ALL_ALERTS_EVENTS_LATEST "
                         f" WHERE ETDateTime >= @yesterday "
                         f" ORDER BY ETDateTime DESC")
     now_etc = time_handler.utc_to_est(now)
@@ -250,6 +274,7 @@ def main():
     yesterday_etc_str = yesterday_etc.strftime("%m/%d/%y %I:%M %p")
 
     alert_dict = alerts.as_dict()
+
     total_msg = ""
     all_alerts = []
     for i, key in enumerate(alert_dict):

@@ -19,9 +19,7 @@ $array = array();
 
 $result = sqlsrv_query($db, $query);
 while($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)){
-  // $json = json_encode($row);
   $array[] = $row;
-  // $out .= $json.',';
 }
 
 $out = json_encode($array);

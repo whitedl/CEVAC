@@ -1,6 +1,0 @@
-
-
-CREATE VIEW CEVAC_ASC_POWER_SUMS_HIST AS
-
-SELECT UTCDateTime,  SUM(ActualValue) AS Total_Usage, DATEPART(year, UTCDateTime) AS Year, DATEPART(month, UTCDateTime) AS Month, DATEPART(day, UTCDateTime) AS Day FROM CEVAC_ASC_POWER_ALL
-GROUP BY UTCDateTime
