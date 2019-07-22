@@ -17,18 +17,18 @@ email = "cevac5733@gmail.com"
 password = "cevacsteve5733"
 to_list = {
     "Harrison Hall": "hchall@g.clemson.edu",
-    #"Bennett Meares": "bmeares@g.clemson.edu",
+    "Bennett Meares": "bmeares@g.clemson.edu",
     #  "Inscribe boi": "bmeares@inscribe.productions",
-    #"Zach Smith": "ztsmith@g.clemson.edu",
+    "Zach Smith": "ztsmith@g.clemson.edu",
     # "Zach Klein": "ztklein@g.clemson.edu",
     # "Drewboi": "abemery@clemson.edu",
-    #"Tim Howard": "timh@clemson.edu",
+    "Tim Howard": "timh@clemson.edu",
 }
 
 emergency_to_list = {
     "Harrison Hall": "hchall@g.clemson.edu",
-    #"Bennett Meares": "bmeares@g.clemson.edu",
-    #"Tim Howard": "timh@clemson.edu",
+    "Bennett Meares": "bmeares@g.clemson.edu",
+    "Tim Howard": "timh@clemson.edu",
 }
 
 f = open("/cevac/DEV/scripts/harrison/alerts/alert_email.html", "r")
@@ -266,7 +266,6 @@ def main():
     """Do main function."""
     # Get alerts from the past day
     try:
-        print(dog)
         now = datetime.datetime.utcnow()
         day = datetime.timedelta(1)
         yesterday = now - day
@@ -312,7 +311,8 @@ def main():
         subject = f"CEVAC alert log from {yesterday_etc_str} to {now_etc_str}"
         email_message(email, password, to_list, total_msg, subject)
     except Exception:
-        f = open("emergency_email.html", "r")
+        f = open("/cevac/DEV/scripts/harrison/alerts/alert_emergency.html",
+                 "r")
         emergency_email = "".join(f.readlines())
         email_message(email, password, emergency_to_list,
                       emergency_email, "ISSUES WITH CEVAC ALERTS")
