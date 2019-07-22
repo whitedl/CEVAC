@@ -93,7 +93,13 @@
       {% for log in logs %}
         <h2 class="split">{{log}}</h2>
         {% for issue in logs[log]["issues"] %}
-          <h3>{{issue}}</h3><br>
+          <h3>{{issue}}</h3>
+        {% endfor %}
+      {% endfor %}
+      {% for custom_test in custom %}
+        <h2 class="split">{{custom_test}}</h2>
+        {% for issue in custom[custom_test]["issues"] %}
+          <h3>{{issue}}</h3>
         {% endfor %}
       {% endfor %}
     </div>

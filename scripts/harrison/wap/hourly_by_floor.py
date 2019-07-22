@@ -1,4 +1,4 @@
-import os, sys
+import sys
 from stat import *
 import pypyodbc
 import json
@@ -7,7 +7,6 @@ import time
 import pytz
 import csv
 import logging
-import safe_move
 import random
 
 ######################################

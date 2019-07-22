@@ -422,6 +422,13 @@ def debug_log(message, LOG):
 # Check import directory for files, end program if none exist
 file_list = []
 for fname in os.listdir(import_dir):
+    is_file = False
+    if "watt" in fname.lower():
+        is_file = True
+    if "wfic" in fname.lower():
+        is_file = True
+    if not is_file:
+        continue
     if S_ISREG(os.stat(os.path.join(import_dir, fname)).st_mode):
         file_list.append(fname)
 

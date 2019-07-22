@@ -52,18 +52,22 @@ fi
 # isCustom is set, therefore exists
 if [ ! -z "$isCustom" ]; then
   AliasName=`/cevac/scripts/sql_value.sh "SELECT AliasName FROM CEVAC_TABLES WHERE TableName = '$HIST_VIEW'"`
+  DataName=`/cevac/scripts/sql_value.sh "SELECT DataName FROM CEVAC_TABLES WHERE TableName = '$HIST_VIEW'"`
   DateTimeName=`/cevac/scripts/sql_value.sh "SELECT DateTimeName FROM CEVAC_TABLES WHERE TableName = '$HIST_VIEW'"`
   Dependencies=`/cevac/scripts/sql_value.sh "SELECT Dependencies FROM CEVAC_TABLES WHERE TableName = '$HIST_VIEW'"`
   if [ "$isCustom" == "1" ]; then
     echo "Custom table detected. Please choose:"
     echo $'   1: Reuse previous table structure (no change)'
-    echo $'   2: New table structure\n   (/cevac/CUSTOM_DEFS/$HIST_VIEW has changed)'
+    echo $'   2: New table structure\n   (/cevac/CUSTOM_DEFS/'"$HIST_VIEW"' has changed)'
     read choice
 
     if [ "$choice" == "1" ]; then
-      /cevac/scripts/CREATE_CUSTOM.sh "$Building" "$Metric" "$DateTimeName" "$AliasName" "$Dependencies"
+      /cevac/scripts/CREATE_CUSTOM.sh "$Building" "$Metric" "$DateTimeName" "$AliasName" "$DataName" "$Dependencies"
     elif [ "$choice" == "2" ]; then
+      echo "Dropping caches..."
       /cevac/scripts/exec_sql.sh "DELETE FROM CEVAC_TABLES WHERE BuildingSName = '$Building' AND Metric = '$Metric'"
+      /cevac/scripts/exec_sql.sh "IF OBJECT_ID('$HIST_CACHE') IS NOT NULL DROP TABLE $HIST_CACHE;"
+      /cevac/scripts/exec_sql.sh "IF OBJECT_ID('$HIST_CSV') IS NOT NULL DROP TABLE $HIST_CSV;"
       echo "Executing CREATE_CUSTOM.sh"
       /cevac/scripts/CREATE_CUSTOM.sh
     else
@@ -112,6 +116,7 @@ fi
 echo "CHECKPOINT 1"
 /cevac/scripts/exec_sql.sh "CHECKPOINT"
 
+# exit 1
 
 ###
 # Phase 3: Init _CACHE
