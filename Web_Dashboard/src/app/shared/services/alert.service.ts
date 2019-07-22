@@ -38,13 +38,15 @@ export class AlertService {
   }
 
   acknowledge(alert: Alert) {
-    const params = new HttpParams()
-      .set('EventID', alert.EventID.toString())
-      .set('ACK', '1');
+    const options = {
+      params: new HttpParams()
+        .set('EventID', alert.EventID.toString())
+        .set('ACK', '1')
+    };
     return this.http.patch(
       'http://wfic-cevac1/requests/acknowledge.php',
       null,
-      { params: params }
+      options
     );
   }
 }
