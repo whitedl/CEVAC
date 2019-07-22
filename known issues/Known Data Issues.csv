@@ -52,3 +52,4 @@ AHU1 Cooling Coil Discharge SP offline,WATT,5/27/2019,None,AHU1 CCDSP does not r
 305D Temp Reports Very High,COOPER,6/27/2018,None,305D Temp reads values between 90 and 250,None,None
 515 Temp Reports Very High,COOPER,8/30/2016,None,515 Temp reads values between 90 and 130,None,None
 515 Temp Restored,COOPER,12/8/2016,None,515 Temp begins reporting normally,None,None
+Hourly WAP data now aggregated by half-hour,WATT,6/25/2018,None,None,None,WAP data now aggregated in 30 minute intervals
