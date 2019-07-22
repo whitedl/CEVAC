@@ -4,10 +4,14 @@ mat-sidenav {
 
 #map {
   height: 100%;
+  width: 100%;
+  top: 0;
+  bottom: 0;
 }
 
 .sidenav-column {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  height: 100%;
 }
