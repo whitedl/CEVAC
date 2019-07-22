@@ -24,7 +24,6 @@ to_list = {
     # "Drewboi": "abemery@clemson.edu",
     "Tim Howard": "timh@clemson.edu",
 }
-
 emergency_to_list = {
     "Harrison Hall": "hchall@g.clemson.edu",
     "Bennett Meares": "bmeares@g.clemson.edu",
