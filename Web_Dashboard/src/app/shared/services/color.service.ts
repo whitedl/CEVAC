@@ -70,11 +70,11 @@ export class ColorService {
   };
   private scales: ScaleSet = {
     POWER: new Scale([0, 200, 400, 600, 800, 1000]),
-    TEMP: new Scale([30, 60, 80, 100]),
+    TEMP_SPACE: new Scale([61, 68, 73, 80]),
     CO2: new Scale([0, 500, 800, 1000, 1200]),
     IAQ: new Scale([0, 500, 800, 1000, 1200]),
     CHW: new Scale([0, 10000]),
-    HUMIDITY: new Scale([0, 70, 90, 100])
+    HUM: new Scale([0, 70, 90, 100])
   };
   private crg: BuildingRegistry = {};
   private crgPalette = 'ClemsonPalette';
