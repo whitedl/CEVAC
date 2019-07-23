@@ -14,6 +14,7 @@ rm -f /srv/csv/*
 csv_tables_query="
 SELECT RTRIM(BuildingSName), RTRIM(Metric), RTRIM(Age) FROM CEVAC_TABLES
 WHERE TableName LIKE '%_CSV%' AND TableName NOT LIKE '%BROKEN%' AND TableName NOT LIKE '%FULL%'
+AND customLASR = 0
 "
 /cevac/scripts/exec_sql.sh "$csv_tables_query" "csv_tables.csv"
 
@@ -33,6 +34,7 @@ for t in "${tables_array[@]}"; do
   A=`echo "$t" | sed '3!d'`
 
   table_csv="CEVAC_$B""_$M""_$A""_CSV"
+  echo $table_csv
  
   out=`/cevac/scripts/exec_sql.sh "IF OBJECT_ID('$table_csv') IS NOT NULL DROP TABLE $table_csv"`
   error=`echo "$out" | grep 'Msg'`
