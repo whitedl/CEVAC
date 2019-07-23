@@ -22,7 +22,7 @@ failed_dir = prefix
 processed_dir = prefix + "/processed"
 log_dir = prefix + "/logs"
 
-SEND = False
+SEND = True
 DEBUG = False
 
 #######################################
