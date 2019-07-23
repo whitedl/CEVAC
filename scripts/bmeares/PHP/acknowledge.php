@@ -33,7 +33,7 @@ $result = sqlsrv_query($db, $query);
 // $json = json_encode($row);
 
 // echo $json;
-echo $EventID;
+echo strval($EventID);
 
 sqlsrv_close($db);
 ?>

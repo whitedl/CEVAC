@@ -1,6 +1,6 @@
 #! /bin/bash
 
-/home/bmeares/scripts/seperator.sh
+/cevac/scripts/seperator.sh
 
 hist_views_query="
 SELECT RTRIM(TableName) FROM CEVAC_TABLES
@@ -25,7 +25,7 @@ for t in "${tables_array[@]}"; do
     sql="EXEC CEVAC_CACHE_APPEND @tables = '"$t"'"
   else sql="EXEC CEVAC_CACHE_INIT @tables = '$t'"
   fi
-  /home/bmeares/scripts/exec_sql.sh "$sql"
+  /cevac/scripts/exec_sql.sh "$sql"
   if [ ! $? -eq 0 ]; then
     echo "Error. Aborting append"
     exit 1

@@ -10,11 +10,18 @@ Dependencies="$6"
 echo "Usage: $0 [BuildingSName] [Metric] [DateTimeName] [AliasName] [DataName] [Dependencies]"
 
 if [ -z "$1" ]; then
-  echo $'Building            (e.g. WATT): '; read BuildingSName
+  echo $'BuildingSName       (e.g. WATT): '; read BuildingSName
 fi
 if [ -z "$2" ]; then
   echo $'Metric              (e.g. TEMP): '; read Metric
 fi
+HIST_VIEW="CEVAC_$BuildingSName""_$Metric"_"HIST_VIEW"
+def_file="/cevac/CUSTOM_DEFS/$HIST_VIEW.sql"
+if [ ! -f "$def_file" ]; then
+  echo "$def_file is missing"
+  exit 1
+fi
+
 if [ -z "$3" ]; then
   echo $'DateTimeName (e.g. UTCDateTime):'; read DateTimeName
 fi
@@ -28,13 +35,6 @@ if [ -z "$6" ]; then
   echo $'Dependencies   (comma-separated):'; read Dependencies
 fi
 
-HIST_VIEW="CEVAC_$BuildingSName""_$Metric"_"HIST_VIEW"
-
-def_file="/cevac/CUSTOM_DEFS/$HIST_VIEW.sql"
-if [ ! -f "$def_file" ]; then
-  echo "$def_file is missing"
-  exit 1
-fi
 
 CREATE_VIEW="
 CREATE VIEW $HIST_VIEW AS
