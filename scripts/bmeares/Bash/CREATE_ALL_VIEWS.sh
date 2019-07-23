@@ -4,6 +4,7 @@ building="$1"
 metric="$2"
 keys_list="$3"
 HIST_VIEW="CEVAC_$building""_$metric""_HIST_VIEW"
+HIST_LASR="CEVAC_$building""_$metric""_HIST_LASR"
 if [ -z "$4" ]; then unitOfMeasureID="NULL"; else unitOfMeasureID="$4"; fi
 
 if [ -z "$1" ] || [ -z "$2" ]; then
@@ -43,7 +44,7 @@ fi
 
 for a in "${ages_array[@]}"; do
   echo "Creating CEVAC_$building""_$metric""_$a"
-  out=`./CREATE_VIEW.sh $building $metric $a $keys_list $unitOfMeasureID`
+  out=`/cevac/scripts/CREATE_VIEW.sh $building $metric $a $keys_list $unitOfMeasureID`
   error=`echo "$out" | grep 'Msg'`
   error2=`echo "$out" | awk '/Msg/ { getline; print $0 }'`
   if [ ! -z "$error" ]; then
@@ -60,4 +61,5 @@ for a in "${ages_array[@]}"; do
     exit 1
   fi
 done
+
 
