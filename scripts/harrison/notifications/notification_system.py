@@ -22,7 +22,7 @@ SEND = True
 email = "cevac5733@gmail.com"
 password = "cevacsteve5733"
 
-LASR_IP = "8.8.8.8"
+LASR_IP = "wfic-sas-im-hd.clemson.edu"
 
 email_fpath = ("/cevac/DEV/scripts/harrison/notifications/"
                "notification_email.html")
