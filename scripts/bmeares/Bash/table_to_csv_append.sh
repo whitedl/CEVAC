@@ -17,9 +17,10 @@ fi
 
 table_CSV_exists_query="IF OBJECT_ID('$table_CSV') IS NOT NULL SELECT 'EXISTS' ELSE SELECT 'DNE'"
 table_CSV_exists=`/cevac/scripts/sql_value.sh "$table_CSV_exists_query"`
+xref=`echo $table | grep XREF`;
 
 echo "$table_CSV_exists"
-if [ "$table_CSV_exists" != "EXISTS" ]; then
+if [ "$table_CSV_exists" != "EXISTS" ] || [ ! -z "$xref" ]; then
   echo "$table_CSV does not exist. Removing local CSV"
   rm -f /srv/csv/$table.csv
 else
@@ -227,11 +228,14 @@ if [ ! -f /srv/csv/$table.csv ]; then
     echo "Error: /cevac/cache/$table.csv failed."
     exit 1
   fi
-  if ! /cevac/scripts/exec_sql.sh "$csv_utc_query"; then
-    echo "Error: Failed to create $table_CSV"
-    exit 1
+  if [ -z "$xref" ]; then
+    # create _CSV if not an XREF
+    if ! /cevac/scripts/exec_sql.sh "$csv_utc_query"; then
+        echo "Error: Failed to create $table_CSV"
+        exit 1
+    fi
   fi
-
+  
   # Replace NULL with period for LASR
   sed -i 's/NULL/./g' /cevac/cache/$table.csv
   rows_transferred=$(wc -l < /cevac/cache/$table.csv)
