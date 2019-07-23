@@ -20,13 +20,15 @@ if [ "$runsas" == "runsas" ]; then
   echo "This may harm performance. Omit or use norun for argument 2 to only upload to LASR"
 fi
 # update HIST_CACHE tables
-time /home/bmeares/scripts/append_tables.sh
+# time /home/bmeares/scripts/append_tables.sh
 
 hist_views_query="
 SELECT RTRIM(BuildingSName), RTRIM(Metric), RTRIM(Age) FROM CEVAC_TABLES
-WHERE TableName LIKE '%HIST_VIEW%'
-AND customLASR = 0
-AND TableName NOT LIKE '%SPACE%'
+WHERE TableName LIKE '%HIST_LASR%'
+AND TableName NOT LIKE '%VIEW%'
+AND TableName NOT LIKE '%CSV%'
+AND TableName NOT LIKE '%INT%'
+AND customLASR = 1
 "
 /cevac/scripts/exec_sql.sh "$hist_views_query" "hist_views.csv"
 
@@ -45,7 +47,15 @@ for t in "${tables_array[@]}"; do
   A=`echo "$t" | sed '3!d'`
 
   /cevac/scripts/seperator.sh
-  time /cevac/scripts/lasr_append.sh $B $M $A $runsas $reset
+  echo "Updating CEVAC_$B""_$M""_HIST_LASR"
+  time if ! /cevac/scripts/CREATE_VIEW.sh "$B" "$M" "HIST_LASR"; then
+    echo "Error: Failed to create CEVAC_$B""_$M""_HIST_LASR"
+    exit 1
+  fi
+  time if ! /cevac/scripts/lasr_append.sh "$B" "$M" "$A" "$runsas" "$reset"; then
+    echo "Error: Failed to upload CEVAC_$B""_$M""_HIST_LASR"
+    exit 1
+  fi
 
 done
 

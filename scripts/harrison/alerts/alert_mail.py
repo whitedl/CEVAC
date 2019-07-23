@@ -24,6 +24,11 @@ to_list = {
     # "Drewboi": "abemery@clemson.edu",
     "Tim Howard": "timh@clemson.edu",
 }
+emergency_to_list = {
+    "Harrison Hall": "hchall@g.clemson.edu",
+    "Bennett Meares": "bmeares@g.clemson.edu",
+    "Tim Howard": "timh@clemson.edu",
+}
 
 f = open("/cevac/DEV/scripts/harrison/alerts/alert_email.html", "r")
 page = Template("".join(f.readlines()))
@@ -259,50 +264,57 @@ def email_message(email, password, to_list, message, subject):
 def main():
     """Do main function."""
     # Get alerts from the past day
-    now = datetime.datetime.utcnow()
-    day = datetime.timedelta(1)
-    yesterday = now - day
-    alerts = bsql.Query(f" DECLARE @yesterday DATETIME; SET @yesterday = "
-                        f"DATEADD(day,"
-                        f" -1, GETDATE()); SELECT"
-                        f" TOP 100 * FROM CEVAC_ALL_ALERTS_EVENTS_LATEST "
-                        f" WHERE ETDateTime >= @yesterday "
-                        f" ORDER BY ETDateTime DESC")
-    now_etc = time_handler.utc_to_est(now)
-    yesterday_etc = time_handler.utc_to_est(yesterday)
-    now_etc_str = now_etc.strftime("%m/%d/%y %I:%M %p")
-    yesterday_etc_str = yesterday_etc.strftime("%m/%d/%y %I:%M %p")
+    try:
+        now = datetime.datetime.utcnow()
+        day = datetime.timedelta(1)
+        yesterday = now - day
+        alerts = bsql.Query(f" DECLARE @yesterday DATETIME; SET @yesterday = "
+                            f"DATEADD(day,"
+                            f" -1, GETDATE()); SELECT"
+                            f" TOP 100 * FROM CEVAC_ALL_ALERTS_EVENTS_LATEST "
+                            f" WHERE ETDateTime >= @yesterday "
+                            f" ORDER BY ETDateTime DESC")
+        now_etc = time_handler.utc_to_est(now)
+        yesterday_etc = time_handler.utc_to_est(yesterday)
+        now_etc_str = now_etc.strftime("%m/%d/%y %I:%M %p")
+        yesterday_etc_str = yesterday_etc.strftime("%m/%d/%y %I:%M %p")
 
-    alert_dict = alerts.as_dict()
+        alert_dict = alerts.as_dict()
 
-    total_msg = ""
-    all_alerts = []
-    for i, key in enumerate(alert_dict):
-        alert = alert_dict[key]
-        all_alerts.append(Alert_Log(alert))
+        total_msg = ""
+        all_alerts = []
+        for i, key in enumerate(alert_dict):
+            alert = alert_dict[key]
+            all_alerts.append(Alert_Log(alert))
 
-    all_alerts = sorted(all_alerts)
-    alert_gd = {}
-    for al in all_alerts:
-        al.insert_into_dict(alert_gd)
+        all_alerts = sorted(all_alerts)
+        alert_gd = {}
+        for al in all_alerts:
+            al.insert_into_dict(alert_gd)
 
-    total_msg = ""
-    for key in alert_gd:
-        total_msg += f'<h2 class=\"split\">{key.upper()}</h2>'
-        for building in alert_gd[key]:
-            total_msg += f"<h4>{building}</h4><table>"
-            for al in alert_gd[key][building]:
-                total_msg += "<tr>"
-                if al.acknowledged:
-                    continue
-                e_msg = (f"<td width=\"20%\">{al.etc_str}</td>"
-                         f"<td width=\"10%\">{al.metric}</td>"
-                         f"<td width=\"70%\">{al.message}</td>")
-                total_msg += e_msg + "</tr>"
-            total_msg += "</table>"
+        total_msg = ""
+        for key in alert_gd:
+            total_msg += f'<h2 class=\"split\">{key.upper()}</h2>'
+            for building in alert_gd[key]:
+                total_msg += f"<h4>{building}</h4><table>"
+                for al in alert_gd[key][building]:
+                    total_msg += "<tr>"
+                    if al.acknowledged:
+                        continue
+                    e_msg = (f"<td width=\"20%\">{al.etc_str}</td>"
+                             f"<td width=\"10%\">{al.metric}</td>"
+                             f"<td width=\"70%\">{al.message}</td>")
+                    total_msg += e_msg + "</tr>"
+                total_msg += "</table>"
 
-    subject = f"CEVAC alert log from {yesterday_etc_str} to {now_etc_str}"
-    email_message(email, password, to_list, total_msg, subject)
+        subject = f"CEVAC alert log from {yesterday_etc_str} to {now_etc_str}"
+        email_message(email, password, to_list, total_msg, subject)
+    except Exception:
+        f = open("/cevac/DEV/scripts/harrison/alerts/alert_emergency.html",
+                 "r")
+        emergency_email = "".join(f.readlines())
+        email_message(email, password, emergency_to_list,
+                      emergency_email, "ISSUES WITH CEVAC ALERTS")
 
 
 '''

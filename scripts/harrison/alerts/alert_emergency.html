@@ -44,8 +44,7 @@
         text-align: left;
       }
       .keytab {
-        margin-left: auto;
-        margin-right: auto;
+
       }
       tr {
         margin-bottom: 5%;
@@ -65,7 +64,7 @@
         color: #FFFFFF;
         background-color: #F66733;
       }
-      @media (max-width: 1200px) {
+      @media only screen and (orientation: portrait) {
         .parted {
           margin-right: 0%;
           margin-left: 0%;
@@ -79,6 +78,15 @@
           font-size: 14px;
           text-align: left;
         }
+        h1 {
+          color: #FFFFFF;
+          background-color: #F66733;
+          text-align: center;
+          margin-top: 5%;
+          margin-bottom: 5%;
+          padding-top: 5%;
+          padding-bottom: 5%;
+        }
       }
     </style>
     <meta charset='utf-8'>
@@ -88,20 +96,7 @@
       <div class="logo">
         <img src="https://www.clemson.edu/brand/resources/logos/wordmark-academic/orange.png">
       </div>
-      <h2>{{ Name }}:</h2>
-      <h3>The following notifications are aggregated from the past day.</h3>
-      {% for log in logs %}
-        <h2 class="split">{{log}}</h2>
-        {% for issue in logs[log]["issues"] %}
-          <h3>{{issue}}</h3>
-        {% endfor %}
-      {% endfor %}
-      {% for custom_test in custom %}
-        <h2 class="split">{{custom_test}}</h2>
-        {% for issue in custom[custom_test]["issues"] %}
-          <h3>{{issue}}</h3>
-        {% endfor %}
-      {% endfor %}
+      <h3>There was an issue with sending the alert email. Is the events sql table up?</h3>
     </div>
   </body>
 </html>

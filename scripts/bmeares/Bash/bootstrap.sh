@@ -37,9 +37,11 @@ HIST="CEVAC_"$Building"_"$Metric"_HIST"
 HIST_CACHE="CEVAC_"$Building"_"$Metric"_HIST_CACHE"
 HIST_CSV="CEVAC_"$Building"_"$Metric"_HIST_CSV"
 HIST_VIEW="CEVAC_"$Building"_"$Metric"_HIST_VIEW"
+HIST_LASR="CEVAC_"$Building"_"$Metric"_HIST_LASR"
 XREF="CEVAC_"$Building"_"$Metric"_XREF"
 
 isCustom=`/cevac/scripts/sql_value.sh "SELECT isCustom FROM CEVAC_TABLES WHERE TableName = '$HIST_VIEW'"`
+customLASR=`/cevac/scripts/sql_value.sh "SELECT customLASR FROM CEVAC_TABLES WHERE TableName = '$HIST_VIEW'"`
 checkXREF=`/cevac/scripts/sql_value.sh "EXEC CHECK_XREF @BuildingSName = '$Building', @Metric = '$Metric'"`
 
 if [ "$checkXREF" != "XREF" ]; then
@@ -47,6 +49,24 @@ if [ "$checkXREF" != "XREF" ]; then
   echo "You may continue bootstrapping with PointSliceID instead of Alias, but you MUST specify keywords or unitOfMeasureID"
   echo "CEVAC_$Building"_$Metric""_PXREF will be generated using the parameters provided during bootstrapping.""
   echo "  (Omitting parameters will include all PointSliceIDs for a building - so be careful!)"
+else
+  xref_readingType=`/cevac/scripts/sql_value.sh "IF 'ReadingType' IN (SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '$XREF') SELECT 'ReadingType' ELSE SELECT 'No ReadingType'"`
+  # See if ReadingType is in XREF. If so, see if Set Points exist
+  if [ "$xref_readingType" == "ReadingType" ]; then
+    check_customLASR=`/cevac/scripts/sql_value.sh "IF EXISTS(SELECT TOP 1 * FROM $XREF WHERE ReadingType LIKE '%SP%') SELECT 'LASR' ELSE SELECT 'STANDARD'"`
+  else
+    check_customLASR="0"
+  fi
+  if [ "$customLASR" == "1" ] || [ "$check_customLASR" == "LASR" ]; then
+    echo "customLASR: $customLASR"
+    echo "check_customLASR: $check_customLASR"
+    echo "Set points detected in XREF. Create HIST_LASR table? (~5 extra minutes) (Y/n)"
+    read choice
+    if [ "$choice" == "y" ] || [ "$choice" == "Y" ] || [ -z "$choice" ]; then
+      customLASR="1"
+      echo "Will create $HIST_LASR"
+    fi
+  fi
 fi
 
 # isCustom is set, therefore exists
@@ -122,7 +142,7 @@ echo "CHECKPOINT 1"
 # Phase 3: Init _CACHE
 ###
 /cevac/scripts/seperator.sh
-echo "Phase 4: init _CACHE"
+echo "Phase 3: init _CACHE"
 time if ! /cevac/scripts/exec_sql.sh "EXEC CEVAC_CACHE_INIT @tables = '$HIST_VIEW'" ; then
   echo "CEVAC_CACHE_INIT failed. Aborting bootstrap"
   exit 1
@@ -131,12 +151,22 @@ fi
 echo "CHECKPOINT 2"
 /cevac/scripts/exec_sql.sh "CHECKPOINT"
 
-###
-# Phase 4: Rebuild /srv/csv/_HIST.csv
-###
-/cevac/scripts/seperator.sh
-echo "Phase 4: create CSVs and rsync to LASR"
-time /cevac/scripts/lasr_append.sh "$Building" "$Metric" HIST norun reset
+if [ "$customLASR" == "$1" ]; then # customLASR is true, upload HIST_LASR instead
+  echo "Creating $HIST_LASR"
+  if ! /cevac/scripts/CREATE_VIEW.sh "$Building" "$Metric" "HIST_LASR"; then
+    echo "Error: Failed to create $HIST_LASR"
+    exit 1
+  fi
+
+  /cevac/scripts/seperator.sh
+  echo "Phase 4: create CSVs and rsync to LASR"
+  time /cevac/scripts/lasr_append.sh "$Building" "$Metric" HIST_LASR norun reset
+
+else # customLASR is false, therefore upload standard HIST
+  /cevac/scripts/seperator.sh
+  echo "Phase 4: create CSVs and rsync to LASR"
+  time /cevac/scripts/lasr_append.sh "$Building" "$Metric" HIST norun reset
+fi
 
 echo "CHECKPOINT 3"
 /cevac/scripts/exec_sql.sh "CHECKPOINT"
