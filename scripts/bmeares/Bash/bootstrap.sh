@@ -50,7 +50,13 @@ if [ "$checkXREF" != "XREF" ]; then
   echo "CEVAC_$Building"_$Metric""_PXREF will be generated using the parameters provided during bootstrapping.""
   echo "  (Omitting parameters will include all PointSliceIDs for a building - so be careful!)"
 else
-  check_customLASR=`/cevac/scripts/sql_value.sh "IF EXISTS(SELECT TOP 1 * FROM $XREF WHERE ReadingType LIKE '%SP%') SELECT 'LASR' ELSE SELECT 'STANDARD'"`
+  xref_readingType=`/cevac/scripts/sql_value.sh "IF 'ReadingType' IN (SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '$XREF') SELECT 'ReadingType' ELSE SELECT 'No ReadingType'"`
+  # See if ReadingType is in XREF. If so, see if Set Points exist
+  if [ "$xref_readingType" == "ReadingType" ]; then
+    check_customLASR=`/cevac/scripts/sql_value.sh "IF EXISTS(SELECT TOP 1 * FROM $XREF WHERE ReadingType LIKE '%SP%') SELECT 'LASR' ELSE SELECT 'STANDARD'"`
+  else
+    check_customLASR="0"
+  fi
   if [ "$customLASR" == "1" ] || [ "$check_customLASR" == "LASR" ]; then
     echo "customLASR: $customLASR"
     echo "check_customLASR: $check_customLASR"

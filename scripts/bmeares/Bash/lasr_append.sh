@@ -8,7 +8,6 @@ building="$1"
 metric="$2"
 age="$3"
 table="CEVAC_""$building""_""$metric""_""$age"
-dest_table="$table"
 if [ "$4" == "runsas" ]; then
   runsas="runsas"
 fi
@@ -18,11 +17,8 @@ if [ "$5" == "reset" ] || [ ! -f /srv/csv/$table.csv ] || [ "$table_CSV_exists" 
   reset="reset"
 fi
 
-lasr=`echo "$age" | grep "LASR"`
-if [ ! -z "$lasr" ]; then
-  dest_table=`echo "$table" | sed "s/_LASR//g"`
-  echo "NOTE: LASR table detected. Destination table will be called $dest_table"
-fi
+dest_table=`python3 /cevac/python/name_shortener.py "$table"`
+echo "LASR table will be called $dest_table"
 
 echo "Creating $table.csv"
 
