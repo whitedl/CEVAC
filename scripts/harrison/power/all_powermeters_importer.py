@@ -63,31 +63,29 @@ def ingest_file(fname):
     with open("tempcsv.csv", "r") as csvfile:
         reader = csv.reader(csvfile)
 
-        # Move reader to 'Timestamp' line
-        try:
-            while next(reader)[1] != 'Timestamp':
-                pass
-        except StopIteration:
-            logging.error("Couldn't find 'Timestamp' line in %s. Unable to"
-                          " injest file.", fname)
-            return ""
-
-        # read past header
         header = {}
-        for i, col in enumerate(reader):
-            header[i] = col.split(" ")
-        print(header)
-        return ""
-        next(reader)
+        skip = True
         for row in reader:
+            if skip:
+                if row[1] == "Timestamp":
+                    for i, col in enumerate(row):
+                        header[i] = col.split(" ")[0]
+                    skip = False
+                else:
+                    continue
             try:
                 today = custom_datestring_to_datetime(
                     row[1]).strftime('%Y-%m-%d %H:%M:%S')
-                kWh = float(row[3])
-                com = ("INSERT INTO  CEVAC_CAMPUS_ENERGY_HIST_RAW " +
-                       "(ETDateTime," + " ActualValue) VALUES ('" + today +
-                       "','" + str(kWh) + "')")
-                insert_sql_total += com + "; "
+                for i, col in enumerate(row):
+                    try:
+                        kWh = float(row[i])
+                        com = ("INSERT INTO  CEVAC_CAMPUS_ENERGY_HIST_RAW " +
+                               "(ETDateTime, Alias, ActualValue) VALUES ('" +
+                               today + "','" + header[i] + "','" + str(kWh)
+                               + "')")
+                        insert_sql_total += com + "; "
+                    except Exception:
+                        continue
 
             except Exception:
                 errorCount += 1
@@ -150,7 +148,7 @@ for fname in next(os.walk(import_dir))[2]:
         logging.error("Unexpected error while processing file '%s'", fpath)
         raise
 
-    if success:
+    if success and SEND:
         try:
             safe_move(fpath, os.path.join(processed_dir, fname))
             logging.info("Successfully imported data in file " + fname)
@@ -165,12 +163,10 @@ if SEND:
     os.system("/home/bmeares/scripts/exec_sql_script.sh "
               "/home/bmeares/cache/insert_powermeters.sql")
     os.remove("/home/bmeares/cache/insert_powermeters.sql")
+    cleanup()
 else:
     print("DID NOT SEND")
     print(insert_sql_total.replace(';', '\nGO\n'))
-
-# clean output directories
-cleanup()
 
 # close logger
 logging.shutdown()
