@@ -7,7 +7,8 @@ CREATE PROCEDURE CEVAC_VIEW
 	@Metric NVARCHAR(30),
 	@Age NVARCHAR(30),
 	@keys_list NVARCHAR(500) = '',
-	@unitOfMeasureID int = NULL
+	@unitOfMeasureID int = NULL,
+	@execute BIT = 1
 	
 
 AS
@@ -30,8 +31,7 @@ DECLARE @RemoteIP NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM #cevac_config_temp
 	;
 
 DECLARE @building_key nvarchar(100);
-DECLARE @execute INT;
-SET @execute = 1;
+--SET @execute = 1;
 
 SET @building_key = (SELECT RTRIM(BuildingKey) FROM CEVAC_BUILDING_INFO WHERE BuildingSName = @Building);
 --IF @building_key IS NULL BEGIN
@@ -42,6 +42,8 @@ SET @building_key = (SELECT RTRIM(BuildingKey) FROM CEVAC_BUILDING_INFO WHERE Bu
 DECLARE @Table_name nvarchar(100);
 DECLARE @HIST_VIEW NVARCHAR(200);
 DECLARE @HIST_CACHE NVARCHAR(200);
+DECLARE @HIST_LASR NVARCHAR(350);
+DECLARE @HIST_LASR_INT NVARCHAR(350);
 DECLARE @HIST NVARCHAR(200);
 DECLARE @DAY NVARCHAR(200);
 DECLARE @LATEST NVARCHAR(200);
@@ -72,6 +74,8 @@ CREATE TABLE #cevac_metric_params(Params nvarchar(100))
 -- Reference names
 SET @HIST_VIEW = 'CEVAC_' + @Building + '_' + @Metric + '_HIST_VIEW';
 SET @HIST_CACHE = 'CEVAC_' + @Building + '_' + @Metric + '_HIST_CACHE';
+SET @HIST_LASR = 'CEVAC_' + @Building + '_' + @Metric + '_HIST_LASR';
+SET @HIST_LASR_INT = 'CEVAC_' + @Building + '_' + @Metric + '_HIST_LASR_INT';
 SET @HIST = 'CEVAC_' + @Building + '_' + @Metric + '_HIST';
 SET @DAY = 'CEVAC_' + @Building + '_' + @Metric + '_DAY';
 SET @LATEST = 'CEVAC_' + @Building + '_' + @Metric + '_LATEST';
@@ -80,7 +84,7 @@ SET @LATEST_BROKEN = 'CEVAC_' + @Building + '_' + @Metric + '_LATEST_BROKEN';
 SET @OLDEST = 'CEVAC_' + @Building + '_' + @Metric + '_OLDEST';
 
 -- Current name
-IF @Age LIKE '%HIST%' SET @Table_name = CONCAT('CEVAC_', @Building, '_', @Metric, '_', @Age, '_VIEW')
+IF @Age = 'HIST' SET @Table_name = CONCAT('CEVAC_', @Building, '_', @Metric, '_', @Age, '_VIEW')
 ELSE SET @Table_name = CONCAT('CEVAC_', @Building, '_', @Metric, '_', @Age);
 SELECT @Table_name AS 'Table_name init';
 SET @XREF = CONCAT('CEVAC_', @Building, '_', @Metric, '_XREF');
@@ -159,6 +163,10 @@ DECLARE @DateTimeName NVARCHAR(50);
 DECLARE @AliasName NVARCHAR(50);
 DECLARE @DataName NVARCHAR(50);
 DECLARE @isCustom BIT;
+DECLARE @customLASR BIT;
+
+SET @customLASR = 0;  -- DEFAULT
+
 
 -- If XREF doesn't exist, select PointSliceID instead
 IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = @XREF)
@@ -168,11 +176,19 @@ BEGIN
 	SET @Alias_query = 'ps.PointSliceID AS PointSliceID, ';
 END ELSE BEGIN -- XREF exists
 	-- Insert XREF into CEVAC_TABLES
-	SELECT 'Adding XREF to table: ' + @XREF AS 'XREF';
+	PRINT 'Adding XREF to table: ' + @XREF;
 	IF @execute = 1 BEGIN
+		-- Check if XREF contains setpoints. If so, flip customLASR (for CEVAC_HIST_LASR)
+		DECLARE @customLASR_query NVARCHAR(MAX);
+		DECLARE @customLASR_rc INT;
+		SET @customLASR_query = 'SELECT TOP 1 * FROM ' + @XREF;
+		EXEC(@customLASR_query);
+		SET @customLASR_rc = @@ROWCOUNT;
+		IF @customLASR_rc > 0 SET @customLASR = 1;
+
 		DELETE FROM CEVAC_TABLES WHERE TableName = @XREF;
-		INSERT INTO CEVAC_TABLES(BuildingSName, Metric, Age, TableName, DateTimeName, AliasName, DataName)
-		VALUES (@Building, @Metric, 'XREF', @XREF, 'PointSliceID', 'Alias', 'PointSliceID');
+		INSERT INTO CEVAC_TABLES(BuildingSName, Metric, Age, TableName, DateTimeName, AliasName, DataName, customLASR)
+		VALUES (@Building, @Metric, 'XREF', @XREF, 'PointSliceID', 'Alias', 'PointSliceID', @customLASR);
 	END
 END
 
@@ -302,17 +318,19 @@ IF @Age LIKE '%PXREF%' BEGIN
 	IF @execute = 1 BEGIN 
 		EXEC(@PXREF_query);
 		IF NOT EXISTS (SELECT TableName FROM CEVAC_TABLES WHERE TableName = @PXREF) BEGIN
-		INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, AliasName, DataName, Definition, Dependencies)
+		INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, AliasName, DataName, isCustom, Definition, Dependencies, customLASR)
 		VALUES (
 			@Building,
 			@Metric,
 			@Age,
 			@PXREF,
-			NULL,
 			@Alias_or_PSID,
 			@Alias_or_PSID,
+			@Alias_or_PSID,
+			@isCustom,
 			@PXREF_query,
-			NULL
+			NULL,
+			@customLASR
 		)
 		END
 	END
@@ -363,6 +381,13 @@ SET @Create_View = '
 	) SELECT * FROM original
 	';
 
+	IF @Age LIKE '%LASR%' BEGIN
+		SET @Create_View = '
+		EXEC CEVAC_HIST_LASR @BuildingSName = ''' + @Building + ''', @Metric = ''' + @Metric + ''';
+		';
+		SET @customLASR = 1;
+	END
+
 END -- END of _HIST_VIEW
 		
 -----------------------------------------------
@@ -378,7 +403,22 @@ ELSE IF @Age = 'DAY' BEGIN
 	SELECT * FROM ' + @HIST + '
 	WHERE ' + @DateTimeName + ' <= GETUTCDATE() AND ' + @DateTimeName + ' >= DATEADD(day, -1, GETUTCDATE())
 	';
-	
+END	 -- END of _DAY
+
+-----------------------------------------------
+-- Age: MONTH
+--
+-- Requires:
+-- HIST
+-----------------------------------------------
+ELSE IF @Age = 'MONTH' BEGIN
+	SET @Dependencies_list = @HIST;
+	SET @Create_View = '
+	CREATE VIEW ' + @Table_name + ' AS
+	SELECT * FROM ' + @HIST + '
+	WHERE ' + @DateTimeName + ' <= GETUTCDATE() AND ' + @DateTimeName + ' >= DATEADD(MONTH, -1, GETUTCDATE())
+	';
+END	 -- END of _DAY
 
 -----------------------------------------------
 -- Ages: LATEST, LATEST_FULL, and LATEST_BROKEN
@@ -387,7 +427,7 @@ ELSE IF @Age = 'DAY' BEGIN
 -- HIST, DAY
 -- LATEST, LATEST_FULL (for LATEST_BROKEN)
 -----------------------------------------------
-END ELSE IF @Age LIKE '%LATEST%' BEGIN
+ELSE IF @Age LIKE '%LATEST%' BEGIN
 	SET @Dependencies_list = @HIST + ',' + @DAY;
 	DECLARE @Latest_source NVARCHAR(500);
 	IF @Age LIKE '%FULL%' SET @Latest_source = @HIST;
@@ -444,6 +484,7 @@ END ELSE IF @Age LIKE '%OLDEST%' BEGIN
 		MIN(' + @DateTimeName + ') AS LastTime
 		FROM
 		' + @Oldest_source + '
+		WHERE ' + @DataName + ' > 0 
 		GROUP BY ' + @AliasName + '
 	) AS recent
 	ON
@@ -482,7 +523,7 @@ IF @execute = 1 AND @Create_View IS NOT NULL BEGIN
 
 	DELETE FROM CEVAC_TABLES WHERE TableName = @Table_name;
 	IF NOT EXISTS (SELECT TableName FROM CEVAC_TABLES WHERE TableName = @Table_name) BEGIN
-		INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, AliasName, DataName, isCustom, Definition, Dependencies)
+		INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, AliasName, DataName, isCustom, Definition, Dependencies, customLASR)
 			VALUES (
 				@Building,
 				@Metric,
@@ -493,7 +534,8 @@ IF @execute = 1 AND @Create_View IS NOT NULL BEGIN
 				isnull(@DataName, 'ActualValue'),
 				isnull(@isCustom,0),
 				@Create_View,
-				@Dependencies_list
+				@Dependencies_list,
+				isnull(@customLASR,0)
 			)
 	END
 END
@@ -529,6 +571,7 @@ IF @Age LIKE '%HIST%' BEGIN
 	SET @AliasName = (SELECT TOP 1 AliasName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age = 'HIST');
 	SET @DataName = ISNULL((SELECT TOP 1 DataName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age = 'HIST'),@DataName);
 	SET @isCustom = (SELECT TOP 1 isCustom FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age = 'HIST');
+--	SET @customLASR = (SELECT TOP 1 customLASR FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age = 'HIST');
 
 	IF @DateTimeName IS NULL OR @AliasName IS NULL OR @DataName IS NULL BEGIN
 		DECLARE @error NVARCHAR(200);
@@ -549,7 +592,7 @@ IF @Age LIKE '%HIST%' BEGIN
 	IF @execute = 1 BEGIN
 		EXEC(@Create_API_View);
 		IF NOT EXISTS (SELECT * FROM CEVAC_TABLES WHERE TableName = @HIST) BEGIN
-			INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, AliasName, DataName, isCustom, Definition, Dependencies)
+			INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, AliasName, DataName, isCustom, Definition, Dependencies, customLASR)
 			VALUES (
 				@Building,
 				@Metric,
@@ -559,10 +602,50 @@ IF @Age LIKE '%HIST%' BEGIN
 				@AliasName,
 				@DataName,
 				isnull(@isCustom,0),
-				@Create_API_View,
-				@_HIST_source
-			)
+				@Create_View,
+				@_HIST_source,
+				isnull(@customLASR,0)
+			);
 		END
+	END
+
+
+	SELECT @customLASR AS 'customLASR';
+	-- Insert HIST_LASR if necessary
+	IF @customLASR = 1 BEGIN
+		-- HIST_LASR
+		DELETE FROM CEVAC_TABLES WHERE TableName = @HIST_LASR;
+		INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, AliasName, DataName, isCustom, Definition, Dependencies, customLASR)
+		VALUES (
+			@Building,
+			@Metric,
+			@Age,
+			@HIST_LASR,
+			@DateTimeName,
+			@AliasName,
+			@DataName,
+			isnull(@isCustom,0),
+			@Create_View,
+			@_HIST_source,
+			@customLASR
+		);
+		-- HIST_LASR_INT
+		DELETE FROM CEVAC_TABLES WHERE TableName = @HIST_LASR_INT;
+		INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, AliasName, DataName, isCustom, Definition, Dependencies, customLASR)
+		VALUES (
+			@Building,
+			@Metric,
+			@Age,
+			@HIST_LASR_INT,
+			@DateTimeName,
+			@AliasName,
+			@DataName,
+			isnull(@isCustom,0),
+			@Create_API_View,
+			@_HIST_source,
+			@customLASR
+		);
+
 	END
 END
 
