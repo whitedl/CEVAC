@@ -272,7 +272,8 @@ def main():
                             f"DATEADD(day,"
                             f" -1, GETDATE()); SELECT"
                             f" TOP 100 * FROM CEVAC_ALL_ALERTS_EVENTS_LATEST "
-                            f" WHERE ETDateTime >= @yesterday "
+                            f" WHERE ETDateTime >= @yesterday AND"
+                            f" Acknowledged = 0"
                             f" ORDER BY ETDateTime DESC")
         now_etc = time_handler.utc_to_est(now)
         yesterday_etc = time_handler.utc_to_est(yesterday)
