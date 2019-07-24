@@ -8,6 +8,7 @@ building="$1"
 metric="$2"
 age="$3"
 table="CEVAC_""$building""_""$metric""_""$age"
+table_CSV="$table""_CSV"
 if [ "$4" == "runsas" ]; then
   runsas="runsas"
 fi
@@ -36,7 +37,6 @@ else
   echo "Sending newest lines of $table.csv over rsync..."
   rsync -vh --progress /cevac/cache/$table.csv wfic-sas-im-hd.clemson.edu:/opt/sasinside/sasconfig/Lev1/AppData/SASVisualAnalytics/VisualAnalyticsAdministrator/AutoLoad/Append/$dest_table.csv
 fi
-
 
 if [ "$runsas" == "runsas" ]; then
   echo "runsas detected. Executing LASR Autoload script..."

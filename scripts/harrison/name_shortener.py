@@ -6,7 +6,8 @@ from sys import argv
 table = argv[-1]
 
 name_to_shortened = {
-    "CEVAC": "C",
+    "CEVAC" : "C",
+    "LASR" : "",
 }
 
 words = table.split("_")
@@ -16,4 +17,9 @@ for i, word in enumerate(words):
     elif i > 1:
         words[i] = words[i][:3]
 
-print("_".join(words))
+
+output = "_".join(words)
+if output.endswith("_"):
+    output = output[:-1]
+
+print(output)
