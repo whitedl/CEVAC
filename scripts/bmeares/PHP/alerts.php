@@ -15,10 +15,14 @@ SELECT * FROM CEVAC_ALL_ALERTS_EVENTS_HIST
 $where
 ";
 
+// echo $query;
 $array = array();
+$result = sqlsrv_query($db, $query);
+while($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)){
+  $array[] = $row;
+}
 
 $json = json_encode($array);
 echo $json;
-
 sqlsrv_close($db);
 ?>

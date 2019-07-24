@@ -71,6 +71,7 @@ fi
 
 # isCustom is set, therefore exists
 if [ ! -z "$isCustom" ]; then
+  IDName=`/cevac/scripts/sql_value.sh "SELECT IDName FROM CEVAC_TABLES WHERE TableName = '$HIST_VIEW'"`
   AliasName=`/cevac/scripts/sql_value.sh "SELECT AliasName FROM CEVAC_TABLES WHERE TableName = '$HIST_VIEW'"`
   DataName=`/cevac/scripts/sql_value.sh "SELECT DataName FROM CEVAC_TABLES WHERE TableName = '$HIST_VIEW'"`
   DateTimeName=`/cevac/scripts/sql_value.sh "SELECT DateTimeName FROM CEVAC_TABLES WHERE TableName = '$HIST_VIEW'"`
@@ -82,7 +83,7 @@ if [ ! -z "$isCustom" ]; then
     read choice
 
     if [ "$choice" == "1" ]; then
-      /cevac/scripts/CREATE_CUSTOM.sh "$Building" "$Metric" "$DateTimeName" "$AliasName" "$DataName" "$Dependencies"
+      /cevac/scripts/CREATE_CUSTOM.sh "$Building" "$Metric" "$DateTimeName" "$IDName" "$AliasName" "$DataName" "$Dependencies"
     elif [ "$choice" == "2" ]; then
       echo "Dropping caches..."
       /cevac/scripts/exec_sql.sh "DELETE FROM CEVAC_TABLES WHERE BuildingSName = '$Building' AND Metric = '$Metric'"
@@ -151,7 +152,7 @@ fi
 echo "CHECKPOINT 2"
 /cevac/scripts/exec_sql.sh "CHECKPOINT"
 
-if [ "$customLASR" == "$1" ]; then # customLASR is true, upload HIST_LASR instead
+if [ "$customLASR" == "1" ]; then # customLASR is true, upload HIST_LASR instead
   echo "Creating $HIST_LASR"
   if ! /cevac/scripts/CREATE_VIEW.sh "$Building" "$Metric" "HIST_LASR"; then
     echo "Error: Failed to create $HIST_LASR"
@@ -171,4 +172,8 @@ fi
 echo "CHECKPOINT 3"
 /cevac/scripts/exec_sql.sh "CHECKPOINT"
 
+time /cevac/scripts/lasr_append.sh "$Building" "$Metric" LATEST norun reset
+if [ "$checkXREF" == "XREF" ]; then
+  time /cevac/scripts/lasr_append.sh "$Building" "$Metric" XREF norun reset
+fi
 time /cevac/scripts/lasr_append.sh "$Building" "$Metric" LATEST norun reset

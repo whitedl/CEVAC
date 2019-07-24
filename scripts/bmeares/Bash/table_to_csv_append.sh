@@ -30,9 +30,10 @@ fi
 
 UTCDateTime=`/cevac/scripts/sql_value.sh "SET NOCOUNT ON; SELECT TOP 1 RTRIM(DateTimeName) FROM CEVAC_TABLES WHERE TableName = '$table'"`
 Alias=`/cevac/scripts/sql_value.sh "SET NOCOUNT ON; SELECT TOP 1 RTRIM(AliasName) FROM CEVAC_TABLES WHERE TableName = '$table'"`
+IDName=`/cevac/scripts/sql_value.sh "SET NOCOUNT ON; SELECT TOP 1 RTRIM(IDName) FROM CEVAC_TABLES WHERE TableName = '$table'"`
 DataName=`/cevac/scripts/sql_value.sh "SET NOCOUNT ON; SELECT TOP 1 RTRIM(DataName) FROM CEVAC_TABLES WHERE TableName = '$table'"`
 
-if [ -z "$UTCDateTime" ] || [ -z "$Alias" ] || [ -z "$DataName" ]; then
+if [ -z "$UTCDateTime" ] || [ -z "$Alias" ] || [ -z "$DataName" ] || [ -z "$IDName" ]; then
   echo "Error: Missing DateTimeName, AliasName, or DataName for $table"
   echo "Enter the information below and rerun the script."
   echo "BuildingSName:"
@@ -43,6 +44,8 @@ if [ -z "$UTCDateTime" ] || [ -z "$Alias" ] || [ -z "$DataName" ]; then
   read Age
   echo "DateTimeName:"
   read DateTimeName
+  echo "IDName:"
+  read IDName
   echo "AliasName:"
   read AliasName
   echo "DataName:"
@@ -55,13 +58,14 @@ if [ -z "$UTCDateTime" ] || [ -z "$Alias" ] || [ -z "$DataName" ]; then
   SET @Definition = (SELECT TOP 1 Definition FROM CEVAC_TABLES WHERE TableName = '$table');
   SET @isCustom = ISNULL((SELECT TOP 1 isCustom FROM CEVAC_TABLES WHERE TableName = '$table'),0);
   SET @customLASR = ISNULL((SELECT TOP 1 customLASR FROM CEVAC_TABLES WHERE TableName = '$table'),0);
-	INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, AliasName, DataName, isCustom, Definition, customLASR)
+	INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, isCustom, Definition, customLASR)
 		VALUES (
 			'$BuildingSName',
 			'$Metric',
 			'$Age',
 			'$table',
       '$DateTimeName',
+      '$IDName',
       '$AliasName',
       '$DataName',
       @isCustom,
@@ -77,6 +81,7 @@ if [ -z "$UTCDateTime" ] || [ -z "$Alias" ] || [ -z "$DataName" ]; then
 fi
 
 echo "DateTimeName: $UTCDateTime"
+echo "IDName: $IDName"
 echo "AliasName: $Alias"
 echo "DataName: $DataName"
 
@@ -92,6 +97,7 @@ IF EXISTS (SELECT TableName FROM CEVAC_TABLES WHERE TableName = '$table') BEGIN
 	DECLARE @TableName NVARCHAR(100);
   DECLARE @DateTimeName NVARCHAR(50);
   DECLARE @AliasName NVARCHAR(50);
+  DECLARE @IDName NVARCHAR(50);
   DECLARE @DataName NVARCHAR(50);
   DECLARE @isCustom BIT;
   DECLARE @customLASR BIT;
@@ -99,6 +105,7 @@ IF EXISTS (SELECT TableName FROM CEVAC_TABLES WHERE TableName = '$table') BEGIN
 	SET @Metric = (SELECT TOP 1 Metric FROM CEVAC_TABLES WHERE TableName = '$table');
 	SET @Age = (SELECT TOP 1 Age FROM CEVAC_TABLES WHERE TableName = '$table');
   SET @DateTimeName = (SELECT TOP 1 DateTimeName FROM CEVAC_TABLES WHERE TableName = '$table');
+  SET @IDName = (SELECT TOP 1 IDName FROM CEVAC_TABLES WHERE TableName = '$table');
   SET @AliasName = (SELECT TOP 1 AliasName FROM CEVAC_TABLES WHERE TableName = '$table');
   SET @DataName = (SELECT TOP 1 DataName FROM CEVAC_TABLES WHERE TableName = '$table');
   SET @isCustom = (SELECT TOP 1 isCustom FROM CEVAC_TABLES WHERE TableName = '$table');
@@ -106,13 +113,14 @@ IF EXISTS (SELECT TableName FROM CEVAC_TABLES WHERE TableName = '$table') BEGIN
   
 
 	DELETE FROM CEVAC_TABLES WHERE TableName = '$table_CSV';
-	INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, AliasName, DataName, isCustom, Dependencies, customLASR)
+	INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, isCustom, Dependencies, customLASR)
 		VALUES (
 			@BuildingSName,
 			@Metric,
 			@Age,
 			'$table_CSV',
       '$UTCDateTime',
+      '$IDName',
       '$Alias',
       '$DataName',
       @isCustom,
@@ -143,8 +151,8 @@ WITH new AS (
 )
   INSERT INTO $table_CSV
 
-  SELECT new.$UTCDateTime, new.$Alias FROM new
-  LEFT JOIN new_csv AS CSV ON CSV.$UTCDateTime = new.$UTCDateTime AND CSV.$Alias = new.$Alias
+  SELECT new.$UTCDateTime, new.$IDName FROM new
+  LEFT JOIN new_csv AS CSV ON CSV.$UTCDateTime = new.$UTCDateTime AND CSV.$IDName = new.$IDName
   WHERE CSV.$UTCDateTime IS NULL
 
 "
@@ -174,14 +182,14 @@ WITH new AS (
   SELECT new.* FROM new
   LEFT JOIN new_csv AS CSV ON CSV.$UTCDateTime = new.$UTCDateTime
   WHERE CSV.$UTCDateTime IS NULL
-  ORDER BY LEN(new.$Alias) DESC
+  ORDER BY LEN(new.$IDName) DESC
 "
 
 csv_utc_query="
 SET NOCOUNT ON
 IF OBJECT_ID('dbo.$table_CSV') IS NOT NULL DROP TABLE $table_CSV;
 GO
-SELECT $UTCDateTime, $Alias
+SELECT $UTCDateTime, $IDName
 INTO $table_CSV
 FROM $table
 "
