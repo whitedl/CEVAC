@@ -55,3 +55,8 @@ AHU1 Cooling Coil Discharge SP offline,WATT,5/27/2019,None,AHU1 CCDSP does not r
 515 Temp Reports Very High,COOPER,8/30/2016,None,515 Temp reads values between 90 and 130,None,None
 515 Temp Restored,COOPER,12/8/2016,None,515 Temp begins reporting normally,None,None
 Hourly WAP data now aggregated by half-hour,WATT,6/25/2018,None,None,None,WAP data now aggregated in 30 minute intervals
+Air Handler L1 Return Air CO2 Offline,ASC,10/5/2016,None,None,Air Handler L1 Return Air CO2 reports very low,None
+Air Handler L1 Return Air CO2 Restored,ASC,7/3/2019,None,None,Air Handler L1 Return Air CO2 reports normally,None
+Air Handler L1 Return Air CO2 1st Floor CO2 Offline,ASC,3/19/2018,None,None,Air Handler L1 Return Air CO2 1st Floor does not report,None
+Air Handler L1 Return Air CO2 3rd Floor CO2 Offline,ASC,10/12/2018,None,None,Air Handler L1 Return Air 3rd Floor CO2 reports very low\,None
+Air Handler R1 Return Air CO2 Offline,ASC,6/29/2016,None,None,Air Handler R1 Return Air CO2 reports very low,None
