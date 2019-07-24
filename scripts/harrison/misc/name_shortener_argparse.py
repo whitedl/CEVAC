@@ -3,15 +3,22 @@
 from sys import argv
 import argparse
 
-# Handle command line arguments
-parser = argparse.ArgumentParser(description='Shorten a table name '
-                                             'systematically.')
+# Argument Parsing
+parser = argparse.ArgumentParser()
+parser.add_argument('-r', '-raw', '-R', help='Raw, disable', default="True", type=bool, dest="dog")
+parser.add_argument('-foo', help='Raw, disable', default="True", type=bool)
+args = parser.parse_known_args()[0]
+dog = args.dog
+print(dog, type(dog))
+print(args)
 
 
-table = argv[-1]
+
+table = argv[-1].replace("\n","")
 
 name_to_shortened = {
-    "CEVAC": "C",
+    "CEVAC" : "C",
+    "LASR" : "",
 }
 
 words = table.split("_")
@@ -21,4 +28,6 @@ for i, word in enumerate(words):
     elif i > 1:
         words[i] = words[i][:3]
 
-print("_".join(words))
+words = [word for word in words if word != ""]
+
+print("_".join(words),end="")

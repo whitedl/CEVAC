@@ -398,6 +398,21 @@ def is_occupied():
     return False
 
 
+def get_psid_from_alias(alias, bldgsname, metric):
+    command = (f"EXEC CEVAC_XREF_LOOKUP @BuildingSName = '{bldgsname}', "
+               f"@Metric = '{metric}', @Alias = '{alias}'")
+    print(command)
+    os.system("/home/bmeares/scripts/exec_sql.sh \"" + command +
+              "\" temp_psid_csv.csv")
+    f = open("/home/bmeares/scripts/temp_psid_csv.csv")
+    lines = f.readlines()
+    try:
+        psids = [int(psid) for i, psid in enumerate(lines) if i > 0]
+        return str(max(psids))
+    except:
+        return lines[-1]
+
+
 def building_is_occupied(occupancy_dict, building):
     """Return True if in occupied time."""
     if occupancy_dict is None:
@@ -432,7 +447,7 @@ def check_numerical_alias(alias, alert, next_id, last_events, new_events):
 
     print(selection_command)
     if not CHECK_ALERTS:
-        return ""
+        return (next_id, new_events, "")
 
     data_list = command_to_list_single(selection_command)
     data_list = [float(d) for d in data_list]
@@ -463,7 +478,7 @@ def check_numerical_alias(alias, alert, next_id, last_events, new_events):
                f"'{alert['message_id']}', {alias}, '{event_id}',"
                f"'{alert['building']}')")
     safe_log("Checked " + str(i + 1), "info")
-    return com + ";"
+    return (next_id, new_events, com + ";")
 
 
 def check_temp(room, alert, temps, known_issues, next_id, last_events,
@@ -471,7 +486,7 @@ def check_temp(room, alert, temps, known_issues, next_id, last_events,
     """Check temp."""
     if skip_alias(known_issues, alert["building"], room):
         print(room, " is decomissioned")
-        return ""
+        return (next_id, new_events, "")
     else:
         pass
 
@@ -501,7 +516,7 @@ def check_temp(room, alert, temps, known_issues, next_id, last_events,
                 room_vals["Cooling SP"] -= val
                 room_vals["Heating SP"] -= val
         except Exception:
-            return ""
+            return (next_id, new_events, "")
 
         # Check value
         send_alert = False
@@ -561,12 +576,12 @@ def check_temp(room, alert, temps, known_issues, next_id, last_events,
                    f"'{alert['message_id']}', '{room}', "
                    f"'{event_id}', '{alert['building']}')")
             safe_log("An alert was sent for " + str(a), "info")
-            return com + ";"
+            return (next_id, new_events, com + ";")
     except Exception:
         pass
 
     safe_log("Checked " + str(i + 1), "info")
-    return ""
+    return (next_id, new_events, "")
 
 
 def check_time(data, alert, next_id, last_events, new_events):
@@ -574,7 +589,7 @@ def check_time(data, alert, next_id, last_events, new_events):
     alias = data
     if skip_alias(known_issues, alert["building"], alias):
         print(alias, " is decomissioned")
-        return ""
+        return (next_id, new_events, "")
     else:
         pass
     t = aliases[alias]
@@ -610,8 +625,8 @@ def check_time(data, alert, next_id, last_events, new_events):
                f"'{utcdatetimenow_str}',"
                f"'{alert['message_id']}', '{alias}',"
                f" '{event_id}', '{alert['building']}')")
-        return com + "; "
-    return ""
+        return (next_id, new_events, com + "; ")
+    return (next_id, new_events, "")
 
 
 if __name__ == "__main__":
@@ -665,10 +680,13 @@ if __name__ == "__main__":
 
                 for alias in all_aliases:
                     try:
-                        insert_sql_total += check_numerical_alias(alias, alert,
-                                                                  next_id,
-                                                                  last_events,
-                                                                  new_events)
+                        obj = check_numerical_alias(alias, alert,
+                                                    next_id,
+                                                    last_events,
+                                                    new_events)
+                        next_id = obj[0]
+                        new_events = obj[1]
+                        insert_sql_total += obj[2]
                     except Exception:
                         pass
 
@@ -701,10 +719,13 @@ if __name__ == "__main__":
                         ec += 1
 
                 for room in temps:
-                    insert_sql_total += check_temp(room, alert, temps,
+                    obj = check_temp(room, alert, temps,
                                                    known_issues,
                                                    next_id, last_events,
                                                    new_events)
+                    next_id = obj[0]
+                    new_events = obj[1]
+                    insert_sql_total += obj[2]
 
             # Check if aliases have reported within a given time
             elif ("<now>" in alert["value"]):
@@ -744,8 +765,11 @@ if __name__ == "__main__":
                 minutes = amount * 24 * 60 / unit
 
                 for data in aliases:
-                    insert_sql_total += check_time(data, alert, next_id,
+                    obj = check_time(data, alert, next_id,
                                                    last_events, new_events)
+                    next_id = obj[0]
+                    new_events = obj[1]
+                    insert_sql_total += obj[2]
 
                 safe_log("Checked " + str(i + 1), "info")
 
