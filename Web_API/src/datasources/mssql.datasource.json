@@ -1,0 +1,8 @@
+{
+  "name": "mssql",
+  "connector": "mssql",
+  "host": "130.127.218.11",
+  "user": "wficcm",
+  "password": "5wattcevacmaint$",
+  "database": "WFIC-CEVAC"
+}
