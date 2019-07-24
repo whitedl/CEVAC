@@ -47,14 +47,17 @@ readarray tables_array < /cevac/cache/tables_temp.csv
 
 for t in "${tables_array[@]}"; do
   t=`echo "$t" | tr -d '\n'`
+  t_CACHE=`echo "$t" | sed 's/VIEW/CACHE/g'`
   if [ -z "$t" ]; then
     continue
   fi
   table_type=`/cevac/scripts/sql_value.sh "SELECT TABLE_TYPE FROM information_schema.tables WHERE TABLE_NAME = '$t'"`
   table_type=$(echo "$table_type" | sed 's/BASE //g')
-  sql="
-  IF OBJECT_ID('$t') IS NOT NULL EXEC('DROP $table_type $t')"
+
+  sql="IF OBJECT_ID('$t') IS NOT NULL EXEC('DROP $table_type $t')"
+  c_sql="IF OBJECT_ID('"$t_CACHE"') IS NOT NULL EXEC('DROP TABLE $t_CACHE')"
   /cevac/scripts/exec_sql.sh "$sql"
+  /cevac/scripts/exec_sql.sh "$c_sql"
 done
 
 # Delete all from CEVAC_TABLES
