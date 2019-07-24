@@ -2,31 +2,24 @@
 include "config.php";
 global $db;
 
-// $vars = json_decode(stripslashes(file_get_contents("php://input")), true);
-$query = '
-  SELECT RTRIM(AlertType) AS AlertType, RTRIM(AlertMessage) AS AlertMessage,
-  RTRIM(Metric) AS Metric, RTRIM(BuildingSName) AS BuildingSName, RTRIM(BuildingDName) AS BuildingDName, Acknowledged, EventID, ETDateTime, DetectionTimeET
-  FROM CEVAC_ALL_ALERTS_EVENTS_HIST
-  WHERE Acknowledged = 0
-  ORDER BY EventID DESC;
-';
+$where = " WHERE ";
+foreach($_GET as $g){
+  $key = array_search($g, $_GET);
+  $where .= " $key = '$g' AND";
+}
+if(count($_GET) > 0) $where = substr($where, 0, -3);
+else $where = "";
 
-if(isset($_GET['debug'])) echo '<pre>';
+$query = "
+SELECT * FROM
+CEVAC_ALL_ALERTS_EVENTS_HIST
+$where
+";
 
-// $out = '[';
 $array = array();
 
+$json = json_encode($array);
+echo $json;
 
-$result = sqlsrv_query($db, $query);
-while($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)){
-  $array[] = $row;
-}
-
-$out = json_encode($array);
-// $out .= ']';
-echo $out;
-
-
-if(isset($_GET['debug'])) echo '</pre>';
 sqlsrv_close($db);
 ?>
