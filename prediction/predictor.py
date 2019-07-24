@@ -127,14 +127,14 @@ class predictor():
         # specify compiler, loss function, and metrics we want printed out
         model.compile(optimizer='adam',loss=losses.mse, metrics=['accuracy'])
 
+        # load jonathan's brain
+        model.load_weights('powerModel.h5')
+        # model.load_weights('/home/bmeares/CEVAC/prediction/powerModel.h5')
+
         return model
 
     # predict given a power model and the previous 12 hours of weather data
     def predict(self):
-
-        # load jonathan's brain
-        self.model.load_weights('powerModel.h5')
-        # model.load_weights('/home/bmeares/CEVAC/prediction/powerModel.h5')
 
         # get information from the past 12 hours
         for i in range(0,12):

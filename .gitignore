@@ -1,5 +1,6 @@
 combinedData.json
 api.json
+*.txt
 *.npy
 Pipfile
 Pipfile.lock
