@@ -1,7 +1,7 @@
 #! /bin/bash
 if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
   echo Please enter building, metric, age.
-  echo "Usage: ./lasr_append [BLDG] [METRIC] [AGE] {runsas} {reset}"
+  echo "Usage: $0 [BLDG] [METRIC] [AGE] {runsas} {reset}"
   exit 1
 fi
 building="$1"
