@@ -12,7 +12,16 @@ DECLARE @insert_sql NVARCHAR(MAX);
 DECLARE @CEVAC_ALL_RECORD_COUNT_HIST_RAW NVARCHAR(200);
 SET @CEVAC_ALL_RECORD_COUNT_HIST_RAW = 'CEVAC_ALL_RECORDS_COUNTS_COMPARE_HIST_RAW';
 DECLARE @HIST NVARCHAR(400);
-SET @HIST = 'CEVAC_' + @BuildingSName + '_' + @Metric + '_HIST';
+
+--DECLARE @customLASR BIT;
+--SET @customLASR = ISNULL((SELECT TOP 1 customLASR FROM CEVAC_TABLES WHERE BuildingSName = @BuildingSName AND Metric = @Metric AND Age LIKE '%HIST%'),0);
+--IF @customLASR = 1 BEGIN
+--	SET @HIST = 'CEVAC_' + @BuildingSName + '_' + @Metric + '_HIST_LASR';
+--END ELSE BEGIN
+	SET @HIST = 'CEVAC_' + @BuildingSName + '_' + @Metric + '_HIST';
+--END
+
+
 DECLARE @DateTimeName NVARCHAR(100);
 SET @DateTimeName = RTRIM((SELECT TOP 1 DateTimeName FROM CEVAC_TABLES WHERE BuildingSName = @BuildingSName AND Metric = @Metric AND Age = 'HIST'));
 

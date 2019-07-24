@@ -15,6 +15,7 @@ DECLARE @name_CACHE NVARCHAR(300);
 DECLARE @Alias_or_PSID NVARCHAR(50);
 DECLARE @select_query NVARCHAR(MAX);
 DECLARE @i INT;
+DECLARE @IDName NVARCHAR(50);
 DECLARE @AliasName NVARCHAR(50);
 DECLARE @DataName NVARCHAR(50);
 DECLARE @DateTimeName NVARCHAR(50);
@@ -71,6 +72,7 @@ WHILE (EXISTS(SELECT 1 FROM #cevac_params) AND @i > 0) BEGIN
 
 	EXEC CEVAC_ALIAS_OR_PSID_OUTPUT @table = @name, @Alias_or_PSID_out = @Alias_or_PSID OUTPUT;
 	SET @DateTimeName = ISNULL((SELECT TOP 1 RTRIM(DateTimeName) FROM CEVAC_TABLES WHERE TableName = @name), 'UTCDateTime');
+	SET @IDName = ISNULL((SELECT TOP 1 RTRIM(IDName) FROM CEVAC_TABLES WHERE TableName = @name), 'PointSliceID');
 	SET @AliasName = ISNULL((SELECT TOP 1 RTRIM(AliasName) FROM CEVAC_TABLES WHERE TableName = @name), 'Alias');
 	SET @DataName = ISNULL((SELECT TOP 1 RTRIM(DataName) FROM CEVAC_TABLES WHERE TableName = @name),'ActualValue');
 
@@ -132,8 +134,8 @@ WHILE (EXISTS(SELECT 1 FROM #cevac_params) AND @i > 0) BEGIN
 		INSERT INTO ' + @name_CACHE +
 		'
 		SELECT V.* FROM V ' +
-		'LEFT JOIN C ON V.' + @DateTimeName + ' = C.' + @DateTimeName + ' AND V.' + @AliasName + ' = C.' + @AliasName
-		+ ' WHERE C.' + @DateTimeName + ' IS NULL AND C.' + @AliasName + ' IS NULL
+		'LEFT JOIN C ON V.' + @DateTimeName + ' = C.' + @DateTimeName + ' AND V.' + @IDName + ' = C.' + @IDName
+		+ ' WHERE C.' + @DateTimeName + ' IS NULL AND C.' + @IDName + ' IS NULL
 
 		SET @rows_transferred = @@ROWCOUNT;
 
@@ -190,13 +192,14 @@ WHILE (EXISTS(SELECT 1 FROM #cevac_params) AND @i > 0) BEGIN
 			END
 
 			DELETE FROM CEVAC_TABLES WHERE TableName = @name_CACHE;
-			INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, AliasName, DataName, isCustom, Dependencies, customLASR)
+			INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, isCustom, Dependencies, customLASR)
 				VALUES (
 					@BuildingSName,
 					@Metric,
 					@Age,
 					@name_CACHE,
 					@DateTimeName,
+					@IDName,
 					@AliasName,
 					@DataName,
 					@isCustom,

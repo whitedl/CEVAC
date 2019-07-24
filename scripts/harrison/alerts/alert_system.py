@@ -399,18 +399,31 @@ def is_occupied():
 
 
 def get_psid_from_alias(alias, bldgsname, metric):
-    command = (f"EXEC CEVAC_XREF_LOOKUP @BuildingSName = '{bldgsname}', "
-               f"@Metric = '{metric}', @Alias = '{alias}'")
-    print(command)
-    os.system("/home/bmeares/scripts/exec_sql.sh \"" + command +
-              "\" temp_psid_csv.csv")
-    f = open("/home/bmeares/scripts/temp_psid_csv.csv")
-    lines = f.readlines()
+    print("here")
+    print(f"args: {alias} {bldgsname} {metric}")
     try:
-        psids = [int(psid) for i, psid in enumerate(lines) if i > 0]
-        return str(max(psids))
-    except:
-        return lines[-1]
+        command = (f"EXEC CEVAC_XREF_LOOKUP @BuildingSName = '{bldgsname}', "
+                   f"@Metric = '{metric}', @Alias = '{alias}'")
+        print(command)
+        os.system("/home/bmeares/scripts/exec_sql.sh \"" + command +
+                  "\" temp_psid_csv.csv")
+        f = open("/cevac/cache/temp_psid_csv.csv", "r")
+        lines = f.readlines()
+        print(lines)
+        try:
+            psids = [int(psid.replace("\n","")) for i, psid in enumerate(lines) if i > 0]
+            print("here")
+            print(psids)
+            print(max(psids))
+            os.remove("/cevac/cache/temp_psid_csv.csv")
+            return str(max(psids))
+        except Exception:
+            os.remove("/cevac/cache/temp_psid_csv.csv")
+            return str(int(lines[-1].replace("\n","")))
+    except Exception:
+        print("BROKE")
+        os.remove("/cevac/cache/temp_psid_csv.csv")
+        return ""
 
 
 def building_is_occupied(occupancy_dict, building):
@@ -431,7 +444,8 @@ def building_is_occupied(occupancy_dict, building):
     return False
 
 
-def check_numerical_alias(alias, alert, next_id, last_events, new_events):
+def check_numerical_alias(alias, alert, next_id, last_events, new_events,
+                          get_psid):
     """Check numerical alias alert."""
     selection_command = (f"SELECT TOP {str(alert['num_entries'])} "
                          f"{alert['column']} FROM "
@@ -461,6 +475,16 @@ def check_numerical_alias(alias, alert, next_id, last_events, new_events):
 
     alias = "Alias"
     if send_alert:
+        a = deepcopy(alert)
+        if get_psid:
+            a['message'] = angle_brackets_replace_specific(a["message"], "alias",
+                                        room + str(" Temp") + " "
+                                        + get_psid_from_alias(room + " Temp",
+                                                              alert["building"],
+                                                              alert["type"]))
+        else:
+            a['message'] = angle_brackets_replace_specific(a["message"], "alias",
+                                        room + str(" Temp"))
         event_id, next_id, new_events = assign_event_id(next_id,
                                                         last_events,
                                                         new_events,
@@ -472,7 +496,7 @@ def check_numerical_alias(alias, alert, next_id, last_events, new_events):
                "MessageID,"
                " Alias, EventID, BuildingSName)"
                f" VALUES('{alert['operation']}',"
-               f"'{alert['message']}',"
+               f"'{a['message']}',"
                f"'{alert['type']}',"
                f"'{alert['bldg_disp']}','{utcdatetimenow_str}',"
                f"'{alert['message_id']}', {alias}, '{event_id}',"
@@ -482,7 +506,7 @@ def check_numerical_alias(alias, alert, next_id, last_events, new_events):
 
 
 def check_temp(room, alert, temps, known_issues, next_id, last_events,
-               new_events):
+               new_events, get_psid):
     """Check temp."""
     if skip_alias(known_issues, alert["building"], room):
         print(room, " is decomissioned")
@@ -546,9 +570,10 @@ def check_temp(room, alert, temps, known_issues, next_id, last_events,
 
         if send_alert:
             a = deepcopy(alert)
+            add = " " + get_psid_from_alias(room + " Temp",alert["building"],alert["type"]) if get_psid else ""
             a["message"] = angle_brackets_replace_specific(
                             a["message"], "alias",
-                            room + str(" Temp"))
+                            room + str(" Temp") + add)
             a["message"] = angle_brackets_replace_specific(
                             a["message"], "Cooling SP",
                             f"{(room_vals['Cooling SP']-val):.1f}")
@@ -584,7 +609,7 @@ def check_temp(room, alert, temps, known_issues, next_id, last_events,
     return (next_id, new_events, "")
 
 
-def check_time(data, alert, next_id, last_events, new_events):
+def check_time(data, alert, next_id, last_events, new_events, get_psid):
     """Check time off since last report."""
     alias = data
     if skip_alias(known_issues, alert["building"], alias):
@@ -606,8 +631,9 @@ def check_time(data, alert, next_id, last_events, new_events):
     if True:
         safe_log("An alert was sent for " + str(alert), "info")
         a = deepcopy(alert)
+        add = " " +get_psid_from_alias(alias + " Temp",alert["building"],alert["type"]) if get_psid else ""
         a["message"] = angle_brackets_replace_specific(
-                            a["message"], "alias", alias)
+                            a["message"], "alias", alias + add)
         a["message"] = angle_brackets_replace_specific(
                             a["message"], "days", days_since)
         event_id, next_id, new_events = assign_event_id(
@@ -616,6 +642,7 @@ def check_time(data, alert, next_id, last_events, new_events):
                                             new_events,
                                             alert,
                                             alias)
+        print(a["message"])
 
         com = (f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType, "
                f"AlertMessage, Metric,BuildingDName,UTCDateTime, "
@@ -656,6 +683,8 @@ if __name__ == "__main__":
     for i, a in enumerate(alerts):
         alert = alerts[a]
         a_or_psid = get_alias_or_psid(alert["database"])
+        get_psid = (a_or_psid == "Alias")
+        print(get_psid, "add psid")
         try:
             # Check time conditional to make sure it is the correct time for
             # the alert
@@ -683,7 +712,7 @@ if __name__ == "__main__":
                         obj = check_numerical_alias(alias, alert,
                                                     next_id,
                                                     last_events,
-                                                    new_events)
+                                                    new_eventsm, get_psid)
                         next_id = obj[0]
                         new_events = obj[1]
                         insert_sql_total += obj[2]
@@ -722,7 +751,7 @@ if __name__ == "__main__":
                     obj = check_temp(room, alert, temps,
                                                    known_issues,
                                                    next_id, last_events,
-                                                   new_events)
+                                                   new_events, get_psid)
                     next_id = obj[0]
                     new_events = obj[1]
                     insert_sql_total += obj[2]
@@ -765,8 +794,8 @@ if __name__ == "__main__":
                 minutes = amount * 24 * 60 / unit
 
                 for data in aliases:
-                    obj = check_time(data, alert, next_id,
-                                                   last_events, new_events)
+                    obj = check_time(data, alert, next_id, last_events,
+                                     new_events, get_psid)
                     next_id = obj[0]
                     new_events = obj[1]
                     insert_sql_total += obj[2]
