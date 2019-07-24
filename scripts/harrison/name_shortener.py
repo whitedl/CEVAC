@@ -17,4 +17,6 @@ for i, word in enumerate(words):
     elif i > 1:
         words[i] = words[i][:3]
 
-print(output,end="")
+words = [word for word in words if word != ""]
+
+print("_".join(words),end="")
