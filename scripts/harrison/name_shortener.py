@@ -3,7 +3,7 @@
 from sys import argv
 
 
-table = argv[-1]
+table = argv[-1].replace("\n","")
 
 name_to_shortened = {
     "CEVAC" : "C",
@@ -17,9 +17,4 @@ for i, word in enumerate(words):
     elif i > 1:
         words[i] = words[i][:3]
 
-
-output = "_".join(words)
-if output.endswith("_"):
-    output = output[:-1]
-
-print(output)
+print(output,end="")
