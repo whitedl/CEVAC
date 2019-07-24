@@ -30,10 +30,16 @@ WITH hist_slice AS (
 	SELECT h.Alias, h.UTCDateTime, h.ETDateTime, CAST(h.ActualValue AS INT) AS ''ActualValue'', ROW_NUMBER() OVER (ORDER BY UTCDateTime) - ROW_NUMBER() OVER (PARTITION BY CAST(ActualValue AS INT) ORDER BY UTCDateTime) AS Grp
 	FROM hist_slice AS h
 	WHERE h.Alias = ''' + @Alias + '''
-)
-SELECT ' + @AliasName + ', MIN(' + @DateTimeName + ') AS ''' + @DateTimeName + ''', MIN(ETDateTime) AS ''ETDateTime'', ' + @DataName + '
-FROM agg
-GROUP BY ' + @AliasName + ', grp, ' + @DataName + '
+), begin_records AS (
+	SELECT ' + @AliasName + ', MIN(' + @DateTimeName + ') AS ''' + @DateTimeName + ''', MIN(ETDateTime) AS ''ETDateTime'', ' + @DataName + '
+	FROM agg
+	GROUP BY ' + @AliasName + ', grp, ' + @DataName + '
+), end_records AS (
+	SELECT ' + @AliasName + ', MAX(' + @DateTimeName + ') AS ''' + @DateTimeName + ''', MAX(ETDateTime) AS ''ETDateTime'', ' + @DataName + '
+	FROM agg
+	GROUP BY ' + @AliasName + ', grp, ' + @DataName + '
+) SELECT * FROM begin_records
+UNION SELECT * FROM end_records
 ';
 
 IF @execute = 1 EXEC(@EXEC_SQL);
