@@ -64,7 +64,7 @@ export class MapdataService {
       name: 'Humidity',
       propertyName: 'HUM',
       category: 'IAQ',
-      unit: 'null',
+      unit: '%',
       form: 'MAX',
       display: true,
       active: true
