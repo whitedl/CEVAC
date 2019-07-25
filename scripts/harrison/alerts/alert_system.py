@@ -26,14 +26,14 @@ json_oc = "/cevac/cron/alert_log_oc.json"
 json_unoc = "/cevac/cron/alert_log_unoc.json"
 
 # Determines whether or not to write a log and keep track of event id's
-LOG = False
+LOG = True
 
 # Determines whether or not to check the alerts against the respectful
 # databases
 CHECK_ALERTS = True
 
 # Determines whether or not to insert the found alerts into the alert databse
-SEND = False
+SEND = True
 
 # Determines whether or not to update the cache alerts are checked against
 UPDATE_CACHE = True
@@ -308,21 +308,18 @@ def command_to_list_multiple(command, num_args):
 
     list of lists (with length up to num_args) of data from a query.
     """
-    print("here2")
     data = command_to_json_string(command)
-    print("here2.5")
     data_readable = data.replace("}{", "} {").replace("\'", "\"")
     data_list = data_readable.split("} {")
     dict_list = []
-    print("here2.6")
     try:
         for i, d in enumerate(data_list):
             d = d if d[0] == "{" else "{" + d
             d = d if d[-1] == "}" else d + "}"
             dict_list.append(json.loads(d))
     except:
+        print("issue, data:")
         print(data_list)
-    print("here3")
     data_list = []
     for sd in dict_list:
         try:
@@ -332,7 +329,6 @@ def command_to_list_multiple(command, num_args):
             data_list.append(dl)
         except Exception:
             pass
-    print("here4")
     return data_list
 
 
@@ -457,7 +453,6 @@ def building_is_occupied(occupancy_dict, building):
 def check_numerical_alias(alias, alert, next_id, last_events, new_events,
                           get_psid):
     """Check numerical alias alert."""
-    print("got here")
     selection_command = (f"SELECT TOP {str(alert['num_entries'])} "
                          f"{alert['column']} FROM "
                          f"{str(alert['database'])}")
@@ -713,11 +708,8 @@ if __name__ == "__main__":
                 z = (f"SELECT DISTINCT "
                      f"{a_or_psid} "
                      f"FROM {alert['database']}")
-                print("here1")
                 z = command_to_list_multiple(z,2)
-                print("z",type(z))
                 all_aliases = [b[0] for b in command_to_list_multiple(z, 2)]
-                print("here2")
 
                 for alias in all_aliases:
                     try:
@@ -820,9 +812,9 @@ if __name__ == "__main__":
                 print("invalid condition")
 
         except Exception:
-            safe_log("Issue on alert " + str(i + 1) + " " + str(alert),
+            safe_log("Issue on alert " + str(i + 2) + " " + str(alert),
                      "error")
-            print("issue on alert", str(i + 1))
+            print("issue on alert", str(i + 2))
 
     if insert_sql_total == "":
         insert_sql_total = ("INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType,"
