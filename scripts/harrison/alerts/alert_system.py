@@ -25,12 +25,20 @@ json_fname = "/cevac/cron/alert_log.json"
 json_oc = "/cevac/cron/alert_log_oc.json"
 json_unoc = "/cevac/cron/alert_log_unoc.json"
 
+# Determines whether or not to write a log and keep track of event id's
+LOG = False
 
-LOG = True
+# Determines whether or not to check the alerts against the respectful
+# databases
 CHECK_ALERTS = True
-SEND = True
+
+# Determines whether or not to insert the found alerts into the alert databse
+SEND = False
+
+# Determines whether or not to update the cache alerts are checked against
 UPDATE_CACHE = True
 
+# The positions for columns in the csv
 COLUMNS = {
     "alert_name": 0,
     "type": 1,
@@ -52,6 +60,7 @@ COLUMNS = {
 }
 
 
+# Time constants
 TIME = {
     "day": 1,
     "hr": 24,
@@ -299,7 +308,9 @@ def command_to_list_multiple(command, num_args):
 
     list of lists (with length up to num_args) of data from a query.
     """
+    print("command_to_list_multiple")
     data = command_to_json_string(command)
+    print(data)
 
     data_readable = data.replace("}{", "} {").replace("\'", "\"")
     data_list = data_readable.split("} {")
@@ -324,7 +335,7 @@ def command_to_list_multiple(command, num_args):
 def safe_log(message, type):
     """Log a message safely."""
     if LOG:
-        if type == "error":
+        if type.lower() == "error":
             logging.error(message)
         else:
             logging.info(message)
@@ -399,29 +410,24 @@ def is_occupied():
 
 
 def get_psid_from_alias(alias, bldgsname, metric):
-    print("here")
-    print(f"args: {alias} {bldgsname} {metric}")
+    """Return the (most recent) pointsliceid from an alias."""
+    print(f"get psid from alias: {alias} {bldgsname} {metric}")
     try:
         command = (f"EXEC CEVAC_XREF_LOOKUP @BuildingSName = '{bldgsname}', "
                    f"@Metric = '{metric}', @Alias = '{alias}'")
-        print(command)
         os.system("/home/bmeares/scripts/exec_sql.sh \"" + command +
                   "\" temp_psid_csv.csv")
         f = open("/cevac/cache/temp_psid_csv.csv", "r")
         lines = f.readlines()
-        print(lines)
         try:
             psids = [int(psid.replace("\n","")) for i, psid in enumerate(lines) if i > 0]
-            print("here")
-            print(psids)
-            print(max(psids))
             os.remove("/cevac/cache/temp_psid_csv.csv")
             return str(max(psids))
         except Exception:
             os.remove("/cevac/cache/temp_psid_csv.csv")
             return str(int(lines[-1].replace("\n","")))
     except Exception:
-        print("BROKE")
+        print("could not get psid from alias")
         os.remove("/cevac/cache/temp_psid_csv.csv")
         return ""
 
@@ -447,6 +453,7 @@ def building_is_occupied(occupancy_dict, building):
 def check_numerical_alias(alias, alert, next_id, last_events, new_events,
                           get_psid):
     """Check numerical alias alert."""
+    print("got here")
     selection_command = (f"SELECT TOP {str(alert['num_entries'])} "
                          f"{alert['column']} FROM "
                          f"{str(alert['database'])}")
@@ -478,13 +485,13 @@ def check_numerical_alias(alias, alert, next_id, last_events, new_events,
         a = deepcopy(alert)
         if get_psid:
             a['message'] = angle_brackets_replace_specific(a["message"], "alias",
-                                        room + str(" Temp") + " "
-                                        + get_psid_from_alias(room + " Temp",
+                                        room
+                                        + get_psid_from_alias(room,
                                                               alert["building"],
                                                               alert["type"]))
         else:
             a['message'] = angle_brackets_replace_specific(a["message"], "alias",
-                                        room + str(" Temp"))
+                                        room)
         event_id, next_id, new_events = assign_event_id(next_id,
                                                         last_events,
                                                         new_events,
@@ -493,9 +500,9 @@ def check_numerical_alias(alias, alert, next_id, last_events, new_events,
         safe_log("An alert was sent for " + str(alert), "info")
         com = (f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType, "
                f"AlertMessage, Metric, BuildingDName, UTCDateTime, "
-               "MessageID,"
-               " Alias, EventID, BuildingSName)"
-               f" VALUES('{alert['operation']}',"
+               "MessageID, "
+               "Alias, EventID, BuildingSName) "
+               f"VALUES('{alert['operation']}',"
                f"'{a['message']}',"
                f"'{alert['type']}',"
                f"'{alert['bldg_disp']}','{utcdatetimenow_str}',"
@@ -507,7 +514,7 @@ def check_numerical_alias(alias, alert, next_id, last_events, new_events,
 
 def check_temp(room, alert, temps, known_issues, next_id, last_events,
                new_events, get_psid):
-    """Check temp."""
+    """Check temps."""
     if skip_alias(known_issues, alert["building"], room):
         print(room, " is decomissioned")
         return (next_id, new_events, "")
@@ -628,32 +635,30 @@ def check_time(data, alert, next_id, last_events, new_events, get_psid):
     days_since = time_diff.days + 1  # ceil
 
     # Add to alerts to send
-    if True:
-        safe_log("An alert was sent for " + str(alert), "info")
-        a = deepcopy(alert)
-        add = " " +get_psid_from_alias(alias + " Temp",alert["building"],alert["type"]) if get_psid else ""
-        a["message"] = angle_brackets_replace_specific(
-                            a["message"], "alias", alias + add)
-        a["message"] = angle_brackets_replace_specific(
-                            a["message"], "days", days_since)
-        event_id, next_id, new_events = assign_event_id(
-                                            next_id,
-                                            last_events,
-                                            new_events,
-                                            alert,
-                                            alias)
-        print(a["message"])
+    safe_log("An alert was sent for " + str(alert), "info")
+    a = deepcopy(alert)
+    add = " " +get_psid_from_alias(alias, alert["building"],alert["type"]) if get_psid else ""
+    a["message"] = angle_brackets_replace_specific(
+                        a["message"], "alias", alias + add)
+    a["message"] = angle_brackets_replace_specific(
+                        a["message"], "days", days_since)
+    event_id, next_id, new_events = assign_event_id(
+                                        next_id,
+                                        last_events,
+                                        new_events,
+                                        alert,
+                                        alias)
+    print(a["message"])
 
-        com = (f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType, "
-               f"AlertMessage, Metric,BuildingDName,UTCDateTime, "
-               f"MessageID, Alias, EventID, BuildingSName)"
-               f" VALUES('{a['operation']}','{a['message']}',"
-               f"'{a['type']}','{a['bldg_disp']}',"
-               f"'{utcdatetimenow_str}',"
-               f"'{alert['message_id']}', '{alias}',"
-               f" '{event_id}', '{alert['building']}')")
-        return (next_id, new_events, com + "; ")
-    return (next_id, new_events, "")
+    com = (f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType, "
+           f"AlertMessage, Metric,BuildingDName,UTCDateTime, "
+           f"MessageID, Alias, EventID, BuildingSName)"
+           f" VALUES('{a['operation']}','{a['message']}',"
+           f"'{a['type']}','{a['bldg_disp']}',"
+           f"'{utcdatetimenow_str}',"
+           f"'{alert['message_id']}', '{alias}',"
+           f" '{event_id}', '{alert['building']}')")
+    return (next_id, new_events, com + "; ")
 
 
 if __name__ == "__main__":
@@ -673,7 +678,7 @@ if __name__ == "__main__":
 
     # JSON
     next_id, last_events = parse_json(json_fname, json_oc, json_unoc)
-    new_events = {}  # id: { hash : event_id }
+    new_events = {}  # id: { "hash" : event_id }
 
     # Check alerts for conditions
     insert_sql_total = ""
@@ -684,7 +689,6 @@ if __name__ == "__main__":
         alert = alerts[a]
         a_or_psid = get_alias_or_psid(alert["database"])
         get_psid = (a_or_psid == "Alias")
-        print(get_psid, "add psid")
         try:
             # Check time conditional to make sure it is the correct time for
             # the alert
@@ -705,7 +709,9 @@ if __name__ == "__main__":
                 z = (f"SELECT DISTINCT "
                      f"{a_or_psid} "
                      f"FROM {alert['database']}")
+                print("here1")
                 all_aliases = [b[0] for b in command_to_list_multiple(z, 2)]
+                print("here2")
 
                 for alias in all_aliases:
                     try:
