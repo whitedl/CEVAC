@@ -485,9 +485,9 @@ def check_numerical_alias(alias, alert, next_id, last_events, new_events,
         if get_psid:
             a['message'] = angle_brackets_replace_specific(a["message"], "alias",
                                         room
-                                        + get_psid_from_alias(room,
+                                        + "(" + get_psid_from_alias(room,
                                                               alert["building"],
-                                                              alert["type"]))
+                                                              alert["type"]) + ")")
         else:
             a['message'] = angle_brackets_replace_specific(a["message"], "alias",
                                         room)
@@ -576,10 +576,10 @@ def check_temp(room, alert, temps, known_issues, next_id, last_events,
 
         if send_alert:
             a = deepcopy(alert)
-            add = " " + get_psid_from_alias(room + " Temp",alert["building"],alert["type"]) if get_psid else ""
+            add = get_psid_from_alias(room + " Temp",alert["building"],alert["type"]) if get_psid else ""
             a["message"] = angle_brackets_replace_specific(
                             a["message"], "alias",
-                            room + str(" Temp") + add)
+                            room + " Temp (" + add + ")")
             a["message"] = angle_brackets_replace_specific(
                             a["message"], "Cooling SP",
                             f"{(room_vals['Cooling SP']-val):.1f}")
@@ -636,7 +636,7 @@ def check_time(data, alert, next_id, last_events, new_events, get_psid):
     # Add to alerts to send
     safe_log("An alert was sent for " + str(alert), "info")
     a = deepcopy(alert)
-    add = " " +get_psid_from_alias(alias, alert["building"],alert["type"]) if get_psid else ""
+    add = " (" +get_psid_from_alias(alias, alert["building"],alert["type"]) + ")" if get_psid else ""
     a["message"] = angle_brackets_replace_specific(
                         a["message"], "alias", alias + add)
     a["message"] = angle_brackets_replace_specific(

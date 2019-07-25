@@ -1,5 +1,6 @@
 """Parse alerts from CEVAC_ALL_ALERTS_HIST."""
 
+import os
 import bsql
 import datetime
 import time_handler
@@ -9,6 +10,7 @@ from jinja2 import Template
 from email import message as msg
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
+from time import sleep
 
 import base64
 
@@ -60,6 +62,10 @@ metrics_a = {
     "STEAM": {
         "key": "<STEAM>",
         "char": "⛅",
+    },
+    "CO2": {
+        "key": "<CO2>",
+        "char": "🌫",
     },
 
     "UNKNOWN": {
@@ -113,8 +119,8 @@ metrics = {
         "fpath": pic_path + "POWER.png",
         "cid": "image2",
     },
-    "IAQ": {
-        "key": "<IAQ>",
+    "CO2": {
+        "key": "<CO2>",
         "char": (f"<img src=\"cid:image3\"  width=\"50\" height=\"50\">"),
         "fpath": pic_path + "CO2.png",
         "cid": "image3",
@@ -213,6 +219,15 @@ class Alert_Log:
         return False
 
 
+def rebuild_events():
+    """Rebuild a broken cache."""
+    command = f"EXEC CEVAC_CACHE_INIT @tables = 'CEVAC_ALL_ALERTS_EVENTS_HIST_VIEW'"
+    print(command)
+    os.system("/cevac/scripts/exec_sql.sh \"" + command +
+              "\" temp_csv.csv")
+    return None
+
+
 def replace_metric(rep_str):
     """Replace metric str with character."""
     for metric in metrics:
@@ -264,6 +279,7 @@ def email_message(email, password, to_list, message, subject):
 def main():
     """Do main function."""
     # Get alerts from the past day
+    rebuild_events()
     try:
         now = datetime.datetime.utcnow()
         day = datetime.timedelta(1)
