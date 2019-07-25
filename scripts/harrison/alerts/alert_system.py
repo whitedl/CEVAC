@@ -20,7 +20,7 @@ KNOWN_ISSUES_FPATH = "/cevac/DEV/known issues/Known Data Issues.csv"
 OCCUPANCY_FPATH = "/cevac/CEVAC/scripts/harrison/alerts/occupancy.csv"
 LOGGING_PATH = "/home/bmeares/cron/alerts/"
 PHONE_PATH = "/home/bmeares/cron/alerts/"
-alert_fname = "/cevac/CEVAC/alerts/alert_parameters.csv"
+alert_fname = "/cevac/DEV/alerts/alert_parameters.csv"
 json_fname = "/cevac/cron/alert_log.json"
 json_oc = "/cevac/cron/alert_log_oc.json"
 json_unoc = "/cevac/cron/alert_log_unoc.json"
@@ -308,18 +308,21 @@ def command_to_list_multiple(command, num_args):
 
     list of lists (with length up to num_args) of data from a query.
     """
-    print("command_to_list_multiple")
+    print("here2")
     data = command_to_json_string(command)
-    print(data)
-
+    print("here2.5")
     data_readable = data.replace("}{", "} {").replace("\'", "\"")
     data_list = data_readable.split("} {")
     dict_list = []
-    for i, d in enumerate(data_list):
-        d = d if d[0] == "{" else "{" + d
-        d = d if d[-1] == "}" else d + "}"
-        dict_list.append(json.loads(d))
-
+    print("here2.6")
+    try:
+        for i, d in enumerate(data_list):
+            d = d if d[0] == "{" else "{" + d
+            d = d if d[-1] == "}" else d + "}"
+            dict_list.append(json.loads(d))
+    except:
+        print(data_list)
+    print("here3")
     data_list = []
     for sd in dict_list:
         try:
@@ -329,6 +332,7 @@ def command_to_list_multiple(command, num_args):
             data_list.append(dl)
         except Exception:
             pass
+    print("here4")
     return data_list
 
 
@@ -710,6 +714,8 @@ if __name__ == "__main__":
                      f"{a_or_psid} "
                      f"FROM {alert['database']}")
                 print("here1")
+                z = command_to_list_multiple(z,2)
+                print("z",type(z))
                 all_aliases = [b[0] for b in command_to_list_multiple(z, 2)]
                 print("here2")
 
