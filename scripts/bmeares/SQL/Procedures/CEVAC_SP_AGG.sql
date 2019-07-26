@@ -3,12 +3,12 @@ GO
 SET ANSI_NULLS, QUOTED_IDENTIFIER ON;
 GO
 CREATE PROCEDURE CEVAC_SP_AGG
-	@Alias NVARCHAR(100),
+	@ID NVARCHAR(100),
 	@HIST NVARCHAR(300),
 	@begin_UTC_string NVARCHAR(100),
 	@now_UTC_string NVARCHAR(100),
 	@DateTimeName NVARCHAR(100),
-	@AliasName NVARCHAR(100),
+	@IDName NVARCHAR(100),
 	@DataName NVARCHAR(100)
 AS
 DECLARE @execute BIT;
@@ -27,17 +27,17 @@ WITH hist_slice AS (
 	SELECT * FROM ' + @HIST + '
 	WHERE ' + @DateTimeName + ' BETWEEN @begin_UTC AND @now_UTC
 ), agg AS (
-	SELECT h.Alias, h.UTCDateTime, h.ETDateTime, CAST(h.ActualValue AS INT) AS ''ActualValue'', ROW_NUMBER() OVER (ORDER BY UTCDateTime) - ROW_NUMBER() OVER (PARTITION BY CAST(ActualValue AS INT) ORDER BY UTCDateTime) AS Grp
+	SELECT h.' + @IDName + ', h.Alias, h.UTCDateTime, h.ETDateTime, ROUND(h.ActualValue,2) AS ''ActualValue'', ROW_NUMBER() OVER (ORDER BY UTCDateTime) - ROW_NUMBER() OVER (PARTITION BY CAST(ActualValue AS INT) ORDER BY UTCDateTime) AS Grp
 	FROM hist_slice AS h
-	WHERE h.Alias = ''' + @Alias + '''
+	WHERE h.' + @IDName + ' = ' + @ID + '
 ), begin_records AS (
-	SELECT ' + @AliasName + ', MIN(' + @DateTimeName + ') AS ''' + @DateTimeName + ''', MIN(ETDateTime) AS ''ETDateTime'', ' + @DataName + '
+	SELECT ' + @IDName + ', Alias, MIN(' + @DateTimeName + ') AS ''' + @DateTimeName + ''', MIN(ETDateTime) AS ''ETDateTime'', ' + @DataName + '
 	FROM agg
-	GROUP BY ' + @AliasName + ', grp, ' + @DataName + '
+	GROUP BY ' + @IDName + ', Alias, grp, ' + @DataName + '
 ), end_records AS (
-	SELECT ' + @AliasName + ', MAX(' + @DateTimeName + ') AS ''' + @DateTimeName + ''', MAX(ETDateTime) AS ''ETDateTime'', ' + @DataName + '
+	SELECT ' + @IDname + ', Alias, MAX(' + @DateTimeName + ') AS ''' + @DateTimeName + ''', MAX(ETDateTime) AS ''ETDateTime'', ' + @DataName + '
 	FROM agg
-	GROUP BY ' + @AliasName + ', grp, ' + @DataName + '
+	GROUP BY ' + @IDName + ', Alias, grp, ' + @DataName + '
 ) SELECT * FROM begin_records
 UNION SELECT * FROM end_records
 ';
