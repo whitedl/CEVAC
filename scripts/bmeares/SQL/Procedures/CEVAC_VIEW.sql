@@ -90,7 +90,7 @@ SELECT @Table_name AS 'Table_name init';
 SET @XREF = CONCAT('CEVAC_', @Building, '_', @Metric, '_XREF');
 IF @Metric = 'POWER_SUMS' SET @XREF = CONCAT('CEVAC_', @Building, '_POWER_XREF');
 SET @PXREF = CONCAT('CEVAC_', @Building, '_', @Metric, '_PXREF');
-IF @Metric = 'POWER_RAW' SET @XREF = CONCAT('CEVAC_', @Building, '_', REPLACE(@Metric, 'POWER_RAW', 'POWER'), '_XREF');
+--IF @Metric = 'POWER_RAW' SET @XREF = CONCAT('CEVAC_', @Building, '_', REPLACE(@Metric, 'POWER_RAW', 'POWER'), '_XREF');
 IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = @XREF) SET @XREF = NULL;
 
 -- add quotes for regex search
@@ -347,6 +347,7 @@ ELSE IF @Age LIKE '%HIST%' BEGIN
 		EXEC CEVAC_HIST_LASR @BuildingSName = ''' + @Building + ''', @Metric = ''' + @Metric + ''';
 		';
 		SET @customLASR = 1;
+		SET @Table_name = @HIST_LASR;
 	END
 
 END -- END of _HIST_VIEW
@@ -571,45 +572,44 @@ IF @Age LIKE '%HIST%' BEGIN
 	END
 
 
-	SELECT @customLASR AS 'customLASR';
-	-- Insert HIST_LASR if necessary
-	IF @customLASR = 1 BEGIN
-		-- HIST_LASR
-		DELETE FROM CEVAC_TABLES WHERE TableName = @HIST_LASR;
-		INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, isCustom, Definition, Dependencies, customLASR)
-		VALUES (
-			@Building,
-			@Metric,
-			@Age,
-			@HIST_LASR,
-			@DateTimeName,
-			@IDName,
-			@AliasName,
-			@DataName,
-			isnull(@isCustom,0),
-			@Create_View,
-			@_HIST_source,
-			@customLASR
-		);
-		-- HIST_LASR_INT
-		DELETE FROM CEVAC_TABLES WHERE TableName = @HIST_LASR_INT;
-		INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, isCustom, Definition, Dependencies, customLASR)
-		VALUES (
-			@Building,
-			@Metric,
-			@Age,
-			@HIST_LASR_INT,
-			@DateTimeName,
-			@IDName,
-			@AliasName,
-			@DataName,
-			isnull(@isCustom,0),
-			@Create_API_View,
-			@_HIST_source,
-			@customLASR
-		);
+	---- Insert HIST_LASR if necessary
+	--IF @customLASR = 1 BEGIN
+	--	-- HIST_LASR
+	--	DELETE FROM CEVAC_TABLES WHERE TableName = @HIST_LASR;
+	--	INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, isCustom, Definition, Dependencies, customLASR)
+	--	VALUES (
+	--		@Building,
+	--		@Metric,
+	--		@Age,
+	--		@HIST_LASR,
+	--		@DateTimeName,
+	--		@IDName,
+	--		@AliasName,
+	--		@DataName,
+	--		isnull(@isCustom,0),
+	--		@Create_View,
+	--		@_HIST_source,
+	--		@customLASR
+	--	);
+	--	-- HIST_LASR_INT
+	--	DELETE FROM CEVAC_TABLES WHERE TableName = @HIST_LASR_INT;
+	--	INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, isCustom, Definition, Dependencies, customLASR)
+	--	VALUES (
+	--		@Building,
+	--		@Metric,
+	--		@Age,
+	--		@HIST_LASR_INT,
+	--		@DateTimeName,
+	--		@IDName,
+	--		@AliasName,
+	--		@DataName,
+	--		isnull(@isCustom,0),
+	--		@Create_API_View,
+	--		@_HIST_source,
+	--		@customLASR
+	--	);
 
-	END
+	--END
 END
 
 

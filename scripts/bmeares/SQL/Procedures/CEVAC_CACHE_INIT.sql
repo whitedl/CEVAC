@@ -62,10 +62,12 @@ DECLARE @CEVAC_CACHE_APPEND NVARCHAR(MAX);
 IF @tables LIKE '%HIST_LASR%' AND @params_rc = 1 BEGIN
 	DECLARE @BuildingSName NVARCHAR(100);
 	DECLARE @Metric NVARCHAR(100);
-	SET @BuildingSName = (SELECT BuildingSName FROM CEVAC_TABLES WHERE TableName = @tables);
-	SET @Metric = (SELECT BuildingSName FROM CEVAC_TABLES WHERE TableName = @tables);
+	SET @BuildingSName = (SELECT RTRIM(BuildingSName) FROM CEVAC_TABLES WHERE TableName = @tables);
+	SET @Metric = (SELECT RTRIM(Metric) FROM CEVAC_TABLES WHERE TableName = @tables);
 
-	SET @CEVAC_CACHE_APPEND = 'EXEC CEVAC_VIEW @Building = ''' + @BuildingSName + ''', @Metric = ''' + @Metric + ''', @Age = ''HIST_LASR''';
+	SET @CEVAC_CACHE_APPEND = '
+	IF OBJECT_ID(''CEVAC_' + @BuildingSName + '_' + @Metric + '_HIST_LASR'') IS NOT NULL DROP TABLE CEVAC_' + @BuildingSName + '_' + @Metric + '_HIST_LASR;
+	EXEC CEVAC_VIEW @Building = ''' + @BuildingSName + ''', @Metric = ''' + @Metric + ''', @Age = ''HIST_LASR''';
 END ELSE BEGIN
 	SET @CEVAC_CACHE_APPEND = 'EXEC CEVAC_CACHE_APPEND @tables = ''' + @tables + '''';
 END
