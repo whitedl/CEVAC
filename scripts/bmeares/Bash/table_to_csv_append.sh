@@ -32,7 +32,6 @@ UTCDateTime=`/cevac/scripts/sql_value.sh "SET NOCOUNT ON; SELECT TOP 1 RTRIM(Dat
 Alias=`/cevac/scripts/sql_value.sh "SET NOCOUNT ON; SELECT TOP 1 RTRIM(AliasName) FROM CEVAC_TABLES WHERE TableName = '$table'"`
 IDName=`/cevac/scripts/sql_value.sh "SET NOCOUNT ON; SELECT TOP 1 RTRIM(IDName) FROM CEVAC_TABLES WHERE TableName = '$table'"`
 DataName=`/cevac/scripts/sql_value.sh "SET NOCOUNT ON; SELECT TOP 1 RTRIM(DataName) FROM CEVAC_TABLES WHERE TableName = '$table'"`
-
 if [ -z "$UTCDateTime" ] || [ -z "$Alias" ] || [ -z "$DataName" ] || [ -z "$IDName" ]; then
   echo "Error: Missing DateTimeName, AliasName, or DataName for $table"
   echo "Enter the information below and rerun the script."
@@ -131,6 +130,12 @@ END
 
 "
 
+if [ "$UTCDateTime" != "$IDName" ]; then
+  csv_new_cols="new.$UTCDateTime,new.$IDName"
+else
+  csv_new_cols="new.$UTCDateTime"
+fi
+
 csv_utc_append_query="
 DECLARE @begin DATETIME;
 DECLARE @now DATETIME;
@@ -151,7 +156,8 @@ WITH new AS (
 )
   INSERT INTO $table_CSV
 
-  SELECT new.$UTCDateTime, new.$IDName FROM new
+  SELECT $csv_new_cols
+  FROM new
   LEFT JOIN new_csv AS CSV ON CSV.$UTCDateTime = new.$UTCDateTime AND CSV.$IDName = new.$IDName
   WHERE CSV.$UTCDateTime IS NULL
 
@@ -180,18 +186,18 @@ WITH new AS (
   WHERE $UTCDateTime > isnull(@begin, 0) AND $UTCDateTime <= @now
 )
   SELECT new.* FROM new
-  LEFT JOIN new_csv AS CSV ON CSV.$UTCDateTime = new.$UTCDateTime
-  WHERE CSV.$UTCDateTime IS NULL
-  ORDER BY LEN(new.$IDName) DESC
+  LEFT JOIN new_csv AS CSV ON CSV.$UTCDateTime = new.$UTCDateTime AND CSV.$IDName = new.$IDName
+  WHERE CSV.$UTCDateTime IS NULL AND CSV.$IDName IS NULL
+  ORDER BY LEN(new.$Alias) DESC
 "
 
 csv_utc_query="
 SET NOCOUNT ON
 IF OBJECT_ID('dbo.$table_CSV') IS NOT NULL DROP TABLE $table_CSV;
 GO
-SELECT $UTCDateTime, $IDName
+SELECT $csv_new_cols
 INTO $table_CSV
-FROM $table
+FROM $table AS new
 "
 query="
 SET NOCOUNT ON
@@ -230,10 +236,8 @@ if [ ! -f /srv/csv/$table.csv ]; then
   echo Executing query:
   echo "$query"
   # get data
-  /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$query" -W -o "/cevac/cache/$table.csv" -h-1 -s"," -w 700
-  csv_error=`grep "Msg.*Level.*State.*Server" /cevac/cache/$table.csv`
-  if [ ! -z "$csv_error" ]; then
-    echo "Error: /cevac/cache/$table.csv failed."
+  if ! /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$query" -W -o "/cevac/cache/$table.csv" -h-1 -s"," -w 700 ; then
+    echo "Error: Failed generating $table.csv. Quitting $0..."
     exit 1
   fi
   if [ -z "$xref" ]; then
@@ -257,7 +261,10 @@ else # csv exists
   echo "$append_query"
 
   # Get columns and data
-  /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$append_query" -W -o "/home/bmeares/cache/$table.csv" -s"," -w 700
+  if ! /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$append_query" -W -o "/cevac/cache/$table.csv" -s"," -w 700 ; then
+    echo "Failed to get columns..."
+    exit 1
+  fi
   # remove separator
   sed 2d -i /cevac/cache/$table.csv
 
@@ -266,7 +273,10 @@ else # csv exists
   rows_transferred=$(expr `wc -l < /cevac/cache/$table.csv` - 1 )
 
   echo "Updating $table_CSV..."
-  /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$csv_utc_append_query"
+  if ! /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$csv_utc_append_query" ; then
+    echo "Error! aborting..."
+    exit 1
+  fi
 
   echo "Removing columns from /srv/csv/$table.csv..."
   # remove columns from historical csv
