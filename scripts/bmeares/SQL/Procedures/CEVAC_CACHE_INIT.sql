@@ -3,12 +3,9 @@ GO
 SET ANSI_NULLS, QUOTED_IDENTIFIER ON;
 GO
 CREATE PROCEDURE CEVAC_CACHE_INIT
-	@tables NVARCHAR(500),
+	@tables NVARCHAR(MAX),
 	@destTableName NVARCHAR(300) = NULL
 AS
-
-
-
 
 DECLARE @name NVARCHAR(100);
 DECLARE @name_CACHE NVARCHAR(100);
@@ -26,20 +23,22 @@ END ELSE BEGIN
 	SET @name_CACHE = NULL;
 END
 
+DECLARE @cevac_params TABLE(TableName NVARCHAR(MAX));
 
 SET @i = 100;
 IF OBJECT_ID('dbo.#cevac_params', 'U') IS NOT NULL DROP TABLE #cevac_params;
-SELECT * INTO #cevac_params FROM ListTable(@tables);
+INSERT INTO @cevac_params SELECT * FROM ListTable(@tables);
+
 SET @params_rc = @@ROWCOUNT;
 IF @params_rc > 1 AND @destTableName IS NOT NULL BEGIN
 	RAISERROR('Custom init must have only one table', 11, 1);
 	RETURN
 END
 
-WHILE (EXISTS(SELECT 1 FROM #cevac_params) AND @i > 0) BEGIN
+WHILE (EXISTS(SELECT 1 FROM @cevac_params) AND @i > 0) BEGIN
 	SET @i = @i - 1;
-	SET @name = (SELECT TOP 1 * FROM #cevac_params);
-	DELETE TOP(1) FROM #cevac_params;
+	SET @name = (SELECT TOP 1 TableName FROM @cevac_params);
+	DELETE TOP(1) FROM @cevac_params;
 
 	IF @custom = 0 AND @name_CACHE IS NULL BEGIN
 		-- Replace _VIEW with _CACHE, else append _CACHE
