@@ -7,6 +7,7 @@ IDName="$4"
 AliasName="$5"
 DataName="$6"
 Dependencies="$7"
+error=""
 
 echo "Usage: $0 [BuildingSName] [Metric] [DateTimeName] [IDName] [AliasName] [DataName] [Dependencies]"
 
@@ -19,7 +20,8 @@ fi
 HIST_VIEW="CEVAC_$BuildingSName""_$Metric"_"HIST_VIEW"
 def_file="/cevac/CUSTOM_DEFS/$HIST_VIEW.sql"
 if [ ! -f "$def_file" ]; then
-  echo "$def_file is missing"
+  error="$def_file is missing"
+  /cevac/scripts/log_error.sh "$error"
   exit 1
 fi
 
@@ -81,4 +83,8 @@ CUSTOM_file="/cevac/cache/CUSTOM_$HIST_VIEW.sql"
 
 echo "$custom_query" > $CUSTOM_file
 
-/cevac/scripts/exec_sql_script.sh "$CUSTOM_file"
+if ! /cevac/scripts/exec_sql_script.sh "$CUSTOM_file" ; then
+  error="Could not execute CEVAC_CUSTOM_HIST"
+  /cevac/scripts/log_error.sh "$error"
+  exit 1
+fi

@@ -23,9 +23,9 @@ for t in "${tables_array[@]}"; do
     sql="EXEC CEVAC_CACHE_INIT @tables = '"$t"'"
   else sql="EXEC CEVAC_CACHE_APPEND @tables = '$t'"
   fi
-  /cevac/scripts/exec_sql.sh "$sql"
-  if [ ! $? -eq 0 ]; then
+  if ! /cevac/scripts/exec_sql.sh "$sql" ; then
     echo "Error. Aborting append"
+    /cevac/scripts/log_error.sh "Error executing CEVAC_CACHE_APPEND" "$t"
     exit 1
   fi
 done
