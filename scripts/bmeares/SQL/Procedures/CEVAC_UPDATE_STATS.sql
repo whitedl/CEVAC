@@ -3,12 +3,15 @@ GO
 SET ANSI_NULLS, QUOTED_IDENTIFIER ON;
 GO
 CREATE PROCEDURE CEVAC_UPDATE_STATS
-	@BuildingSName NVARCHAR(50),
-	@Metric NVARCHAR(50)
+	@BuildingSName NVARCHAR(200),
+	@Metric NVARCHAR(200)
 AS
 
 DECLARE @execute BIT;
 SET @execute = 1;
+DECLARE @error NVARCHAR(MAX);
+DECLARE @ProcessName NVARCHAR(MAX);
+SET @ProcessName = OBJECT_NAME(@@PROCID);
 
 DECLARE @LATEST NVARCHAR(300);
 SET @LATEST = 'CEVAC_' + @BuildingSName + '_' + @Metric + '_LATEST';
@@ -18,8 +21,8 @@ DECLARE @stats_source NVARCHAR(300);
 SET @stats_source = @LATEST_CACHE;
 
 IF OBJECT_ID(@LATEST) IS NULL OR @LATEST IS NULL BEGIN
-	DECLARE @error NVARCHAR(MAX);
 	SET @error = @LATEST + ' does not exist';
+	EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @LATEST;
 	RAISERROR(@error, 11,1);
 	RETURN;
 END
