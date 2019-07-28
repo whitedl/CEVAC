@@ -1,5 +1,5 @@
 #! /bin/sh
-
+error=""
 building="$1"
 metric="$2"
 keys_list="$3"
@@ -26,11 +26,10 @@ if [ "$checkXREF" != "XREF" ] && [ "$isCustom" != "1" ]; then
     echo $'unitOfMeasureID\n     (important!): '; read unitOfMeasureID
   fi
   echo $'Keywords (e.g. SLAB,ZN-T,CRAC)\n     (empty to omit): '; read keys_list
-  
 fi
 
 if [ -z "$building" ] || [ -z "$metric" ]; then
-  echo Error!
+  echo "Error! Run $0 again with the correct parameters"
   exit 1
 fi
 [ -z "$unitOfMeasureID" ] && unitOfMeasureID="NULL";
@@ -44,20 +43,9 @@ fi
 
 for a in "${ages_array[@]}"; do
   echo "Creating CEVAC_$building""_$metric""_$a"
-  out=`/cevac/scripts/CREATE_VIEW.sh $building $metric $a $keys_list $unitOfMeasureID`
-  error=`echo "$out" | grep 'Msg'`
-  error2=`echo "$out" | awk '/Msg/ { getline; print $0 }'`
-  if [ ! -z "$error" ]; then
-    echo "Error creating $a"
-    echo "Error Message:"
-    echo "$error"
-    echo "$error2"
-
-    echo "Print full output log? (y/N)": 
-    read choice
-    if [ "$choice" == "y" ] || [ "$choice" == "Y" ]; then
-      echo "$out"
-    fi
+  if ! /cevac/scripts/CREATE_VIEW.sh $building $metric $a $keys_list $unitOfMeasureID ; then
+    error="Error encountered when creatiny $building""_$metric""_$a"
+    /cevac/scripts/log_error.sh "$error"
     exit 1
   fi
 done
