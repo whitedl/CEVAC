@@ -1,5 +1,5 @@
 #! /bin/sh
-
+error=""
 Building="$1"
 Metric="$2"
 if [ -z "$1" ] || [ -z "$2" ]; then
@@ -60,24 +60,28 @@ for t in "${tables_array[@]}"; do
   sql="IF OBJECT_ID('$t') IS NOT NULL EXEC('DROP $table_type $t')"
   c_sql="IF OBJECT_ID('"$t_CACHE"') IS NOT NULL EXEC('DROP TABLE $t_CACHE')"
   if ! /cevac/scripts/exec_sql.sh "$sql"; then
-    echo "Error: Could not drop $t"
+    error="Error: Could not drop $t"
+    /cevac/scripts/log_error.sh "$error" "$t"
     exit 1
   fi
   if ! /cevac/scripts/exec_sql.sh "$c_sql" ; then
-    echo "Error: Could not drop $t_CACHE"
+    error="Error: Could not drop $t_CACHE"
+    /cevac/scripts/log_error.sh "$error" "$t_CACHE"
     exit 1
   fi
 done
 # Drop HIST_CACHE just in case
 sql="IF OBJECT_ID('$HIST_CACHE') IS NOT NULL EXEC('DROP TABLE $HIST_CACHE')"
 if ! /cevac/scripts/exec_sql.sh "$sql"; then
-  echo "Error: Could not drop $t"
+  error="Error: Could not drop $t"
+  /cevac/scripts/log_error.sh "$error" "$t"
   exit 1
 fi
 
 # Delete all from CEVAC_TABLES
 if ! /cevac/scripts/exec_sql.sh "DELETE FROM CEVAC_TABLES WHERE BuildingSName = '$Building' AND Metric = '$Metric'""$exclude_query" ; then
-  echo "Error: Could not delete $Building"_$Metric" from CEVAC_TABLES"
+  error="Error: Could not delete $Building"_$Metric" from CEVAC_TABLES"
+  /cevac/scripts/log_error.sh "$error"
   exit 1
 fi
 

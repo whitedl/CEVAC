@@ -5,7 +5,12 @@ WITH original AS (
 	FROM original
 	GROUP BY UTCDateTime
 )
-SELECT *, (SUM_guest_count + SUM_clemson_count) AS 'SUM_total' FROM sums
+SELECT UTCDateTime,
+ETDateTime,
+(SUM_guest_count + SUM_clemson_count) AS 'SUM_total',
+SUM_guest_count,
+SUM_clemson_count
+FROM sums
 
 
 

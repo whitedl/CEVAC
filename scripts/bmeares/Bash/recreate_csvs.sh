@@ -1,5 +1,5 @@
 #! /bin/bash
-
+error=""
 echo "Warning: This will delete everything in /srv/csv/ and will take some time to recreate."
 echo "Continue? (y/N)"
 read choice
@@ -16,7 +16,11 @@ SELECT RTRIM(BuildingSName), RTRIM(Metric), RTRIM(Age) FROM CEVAC_TABLES
 WHERE TableName LIKE '%_CSV%' AND TableName NOT LIKE '%BROKEN%' AND TableName NOT LIKE '%FULL%'
 AND customLASR = 0
 "
-/cevac/scripts/exec_sql.sh "$csv_tables_query" "csv_tables.csv"
+if ! /cevac/scripts/exec_sql.sh "$csv_tables_query" "csv_tables.csv" ; then
+  error="Failed to get CSV tables"
+  /cevac/scripts/log_error.sh "$error"
+  exit 1
+fi
 
 # Remove header from csv
 sed -i '1d' /cevac/cache/csv_tables.csv
@@ -36,28 +40,18 @@ for t in "${tables_array[@]}"; do
   table_csv="CEVAC_$B""_$M""_$A""_CSV"
   echo $table_csv
  
-  out=`/cevac/scripts/exec_sql.sh "IF OBJECT_ID('$table_csv') IS NOT NULL DROP TABLE $table_csv"`
-  error=`echo "$out" | grep 'Msg'`
-  error2=`echo "$out" | awk '/Msg/ { getline; print $0 }'`
-
-  if [ ! -z "$error" ]; then
-    echo "Error dropping $table_csv"
-    echo "Error Message:"
-    echo "$error"
-    echo "$error2"
-
-    echo "Print full output log? (y/N)": 
-    read choice
-    if [ "$choice" == "y" ] || [ "$choice" == "Y" ]; then
-      echo "$out"
-    fi
+  if ! /cevac/scripts/exec_sql.sh "IF OBJECT_ID('$table_csv') IS NOT NULL DROP TABLE $table_csv" ; then
+    error="Error dropping $table_csv"
+    /cevac/scripts/log_error.sh "$error" "CEVAC_$B""_$M""_$A"
     exit 1
   fi
 
-
-
   echo "Recreating and uploading $table_csv"
-  time /cevac/scripts/lasr_append.sh $B $M $A "norun" "reset"
+  time if ! /cevac/scripts/lasr_append.sh $B $M $A "norun" "reset" ; then
+    error="Failed lasr_append for $B""_$M""_$A"
+    /cevac/scripts/log_error.sh "$error" "CEVAC_$B""_$M""_$A"
+    exit 1
+  fi
 
 done
 
