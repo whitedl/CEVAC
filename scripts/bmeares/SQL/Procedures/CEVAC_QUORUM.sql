@@ -8,6 +8,9 @@ CREATE PROCEDURE CEVAC_QUORUM
 	@types_list NVARCHAR(1000),
 	@execute BIT = 1
 AS
+DECLARE @error NVARCHAR(MAX);
+DECLARE @ProcessName NVARCHAR(MAX);
+SET @ProcessName = OBJECT_NAME(@@PROCID);
 
 DECLARE @HIST NVARCHAR(500);
 DECLARE @XREF NVARCHAR(500);
@@ -19,7 +22,6 @@ DECLARE @QUORUM NVARCHAR(500);
 DECLARE @EXEC_SQL NVARCHAR(MAX);
 DECLARE @DateTimeName NVARCHAR(100);
 DECLARE @IDName NVARCHAR(100);
-DECLARE @error NVARCHAR(MAX);
 DECLARE @agg_names TABLE(agg_name NVARCHAR(MAX));
 
 SET @HIST = 'CEVAC_' + @BuildingSName + '_' + @Metric + '_HIST';
@@ -34,16 +36,19 @@ SET @IDName = RTRIM((SELECT TOP 1 IDName FROM CEVAC_TABLES WHERE TableName = @HI
 INSERT INTO @agg_names SELECT * FROM ListTable(@types_list);
 IF @IDName IS NULL BEGIN
 	SET @error = 'IDName is null';
+	EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @HIST;
 	RAISERROR(@error,11,1);
 	RETURN
 END
 IF @DateTimeName IS NULL BEGIN
 	SET @error = 'DateTimeName is null';
+	EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @HIST;
 	RAISERROR(@error,11,1);
 	RETURN
 END
 IF @DateTimeName IS NULL BEGIN
 	SET @error = 'DateTimeName is null';
+	EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @HIST;
 	RAISERROR(@error,11,1);
 	RETURN
 END
