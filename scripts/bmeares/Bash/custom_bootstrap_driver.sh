@@ -3,6 +3,7 @@
 runsas="norun"
 reset="append"
 customLASR="0"
+error=""
 
 echo "Usage: $0 {customLASR} {runsas} {reset}"
 
@@ -52,13 +53,17 @@ for t in "${tables_array[@]}"; do
     A="HIST_LASR"
     echo "Updating CEVAC_$B""_$M""_HIST_LASR"
     time if ! /cevac/scripts/CREATE_VIEW.sh "$B" "$M" "HIST_LASR"; then
-      echo "Error: Failed to create CEVAC_$B""_$M""_HIST_LASR"
+      error="Error: Failed to create CEVAC_$B""_$M""_HIST_LASR"
+      /cevac/scripts/log_error.sh "$error"
       exit 1
     fi
   fi
 
   /cevac/scripts/seperator.sh
-  /cevac/scripts/bootstrap.sh $B $M
+  if ! /cevac/scripts/bootstrap.sh $B $M ; then
+    error="Failed to bootstrap $B""_$M"
+    /cevac/scripts/log_error.sh "$error"
+  fi
 done
 
 if [ "$runsas" != "norun" ]; then
@@ -67,5 +72,4 @@ if [ "$runsas" != "norun" ]; then
 else
   echo "Skipping runsas.sh. Tables will be loaded automatically in 15 minutes."
 fi
-
 
