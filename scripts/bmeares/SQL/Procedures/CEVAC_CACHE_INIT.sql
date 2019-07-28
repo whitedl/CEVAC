@@ -11,6 +11,9 @@ DECLARE @name NVARCHAR(100);
 DECLARE @name_CACHE NVARCHAR(100);
 DECLARE @i INT;
 DECLARE @params_rc INT;
+DECLARE @error NVARCHAR(MAX);
+DECLARE @ProcessName NVARCHAR(MAX);
+SET @ProcessName = OBJECT_NAME(@@PROCID);
 
 DECLARE @custom BIT;
 SET @custom = 0;
@@ -31,7 +34,9 @@ INSERT INTO @cevac_params SELECT * FROM ListTable(@tables);
 
 SET @params_rc = @@ROWCOUNT;
 IF @params_rc > 1 AND @destTableName IS NOT NULL BEGIN
-	RAISERROR('Custom init must have only one table', 11, 1);
+	SET @error = 'Custom init must have only one table';
+	EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @name;
+	RAISERROR(@error, 11, 1);
 	RETURN
 END
 

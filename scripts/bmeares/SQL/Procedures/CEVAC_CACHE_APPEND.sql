@@ -9,6 +9,9 @@ AS
 
 DECLARE @execute int;
 SET @execute = 1;
+DECLARE @error NVARCHAR(MAX);
+DECLARE @ProcessName NVARCHAR(MAX);
+SET @ProcessName = OBJECT_NAME(@@PROCID);
 
 DECLARE @name NVARCHAR(300);
 DECLARE @name_CACHE NVARCHAR(300);
@@ -32,7 +35,9 @@ IF OBJECT_ID('dbo.#cevac_params', 'U') IS NOT NULL DROP TABLE #cevac_params;
 SELECT * INTO #cevac_params FROM ListTable(@tables);
 SET @params_rc = @@ROWCOUNT;
 IF @params_rc > 1 AND @destTableName IS NOT NULL BEGIN
-	RAISERROR('Custom append must have only one table', 11, 1);
+	SET @error = 'Custom append must have only one table';
+	EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @name;
+	RAISERROR(@error, 11, 1);
 	RETURN
 END
 
@@ -171,23 +176,33 @@ WHILE (EXISTS(SELECT 1 FROM #cevac_params) AND @i > 0) BEGIN
 			SET @customLASR = (SELECT customLASR FROM CEVAC_TABLES WHERE TableName = @name);
 
 			IF @BuildingSName IS NULL BEGIN
-				RAISERROR('BuildingSName is NULL',11,1);
+				SET @error = 'BuildingSName is NULL';
+				EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @name;
+				RAISERROR(@error,11,1);
 				RETURN
 			END
 			IF @Metric IS NULL BEGIN
-				RAISERROR('Metric is NULL',11,1);
+				SET @error = 'Metric is NULL';
+				EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @name;
+				RAISERROR(@error,11,1);
 				RETURN
 			END
 			IF @Age IS NULL BEGIN
-				RAISERROR('Age is NULL',11,1);
+				SET @error = 'Age is NULL';
+				EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @name;
+				RAISERROR(@error,11,1);
 				RETURN
 			END
 			IF @isCustom IS NULL BEGIN
-				RAISERROR('isCustom is NULL',11,1);
+				SET @error = 'isCustom is NULL';
+				EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @name;
+				RAISERROR(@error,11,1);
 				RETURN
 			END
 			IF @customLASR IS NULL BEGIN
-				RAISERROR('customLASR is NULL',11,1);
+				SET @error = 'customLASR is NULL';
+				EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @name;
+				RAISERROR(@error,11,1);
 				RETURN
 			END
 

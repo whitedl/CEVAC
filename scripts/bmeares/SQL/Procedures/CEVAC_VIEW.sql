@@ -13,21 +13,29 @@ CREATE PROCEDURE CEVAC_VIEW
 
 AS
 
-SELECT * INTO #cevac_config_temp FROM CEVAC_CONFIG;
+DECLARE @error NVARCHAR(MAX);
+DECLARE @ProcessName NVARCHAR(MAX);
+SET @ProcessName = OBJECT_NAME(@@PROCID);
 
-DECLARE @RemoteIP NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM #cevac_config_temp WHERE VarName = 'RemoteIP'),
-	@RemoteDB NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM #cevac_config_temp WHERE VarName = 'RemoteDB'),
-	@RemoteSchema NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM #cevac_config_temp WHERE VarName = 'RemoteSchema'),
-	@RemoteAVTable NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM #cevac_config_temp WHERE VarName = 'RemoteAVTable'),
-	@RemoteUnitTable NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM #cevac_config_temp WHERE VarName = 'RemoteUnitTable'),
-	@RemotePSTable NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM #cevac_config_temp WHERE VarName = 'RemotePSTable'),
-	@RemotePtTable NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM #cevac_config_temp WHERE VarName = 'RemotePtTable'),
-	@RemoteUTCName NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM #cevac_config_temp WHERE VarName = 'RemoteUTCName'),
-	@RemotePSIDName NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM #cevac_config_temp WHERE VarName = 'RemotePSIDName'),
-	@RemotePointIDName NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM #cevac_config_temp WHERE VarName = 'RemotePointIDName'),
-	@RemoteUnitOfMeasureIDName NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM #cevac_config_temp WHERE VarName = 'RemoteUnitOfMeasureIDName'),
-	@RemotePointNameName NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM #cevac_config_temp WHERE VarName = 'RemotePointNameName'),
-	@RemoteActualValueName NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM #cevac_config_temp WHERE VarName = 'RemoteActualValueName')
+DECLARE @cevac_config_temp TABLE(
+	VarName NVARCHAR(MAX),
+	VarValue NVARCHAR(MAX)
+);
+INSERT INTO @cevac_config_temp SELECT * FROM CEVAC_CONFIG;
+
+DECLARE @RemoteIP NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM @cevac_config_temp WHERE VarName = 'RemoteIP'),
+	@RemoteDB NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM @cevac_config_temp WHERE VarName = 'RemoteDB'),
+	@RemoteSchema NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM @cevac_config_temp WHERE VarName = 'RemoteSchema'),
+	@RemoteAVTable NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM @cevac_config_temp WHERE VarName = 'RemoteAVTable'),
+	@RemoteUnitTable NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM @cevac_config_temp WHERE VarName = 'RemoteUnitTable'),
+	@RemotePSTable NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM @cevac_config_temp WHERE VarName = 'RemotePSTable'),
+	@RemotePtTable NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM @cevac_config_temp WHERE VarName = 'RemotePtTable'),
+	@RemoteUTCName NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM @cevac_config_temp WHERE VarName = 'RemoteUTCName'),
+	@RemotePSIDName NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM @cevac_config_temp WHERE VarName = 'RemotePSIDName'),
+	@RemotePointIDName NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM @cevac_config_temp WHERE VarName = 'RemotePointIDName'),
+	@RemoteUnitOfMeasureIDName NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM @cevac_config_temp WHERE VarName = 'RemoteUnitOfMeasureIDName'),
+	@RemotePointNameName NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM @cevac_config_temp WHERE VarName = 'RemotePointNameName'),
+	@RemoteActualValueName NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM @cevac_config_temp WHERE VarName = 'RemoteActualValueName')
 	;
 
 DECLARE @building_key nvarchar(100);
@@ -113,14 +121,16 @@ IF EXISTS (SELECT TOP 1 Dependencies FROM CEVAC_TABLES WHERE TableName = @Table_
 	DECLARE @dependency_query NVARCHAR(500);
 	SET @Dependencies_list = (SELECT TOP 1 Dependencies FROM CEVAC_TABLES WHERE TableName = @Table_name);
 	IF @Dependencies_list IS NOT NULL BEGIN
-		SELECT * INTO #cevac_dep FROM ListTable(@Dependencies_list);
+		DECLARE @cevac_dep TABLE(dep NVARCHAR(MAX));
+		INSERT INTO @cevac_dep SELECT * FROM ListTable(@Dependencies_list);
 		DECLARE @i INT;
 		SET @i = 100;
-		WHILE (EXISTS(SELECT 1 FROM #cevac_dep) AND @i > 0) BEGIN
-			SET @dependency = (SELECT TOP 1 * FROM #cevac_dep);
-			DELETE TOP(1) FROM #cevac_dep;
+		WHILE (EXISTS(SELECT 1 FROM @cevac_dep) AND @i > 0) BEGIN
+			SET @dependency = (SELECT TOP 1 * FROM @cevac_dep);
+			DELETE TOP(1) FROM @cevac_dep;
 			SET @dependency_query = '
 			IF OBJECT_ID(''' + @dependency + ''') IS NULL BEGIN
+				EXEC CEVAC_LOG_ERROR @ErrorMessage = ''' + @Table_name + ' requires ' + @dependency + ''', @ProcessName = ''' + @ProcessName + ''', @TableName = ''' + @Table_name + ''';
 				RAISERROR(''' + @Table_name + ' requires ' + @dependency + ''', 11, 1);
 				RETURN
 			END
@@ -221,31 +231,41 @@ DECLARE @Create_View nvarchar(MAX);
 --------------------------------
 IF @Age LIKE 'HIST' AND @isCustom = 0 BEGIN
 	IF OBJECT_ID(@XREF) IS NULL AND OBJECT_ID(@PXREF) IS NULL AND @building_key IS NOT NULL BEGIN
-		RAISERROR('HIST requires XREF or PXREF', 11, 1);
+		SET @error = @HIST + ' requires ' + @XREF + ' or ' + @PXREF;
+		EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @Table_name;
+		RAISERROR(@error, 11, 1);
 		RETURN
 	END
 END
 IF @Age LIKE 'DAY' BEGIN
 	IF OBJECT_ID(@HIST) IS NULL BEGIN
-		RAISERROR('DAY requires HIST', 11, 1);
+		SET @error = @DAY + ' requires ' + @HIST;
+		EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @Table_name;
+		RAISERROR(@error, 11, 1);
 		RETURN
 	END
 END
 IF @Age LIKE 'LATEST%' BEGIN
 	IF OBJECT_ID(@DAY) IS NULL OR OBJECT_ID(@HIST) IS NULL BEGIN
-		RAISERROR('LATEST requires HIST and DAY', 11, 1);
+		SET @error = @LATEST + ' requires ' + @HIST + ' and ' + @DAY;
+		EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @Table_name;
+		RAISERROR(@error, 11, 1);
 		RETURN
 	END
 END
 IF @Age LIKE 'OLDEST%' BEGIN
 	IF OBJECT_ID(@HIST) IS NULL BEGIN
-		RAISERROR('OLDEST requires HIST', 11, 1);
+		SET @error = @OLDEST + ' requires ' + @HIST;
+		EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @Table_name;
+		RAISERROR(@error, 11, 1);
 		RETURN
 	END
 END
 IF @Age LIKE 'LATEST_BROKEN' BEGIN
 	IF OBJECT_ID(@DAY) IS NULL OR OBJECT_ID(@HIST) IS NULL OR OBJECT_ID(@LATEST) IS NULL OR OBJECT_ID(@LATEST_FULL) IS NULL BEGIN
-		RAISERROR('LATEST_BROKEN requires HIST, DAY, LATEST_FULL, and LATEST', 11, 1);
+		SET @error = @LATEST_BROKEN + ' requires ' + @LATEST + ', ' + @LATEST_FULL + ', ' + @DAY + ', and ' + @HIST;
+		EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @Table_name;
+		RAISERROR(@error, 11, 1);
 		RETURN
 	END
 END
@@ -265,16 +285,22 @@ IF @Age LIKE '%PXREF%' BEGIN
 	END
 		
 	IF @building_key IS NULL BEGIN
-		RAISERROR('Missing building key. Check CEVAC_BUILDING_INFO if building exists',11,1);
+		SET @error = 'Missing building key. Check CEVAC_BUILDING_INFO if ' + @Building + ' exists';
+		EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @Table_name;
+		RAISERROR(@error,11,1);
 		RETURN
 	END
 	IF @PXREF IS NULL BEGIN
-		RAISERROR('Error: PXREF variable is null',11,1);
+		SET @error = 'Error: PXREF variable is null';
+		EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @Table_name;
+		RAISERROR(@error,11,1);
 		RETURN
 	END
 	DECLARE @PXREF_query NVARCHAR(MAX);
 	IF @keys_list_query IS NULL BEGIN
-		RAISERROR('Error: Keys list is null',11,1);
+		SET @error = 'Error: Keys list query is null';
+		EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @Table_name;
+		RAISERROR(@error,11,1);
 		RETURN
 	END
 
@@ -329,7 +355,9 @@ ELSE IF @Age LIKE '%HIST%' BEGIN
 	IF @XREF_or_PXREF = 'XREF' SET @xref_source = @XREF;
 	ELSE IF @XREF_or_PXREF = 'PXREF' SET @xref_source = @PXREF;
 	ELSE BEGIN
-		RAISERROR('Could not distinguish XREF source',11,1);
+		SET @error = 'Could not distinguish XREF source';
+		EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @Table_name;
+		RAISERROR(@error,11,1);
 		RETURN
 	END
 
@@ -538,8 +566,8 @@ IF @Age LIKE '%HIST%' BEGIN
 --	SET @customLASR = (SELECT TOP 1 customLASR FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age = 'HIST');
 
 	IF @DateTimeName IS NULL OR @AliasName IS NULL OR @DataName IS NULL OR @IDName IS NULL BEGIN
-		DECLARE @error NVARCHAR(200);
 		SET @error = 'Make sure CEVAC_' + @Building + '_' + @Metric + '_HIST_VIEW is in CEVAC_TABLES';
+		EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @Table_name;
 		RAISERROR(@error, 11, 1);
 		RETURN
 	END
