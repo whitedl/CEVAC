@@ -3,11 +3,15 @@ GO
 SET ANSI_NULLS, QUOTED_IDENTIFIER ON;
 GO
 CREATE PROCEDURE CEVAC_CUSTOM_HIST
-	@BuildingSName NVARCHAR(100),
-	@Metric NVARCHAR(100)
+	@BuildingSName NVARCHAR(300),
+	@Metric NVARCHAR(300)
 AS
-DECLARE @HIST NVARCHAR(100);
-DECLARE @HIST_VIEW NVARCHAR(105);
+DECLARE @error NVARCHAR(MAX);
+DECLARE @ProcessName NVARCHAR(MAX);
+SET @ProcessName = OBJECT_NAME(@@PROCID);
+
+DECLARE @HIST NVARCHAR(300);
+DECLARE @HIST_VIEW NVARCHAR(300);
 DECLARE @CREATEName NVARCHAR(MAX);
 DECLARE @Create_Procedure_query NVARCHAR(MAX);
 DECLARE @dependency NVARCHAR(300);
@@ -20,7 +24,9 @@ SET @HIST = 'CEVAC_' + @BuildingSName + '_' + @Metric + '_HIST';
 SET @HIST_VIEW =  @HIST + '_VIEW';
 SELECT @HIST_VIEW AS 'HIST_VIEW';
 IF NOT EXISTS(SELECT TOP 1 Definition FROM CEVAC_TABLES WHERE TableName = @HIST_VIEW) BEGIN
-	RAISERROR('Missing Definition from CEVAC_TABLES. Run CREATE_CUSTOM.sh to resolve',11,1);
+	SET @error = 'Missing Definition from CEVAC_TABLES. Run CREATE_CUSTOM.sh to resolve';
+	EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @HIST_VIEW;
+	RAISERROR(@error,11,1);
 	RETURN
 END ELSE BEGIN
 	SET @Definition = (SELECT TOP 1 Definition FROM CEVAC_TABLES WHERE TableName = @HIST_VIEW);
@@ -38,6 +44,7 @@ WHILE (EXISTS(SELECT 1 FROM #cevac_dep) AND @i > 0) BEGIN
 	DELETE TOP(1) FROM #cevac_dep;
 	SET @dependecy_query = '
 	IF OBJECT_ID(''' + RTRIM(@dependency) + ''') IS NULL BEGIN
+		EXEC CEVAC_LOG_ERROR @ErrorMessage = ''' + RTRIM(@HIST) + ' requires ' + RTRIM(@dependency) + ''', @ProcessName = ''' + @ProcessName + ''', @TableName = ''' + RTRIM(@HIST) + ''';
 		RAISERROR(''' + RTRIM(@HIST) + ' requires ' + RTRIM(@dependency) + ''', 11, 1);
 		RETURN
 	END

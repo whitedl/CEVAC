@@ -19,6 +19,7 @@ DECLARE @sp_aliases NVARCHAR(350);
 DECLARE @filtered NVARCHAR(350);
 DECLARE @DateTimeName NVARCHAR(100);
 DECLARE @AliasName NVARCHAR(100);
+DECLARE @IDName NVARCHAR(100);
 DECLARE @DataName NVARCHAR(100);
 DECLARE @now_UTC_string NVARCHAR(100);
 
@@ -26,10 +27,11 @@ SET @HIST = 'CEVAC_' + @BuildingSName + '_' + @Metric + '_HIST';
 SET @HIST_LASR = @HIST + '_LASR';
 SET @HIST_LASR_INT = @HIST_LASR + '_INT';
 SET @XREF = 'CEVAC_' + @BuildingSName + '_' + @Metric + '_XREF';
-SET @sp_aliases = '#' + @HIST + '_sp_aliases';
+SET @sp_aliases = '#' + @HIST + '_sp_ids';
 SET @filtered = '#' + @HIST + '_filtered';
 SET @DateTimeName = (SELECT TOP 1 RTRIM(DateTimeName) FROM CEVAC_TABLES WHERE TableName = @HIST);
 SET @AliasName = (SELECT TOP 1 RTRIM(AliasName) FROM CEVAC_TABLES WHERE TableName = @HIST);
+SET @IDName = (SELECT TOP 1 RTRIM(IDName) FROM CEVAC_TABLES WHERE TableName = @HIST);
 SET @DataName = (SELECT TOP 1 RTRIM(DataName) FROM CEVAC_TABLES WHERE TableName = @HIST);
 SET @now_UTC_string = CAST(GETUTCDATE() AS NVARCHAR(100));
 
@@ -56,7 +58,7 @@ DECLARE @EXEC_SQL NVARCHAR(MAX);
 
 SET @EXEC_SQL = '
 IF OBJECT_ID(''' + @sp_aliases + ''') IS NOT NULL DROP TABLE ' + @sp_aliases + ';
-SELECT DISTINCT ' + @AliasName + ' INTO ' + @sp_aliases + ' FROM ' + @XREF + ' WHERE ReadingType LIKE ''%SP%'';
+SELECT DISTINCT ' + @IDName + ' INTO ' + @sp_aliases + ' FROM ' + @XREF + ' WHERE ReadingType LIKE ''%SP%'';
 
 DECLARE @last_UTC DATETIME;
 IF OBJECT_ID(''' + @HIST_LASR + ''') IS NOT NULL BEGIN
@@ -75,13 +77,13 @@ SET @count = (SELECT COUNT(*) AS c FROM ' + @sp_aliases + ');
 PRINT ''COUNT IS: '' + CAST(@count AS NVARCHAR(20));
 
 WHILE EXISTS (SELECT TOP 1 * FROM ' + @sp_aliases + ') AND @i < 501 BEGIN
-	SET @loop_alias = (SELECT TOP 1 ' + @AliasName + ' FROM ' + @sp_aliases + ');
+	SET @loop_alias = (SELECT TOP 1 ' + @IDName + ' FROM ' + @sp_aliases + ');
 	DELETE TOP (1) FROM ' + @sp_aliases + ';
 	PRINT CAST((@count - @i) AS NVARCHAR(20)) + '' remaining'';
 	SET @i = @i + 1;
 
 	INSERT INTO ' + @HIST_LASR_INT + ' 
-	EXEC CEVAC_SP_AGG @Alias = @loop_alias, @HIST = ''' + @HIST + ''', @begin_UTC_string = @begin_UTC_string_orig, @now_UTC_string = ''' + @now_UTC_string + ''', @DateTimeName = ''' + @DateTimeName + ''', @AliasName = ''' + @AliasName + ''', @DataName = ''' + @DataName + ''';
+	EXEC CEVAC_SP_AGG @ID = @loop_alias, @HIST = ''' + @HIST + ''', @begin_UTC_string = @begin_UTC_string_orig, @now_UTC_string = ''' + @now_UTC_string + ''', @DateTimeName = ''' + @DateTimeName + ''', @IDName = ''' + @IDName + ''', @DataName = ''' + @DataName + ''';
 END
 
 DECLARE @setback_UTC DATETIME;
@@ -98,9 +100,10 @@ DECLARE @begin_UTC DATETIME;
 SET @begin_UTC = DATEADD(MONTH, -1, @last_UTC);
 
 INSERT INTO ' + @HIST_LASR_INT + ' 
-SELECT * FROM ' + @HIST + '
-WHERE ' + @AliasName + ' NOT LIKE ''%SP%''
-AND ' + @DataName + ' BETWEEN @begin_UTC AND @now_UTC;
+SELECT h.* FROM ' + @HIST + ' as h
+INNER JOIN ' + @XREF + ' AS xref ON xref.' + @IDName + ' = h.' + @IDName + '
+WHERE xref.ReadingType NOT LIKE ''%SP%''
+AND h.' + @DataName + ' BETWEEN @begin_UTC AND @now_UTC;
 ';
 PRINT @EXEC_SQL;
 IF @execute = 1 EXEC(@EXEC_SQL);

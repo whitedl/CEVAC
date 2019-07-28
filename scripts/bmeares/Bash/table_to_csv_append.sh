@@ -4,6 +4,7 @@ if [ -z "$1" ]; then
   echo "Usage: $0 [TABLE] {reset}"
   exit 1
 fi
+error=""
 table="$1"
 table_CSV="$table"_CSV
 if [ ! -z "$2" ]; then
@@ -11,7 +12,11 @@ if [ ! -z "$2" ]; then
     echo "Reset! Removing /srv/csv/$table.csv"
     rm -f /srv/csv/$table.csv
     echo "Dropping $table_CSV"
-    /cevac/scripts/exec_sql.sh "IF OBJECT_ID('$table_CSV') IS NOT NULL DROP TABLE $table_CSV"
+    if ! /cevac/scripts/exec_sql.sh "IF OBJECT_ID('$table_CSV') IS NOT NULL DROP TABLE $table_CSV" ; then
+      error="Failed to drop $table_CSV"
+      /cevac/scripts/log_error.sh "$error"
+      exit 1
+    fi
   fi
 fi
 
@@ -30,9 +35,9 @@ fi
 
 UTCDateTime=`/cevac/scripts/sql_value.sh "SET NOCOUNT ON; SELECT TOP 1 RTRIM(DateTimeName) FROM CEVAC_TABLES WHERE TableName = '$table'"`
 Alias=`/cevac/scripts/sql_value.sh "SET NOCOUNT ON; SELECT TOP 1 RTRIM(AliasName) FROM CEVAC_TABLES WHERE TableName = '$table'"`
+IDName=`/cevac/scripts/sql_value.sh "SET NOCOUNT ON; SELECT TOP 1 RTRIM(IDName) FROM CEVAC_TABLES WHERE TableName = '$table'"`
 DataName=`/cevac/scripts/sql_value.sh "SET NOCOUNT ON; SELECT TOP 1 RTRIM(DataName) FROM CEVAC_TABLES WHERE TableName = '$table'"`
-
-if [ -z "$UTCDateTime" ] || [ -z "$Alias" ] || [ -z "$DataName" ]; then
+if [ -z "$UTCDateTime" ] || [ -z "$Alias" ] || [ -z "$DataName" ] || [ -z "$IDName" ]; then
   echo "Error: Missing DateTimeName, AliasName, or DataName for $table"
   echo "Enter the information below and rerun the script."
   echo "BuildingSName:"
@@ -43,6 +48,8 @@ if [ -z "$UTCDateTime" ] || [ -z "$Alias" ] || [ -z "$DataName" ]; then
   read Age
   echo "DateTimeName:"
   read DateTimeName
+  echo "IDName:"
+  read IDName
   echo "AliasName:"
   read AliasName
   echo "DataName:"
@@ -55,13 +62,14 @@ if [ -z "$UTCDateTime" ] || [ -z "$Alias" ] || [ -z "$DataName" ]; then
   SET @Definition = (SELECT TOP 1 Definition FROM CEVAC_TABLES WHERE TableName = '$table');
   SET @isCustom = ISNULL((SELECT TOP 1 isCustom FROM CEVAC_TABLES WHERE TableName = '$table'),0);
   SET @customLASR = ISNULL((SELECT TOP 1 customLASR FROM CEVAC_TABLES WHERE TableName = '$table'),0);
-	INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, AliasName, DataName, isCustom, Definition, customLASR)
+	INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, isCustom, Definition, customLASR)
 		VALUES (
 			'$BuildingSName',
 			'$Metric',
 			'$Age',
 			'$table',
       '$DateTimeName',
+      '$IDName',
       '$AliasName',
       '$DataName',
       @isCustom,
@@ -71,12 +79,14 @@ if [ -z "$UTCDateTime" ] || [ -z "$Alias" ] || [ -z "$DataName" ]; then
   "
   /cevac/scripts/exec_sql.sh "$failure_query"
   echo "Inserted $table into CEVAC_TABLES"
+  
+  error="Tried to create $table_CSV without $table existing in CEVAC_TABLES"
+  /cevac/scripts/log_error.sh "$error" "$table"
   exit 1
-
-
 fi
 
 echo "DateTimeName: $UTCDateTime"
+echo "IDName: $IDName"
 echo "AliasName: $Alias"
 echo "DataName: $DataName"
 
@@ -92,6 +102,7 @@ IF EXISTS (SELECT TableName FROM CEVAC_TABLES WHERE TableName = '$table') BEGIN
 	DECLARE @TableName NVARCHAR(100);
   DECLARE @DateTimeName NVARCHAR(50);
   DECLARE @AliasName NVARCHAR(50);
+  DECLARE @IDName NVARCHAR(50);
   DECLARE @DataName NVARCHAR(50);
   DECLARE @isCustom BIT;
   DECLARE @customLASR BIT;
@@ -99,6 +110,7 @@ IF EXISTS (SELECT TableName FROM CEVAC_TABLES WHERE TableName = '$table') BEGIN
 	SET @Metric = (SELECT TOP 1 Metric FROM CEVAC_TABLES WHERE TableName = '$table');
 	SET @Age = (SELECT TOP 1 Age FROM CEVAC_TABLES WHERE TableName = '$table');
   SET @DateTimeName = (SELECT TOP 1 DateTimeName FROM CEVAC_TABLES WHERE TableName = '$table');
+  SET @IDName = (SELECT TOP 1 IDName FROM CEVAC_TABLES WHERE TableName = '$table');
   SET @AliasName = (SELECT TOP 1 AliasName FROM CEVAC_TABLES WHERE TableName = '$table');
   SET @DataName = (SELECT TOP 1 DataName FROM CEVAC_TABLES WHERE TableName = '$table');
   SET @isCustom = (SELECT TOP 1 isCustom FROM CEVAC_TABLES WHERE TableName = '$table');
@@ -106,13 +118,14 @@ IF EXISTS (SELECT TableName FROM CEVAC_TABLES WHERE TableName = '$table') BEGIN
   
 
 	DELETE FROM CEVAC_TABLES WHERE TableName = '$table_CSV';
-	INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, AliasName, DataName, isCustom, Dependencies, customLASR)
+	INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, isCustom, Dependencies, customLASR)
 		VALUES (
 			@BuildingSName,
 			@Metric,
 			@Age,
 			'$table_CSV',
       '$UTCDateTime',
+      '$IDName',
       '$Alias',
       '$DataName',
       @isCustom,
@@ -122,6 +135,12 @@ IF EXISTS (SELECT TableName FROM CEVAC_TABLES WHERE TableName = '$table') BEGIN
 END
 
 "
+
+if [ "$UTCDateTime" != "$IDName" ]; then
+  csv_new_cols="new.$UTCDateTime,new.$IDName"
+else
+  csv_new_cols="new.$UTCDateTime"
+fi
 
 csv_utc_append_query="
 DECLARE @begin DATETIME;
@@ -143,8 +162,9 @@ WITH new AS (
 )
   INSERT INTO $table_CSV
 
-  SELECT new.$UTCDateTime, new.$Alias FROM new
-  LEFT JOIN new_csv AS CSV ON CSV.$UTCDateTime = new.$UTCDateTime AND CSV.$Alias = new.$Alias
+  SELECT $csv_new_cols
+  FROM new
+  LEFT JOIN new_csv AS CSV ON CSV.$UTCDateTime = new.$UTCDateTime AND CSV.$IDName = new.$IDName
   WHERE CSV.$UTCDateTime IS NULL
 
 "
@@ -172,8 +192,8 @@ WITH new AS (
   WHERE $UTCDateTime > isnull(@begin, 0) AND $UTCDateTime <= @now
 )
   SELECT new.* FROM new
-  LEFT JOIN new_csv AS CSV ON CSV.$UTCDateTime = new.$UTCDateTime
-  WHERE CSV.$UTCDateTime IS NULL
+  LEFT JOIN new_csv AS CSV ON CSV.$UTCDateTime = new.$UTCDateTime AND CSV.$IDName = new.$IDName
+  WHERE CSV.$UTCDateTime IS NULL AND CSV.$IDName IS NULL
   ORDER BY LEN(new.$Alias) DESC
 "
 
@@ -181,9 +201,9 @@ csv_utc_query="
 SET NOCOUNT ON
 IF OBJECT_ID('dbo.$table_CSV') IS NOT NULL DROP TABLE $table_CSV;
 GO
-SELECT $UTCDateTime, $Alias
+SELECT $csv_new_cols
 INTO $table_CSV
-FROM $table
+FROM $table AS new
 "
 query="
 SET NOCOUNT ON
@@ -205,14 +225,21 @@ if [ ! -z "$latest" ] || [ ! -z "$xref" ] || [ ! -z "$compare"  ] || [ ! -z "$is
   echo LATEST, XREF, COMPARE, or ISSUES detected. Will overwrite $table.csv
   rm -f /srv/csv/$table.csv
   echo "Dropping $table_CSV"
-  /cevac/scripts/exec_sql.sh "IF OBJECT_ID('$table_CSV') IS NOT NULL DROP TABLE $table_CSV"
+  if ! /cevac/scripts/exec_sql.sh "IF OBJECT_ID('$table_CSV') IS NOT NULL DROP TABLE $table_CSV" ; then
+    error="Cannot drop $table_CSV"
+    /cevac/scripts/log_error.sh "$error" "$table_CSV"
+  fi
 fi
 
 # If $table.csv doesn't exist, initialize data
 if [ ! -f /srv/csv/$table.csv ]; then
   echo "/srv/csv/$table.csv doesn't exist"
-  /cevac/scripts/exec_sql.sh "IF OBJECT_ID('$table_CSV') IS NOT NULL DROP TABLE $table_CSV"
-  echo Generating $table.csv...
+  if ! /cevac/scripts/exec_sql.sh "IF OBJECT_ID('$table_CSV') IS NOT NULL DROP TABLE $table_CSV"; then
+    error="Failed to drop $table_CSV"
+    /cevac/scripts/log_error.sh "$error" "$table_CSV"
+    exit 1
+  fi
+  echo "Generating $table.csv..."
    # get columns
   /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$cols_query" -W -o "/cevac/cache/cols_$table.csv" -h-1 -s"," -w 700
   tr '\n' ',' < /cevac/cache/cols_$table.csv > /cevac/cache/temp_cols_$table.csv && mv /cevac/cache/temp_cols_$table.csv /cevac/cache/cols_$table.csv
@@ -222,17 +249,17 @@ if [ ! -f /srv/csv/$table.csv ]; then
   echo Executing query:
   echo "$query"
   # get data
-  /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$query" -W -o "/cevac/cache/$table.csv" -h-1 -s"," -w 700
-  csv_error=`grep "Msg.*Level.*State.*Server" /cevac/cache/$table.csv`
-  if [ ! -z "$csv_error" ]; then
-    echo "Error: /cevac/cache/$table.csv failed."
+  if ! /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$query" -W -o "/cevac/cache/$table.csv" -h-1 -s"," -w 700 ; then
+    error="Failed generating $table.csv"
+    /cevac/scripts/log_error.sh "$error" "$table"
     exit 1
   fi
   if [ -z "$xref" ]; then
     # create _CSV if not an XREF
     if ! /cevac/scripts/exec_sql.sh "$csv_utc_query"; then
-        echo "Error: Failed to create $table_CSV"
-        exit 1
+      error="Failed to create $table_CSV"
+      /cevac/scripts/log_error.sh "$error" "$table"
+      exit 1
     fi
   fi
   
@@ -240,7 +267,7 @@ if [ ! -f /srv/csv/$table.csv ]; then
   sed -i 's/NULL/./g' /cevac/cache/$table.csv
   rows_transferred=$(wc -l < /cevac/cache/$table.csv)
 
-  #append columns to beginning of CSV
+  # append columns to beginning of CSV
   cat /cevac/cache/cols_$table.csv /cevac/cache/$table.csv > /cevac/cache/temp_$table.csv && mv /cevac/cache/temp_$table.csv /cevac/cache/$table.csv && cp /cevac/cache/$table.csv /srv/csv/$table.csv
 else # csv exists
   echo "$table.csv found. Grabbing newest data...  "
@@ -249,23 +276,28 @@ else # csv exists
   echo "$append_query"
 
   # Get columns and data
-  /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$append_query" -W -o "/home/bmeares/cache/$table.csv" -s"," -w 700
+  if ! /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$append_query" -W -o "/cevac/cache/$table.csv" -s"," -w 700 ; then
+    error="Failed to get columns..."
+    /cevac/scripts/log_error.sh "$error" "$table"
+    exit 1
+  fi
   # remove separator
   sed 2d -i /cevac/cache/$table.csv
 
   # get newest data since last download
-  # /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$append_query" -W -o "/home/bmeares/cache/$table.csv" -h-1 -s"," -w 700
   rows_transferred=$(expr `wc -l < /cevac/cache/$table.csv` - 1 )
 
   echo "Updating $table_CSV..."
-  /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$csv_utc_append_query"
+  if ! /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$csv_utc_append_query" ; then
+    error="Failed to append data to $table_CSV"
+    /cevac/scripts/log_error.sh "$error" "$table_CSV"
+    exit 1
+  fi
 
   echo "Removing columns from /srv/csv/$table.csv..."
   # remove columns from historical csv
-#  sed -i '1d' /srv/csv/$table.csv
   tail -n +2 /srv/csv/$table.csv | sponge /srv/csv/$table.csv
   # append new data to top of existing csv
-  # sed -i "1i`cat /home/bmeares/cache/$table.csv`" /srv/csv/$table.csv
   echo "Appending data to existing $table.csv..."
   # Replace NULL with period for LASR
   sed -i 's/NULL/./g' /cevac/cache/$table.csv
@@ -288,13 +320,19 @@ VALUES ('$table',GETUTCDATE(),'CSV', ISNULL(@last_UTC,0),($row_count - 1),$rows_
 if [ -z "$xref" ]; then
   echo Inserting into CEVAC_CACHE_RECORDS
   # insert interaction into CEVAC_CACHE_RECORDS
-  /cevac/scripts/exec_sql.sh "$record_query"
-  # /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$record_query"
+  if ! /cevac/scripts/exec_sql.sh "$record_query" ; then
+    error="Could not record csv interaction into CEVAC_CACHE_RECORDS for $table_CSV"
+    /cevac/scripts/log_error.sh "$error" "$table_CSV"
+    exit 1
+  fi
 fi
 
 echo "Adding to CEVAC_TABLES"
 echo "$cevac_tables_query" > /cevac/cache/CEVAC_TABLES_$table_CSV.sql
-/cevac/scripts/exec_sql_script.sh "/cevac/cache/CEVAC_TABLES_$table_CSV.sql"
-# /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$cevac_tables_query"
+if ! /cevac/scripts/exec_sql_script.sh "/cevac/cache/CEVAC_TABLES_$table_CSV.sql" ; then
+  error="Could not add $table_CSV to CEVAC_TABLES"
+  /cevac/scripts/log_error.sh "$error" "$table_CSV"
+  exit 1
+fi
 
-echo Finished
+echo "Finished updating /srv/csv/$table.csv"
