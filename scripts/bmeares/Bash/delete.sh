@@ -1,16 +1,19 @@
 #! /bin/sh
-
+error=""
 Building="$1"
 Metric="$2"
 if [ -z "$1" ] || [ -z "$2" ]; then
   echo "Usage: $0 [BLDG] [METRIC]"
   echo $'Enter the following information.\n'
-  echo $'Building (e.g. WATT): '; read Building
-  echo $'Metric   (e.g. TEMP): '; read Metric
+  echo $'BuildingSName  (e.g. WATT): '; read Building
+  echo $'Metric         (e.g. TEMP): '; read Metric
 fi
 
+LATEST="CEVAC_$Building""_$Metric""_LATEST"
 HIST_VIEW="CEVAC_$Building""_$Metric""_HIST_VIEW"
+HIST_CACHE="CEVAC_$Building""_$Metric""_HIST_CACHE"
 HIST="CEVAC_$Building""_$Metric""_HIST"
+HIST_LASR="CEVAC_$Building""_$Metric""_HIST_LASR"
 echo "Warning: This will completely remove all traces of a BuildingSName/Metric"
 echo "To recreate the tables, run bootstrap.sh (THIS MAY TAKE > 1 HOUR)"
 echo "Custom tables MUST be reconfigured with CREATE_CUSTOM.sh if recreated."
@@ -47,20 +50,44 @@ readarray tables_array < /cevac/cache/tables_temp.csv
 
 for t in "${tables_array[@]}"; do
   t=`echo "$t" | tr -d '\n'`
+  t_CACHE=`echo "$t" | sed 's/VIEW/CACHE/g'`
   if [ -z "$t" ]; then
     continue
   fi
   table_type=`/cevac/scripts/sql_value.sh "SELECT TABLE_TYPE FROM information_schema.tables WHERE TABLE_NAME = '$t'"`
   table_type=$(echo "$table_type" | sed 's/BASE //g')
-  sql="
-  IF OBJECT_ID('$t') IS NOT NULL EXEC('DROP $table_type $t')"
-  /cevac/scripts/exec_sql.sh "$sql"
+
+  sql="IF OBJECT_ID('$t') IS NOT NULL EXEC('DROP $table_type $t')"
+  c_sql="IF OBJECT_ID('"$t_CACHE"') IS NOT NULL EXEC('DROP TABLE $t_CACHE')"
+  if ! /cevac/scripts/exec_sql.sh "$sql"; then
+    error="Error: Could not drop $t"
+    /cevac/scripts/log_error.sh "$error" "$t"
+    exit 1
+  fi
+  if ! /cevac/scripts/exec_sql.sh "$c_sql" ; then
+    error="Error: Could not drop $t_CACHE"
+    /cevac/scripts/log_error.sh "$error" "$t_CACHE"
+    exit 1
+  fi
 done
+# Drop HIST_CACHE just in case
+sql="IF OBJECT_ID('$HIST_CACHE') IS NOT NULL EXEC('DROP TABLE $HIST_CACHE')"
+if ! /cevac/scripts/exec_sql.sh "$sql"; then
+  error="Error: Could not drop $t"
+  /cevac/scripts/log_error.sh "$error" "$t"
+  exit 1
+fi
 
 # Delete all from CEVAC_TABLES
-/cevac/scripts/exec_sql.sh "DELETE FROM CEVAC_TABLES WHERE BuildingSName = '$Building' AND Metric = '$Metric'""$exclude_query"
+if ! /cevac/scripts/exec_sql.sh "DELETE FROM CEVAC_TABLES WHERE BuildingSName = '$Building' AND Metric = '$Metric'""$exclude_query" ; then
+  error="Error: Could not delete $Building"_$Metric" from CEVAC_TABLES"
+  /cevac/scripts/log_error.sh "$error"
+  exit 1
+fi
 
 # Delete /srv/csv/_HIST.scv
 rm -f /srv/csv/$HIST.csv
+rm -f /srv/csv/$HIST_LASR.csv
+rm -f /srv/csv/$LATEST.csv
 
 echo "All $Building""_$Metric tables have been deleted."

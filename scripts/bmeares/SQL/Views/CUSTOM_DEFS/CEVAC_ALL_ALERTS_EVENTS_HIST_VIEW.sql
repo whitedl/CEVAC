@@ -7,7 +7,7 @@ WITH LatestTimes AS (
 	FROM CEVAC_ALL_ALERTS_HIST_RAW
 	GROUP BY EventID
 )
-SELECT AlertType, AlertMessage, Metric, BuildingSName, BuildingDName, Acknowledged, Raw.EventID, dbo.ConvertUTCToLocal(LatestTimes.maxUTC) AS 'ETDateTime', dbo.ConvertUTCToLocal(DetectTimes.minUTC) AS 'DetectionTimeET'
+SELECT AlertType, AlertMessage, Metric, BuildingSName, BuildingDName, Acknowledged, Raw.EventID, dbo.ConvertUTCToLocal(LatestTimes.maxUTC) AS 'ETDateTime', dbo.ConvertUTCToLocal(DetectTimes.minUTC) AS 'DetectionTimeET', Resolved
 FROM CEVAC_ALL_ALERTS_HIST_RAW AS Raw
 INNER JOIN LatestTimes ON LatestTimes.EventID = Raw.EventID AND LatestTimes.maxUTC = Raw.UTCDateTime
 INNER JOIN DetectTimes ON DetectTimes.EventID = Raw.EventID

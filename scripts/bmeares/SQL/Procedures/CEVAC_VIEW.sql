@@ -13,21 +13,29 @@ CREATE PROCEDURE CEVAC_VIEW
 
 AS
 
-SELECT * INTO #cevac_config_temp FROM CEVAC_CONFIG;
+DECLARE @error NVARCHAR(MAX);
+DECLARE @ProcessName NVARCHAR(MAX);
+SET @ProcessName = OBJECT_NAME(@@PROCID);
 
-DECLARE @RemoteIP NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM #cevac_config_temp WHERE VarName = 'RemoteIP'),
-	@RemoteDB NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM #cevac_config_temp WHERE VarName = 'RemoteDB'),
-	@RemoteSchema NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM #cevac_config_temp WHERE VarName = 'RemoteSchema'),
-	@RemoteAVTable NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM #cevac_config_temp WHERE VarName = 'RemoteAVTable'),
-	@RemoteUnitTable NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM #cevac_config_temp WHERE VarName = 'RemoteUnitTable'),
-	@RemotePSTable NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM #cevac_config_temp WHERE VarName = 'RemotePSTable'),
-	@RemotePtTable NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM #cevac_config_temp WHERE VarName = 'RemotePtTable'),
-	@RemoteUTCName NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM #cevac_config_temp WHERE VarName = 'RemoteUTCName'),
-	@RemotePSIDName NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM #cevac_config_temp WHERE VarName = 'RemotePSIDName'),
-	@RemotePointIDName NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM #cevac_config_temp WHERE VarName = 'RemotePointIDName'),
-	@RemoteUnitOfMeasureIDName NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM #cevac_config_temp WHERE VarName = 'RemoteUnitOfMeasureIDName'),
-	@RemotePointNameName NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM #cevac_config_temp WHERE VarName = 'RemotePointNameName'),
-	@RemoteActualValueName NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM #cevac_config_temp WHERE VarName = 'RemoteActualValueName')
+DECLARE @cevac_config_temp TABLE(
+	VarName NVARCHAR(MAX),
+	VarValue NVARCHAR(MAX)
+);
+INSERT INTO @cevac_config_temp SELECT * FROM CEVAC_CONFIG;
+
+DECLARE @RemoteIP NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM @cevac_config_temp WHERE VarName = 'RemoteIP'),
+	@RemoteDB NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM @cevac_config_temp WHERE VarName = 'RemoteDB'),
+	@RemoteSchema NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM @cevac_config_temp WHERE VarName = 'RemoteSchema'),
+	@RemoteAVTable NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM @cevac_config_temp WHERE VarName = 'RemoteAVTable'),
+	@RemoteUnitTable NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM @cevac_config_temp WHERE VarName = 'RemoteUnitTable'),
+	@RemotePSTable NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM @cevac_config_temp WHERE VarName = 'RemotePSTable'),
+	@RemotePtTable NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM @cevac_config_temp WHERE VarName = 'RemotePtTable'),
+	@RemoteUTCName NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM @cevac_config_temp WHERE VarName = 'RemoteUTCName'),
+	@RemotePSIDName NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM @cevac_config_temp WHERE VarName = 'RemotePSIDName'),
+	@RemotePointIDName NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM @cevac_config_temp WHERE VarName = 'RemotePointIDName'),
+	@RemoteUnitOfMeasureIDName NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM @cevac_config_temp WHERE VarName = 'RemoteUnitOfMeasureIDName'),
+	@RemotePointNameName NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM @cevac_config_temp WHERE VarName = 'RemotePointNameName'),
+	@RemoteActualValueName NVARCHAR(MAX) = (SELECT TOP 1 VarValue FROM @cevac_config_temp WHERE VarName = 'RemoteActualValueName')
 	;
 
 DECLARE @building_key nvarchar(100);
@@ -90,7 +98,7 @@ SELECT @Table_name AS 'Table_name init';
 SET @XREF = CONCAT('CEVAC_', @Building, '_', @Metric, '_XREF');
 IF @Metric = 'POWER_SUMS' SET @XREF = CONCAT('CEVAC_', @Building, '_POWER_XREF');
 SET @PXREF = CONCAT('CEVAC_', @Building, '_', @Metric, '_PXREF');
-IF @Metric = 'POWER_RAW' SET @XREF = CONCAT('CEVAC_', @Building, '_', REPLACE(@Metric, 'POWER_RAW', 'POWER'), '_XREF');
+--IF @Metric = 'POWER_RAW' SET @XREF = CONCAT('CEVAC_', @Building, '_', REPLACE(@Metric, 'POWER_RAW', 'POWER'), '_XREF');
 IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = @XREF) SET @XREF = NULL;
 
 -- add quotes for regex search
@@ -113,14 +121,16 @@ IF EXISTS (SELECT TOP 1 Dependencies FROM CEVAC_TABLES WHERE TableName = @Table_
 	DECLARE @dependency_query NVARCHAR(500);
 	SET @Dependencies_list = (SELECT TOP 1 Dependencies FROM CEVAC_TABLES WHERE TableName = @Table_name);
 	IF @Dependencies_list IS NOT NULL BEGIN
-		SELECT * INTO #cevac_dep FROM ListTable(@Dependencies_list);
+		DECLARE @cevac_dep TABLE(dep NVARCHAR(MAX));
+		INSERT INTO @cevac_dep SELECT * FROM ListTable(@Dependencies_list);
 		DECLARE @i INT;
 		SET @i = 100;
-		WHILE (EXISTS(SELECT 1 FROM #cevac_dep) AND @i > 0) BEGIN
-			SET @dependency = (SELECT TOP 1 * FROM #cevac_dep);
-			DELETE TOP(1) FROM #cevac_dep;
+		WHILE (EXISTS(SELECT 1 FROM @cevac_dep) AND @i > 0) BEGIN
+			SET @dependency = (SELECT TOP 1 * FROM @cevac_dep);
+			DELETE TOP(1) FROM @cevac_dep;
 			SET @dependency_query = '
 			IF OBJECT_ID(''' + @dependency + ''') IS NULL BEGIN
+				EXEC CEVAC_LOG_ERROR @ErrorMessage = ''' + @Table_name + ' requires ' + @dependency + ''', @ProcessName = ''' + @ProcessName + ''', @TableName = ''' + @Table_name + ''';
 				RAISERROR(''' + @Table_name + ' requires ' + @dependency + ''', 11, 1);
 				RETURN
 			END
@@ -149,31 +159,27 @@ IF @unitOfMeasureID IS NULL AND @Metric IN (SELECT Metric FROM CEVAC_METRIC) BEG
 	SET @unitOfMeasureID = (SELECT TOP 1 unitOfMeasureID FROM CEVAC_METRIC WHERE Metric = @Metric);
 END
 
-DECLARE @unitOfMeasureID_query NVARCHAR(50);
-SET @unitOfMeasureID_query = (SELECT CASE WHEN @unitOfMeasureID IS NOT NULL THEN ' AND units.UnitOfMeasureID = ''' + CAST(@unitOfMeasureID AS NVARCHAR(30)) + '''' ELSE NULL END)
 
-
-DECLARE @XREF_query NVARCHAR(200);
-SET @XREF_query = 'INNER JOIN ' + @XREF + ' AS xref on xref.PointSliceID = ps.PointSliceID';
-DECLARE @Alias_query NVARCHAR(200);
-SET @Alias_query = ' xref.Alias AS Alias, ';
-DECLARE @Alias_or_PSID NVARCHAR(20);
+DECLARE @XREF_query NVARCHAR(500);
+DECLARE @Alias_or_PSID NVARCHAR(100);
 SET @Alias_or_PSID = 'Alias';
-DECLARE @DateTimeName NVARCHAR(50);
-DECLARE @AliasName NVARCHAR(50);
-DECLARE @DataName NVARCHAR(50);
+DECLARE @DateTimeName NVARCHAR(100);
+DECLARE @AliasName NVARCHAR(100);
+DECLARE @IDName NVARCHAR(100);
+DECLARE @DataName NVARCHAR(100);
 DECLARE @isCustom BIT;
 DECLARE @customLASR BIT;
+DECLARE @XREF_or_PXREF NVARCHAR(100);
 
 SET @customLASR = 0;  -- DEFAULT
-
+SET @XREF_or_PXREF = 'XREF'; -- DEFAULT
 
 -- If XREF doesn't exist, select PointSliceID instead
 IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = @XREF)
 BEGIN
-	SET @XREF_query = NULL;
-	SET @Alias_or_PSID = 'PointSliceID';
-	SET @Alias_query = 'ps.PointSliceID AS PointSliceID, ';
+	SET @XREF_or_PXREF = 'PXREF';
+	SET @XREF_query = 'INNER JOIN ' + @PXREF + ' AS xref on xref.' + @RemotePSIDName + ' = val.' + @RemotePSIDName + '';
+	SET @Alias_or_PSID = @RemotePSIDName;
 END ELSE BEGIN -- XREF exists
 	-- Insert XREF into CEVAC_TABLES
 	PRINT 'Adding XREF to table: ' + @XREF;
@@ -181,20 +187,23 @@ END ELSE BEGIN -- XREF exists
 		-- Check if XREF contains setpoints. If so, flip customLASR (for CEVAC_HIST_LASR)
 		DECLARE @customLASR_query NVARCHAR(MAX);
 		DECLARE @customLASR_rc INT;
-		SET @customLASR_query = 'SELECT TOP 1 * FROM ' + @XREF;
-		EXEC(@customLASR_query);
-		SET @customLASR_rc = @@ROWCOUNT;
-		IF @customLASR_rc > 0 SET @customLASR = 1;
-
+		IF 'ReadingType' IN (SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @XREF) BEGIN
+			SET @customLASR_query = 'SELECT TOP 1 * FROM ' + @XREF + ' WHERE ReadingType LIKE ''%SP%''';
+			EXEC(@customLASR_query);
+			SET @customLASR_rc = @@ROWCOUNT;
+			IF @customLASR_rc > 0 SET @customLASR = 1;
+		END
+		
 		DELETE FROM CEVAC_TABLES WHERE TableName = @XREF;
-		INSERT INTO CEVAC_TABLES(BuildingSName, Metric, Age, TableName, DateTimeName, AliasName, DataName, customLASR)
-		VALUES (@Building, @Metric, 'XREF', @XREF, 'PointSliceID', 'Alias', 'PointSliceID', @customLASR);
+		INSERT INTO CEVAC_TABLES(BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, customLASR)
+		VALUES (@Building, @Metric, 'XREF', @XREF, @RemotePSIDName, @RemotePSIDName, 'Alias', @RemotePSIDName, @customLASR);
 	END
 END
 
-SET @DateTimeName = 'UTCDateTime'; -- DEFAULT
-SET @AliasName = @Alias_or_PSID;   -- DEFAULT
-SET @DataName = 'ActualValue';     -- DEFAULT
+SET @DateTimeName = @RemoteUTCName; -- DEFAULT
+SET @AliasName = 'Alias';   -- DEFAULT
+SET @IDName = @RemotePSIDName; -- DEFAULT
+SET @DataName = @RemoteActualValueName;     -- DEFAULT
 SET @isCustom = 0;                 -- DEFAULT
 -------------------------------------------------------
 -- There exists a similar table within CEVAC_TABLES
@@ -202,18 +211,16 @@ SET @isCustom = 0;                 -- DEFAULT
 -------------------------------------------------------
 IF @Age != 'XREF' AND EXISTS (SELECT TOP 1 * FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age NOT LIKE '%XREF%') BEGIN
 	SET @DateTimeName = RTRIM((SELECT TOP 1 DateTimeName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age = 'HIST'));
+	SET @IDName = RTRIM((SELECT TOP 1 IDName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age = 'HIST'));
 	SET @AliasName = RTRIM((SELECT TOP 1 AliasName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age = 'HIST'));
 	SET @DataName = RTRIM((SELECT TOP 1 DataName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age = 'HIST'));
 	SET @isCustom = (SELECT TOP 1 isCustom FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age = 'HIST');
 END
 
-SET @DataName = ISNULL(@DataName,'ActualValue');     -- DEFAULT
-SET @AliasName = ISNULL(@AliasName,@Alias_or_PSID);   -- DEFAULT
-SET @DateTimeName = ISNULL(@DateTimeName,'UTCDateTime');   -- DEFAULT
-
-SELECT @DateTimeName AS 'DateTimeName';
-SELECT @AliasName AS 'AliasName';
-SELECT @DataName AS 'DataName';
+SET @DataName = ISNULL(@DataName,@RemoteActualValueName);     -- DEFAULT
+SET @IDName = ISNULL(@IDName,@RemotePSIDName);   -- DEFAULT
+SET @AliasName = ISNULL(@AliasName,'Alias');   -- DEFAULT
+SET @DateTimeName = ISNULL(@DateTimeName,@RemoteUTCName);   -- DEFAULT
 
 -- build view query
 DECLARE @Create_View nvarchar(MAX);
@@ -224,31 +231,41 @@ DECLARE @Create_View nvarchar(MAX);
 --------------------------------
 IF @Age LIKE 'HIST' AND @isCustom = 0 BEGIN
 	IF OBJECT_ID(@XREF) IS NULL AND OBJECT_ID(@PXREF) IS NULL AND @building_key IS NOT NULL BEGIN
-		RAISERROR('HIST requires XREF or PXREF', 11, 1);
+		SET @error = @HIST + ' requires ' + @XREF + ' or ' + @PXREF;
+		EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @Table_name;
+		RAISERROR(@error, 11, 1);
 		RETURN
 	END
 END
 IF @Age LIKE 'DAY' BEGIN
 	IF OBJECT_ID(@HIST) IS NULL BEGIN
-		RAISERROR('DAY requires HIST', 11, 1);
+		SET @error = @DAY + ' requires ' + @HIST;
+		EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @Table_name;
+		RAISERROR(@error, 11, 1);
 		RETURN
 	END
 END
 IF @Age LIKE 'LATEST%' BEGIN
 	IF OBJECT_ID(@DAY) IS NULL OR OBJECT_ID(@HIST) IS NULL BEGIN
-		RAISERROR('LATEST requires HIST and DAY', 11, 1);
+		SET @error = @LATEST + ' requires ' + @HIST + ' and ' + @DAY;
+		EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @Table_name;
+		RAISERROR(@error, 11, 1);
 		RETURN
 	END
 END
 IF @Age LIKE 'OLDEST%' BEGIN
 	IF OBJECT_ID(@HIST) IS NULL BEGIN
-		RAISERROR('OLDEST requires HIST', 11, 1);
+		SET @error = @OLDEST + ' requires ' + @HIST;
+		EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @Table_name;
+		RAISERROR(@error, 11, 1);
 		RETURN
 	END
 END
 IF @Age LIKE 'LATEST_BROKEN' BEGIN
 	IF OBJECT_ID(@DAY) IS NULL OR OBJECT_ID(@HIST) IS NULL OR OBJECT_ID(@LATEST) IS NULL OR OBJECT_ID(@LATEST_FULL) IS NULL BEGIN
-		RAISERROR('LATEST_BROKEN requires HIST, DAY, LATEST_FULL, and LATEST', 11, 1);
+		SET @error = @LATEST_BROKEN + ' requires ' + @LATEST + ', ' + @LATEST_FULL + ', ' + @DAY + ', and ' + @HIST;
+		EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @Table_name;
+		RAISERROR(@error, 11, 1);
 		RETURN
 	END
 END
@@ -262,48 +279,36 @@ END
 -- None (init standard bootstrap with PXREF)
 -----------------------------------------------
 IF @Age LIKE '%PXREF%' BEGIN
-	DECLARE @tblUnitOfMeasure_join NVARCHAR(500);
-	IF @unitOfMeasureID_query IS NOT NULL BEGIN
-		SET @tblUnitOfMeasure_join = '
-		INNER JOIN
-		[' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemotePSTable + ' AS ps ON ps.' + @RemotePSIDName + ' = val.' + @RemotePSIDName + '
-		INNER JOIN
-		[' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemotePtTable + ' AS pt ON ps.' + @RemotePointIDName + ' = pt.' + @RemotePointIDName + '
-		INNER JOIN
-		[' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemoteUnitTable + ' AS units ON units.' + @RemoteUnitOfMeasureIDName + ' = pt.' + @RemoteUnitOfMeasureIDName + '
-		';
+	DECLARE @unitOfMeasureID_query NVARCHAR(1000);
+	IF @unitOfMeasureID IS NOT NULL BEGIN
+		SET @unitOfMeasureID_query = ' units.' + @RemoteUnitOfMeasureIDName + ' = ' + CAST(ISNULL(@unitOfMeasureID,-1) AS NVARCHAR(100));
 	END
-
-	DECLARE @PXREF_drop NVARCHAR(MAX);
-	SET @PXREF_drop = '
-		IF OBJECT_ID(''dbo.' + @PXREF + ''', ''U'') IS NOT NULL DROP TABLE ' + @PXREF + ';';
-
-	-- Drop PXREF if it exists
-	SELECT @PXREF_drop AS 'Drop PXREF';
-	IF @execute = 1 BEGIN
-		EXEC(@PXREF_drop);
-		IF EXISTS (SELECT TableName FROM CEVAC_TABLES WHERE TableName = @PXREF) BEGIN
-			DELETE FROM CEVAC_TABLES WHERE TableName = @PXREF;
-		END
-
-	END
-
+		
 	IF @building_key IS NULL BEGIN
-		RAISERROR('Missing building key. Check CEVAC_BUILDING_INFO if building exists',11,1);
+		SET @error = 'Missing building key. Check CEVAC_BUILDING_INFO if ' + @Building + ' exists';
+		EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @Table_name;
+		RAISERROR(@error,11,1);
 		RETURN
 	END
 	IF @PXREF IS NULL BEGIN
-		RAISERROR('Error: PXREF variable is null',11,1);
+		SET @error = 'Error: PXREF variable is null';
+		EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @Table_name;
+		RAISERROR(@error,11,1);
 		RETURN
 	END
 	DECLARE @PXREF_query NVARCHAR(MAX);
 	IF @keys_list_query IS NULL BEGIN
-		RAISERROR('Error: Keys list is null',11,1);
+		SET @error = 'Error: Keys list query is null';
+		EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @Table_name;
+		RAISERROR(@error,11,1);
 		RETURN
 	END
+
+	DELETE FROM CEVAC_TABLES WHERE TableName = @PXREF;
 	SET @PXREF_query = '
+		IF OBJECT_ID(''dbo.' + @PXREF + ''', ''U'') IS NOT NULL DROP TABLE ' + @PXREF + ';
 		SELECT DISTINCT
-			ps.' + @RemotePSIDName + ', pt.' + @RemotePointNameName + ', units.' + @RemoteUnitOfMeasureIDName + '
+			ps.' + @RemotePSIDName + ', pt.' + @RemotePointNameName + ' AS Alias, units.' + @RemoteUnitOfMeasureIDName + '
 		INTO ' + @PXREF + '
 		FROM
 			[' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemotePtTable + ' AS pt
@@ -311,28 +316,28 @@ IF @Age LIKE '%PXREF%' BEGIN
 			INNER JOIN [' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemoteUnitTable + ' AS units ON units.' + @RemoteUnitOfMeasureIDName + ' = pt.' + @RemoteUnitOfMeasureIDName + '
 			' + @keys_list_query + '
 		WHERE
-		( ' + @RemotePointNameName + ' LIKE ' + @building_key + ')
-		' + isnull(@unitOfMeasureID_query, '') + '
-	';
-	SELECT @PXREF_query AS 'Create PXREF';
-	IF @execute = 1 BEGIN 
+		( pt.' + @RemotePointNameName + ' LIKE ' + @building_key + ')
+		AND ' + ISNULL(@unitOfMeasureID_query, '1 = 1');
+	PRINT @PXREF_query;
+	IF @execute = 1 BEGIN
 		EXEC(@PXREF_query);
-		IF NOT EXISTS (SELECT TableName FROM CEVAC_TABLES WHERE TableName = @PXREF) BEGIN
-		INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, AliasName, DataName, isCustom, Definition, Dependencies, customLASR)
+		DELETE FROM CEVAC_TABLES WHERE TableName = @PXREF;
+		INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, isCustom, Definition, Dependencies, customLASR)
 		VALUES (
 			@Building,
 			@Metric,
 			@Age,
 			@PXREF,
-			@Alias_or_PSID,
-			@Alias_or_PSID,
-			@Alias_or_PSID,
+			@RemotePSIDName,
+			@RemotePSIDName,
+			'Alias',
+			@RemotePSIDName,
 			@isCustom,
 			@PXREF_query,
 			NULL,
 			@customLASR
 		)
-		END
+		
 	END
 END
 
@@ -345,40 +350,24 @@ END
 -- Note: Dependencies left NULL for non-standard HIST tables
 ------------------------------------------------------------
 ELSE IF @Age LIKE '%HIST%' BEGIN
-	SELECT 'HIST';
-	DECLARE @PSID_source NVARCHAR(500);
-	IF @Alias_or_PSID = 'Alias' SET @PSID_source = '
-	SELECT ' + @RemotePSIDName + ' FROM ' + @XREF + '
-	';
-	ELSE SET @PSID_source = '
-		SELECT ' + @RemotePSIDName + ' FROM ' + @PXREF + ' ';
 
+	DECLARE @xref_source NVARCHAR(300);
+	IF @XREF_or_PXREF = 'XREF' SET @xref_source = @XREF;
+	ELSE IF @XREF_or_PXREF = 'PXREF' SET @xref_source = @PXREF;
+	ELSE BEGIN
+		SET @error = 'Could not distinguish XREF source';
+		EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @Table_name;
+		RAISERROR(@error,11,1);
+		RETURN
+	END
 
-SET @Create_View = '
+	SET @Create_View = '
 	CREATE VIEW ' + @Table_name + ' AS
 
-	WITH original AS (
-		SELECT
-		' + @Alias_query + '
-		val.' + @RemoteUTCName + ', dbo.ConvertUTCToLocal(val.' + @RemoteUTCName + ') AS ETDateTime, val.' + @RemoteActualValueName + ' 
-		FROM
-			[' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemoteAVTable + ' AS val
-			INNER JOIN
-			[' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemotePSTable + ' AS ps ON ps.' + @RemotePSIDName + ' = val.' + @RemotePSIDName + '
-			INNER JOIN
-			[' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemotePtTable + ' AS pt ON ps.' + @RemotePointIDName+ ' = pt.' + @RemotePointIDName + '
-			INNER JOIN
-			[' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemoteUnitTable + ' AS units ON units.' + @RemoteUnitOfMeasureIDName + ' = pt.' + @RemoteUnitOfMeasureIDName + '
-			' + isnull(@XREF_query, '') + '
-
-		WHERE val.PointSliceID IN
-		(' + @PSID_source + '
-		)' + isnull(@unitOfMeasureID_query, '') + ' ';
-
-
-	-- End of original
-	SET @Create_View = @Create_View + '
-	) SELECT * FROM original
+	SELECT xref.' + @RemotePSIDName + ', xref.Alias AS Alias, val.' + @RemoteUTCName + ', dbo.ConvertUTCToLocal(val.' + @RemoteUTCName + ') AS ETDateTime, val.' + @RemoteActualValueName + ' 
+	FROM
+		[' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemoteAVTable + ' AS val
+	INNER JOIN ' + @xref_source + ' as xref ON xref.' + @RemotePSIDName + ' = val.' + @RemotePSIDName + '
 	';
 
 	IF @Age LIKE '%LASR%' BEGIN
@@ -386,6 +375,7 @@ SET @Create_View = '
 		EXEC CEVAC_HIST_LASR @BuildingSName = ''' + @Building + ''', @Metric = ''' + @Metric + ''';
 		';
 		SET @customLASR = 1;
+		SET @Table_name = @HIST_LASR;
 	END
 
 END -- END of _HIST_VIEW
@@ -438,14 +428,14 @@ ELSE IF @Age LIKE '%LATEST%' BEGIN
 	' temp.* FROM '  + @Latest_source + ' AS temp
 	INNER JOIN
 	(
-		SELECT ' + @AliasName + ', 
+		SELECT ' + @IDName + ', 
 		MAX(' + @DateTimeName + ') AS LastTime
 		FROM
 		' + @Latest_source + '
-		GROUP BY ' + @AliasName + '
+		GROUP BY ' + @IDName + '
 	) AS recent
 	ON
-	temp.' + @AliasName + ' = recent.' + @AliasName + '
+	temp.' + @IDName + ' = recent.' + @IDName + '
 	AND temp.' + @DateTimeName + ' = recent.LastTime
 	';
 
@@ -455,8 +445,8 @@ ELSE IF @Age LIKE '%LATEST%' BEGIN
 		SET @Create_View = '
 		CREATE VIEW ' + @Table_name + ' AS 
 		SELECT latest_full.* FROM ' + @LATEST_FULL + ' AS latest_full
-		LEFT JOIN ' + @LATEST + ' AS latest ON latest.' + @AliasName + ' = latest_full.' + @AliasName + '	
-		WHERE latest.' + @AliasName + ' IS NULL
+		LEFT JOIN ' + @LATEST + ' AS latest ON latest.' + @IDName + ' = latest_full.' + @IDName + '	
+		WHERE latest.' + @IDName + ' IS NULL
 		';
 	END
 
@@ -480,15 +470,15 @@ END ELSE IF @Age LIKE '%OLDEST%' BEGIN
 	' temp.* FROM '  + @Oldest_source + ' AS temp
 	INNER JOIN
 	(
-		SELECT ' + @AliasName + ', 
+		SELECT ' + @IDName + ', 
 		MIN(' + @DateTimeName + ') AS LastTime
 		FROM
 		' + @Oldest_source + '
 		WHERE ' + @DataName + ' > 0 
-		GROUP BY ' + @AliasName + '
+		GROUP BY ' + @IDName + '
 	) AS recent
 	ON
-	temp.' + @AliasName + ' = recent.' + @AliasName + '
+	temp.' + @IDName + ' = recent.' + @IDName + '
 	AND temp.' + @DateTimeName + ' = recent.LastTime
 	';
 
@@ -516,22 +506,23 @@ END
 --------------------------------------
 -- Execute and create the view
 --------------------------------------
-SELECT @Create_View AS 'Create View'
+PRINT @Create_View;
 IF @execute = 1 AND @Create_View IS NOT NULL BEGIN
 	EXEC(@Create_View)
 
 
 	DELETE FROM CEVAC_TABLES WHERE TableName = @Table_name;
 	IF NOT EXISTS (SELECT TableName FROM CEVAC_TABLES WHERE TableName = @Table_name) BEGIN
-		INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, AliasName, DataName, isCustom, Definition, Dependencies, customLASR)
+		INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, isCustom, Definition, Dependencies, customLASR)
 			VALUES (
 				@Building,
 				@Metric,
 				@Age,
 				@Table_name,
-				isnull(@DateTimeName,'UTCDateTime'),
+				isnull(@DateTimeName,@RemoteUTCName),
+				isnull(@IDName,@RemotePSIDName),
 				isnull(@AliasName,'Alias'),
-				isnull(@DataName, 'ActualValue'),
+				isnull(@DataName, @RemoteActualValueName),
 				isnull(@isCustom,0),
 				@Create_View,
 				@Dependencies_list,
@@ -569,16 +560,14 @@ IF @Age LIKE '%HIST%' BEGIN
 
 	SET @DateTimeName = (SELECT TOP 1 DateTimeName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age = 'HIST');
 	SET @AliasName = (SELECT TOP 1 AliasName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age = 'HIST');
+	SET @IDName = (SELECT TOP 1 IDName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age = 'HIST');
 	SET @DataName = ISNULL((SELECT TOP 1 DataName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age = 'HIST'),@DataName);
 	SET @isCustom = (SELECT TOP 1 isCustom FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age = 'HIST');
 --	SET @customLASR = (SELECT TOP 1 customLASR FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age = 'HIST');
 
-	IF @DateTimeName IS NULL OR @AliasName IS NULL OR @DataName IS NULL BEGIN
-		DECLARE @error NVARCHAR(200);
-		SELECT @DateTimeName AS 'DateTimeName is';
-		SELECT @AliasName AS 'AliasName is';
-		SELECT @DataName AS 'DataName is';
+	IF @DateTimeName IS NULL OR @AliasName IS NULL OR @DataName IS NULL OR @IDName IS NULL BEGIN
 		SET @error = 'Make sure CEVAC_' + @Building + '_' + @Metric + '_HIST_VIEW is in CEVAC_TABLES';
+		EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @Table_name;
 		RAISERROR(@error, 11, 1);
 		RETURN
 	END
@@ -592,13 +581,14 @@ IF @Age LIKE '%HIST%' BEGIN
 	IF @execute = 1 BEGIN
 		EXEC(@Create_API_View);
 		IF NOT EXISTS (SELECT * FROM CEVAC_TABLES WHERE TableName = @HIST) BEGIN
-			INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, AliasName, DataName, isCustom, Definition, Dependencies, customLASR)
+			INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, isCustom, Definition, Dependencies, customLASR)
 			VALUES (
 				@Building,
 				@Metric,
 				@Age,
 				@HIST,
 				@DateTimeName,
+				@IDName,
 				@AliasName,
 				@DataName,
 				isnull(@isCustom,0),
@@ -610,43 +600,44 @@ IF @Age LIKE '%HIST%' BEGIN
 	END
 
 
-	SELECT @customLASR AS 'customLASR';
-	-- Insert HIST_LASR if necessary
-	IF @customLASR = 1 BEGIN
-		-- HIST_LASR
-		DELETE FROM CEVAC_TABLES WHERE TableName = @HIST_LASR;
-		INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, AliasName, DataName, isCustom, Definition, Dependencies, customLASR)
-		VALUES (
-			@Building,
-			@Metric,
-			@Age,
-			@HIST_LASR,
-			@DateTimeName,
-			@AliasName,
-			@DataName,
-			isnull(@isCustom,0),
-			@Create_View,
-			@_HIST_source,
-			@customLASR
-		);
-		-- HIST_LASR_INT
-		DELETE FROM CEVAC_TABLES WHERE TableName = @HIST_LASR_INT;
-		INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, AliasName, DataName, isCustom, Definition, Dependencies, customLASR)
-		VALUES (
-			@Building,
-			@Metric,
-			@Age,
-			@HIST_LASR_INT,
-			@DateTimeName,
-			@AliasName,
-			@DataName,
-			isnull(@isCustom,0),
-			@Create_API_View,
-			@_HIST_source,
-			@customLASR
-		);
+	---- Insert HIST_LASR if necessary
+	--IF @customLASR = 1 BEGIN
+	--	-- HIST_LASR
+	--	DELETE FROM CEVAC_TABLES WHERE TableName = @HIST_LASR;
+	--	INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, isCustom, Definition, Dependencies, customLASR)
+	--	VALUES (
+	--		@Building,
+	--		@Metric,
+	--		@Age,
+	--		@HIST_LASR,
+	--		@DateTimeName,
+	--		@IDName,
+	--		@AliasName,
+	--		@DataName,
+	--		isnull(@isCustom,0),
+	--		@Create_View,
+	--		@_HIST_source,
+	--		@customLASR
+	--	);
+	--	-- HIST_LASR_INT
+	--	DELETE FROM CEVAC_TABLES WHERE TableName = @HIST_LASR_INT;
+	--	INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, isCustom, Definition, Dependencies, customLASR)
+	--	VALUES (
+	--		@Building,
+	--		@Metric,
+	--		@Age,
+	--		@HIST_LASR_INT,
+	--		@DateTimeName,
+	--		@IDName,
+	--		@AliasName,
+	--		@DataName,
+	--		isnull(@isCustom,0),
+	--		@Create_API_View,
+	--		@_HIST_source,
+	--		@customLASR
+	--	);
 
-	END
+	--END
 END
 
 
