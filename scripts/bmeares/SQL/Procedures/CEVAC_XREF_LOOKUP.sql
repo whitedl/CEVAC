@@ -8,24 +8,30 @@ CREATE PROCEDURE CEVAC_XREF_LOOKUP
 	@Alias NVARCHAR(200) = NULL,
 	@PointSliceID INT = NULL
 AS
-DECLARE @error NVARCHAR(1000);
+DECLARE @error NVARCHAR(MAX);
+DECLARE @ProcessName NVARCHAR(MAX);
+SET @ProcessName = OBJECT_NAME(@@PROCID);
+DECLARE @XREF NVARCHAR(300);
+SET @XREF = 'CEVAC_' + @BuildingSName + '_' + @Metric + '_XREF';
 
 IF @Alias IS NULL AND @PointSliceID IS NULL BEGIN
 	SET @error = 'Provide an Alias or a PointSliceID';
+	EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @XREF;
 	RAISERROR(@error,11,1);
 	RETURN;
 END
 
 IF @Alias IS NOT NULL AND @PointSliceID IS NOT NULL BEGIN
 	SET @error = 'Provide either an Alias or a PointSliceID (both are not null)';
+	EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @XREF;
 	RAISERROR(@error,11,1);
 	RETURN;
 END
 
-DECLARE @XREF NVARCHAR(300);
-SET @XREF = 'CEVAC_' + @BuildingSName + '_' + @Metric + '_XREF';
+
 IF OBJECT_ID(@XREF) IS NULL BEGIN
 	SET @error = @XREF + ' does not exist';
+	EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @XREF;
 	RAISERROR(@error,11,1);
 	RETURN;
 END

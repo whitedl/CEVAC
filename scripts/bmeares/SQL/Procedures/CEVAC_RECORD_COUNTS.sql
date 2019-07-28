@@ -8,6 +8,10 @@ CREATE PROCEDURE CEVAC_RECORD_COUNTS
 AS
 DECLARE @execute BIT;
 SET @execute = 1;
+DECLARE @error NVARCHAR(MAX);
+DECLARE @ProcessName NVARCHAR(MAX);
+SET @ProcessName = OBJECT_NAME(@@PROCID);
+
 DECLARE @insert_sql NVARCHAR(MAX);
 DECLARE @CEVAC_ALL_RECORD_COUNT_HIST_RAW NVARCHAR(200);
 SET @CEVAC_ALL_RECORD_COUNT_HIST_RAW = 'CEVAC_ALL_RECORDS_COUNTS_COMPARE_HIST_RAW';
@@ -19,19 +23,27 @@ DECLARE @DateTimeName NVARCHAR(100);
 SET @DateTimeName = RTRIM((SELECT TOP 1 DateTimeName FROM CEVAC_TABLES WHERE BuildingSName = @BuildingSName AND Metric = @Metric AND Age = 'HIST'));
 
 IF @DateTimeName IS NULL BEGIN
-	RAISERROR('DateTimeName is null', 11, 1);
+	SET @error = 'DateTimeName is null';
+	EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @HIST;
+	RAISERROR(@error, 11, 1);
 	RETURN
 END
 IF @HIST IS NULL BEGIN
-	RAISERROR('HIST is null', 11, 1);
+	SET @error = 'HIST is null';
+	EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @CEVAC_ALL_RECORD_COUNT_HIST_RAW;
+	RAISERROR(@error, 11, 1);
 	RETURN
 END
 IF @BuildingSName IS NULL BEGIN
-	RAISERROR('BuildingSName is null', 11, 1);
+	SET @error = 'BuildingSName is null';
+	EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @HIST;
+	RAISERROR(@error, 11, 1);
 	RETURN
 END
 IF @CEVAC_ALL_RECORD_COUNT_HIST_RAW IS NULL BEGIN
-	RAISERROR('CEVAC_ALL_RECORD_COUNT_HIST_RAW is null', 11, 1);
+	SET @error = 'CEVAC_ALL_RECORD_COUNT_HIST_RAW is null';
+	EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @HIST;
+	RAISERROR(@error, 11, 1);
 	RETURN
 END
 
