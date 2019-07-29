@@ -78,6 +78,7 @@ def generateInput(h, d, m, y):
         '12' : 31
     }
 
+    # the percent of progress through the month
     throughMonth = [float(d/numMonth[str(m)])]
 
     hour = [0 for i in range(0,24)]
