@@ -1,1 +1,9 @@
-SELECT * FROM CEVAC_WATT_WAP_FLOOR_HIST_RAW
+SELECT
+  UTCDateTime,
+  dbo.ConvertUTCToLocal(UTCDateTime) AS ETDateTime,
+  floor,
+  guest_count,
+  clemson_count,
+  (guest_count + clemson_count) AS total_count
+FROM
+  CEVAC_WATT_WAP_FLOOR_HIST_RAW

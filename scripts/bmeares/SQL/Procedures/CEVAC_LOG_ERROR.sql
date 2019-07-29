@@ -1,0 +1,16 @@
+IF EXISTS(SELECT 1 FROM sys.procedures WHERE Name = 'CEVAC_LOG_ERROR') DROP PROCEDURE CEVAC_LOG_ERROR;
+GO
+CREATE PROCEDURE CEVAC_LOG_ERROR
+	@ErrorMessage NVARCHAR(MAX),
+	@ProcessName NVARCHAR(MAX),
+	@TableName NVARCHAR(MAX) = NULL
+AS
+
+INSERT INTO CEVAC_ERRORS(TableName, ErrorMessage, UTCDateTime, ProcessName)
+VALUES (
+	@TableName,
+	@ErrorMessage,
+	GETUTCDATE(),
+	@ProcessName
+);
+

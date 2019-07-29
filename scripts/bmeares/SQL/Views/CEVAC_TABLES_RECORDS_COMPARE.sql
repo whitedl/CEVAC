@@ -12,7 +12,24 @@ cache_newest AS (
 	WHERE update_time = (SELECT max_utc FROM cache_max WHERE c.table_name = cache_max.table_name)
 )
 
-SELECT * FROM CEVAC_TABLES AS t
+SELECT
+	t.BuildingSName,
+	t.Metric,
+	t.Age,
+	t.TableName,
+	t.DateTimeName,
+	t.AliasName,
+	t.DataName,
+	t.isCustom,
+	t.Definition,
+	t.Dependencies,
+	t.customLASR,
+	cache_newest.update_time,
+	cache_newest.storage,
+	cache_newest.last_UTC,
+	cache_newest.row_count,
+	cache_newest.rows_transferred
+FROM CEVAC_TABLES AS t 
 INNER JOIN cache_newest ON cache_newest.table_name = t.TableName
 
 --SELECT * FROM CEVAC_TABLES
