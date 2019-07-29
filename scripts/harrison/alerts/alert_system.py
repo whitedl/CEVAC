@@ -59,7 +59,6 @@ COLUMNS = {
     "message_id": 16,
 }
 
-
 # Time constants
 TIME = {
     "day": 1,
