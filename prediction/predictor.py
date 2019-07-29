@@ -118,8 +118,7 @@ def pred(model):
 
     for i, hour in enumerate(hourly['hours']):
 
-
-
+        # get time information
         day = hourly['days'][i]
         month = hourly['months'][i]
         year = hourly['years'][i]
