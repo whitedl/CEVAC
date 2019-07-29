@@ -268,7 +268,7 @@ def ingest_file_fail(fname, dbc):
                     total_duration = hours[hour][name][SSID]["time"]
                     unique_users = len(hours[hour][name][SSID]["users"].keys())
                     cursor.execute(insert_sql, [hour, name, SSID, int(
-                        total_duration), total_duration / 60, unique_users])
+                        total_duration), total_duration / 30, unique_users])
 
         # Commit insertions
         dbc.commit()
