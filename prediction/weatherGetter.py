@@ -35,8 +35,9 @@ def appendData(data):
         # add to historic weather
         historicWeather.append(temp)
 
+# write the data in the current dir to the file 'historicWeather.csv'
 def writeData():
-    # write historic weather data to csv file
+
     with open('historicWeather.csv', 'a') as f:
         writer = csv.writer(f)
         writer.writerows(historicWeather)

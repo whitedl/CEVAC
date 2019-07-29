@@ -9,6 +9,7 @@ metric="$2"
 age="$3"
 table="CEVAC_""$building""_""$metric""_""$age"
 table_CSV="$table""_CSV"
+error=""
 if [ "$4" == "runsas" ]; then
   runsas="runsas"
 fi
@@ -25,7 +26,8 @@ echo "Creating $table.csv"
 
 /cevac/scripts/table_to_csv_append.sh "$table"
 if [ ! $? -eq 0 ]; then
-  echo "$table.csv failed. Aborting..."
+  error="$table.csv failed. Aborting..."
+  /cevac/scripts/log_error.sh "$error"
   exit 1
 fi
 echo "Uploading CSV to LASR Autoloader..."

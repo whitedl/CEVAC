@@ -3,6 +3,7 @@
 runsas="norun"
 reset="append"
 customLASR="0"
+error=""
 
 echo "Usage: $0 {customLASR} {runsas} {reset}"
 
@@ -57,14 +58,16 @@ for t in "${tables_array[@]}"; do
     A="HIST_LASR"
     echo "Updating CEVAC_$B""_$M""_HIST_LASR"
     time if ! /cevac/scripts/CREATE_VIEW.sh "$B" "$M" "HIST_LASR"; then
-      echo "Error: Failed to create CEVAC_$B""_$M""_HIST_LASR"
+      error="Error: Failed to create CEVAC_$B""_$M""_HIST_LASR"
+      /cevac/scripts/log_error.sh "$error"
       exit 1
     fi
   fi
 
   /cevac/scripts/seperator.sh
   time if ! /cevac/scripts/lasr_append.sh $B $M $A $runsas $reset ; then
-    echo "Error uploading CEVAC_$B""_$M""_$A to LASR";
+    error="Error uploading CEVAC_$B""_$M""_$A to LASR";
+    /cevac/scripts/log_error.sh "$error"
     exit 1
   fi
 done
