@@ -13,7 +13,11 @@ import {MySequence} from './sequence';
 export class CevacApiApplication extends BootMixin(
   ServiceMixin(RepositoryMixin(RestApplication)),
 ) {
-  constructor(options: ApplicationConfig = {}) {
+  constructor(options: ApplicationConfig = {
+    rest: {
+      basePath: '/api'
+    },
+  }) {
     super(options);
 
     // Set up the custom sequence
