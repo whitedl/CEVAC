@@ -5,7 +5,8 @@ export interface Alert {
   Metric?: string;
   BuildingSName: string;
   BuildingDName?: string;
-  Acknowledged: number;
+  Acknowledged: boolean;
+  Resolved: boolean;
   ETDateTime: Date;
   DetectionTimeET: Date;
 }

@@ -10,6 +10,8 @@ import { Alert } from '@shared/interfaces/alert';
   providedIn: 'root'
 })
 export class AlertService {
+  private buildingAlerts!: [string, Alert[], Alert[]][];
+  private buildingAlertsSubject!: Subject<[string, Alert[], Alert[]][]>;
   private alerts!: Alert[];
   private alertsSubject!: Subject<Alert[]>;
   private alerts$!: Observable<Alert[]>;
@@ -21,8 +23,10 @@ export class AlertService {
 
   initialize() {
     this.alertsSubject = new Subject<Alert[]>();
+    this.buildingAlertsSubject = new Subject<[string, Alert[], Alert[]][]>();
     this.http.get<Alert[]>(this.alertsUrl).subscribe(response => {
       this.alerts = response;
+      response.forEach(val => {});
       this.alertsSubject.next(this.alerts);
     });
     this.alerts$ = this.alertsSubject.asObservable().pipe(shareReplay(1));
