@@ -228,6 +228,7 @@ if [ ! -z "$latest" ] || [ ! -z "$xref" ] || [ ! -z "$compare"  ] || [ ! -z "$is
   if ! /cevac/scripts/exec_sql.sh "IF OBJECT_ID('$table_CSV') IS NOT NULL DROP TABLE $table_CSV" ; then
     error="Cannot drop $table_CSV"
     /cevac/scripts/log_error.sh "$error" "$table_CSV"
+    exit 1
   fi
 fi
 
@@ -323,7 +324,7 @@ if [ -z "$xref" ]; then
   if ! /cevac/scripts/exec_sql.sh "$record_query" ; then
     error="Could not record csv interaction into CEVAC_CACHE_RECORDS for $table_CSV"
     /cevac/scripts/log_error.sh "$error" "$table_CSV"
-    # exit 1
+    exit 1
   fi
 fi
 
