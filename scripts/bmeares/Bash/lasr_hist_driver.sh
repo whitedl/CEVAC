@@ -27,12 +27,11 @@ if [ "$runsas" == "runsas" ]; then
   echo "This may harm performance. Omit or use norun for argument 2 to only upload to LASR"
 fi
 
-if [ "$customLASR" == "0" ]; then
-  # update HIST_CACHE tables
-  time if ! /cevac/scripts/append_tables.sh ; then
-    echo "Error updating HIST_CACHE tables"
-    exit 1
-  fi
+# update HIST_CACHE tables
+time if ! /cevac/scripts/append_tables.sh ; then
+  error="Error updating HIST_CACHE tables"
+  /cevac/scripts/log_error.sh "$error"
+  exit 1
 fi
 hist_views_query="
 SELECT RTRIM(BuildingSName), RTRIM(Metric), RTRIM(Age) FROM CEVAC_TABLES
