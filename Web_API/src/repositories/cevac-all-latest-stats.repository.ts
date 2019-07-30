@@ -8,9 +8,7 @@ export class CevacAllLatestStatsRepository extends DefaultCrudRepository<
   typeof CevacAllLatestStats.prototype.id,
   CevacAllLatestStatsRelations
 > {
-  constructor(
-    @inject('datasources.mssql') dataSource: MssqlDataSource,
-  ) {
+  constructor(@inject('datasources.mssql') dataSource: MssqlDataSource) {
     super(CevacAllLatestStats, dataSource);
   }
 }
