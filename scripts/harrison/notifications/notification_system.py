@@ -29,6 +29,7 @@ email_fpath = ("/cevac/DEV/scripts/harrison/notifications/"
 
 to_list = {
     "Harrison Hall": "hchall@g.clemson.edu",
+    "Drewboi": "abemery@clemson.edu",
 }
 
 
