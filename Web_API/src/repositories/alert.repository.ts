@@ -8,9 +8,7 @@ export class AlertRepository extends DefaultCrudRepository<
   typeof Alert.prototype.EventID,
   AlertRelations
 > {
-  constructor(
-    @inject('datasources.MSSQL') dataSource: MssqlDataSource,
-  ) {
+  constructor(@inject('datasources.mssql') dataSource: MssqlDataSource) {
     super(Alert, dataSource);
   }
 }
