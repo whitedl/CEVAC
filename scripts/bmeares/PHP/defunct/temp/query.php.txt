@@ -1,0 +1,33 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="iframe.css">
+
+</head>
+<?php
+include "../config.php";
+include "../db.php";
+global $db;
+
+// $vars = json_decode(stripslashes(file_get_contents("php://input")), true);
+if(isset($_GET['q'])) $query = urldecode($_GET['q']);
+else die();
+if(isset($_GET['debug'])) echo '<pre>';
+
+echo "<table>\n";
+$result = $db->query($query);
+while ($row = mysqli_fetch_row($result)){
+    echo "\t<tr>\n";
+    foreach($row as $row_value){
+        echo "\t\t<td>$row_value</td>\n";
+    }
+    echo "\t</tr>\n";
+}
+echo "</table>\n";
+
+
+
+if(isset($_GET['debug'])) echo '</pre>';
+// sqlsrv_close($db);
+?>
+
+</html>

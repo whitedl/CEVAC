@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+	<head>
+        <meta charset="utf-8" />
+		<title>CEVAC_VIEW Instructions</title>
+	</head>
+	<body>
+  <pre>
+
+-- <b>INSTRUCTIONS</b>
+-- :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+-- OVERVIEW
+--   Configure the variables to create a new CEVAC view which pulls from JCIHistorianDB.
+--
+--
+-- HOW TO USE
+-- <u>bash script:</u>
+--   ./CREATE_VIEW.sh [BUILDING] [METRIC] [AGE] [keywords] [UnitOfMeasureID]
+--   e.g. ./CREATE_VIEW WATT IAQ HIST CO2,-Q 96
+--   Note: keywords and UnitOfMeasureID may be omitted with NULL or empty strings (examples)
+--   Omitting via command line: ./CREATE_VIEW WATT ALL HIST NULL NULL
+--
+--   or run the script without arguments to be prompted for values:
+--   ./CREATE_VIEW.sh
+--
+--   The CREATE_VIEW script generates and executes SQL to create a single view.
+--   To create all four standard ages, run ./CREATE_ALL_VIEWS.sh. Examples:
+
+--   ./CREATE_ALL_VIEWS.sh [BUILDING] [METRIC] [keys_list] [UnitOfMeasureID]
+--   e.g. ./CREATE_ALL_VIEWS WATT ALL NULL
+--   or without arguments:
+--   ./CREATE_AL_VIEWS.sh
+--
+--
+-- <u>Stored Procecure:</u>
+--   The stored procedure CEVAC_VIEW takes the following variables:
+--     @Building          NVARHCAR(30)
+--     @Metric            NVARCHAR(30)
+--     @Age               NVARCHAR(30)
+--     @keys_list         NVARCHAR(500)
+--     @unitOfMeasureID   INT
+--   e.g.:
+--   EXEC CEVAC_VIEW
+--     @Building = 'WATT',
+--     @Metric = 'IAQ',
+--     @Age = 'HIST',
+--     @keys_list = 'CO2,-Q',
+--     @unitOfMeasureID = 96
+--
+--
+-- <u>SQL Script</u>
+--   In the CEVAC_VIEW.sql script, modify the variables in the configuration
+--   area. Then run the script on the WFIC-CEVAC database of the WFIC SQL Server.
+--
+-- VARIABLES
+-- Building:
+--   Use the standard CEVAC building names (WATT, ASC, COOPER, FLUOR, etc. Full list below).
+--
+-- Metric:
+--   Describes the content of the table (WATER, POWER, TEMP, IAQ, etc).
+--   Note: if a valid XREF already exists for Metric, then the keys_list
+--   may be omitted (preferred empty).
+--
+-- Age:
+--   ____CEVAC Name____________________Description___________________________________
+--   HIST           |  All data from beginning of time
+--   DAY            |  All data from last 24 hours (rolling)
+--   LATEST         |  Most recent entry from each PointSliceID (searches DAY)
+--   LATEST_FULL    |  Most recent entry from each PointSliceID (searches HIST)
+--
+-- keys_list (optional):
+--   Comma-separated list of PointName substrings.
+--   Note: if a valid XREF table exists for Metric, then the keys_list
+--   is optional (and preferred empty).
+--   e.g. ZN-T,SLAB,CRAC,HTG-SP,CLG-SP
+--
+-- unitOfMeasureID (optional):
+--   Additional qualifier to restrict PointSliceIDs by measurement type.
+--   Below are some common unitsOfMeasureIDs. Visit <a href="http://wfic-cevac1/requests/units.php">http://wfic-cevac1/requests/units.php</a>
+--   for the complete list.
+--   ____Name_________________UnitOfMeasureID____
+--   degrees-Fahrenheit    |  64
+--   kilowatts             |  48
+--   kilowatt-hours        |  19
+--   parts-per-million     |  96
+--   us-gallons            |  83
+-- :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+--
+--
+-- OTHER INFORMATION
+--   building_key:
+--     Keyword for extracting Pointnames from JCIHistorianDB by building.
+--   ____CEVAC Name____________________Keyword_______________________________________
+--   ASC            |  ADX:ACAD
+--   COOPER         |  ADX:CL-
+--   FIKE           |  ADX:FIKE
+--   FLUOR          |  ADX:FD and ADX:FLUOR (therefore ADX:F[DL])
+--   HOLMES         |  ADX:HH and HOLMES
+--   LEE_III        |  ADX:LEE-NAE-2
+--   LITTLEJOHN     |  ADX:LJ
+--   MCCABE         |  ADX:MH
+--   RIGGS          |  ADX:RIGGS (ADX:RH-? Not included but worth investigating)
+--   WATT           |  ADX:WATT
+
+  </pre>
+	</body>
+</html>
