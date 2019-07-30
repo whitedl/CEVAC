@@ -10,9 +10,14 @@ age="$3"
 table="CEVAC_""$building""_""$metric""_""$age"
 table_CSV="$table""_CSV"
 error=""
-if [ "$4" == "runsas" ]; then
-  runsas="runsas"
+[ "$4" == "runsas" ] && runsas="runsas"
+
+is_latest=`echo "$age" | grep "LATEST"`
+if [ ! -z "$is_latest"  ]; then
+  echo "Latest detected. Removing /srv/csv/$table.csv"
+  rm -f /srv/csv/$table.csv
 fi
+
 table_CSV_exists_query="IF OBJECT_ID('$table_CSV') IS NOT NULL SELECT 'EXISTS' ELSE SELECT 'DNE'"
 table_CSV_exists=`/cevac/scripts/sql_value.sh "$table_CSV_exists_query"`
 if [ "$5" == "reset" ] || [ ! -f /srv/csv/$table.csv ] || [ "$table_CSV_exists" != "EXISTS" ]; then
