@@ -15,11 +15,8 @@ import urllib.parse
 SEND = True
 DEBUG = False
 
-log_dir = "/home/bmeares/cron/wap/log"
+log_dir = "/cevac/cron/wap/log"
 processed_dir = "/mnt/bldg/WAP/processed"
-if DEBUG:
-    log_dir = "C:\\Users\\hchall\\Downloads"
-    processed_dir = "mnt/bldg/WAP/processed"
 
 CLIENT = 0
 MAC = 2
@@ -105,9 +102,9 @@ if SEND:
     f = open("/cevac/cache/insert_daily_wap2.sql", "w")
     f.write(insert_sql_total.replace(';', '\nGO\n'))
     f.close()
-    os.system("/home/bmeares/scripts/exec_sql_script.sh "
-              "/home/bmeares/cache/insert_daily_wap2.sql")
-    os.remove("/home/bmeares/cache/insert_daily_wap2.sql")
+    os.system("/cevac/scripts/exec_sql_script.sh "
+              "/cevac/cache/insert_daily_wap2.sql")
+    os.remove("/cevac/cache/insert_daily_wap2.sql")
 else:
     print(insert_sql_total)
 
