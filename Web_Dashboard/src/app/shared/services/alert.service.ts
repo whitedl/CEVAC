@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, BehaviorSubject } from 'rxjs';
 import { shareReplay } from 'rxjs/operators';
 
 import { Alert } from '@shared/interfaces/alert';
@@ -13,7 +13,7 @@ export class AlertService {
   private buildingAlerts!: [string, Alert[], Alert[]][];
   private buildingAlertsSubject!: Subject<[string, Alert[], Alert[]][]>;
   private alerts!: Alert[];
-  private alertsSubject!: Subject<Alert[]>;
+  private alertsSubject!: BehaviorSubject<Alert[]>;
   private alerts$!: Observable<Alert[]>;
   private alertsUrl = 'http://wfic-cevac1/requests/alerts.php';
 
@@ -22,18 +22,17 @@ export class AlertService {
   }
 
   initialize() {
-    this.alertsSubject = new Subject<Alert[]>();
+    this.alertsSubject = new BehaviorSubject<Alert[]>([]);
     this.buildingAlertsSubject = new Subject<[string, Alert[], Alert[]][]>();
     this.http.get<Alert[]>(this.alertsUrl).subscribe(response => {
       this.alerts = response;
-      response.forEach(val => {});
       this.alertsSubject.next(this.alerts);
     });
     this.alerts$ = this.alertsSubject.asObservable().pipe(shareReplay(1));
   }
 
   getAlerts(): Observable<Alert[]> {
-    return this.alerts$;
+    return this.alertsSubject;
   }
 
   removeAlert(alertID: number) {
