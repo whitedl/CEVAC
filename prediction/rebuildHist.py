@@ -39,7 +39,7 @@ def fetch():
             }
 
     # fetch the past 12 hours of data starting with 12 hours ago
-    for i in range(12, 0, -1):
+    for i in range(35, 0, -1):
         requestURL = 'https://api.darksky.net/forecast/db6bb38a65d59c7677e8e97db002705b/33.662333,-79.830875,' + str(int(time.time() - 86400 * i))
         print(requestURL)
         r = requests.get(requestURL).json()
