@@ -43,6 +43,7 @@ def fetch():
     requestURL = 'https://api.darksky.net/forecast/db6bb38a65d59c7677e8e97db002705b/33.662333,-79.830875'
     r = requests.get(requestURL).json()
     hourlyData = r['hourly']['data']
+    print(hourlyData[0])
 
     # insert every element in the hourly data
     for element in hourlyData:
@@ -78,7 +79,6 @@ def generateInput(h, d, m, y):
         '12' : 31
     }
 
-    # the percent of progress through the month
     throughMonth = [float(d/numMonth[str(m)])]
 
     hour = [0 for i in range(0,24)]
@@ -118,7 +118,8 @@ def pred(model):
 
     for i, hour in enumerate(hourly['hours']):
 
-        # get time information
+
+
         day = hourly['days'][i]
         month = hourly['months'][i]
         year = hourly['years'][i]
@@ -135,6 +136,7 @@ def pred(model):
         predictions.append(prediction)
 
 
+    print(predictions)
     insert_sql_total = ''
 
     for i, prediction in enumerate(predictions):
