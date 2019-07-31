@@ -72,9 +72,8 @@ export class MapdataService {
   ];
   dataSet: Measurement = this.dataSets[0];
 
-  private dataUrl = 'http://wfic-cevac1/requests/stats.php';
-  private sasBaseURL =
-    'https://sas.clemson.edu:8343/SASVisualAnalytics/report?location=';
+  private dataUrl = 'http://wfic-cevac1:3000/api/stat';
+  private sasBaseURL = 'https://sas.clemson.edu:8343/';
   private map!: L.Map;
   private tracked!: L.GeoJSON;
   private untracked!: L.GeoJSON;
@@ -271,11 +270,13 @@ export class MapdataService {
     if (feature.properties.Status === 'Active') {
       this.http
         .get<BuildingData[]>(
-          this.dataUrl + '?BuildingSName=' + feature.properties.Short_Name
+          this.dataUrl +
+            '?filter[where][buildingsname]=' +
+            feature.properties.Short_Name
         )
         .subscribe(bData => {
           bData.forEach((element: any) => {
-            feature.properties[element.Metric] = element;
+            feature.properties[element.metric] = element;
           });
           this.tracked.resetStyle(layer);
 
