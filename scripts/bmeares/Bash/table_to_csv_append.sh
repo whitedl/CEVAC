@@ -1,7 +1,11 @@
 #! /bin/bash
+
+# ! /cevac/scripts/check_lock.sh && exit 1
+# /cevac/scripts/lock.sh
 if [ -z "$1" ]; then
   echo Error: Missing table name
   echo "Usage: $0 [TABLE] {reset}"
+  /cevac/scripts/unlock.sh
   exit 1
 fi
 error=""
@@ -338,3 +342,4 @@ if ! /cevac/scripts/exec_sql_script.sh "/cevac/cache/CEVAC_TABLES_$table_CSV.sql
 fi
 
 echo "Finished updating /srv/csv/$table.csv"
+# /cevac/scripts/unlock.sh

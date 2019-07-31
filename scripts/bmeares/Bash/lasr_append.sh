@@ -1,7 +1,12 @@
 #! /bin/bash
+
+# ! /cevac/scripts/check_lock.sh && exit 1
+# /cevac/scripts/lock.sh
+
 if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
   echo Please enter building, metric, age.
   echo "Usage: $0 [BLDG] [METRIC] [AGE] {runsas} {reset}"
+  # /cevac/scripts/unlock.sh
   exit 1
 fi
 building="$1"
@@ -29,8 +34,7 @@ echo "LASR table will be called $dest_table"
 
 echo "Creating $table.csv"
 
-/cevac/scripts/table_to_csv_append.sh "$table"
-if [ ! $? -eq 0 ]; then
+if ! /cevac/scripts/table_to_csv_append.sh "$table" ; then
   error="$table.csv failed. Aborting..."
   /cevac/scripts/log_error.sh "$error"
   exit 1
@@ -53,4 +57,4 @@ else
   echo "runsas not detected. $table will be loaded into LASR on the next Autoload schedule"
 fi
 
-
+# /cevac/scripts/unlock.sh
