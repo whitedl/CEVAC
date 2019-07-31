@@ -1,5 +1,7 @@
 #! /bin/sh
 
+! /cevac/scripts/check_lock.sh && exit 1
+/cevac/scripts/lock.sh
 
 keys_list="NULL"
 unitOfMeasureID="NULL"
@@ -30,6 +32,7 @@ read cont
 if [ "$cont" != "y" ] || [ "$cont" != "Y" ] || [ -z "$cont" ]; then
   continue
 else
+  /cevac/scripts/unlock.sh
   exit 1
 fi
 
@@ -99,6 +102,7 @@ if [ ! -z "$isCustom" ]; then
         exit 1
       fi
     else
+      /cevac/scripts/unlock.sh
       exit 1
     fi
     
@@ -214,3 +218,7 @@ if [ "$checkXREF" == "XREF" ]; then
     exit 1
   fi
 fi
+
+
+/cevac/scripts/unlock.sh
+

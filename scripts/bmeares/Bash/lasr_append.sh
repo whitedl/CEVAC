@@ -1,7 +1,12 @@
 #! /bin/bash
+
+# ! /cevac/scripts/check_lock.sh && exit 1
+# /cevac/scripts/lock.sh
+
 if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
   echo Please enter building, metric, age.
   echo "Usage: $0 [BLDG] [METRIC] [AGE] {runsas} {reset}"
+  # /cevac/scripts/unlock.sh
   exit 1
 fi
 building="$1"
@@ -10,9 +15,14 @@ age="$3"
 table="CEVAC_""$building""_""$metric""_""$age"
 table_CSV="$table""_CSV"
 error=""
-if [ "$4" == "runsas" ]; then
-  runsas="runsas"
+[ "$4" == "runsas" ] && runsas="runsas"
+
+is_latest=`echo "$age" | grep "LATEST"`
+if [ ! -z "$is_latest"  ]; then
+  echo "Latest detected. Removing /srv/csv/$table.csv"
+  rm -f /srv/csv/$table.csv
 fi
+
 table_CSV_exists_query="IF OBJECT_ID('$table_CSV') IS NOT NULL SELECT 'EXISTS' ELSE SELECT 'DNE'"
 table_CSV_exists=`/cevac/scripts/sql_value.sh "$table_CSV_exists_query"`
 if [ "$5" == "reset" ] || [ ! -f /srv/csv/$table.csv ] || [ "$table_CSV_exists" != "EXISTS" ]; then
@@ -24,8 +34,7 @@ echo "LASR table will be called $dest_table"
 
 echo "Creating $table.csv"
 
-/cevac/scripts/table_to_csv_append.sh "$table"
-if [ ! $? -eq 0 ]; then
+if ! /cevac/scripts/table_to_csv_append.sh "$table" ; then
   error="$table.csv failed. Aborting..."
   /cevac/scripts/log_error.sh "$error"
   exit 1
@@ -48,4 +57,4 @@ else
   echo "runsas not detected. $table will be loaded into LASR on the next Autoload schedule"
 fi
 
-
+# /cevac/scripts/unlock.sh

@@ -1,5 +1,8 @@
 #! /bin/bash
 
+! /cevac/scripts/check_lock.sh && exit 1
+/cevac/scripts/lock.sh
+
 /cevac/scripts/seperator.sh
 
 hist_views_query="
@@ -26,9 +29,10 @@ for t in "${tables_array[@]}"; do
   if ! /cevac/scripts/exec_sql.sh "$sql" ; then
     echo "Error. Aborting append"
     /cevac/scripts/log_error.sh "Error executing CEVAC_CACHE_APPEND" "$t"
-    exit 1
+    # exit 1
   fi
 done
 
 
 echo "Finished appending HIST_CACHE tables"
+/cevac/scripts/unlock.sh

@@ -31,4 +31,5 @@ Message: $ErrorMessage
 Event logged in CEVAC_ERRORS
 "
 echo "$message"
+/cevac/scripts/unlock.sh "$PARENT_COMMAND"
 exit 1
