@@ -5,8 +5,8 @@
     </mat-panel-title>
   </mat-expansion-panel-header>
   <ng-template matExpansionPanelContent>
-    <div *ngIf="building$.bData">
-      <a href="{{ building$.bData.report_link }}" target="_blank">
+    <div *ngIf="building$.reportlink">
+      <a href="{{ building$.reportlink }}" target="_blank">
         Report Link
       </a>
     </div>

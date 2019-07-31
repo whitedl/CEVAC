@@ -269,6 +269,15 @@ export class MapdataService {
     layer.on(opt);
     if (feature.properties.Status === 'Active') {
       this.http
+        .get<BuildingData>(
+          'http://wfic-cevac1/api/buildings/' + feature.properties.Short_Name
+        )
+        .subscribe(bdata => {
+          if (bdata.reportlink) {
+            feature.properties.reportlink = this.sasBaseURL + bdata.reportlink;
+          }
+        });
+      this.http
         .get<BuildingData[]>(
           this.dataUrl +
             '?filter[where][buildingsname]=' +
