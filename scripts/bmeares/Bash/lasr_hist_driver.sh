@@ -1,5 +1,8 @@
 #! /bin/bash
 
+! /cevac/scripts/check_lock && exit 1
+/cevac/scripts/lock.sh
+
 runsas="norun"
 reset="append"
 customLASR="0"
@@ -27,12 +30,11 @@ if [ "$runsas" == "runsas" ]; then
   echo "This may harm performance. Omit or use norun for argument 2 to only upload to LASR"
 fi
 
-if [ "$customLASR" == "0" ]; then
-  # update HIST_CACHE tables
-  time if ! /cevac/scripts/append_tables.sh ; then
-    echo "Error updating HIST_CACHE tables"
-    exit 1
-  fi
+# update HIST_CACHE tables
+time if ! /cevac/scripts/append_tables.sh ; then
+  error="Error updating HIST_CACHE tables"
+  /cevac/scripts/log_error.sh "$error"
+  # exit 1
 fi
 hist_views_query="
 SELECT RTRIM(BuildingSName), RTRIM(Metric), RTRIM(Age) FROM CEVAC_TABLES
@@ -60,7 +62,8 @@ for t in "${tables_array[@]}"; do
     time if ! /cevac/scripts/CREATE_VIEW.sh "$B" "$M" "HIST_LASR"; then
       error="Error: Failed to create CEVAC_$B""_$M""_HIST_LASR"
       /cevac/scripts/log_error.sh "$error"
-      exit 1
+      continue
+      # exit 1
     fi
   fi
 
@@ -68,7 +71,8 @@ for t in "${tables_array[@]}"; do
   time if ! /cevac/scripts/lasr_append.sh $B $M $A $runsas $reset ; then
     error="Error uploading CEVAC_$B""_$M""_$A to LASR";
     /cevac/scripts/log_error.sh "$error"
-    exit 1
+    continue
+    # exit 1
   fi
 done
 
@@ -80,4 +84,5 @@ else
   echo "Skipping runsas.sh. Tables will be loaded automatically in 15 minutes."
 fi
 
+/cevac/scripts/unlock.sh
 

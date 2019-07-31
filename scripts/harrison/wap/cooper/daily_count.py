@@ -15,21 +15,13 @@ import urllib.parse
 SEND = True
 DEBUG = False
 
-log_dir = "/home/bmeares/cron/wap/log"
+log_dir = "/cevac/cron/wap/log"
 processed_dir = "/mnt/bldg/WAP/processed"
-if DEBUG:
-    log_dir = "C:\\Users\\hchall\\Downloads"
-    processed_dir = "//130.127.219.170/Watt/Watt Staff/Building/WAP/processed"
 
 CLIENT = 0
 MAC = 2
 SSID = 7
 
-
-def command_to_query(command):
-    """Return a query-able string from a sql command."""
-    req = "http://wfic-cevac1/requests/query.php?q="
-    return req + urllib.parse.quote_plus(command)
 
 
 # Script
@@ -44,7 +36,7 @@ processed_files = os.listdir(processed_dir)
 yesterdays_files = []
 yesterday = (dt.now() - datetime.timedelta(1)).date()
 for file in processed_files:
-    if "client" in file and "wfic" in file.lower():
+    if "client" in file and "cooper" in file.lower():
         unix_timestamp = os.path.getmtime(processed_dir + "/" + file)
         fdate = dt.fromtimestamp(unix_timestamp).date()
         if yesterday == fdate:
@@ -93,7 +85,7 @@ if DEBUG:
     print("ERRORS:", errors)
     print("Files:", len(yesterdays_files))
 
-insert_sql_total = ("INSERT INTO CEVAC_WATT_WAP_DAILY_HIST_RAW(UTCDateTime, "
+insert_sql_total = ("INSERT INTO CEVAC_COOPER_WAP_DAILY_HIST_RAW(UTCDateTime, "
                     "clemson_count, guest_count) VALUES("
                     "'" + yesterday.strftime('%Y-%m-%d %H:%M:%S') + "',"
                     "'" + str(eduroam) + "',"
@@ -107,14 +99,14 @@ logging.info("guest_count: " + str(clemsonguest))
 
 if SEND:
     # urllib.request.urlopen(command_to_query(insert_sql_total)).read()
-    f = open("/home/bmeares/cache/insert_daily_wap.sql", "w")
+    f = open("/cevac/cache/insert_daily_wap2.sql", "w")
     f.write(insert_sql_total.replace(';', '\nGO\n'))
     f.close()
-    os.system("/home/bmeares/scripts/exec_sql_script.sh "
-              "/home/bmeares/cache/insert_daily_wap.sql")
-    os.remove("/home/bmeares/cache/insert_daily_wap.sql")
+    os.system("/cevac/scripts/exec_sql_script.sh "
+              "/cevac/cache/insert_daily_wap2.sql")
+    os.remove("/cevac/cache/insert_daily_wap2.sql")
 else:
-    print(insert_sql_total, "\n", command_to_query(insert_sql_total))
+    print(insert_sql_total)
 
 if errors == 0:
     logging.info("Successfully inserted into daily database")
