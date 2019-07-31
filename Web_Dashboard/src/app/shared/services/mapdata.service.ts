@@ -35,7 +35,7 @@ export class MapdataService {
     },
     {
       name: 'CO2',
-      propertyName: 'IAQ',
+      propertyName: 'CO2',
       category: 'IAQ',
       unit: 'ppm',
       form: 'MAX',
