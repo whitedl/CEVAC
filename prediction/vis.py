@@ -3,16 +3,20 @@ import json
 import random
 import numpy as np
 import pandas as pd
+import string
+
 import datetime as dt
 from datetime import date
 from matplotlib import rcParams
 import matplotlib.pyplot as plt
+import matplotlib.pylab as plb
+
 
 # read in the data
-# cwdf = pd.read_csv('chwLogs.csv')
 pdf = pd.read_csv('CEVAC_WATT_POWER_SUMS_HIST.csv')
 
-weatherDF = pd.read_csv('historicWeather.csv', error_bad_lines=False)
+# dictionary of dimensions I want to add to the array
+wdf = pd.read_csv('historicWeather.csv', error_bad_lines=False)
 
 cJSON = {}
 
@@ -51,6 +55,7 @@ numMonth = {
 
 def insertData(df):
     info = {
+    'Month' :   [],
     'Hour' : [],
     'dayOfWeek' : [],
     'intSum': [],
@@ -64,7 +69,10 @@ def insertData(df):
         tm = float(d/numMonth[row['ETDateTime'][5:7]])
         h = int(row['ETDateTime'][11:13])
         d = date(y, m, d).weekday()
+
         intSum = int(row['Total_Usage'])
+
+        info['Month'].append(m)
         info['Hour'].append(h)
         info['dayOfWeek'].append(d)
         info['intSum'].append(intSum)
@@ -76,67 +84,39 @@ def insertData(df):
 
 # format our weather data
 def formatConditions(df):
+
     for index, row in df.iterrows():
-        key = row['time']
+
+        # pull the entire date string
+        date = row['time'][0:15]
+
+        # format the year from the date string
+        year = str(date[0:4])
+
+        # format the month from the date string
+        month = date[5:8]
+        month = month.upper()
+        month = str(monat[month])
+
+        # format the rest of the time data
+        day = str(date[10:12])
+        hour = str(date[13:15])
+
+        # make the key from the formatted time data
+        key = '-'.join((year, month, day))
+        key = key + ' ' + hour
         isDict = cJSON.get(key)
+
         if isDict == None:
             cJSON[key] = {}
+
         for condition in ['temperature', 'humidity', 'cloudCover', 'uvIndex']:
-            if row[condition] == 'snow' or row[condition] == 'rain':
-                pass
-            else:
-                cJSON[key][condition] = row[condition]
-        if len(cJSON[key]) != 4:
-            del cJSON[key]
+            cJSON[key][condition] = row[condition]
 
     with open('combinedData.json', 'w') as f:
         json.dump(cJSON, f)
 
-# adds a prescribed number of hours `addition` to the time 'dateTime'
-def addHour(dateTime, addition):
-
-    # pull and clean the time series data
-    year = str(dateTime[0:4])
-    month = str(dateTime[5:7])
-    day = str(dateTime[8:10])
-    hour = str(dateTime[-2:])
-
-    newYear = None
-    newMonth = None
-    newDay = None
-
-    newHour = int(hour) + addition
-
-    if newHour > 23:
-        newHour = 1
-        newDay = int(day) + 1
-        day = None
-
-        if newDay > numMonth[month]:
-            newMonth = int(month) + 1
-            month = None
-
-            if newMonth > 11:
-                newMonth = 1
-                newYear = int(year) + 1
-                year = None
-
-    newDate = []
-
-    for element in [year, newYear, month, newMonth, day, newDay, newHour]:
-        if element != None:
-            element = str(element)
-            if len(element) < 2:
-                element = '0' + element
-            newDate.append(element)
-
-    newDate = '-'.join((newDate[0], newDate[1], newDate[2])) + ' ' + newDate[3]
-
-    return newDate
-
-# fill numpy arrays for training and testing data sets
 def makeArrays(df):
-
     df = insertData(df)
 
     # temporary x and temporary y lists for each loop
@@ -153,62 +133,50 @@ def makeArrays(df):
     # populate each array for every row that has all of the attributes
     for index, row in df.iterrows():
 
-        # strip the date
-        Date = row['ETDateTime'][0:13]
-
         # get our weather data for that date
         try:
-            weatherData = cJSON[Date]
+            weatherData = cJSON[row['ETDateTime'][0:13]]
         except:
             weatherData = None
 
         if weatherData != None and len(weatherData) == 4:
-            year = int(Date[0:4])
-            d = int(Date[8:10])
-            m = int(Date[5:7])
-            h = int(Date[-2:])
-
             # normalize temperature
-            temperature = float(weatherData['temperature'])
-            temperature = [((temperature - 32) / 1.8 + 20) / 70]
+            temperature = weatherData['temperature']
+            temperature = [(temperature + 20) / 70]
 
             # normalize humidity
-            humidity = float(weatherData['humidity'])
+            humidity = weatherData['humidity']
             humidity = [(humidity / 100)]
 
             # one hot encode month
             month = [0 for i in range(0,12)]
-            month[m - 1] = 1
+            month[row['Month'] - 1] = 1
 
             # one hot encode hour
             hour = [0 for i in range(0, 24)]
-            hour[h - 1] = 1
+            hour[row['Hour'] - 1] = 1
 
             # one hot encode day
             day = [0 for i in range(0, 7)]
-            d = date(year, m, d).weekday()
-            day[d - 1] = 1
+            day[row['dayOfWeek'] - 1] = 1
 
             # throughMonth value was already normalized when inserted into df
-            throughMonth = [float(d/numMonth[Date[5:7]])]
+            throughMonth = [row['throughMonth']]
 
             # normalize clouds
             clouds = weatherData['cloudCover']
             clouds = [(clouds / 100)]
 
-            # powerConsumption = [df[powerConsumptionIndex]['intSum'] / 275]
             tempx = np.concatenate((hour, day, month, throughMonth, temperature, humidity, clouds), axis = -1)
-
-        try:
             tempy = [(row['intSum'] / 275)]
-        except:
-            pass
 
-        if len(tempx) == 47 and len(tempy) == 1:
-            x.append(tempx)
-            y.append(tempy)
-        tempx = []
+            if len(tempx) == 47:
+                x.append(tempx)
+                y.append(tempy)
 
+    saveArrays(x, y)
+
+def saveArrays(x, y):
     # empty list of the training and testing sets that we are going to make
     trainingData = []
     trainingLabels = []
@@ -233,7 +201,7 @@ def makeArrays(df):
         testingData.append(element)
         testingLabels.append(y[i])
 
-    # # save our numpy arrays
+    # save our numpy arrays
     np.save('powerTrainingData.npy', trainingData)
     np.save('powerTrainingLabels.npy', trainingLabels)
     np.save('powerTestingData.npy', testingData)
@@ -246,5 +214,5 @@ def makeArrays(df):
     print('TRAINING LABELS:\t{} ENTRIES'.format(len(trainingLabels)))
 
 if __name__ =='__main__':
-    formatConditions(weatherDF)
+    formatConditions(wdf)
     makeArrays(pdf)

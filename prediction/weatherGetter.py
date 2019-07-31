@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 import csv
 
 # list being written to historicWeather.csv
-historicWeather = [["time", 'summary', 'icon', 'precipIntensity', 'precipProbability', 'temperature', 'apparentTemperature', 'dewPoint', 'humidity', 'pressure', 'windSpeed', 'windGust', 'windBearing', 'cloudCover', 'uvIndex', 'visibility', 'ozone']]
+historicWeather = [["time", 'precipIntensity', 'precipProbability', 'temperature', 'apparentTemperature', 'dewPoint', 'humidity', 'cloudCover', 'uvIndex', 'visibility']]
 
 with open('api.json') as f:
     account = json.load(f)
@@ -26,11 +26,14 @@ def appendData(data):
         # create a temporary list to append to the historic data
         temp = []
 
-        for key in element:
+        for key in ["time", 'precipIntensity', 'precipProbability', 'temperature', 'apparentTemperature', 'dewPoint', 'humidity', 'cloudCover', 'uvIndex', 'visibility']:
             if key == 'time':
                 temp.append(time.strftime('%Y-%B-%d %H', time.localtime(element['time'])))
             else:
-                temp.append(element[key])
+                try:
+                    temp.append(element[key])
+                except:
+                    temp.append('NULL')
 
         # add to historic weather
         historicWeather.append(temp)
@@ -44,6 +47,6 @@ def writeData():
 
 if __name__ == '__main__':
 
-    for i in range(900, 0, -1):
+    for i in range(500, 0, -1):
         fetch(i)
     writeData()
