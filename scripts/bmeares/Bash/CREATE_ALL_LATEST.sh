@@ -1,5 +1,8 @@
 #! /bin/bash
 
+! /cevac/scripts/check_lock.sh && exit 1
+/cevac/scripts/lock.sh
+
 Metric="$1"
 
 if [ -z "$1" ]; then
@@ -16,3 +19,4 @@ if ! /cevac/scripts/exec_sql.sh "$query" ; then
   exit 1
 fi
 
+/cevac/scripts/unlock.sh
