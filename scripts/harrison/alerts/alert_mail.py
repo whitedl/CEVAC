@@ -23,7 +23,7 @@ to_list = {
     #  "Inscribe boi": "bmeares@inscribe.productions",
     "Zach Smith": "ztsmith@g.clemson.edu",
     # "Zach Klein": "ztklein@g.clemson.edu",
-    # "Drewboi": "abemery@clemson.edu",
+    "Drewboi": "abemery@clemson.edu",
     "Tim Howard": "timh@clemson.edu",
 }
 emergency_to_list = {

@@ -90,4 +90,12 @@ rm -f /srv/csv/$HIST.csv
 rm -f /srv/csv/$HIST_LASR.csv
 rm -f /srv/csv/$LATEST.csv
 
+sql="DELETE FROM CEVAC_ALL_LATEST_STATS WHERE BuildingSName = '$Building' AND Metric = '$Metric'"
+if ! /cevac/scripts/exec_sql.sh "$sql" ; then
+  error="Could not delete from CEVAC_ALL_LATEST_STATS"
+  /cevac/scripts/exec_sql.sh "$error" "CEVAC_ALL_LATEST_STATS"
+  exit 1
+fi
+
+
 echo "All $Building""_$Metric tables have been deleted."

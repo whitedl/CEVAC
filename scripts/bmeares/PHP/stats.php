@@ -14,7 +14,7 @@ if(isset($_GET['OP']))
   $OP = clean($_GET['OP']);
 else $OP = "*";
 
-if($OP != "*") $extra_cols = ", DataName, last_ETDateTime, update_ETDateTime";
+if($OP != "*") $extra_cols = ", DataName, last_ETDateTime, update_ETDateTime, TableID";
 else $extra_cols = "";
 
 $query = "
