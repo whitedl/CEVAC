@@ -196,7 +196,9 @@ export class MapdataService {
       style.fillOpacity = 1;
       style.color = this.colorService.getScaledColor(bclass);
       style.fillColor =
-        feature.properties && feature.properties[this.dataSet.propertyName]
+        feature.properties &&
+        feature.properties[this.dataSet.propertyName] &&
+        feature.properties[this.dataSet.propertyName].MAX
           ? this.colorService.getScaledColor(
               bclass,
               this.dataSet.propertyName,
