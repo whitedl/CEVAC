@@ -20,7 +20,7 @@ export class MapdataService {
       propertyName: 'POWER',
       category: 'Utilities',
       unit: 'kW',
-      form: 'MAX',
+      form: 'max',
       display: true,
       active: true
     },
@@ -29,7 +29,7 @@ export class MapdataService {
       propertyName: 'TEMP_SPACE',
       category: 'IAQ',
       unit: 'F',
-      form: 'MAX',
+      form: 'max',
       display: true,
       active: true
     },
@@ -38,7 +38,7 @@ export class MapdataService {
       propertyName: 'CO2',
       category: 'IAQ',
       unit: 'ppm',
-      form: 'MAX',
+      form: 'max',
       display: true,
       active: true
     },
@@ -47,7 +47,7 @@ export class MapdataService {
       propertyName: 'CHW',
       category: 'Utilities',
       unit: 'KBTU',
-      form: 'MAX',
+      form: 'max',
       display: true,
       active: false
     },
@@ -56,7 +56,7 @@ export class MapdataService {
       propertyName: 'STEAM',
       category: 'Utilities',
       unit: 'lbs',
-      form: 'MAX',
+      form: 'max',
       display: true,
       active: false
     },
@@ -65,7 +65,7 @@ export class MapdataService {
       propertyName: 'HUM',
       category: 'IAQ',
       unit: '%',
-      form: 'MAX',
+      form: 'max',
       display: true,
       active: true
     }
@@ -198,11 +198,11 @@ export class MapdataService {
       style.fillColor =
         feature.properties &&
         feature.properties[this.dataSet.propertyName] &&
-        feature.properties[this.dataSet.propertyName].MAX
+        feature.properties[this.dataSet.propertyName].max
           ? this.colorService.getScaledColor(
               bclass,
               this.dataSet.propertyName,
-              feature.properties[this.dataSet.propertyName].MAX
+              feature.properties[this.dataSet.propertyName].max
             )
           : this.colorService.getScaledColor(
               bclass,
