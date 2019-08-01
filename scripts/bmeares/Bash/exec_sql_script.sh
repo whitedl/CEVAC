@@ -16,6 +16,9 @@ p='5wattcevacmaint$'
 
 echo $'Executing script:\n\n'$script
 
-raw=$(/opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -i "$script")
-echo "$raw"
+if ! /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -i "$script" ; then
+  error="Could not execute $script"
+  /cevac/scripts/log_error.sh "$error"
+  exit 1
+fi
 

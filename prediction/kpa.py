@@ -80,15 +80,6 @@ def pred(model):
 	print('STANDARD DEV:\t{}'.format(np.std(differences)))
 	print('MEAN DIFFERENCE:\t{}'.format(np.mean(differences)))
 
-	axes = plt.gca()
-	axes.set_xlim([0,1])
-	axes.set_ylim([0,1])
-	plt.scatter(test_labels, y)
-	plt.plot([0,1], [0,1], '-r')
-	plt.xlabel('Label', fontsize = 18)
-	plt.ylabel('Prediction', fontsize = 18)
-	plt.show()
-
 if __name__ == '__main__':
 	model = createModel('adam', 47)
 	train(model)
