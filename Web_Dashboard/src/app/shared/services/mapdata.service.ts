@@ -271,15 +271,27 @@ export class MapdataService {
     layer.on(opt);
     if (feature.properties.Status === 'Active') {
       this.http
+<<<<<<< Updated upstream
+=======
+<<<<<<< Updated upstream
+=======
+>>>>>>> Stashed changes
         .get<BuildingData>(
           'http://wfic-cevac1/api/buildings/' + feature.properties.Short_Name
         )
         .subscribe(bdata => {
+<<<<<<< Updated upstream
           if (bdata.reportlink) {
             feature.properties.reportlink = this.sasBaseURL + bdata.reportlink;
           }
         });
       this.http
+=======
+          feature.properties = Object.assign(feature.properties, bdata);
+        });
+      this.http
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
         .get<BuildingData[]>(
           this.dataUrl +
             '?filter[where][buildingsname]=' +
