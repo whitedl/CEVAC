@@ -502,10 +502,11 @@
         "BLDG_NAME": "McFadden Building",
         "BLDG_NO": 1199,
         "Const_Year": 0,
-        "Short_Name": "McFadden",
+        "Short_Name": "MCF",
         "ADDRESS": " ",
         "Shape_Leng": 220.514510426,
-        "Shape_Area": 2406.50395903
+        "Shape_Area": 2406.50395903,
+        "Status": "Active"
       }
     },
     {
@@ -1279,7 +1280,7 @@
         "BLDG_NAME": "Littlejohn Coliseum",
         "BLDG_NO": 243,
         "Const_Year": 0,
-        "Short_Name": "LITTLEJOHN",
+        "Short_Name": "LJ",
         "ADDRESS": " ",
         "Shape_Leng": 993.354690863,
         "Shape_Area": 13248.3375774,
@@ -9213,10 +9214,11 @@
         "BLDG_NAME": "Barnett Hall",
         "BLDG_NO": 2009,
         "Const_Year": 1964,
-        "Short_Name": "Barnett",
+        "Short_Name": "BARNETT",
         "ADDRESS": "218 Bryan Circle",
         "Shape_Leng": 121.197119534,
-        "Shape_Area": 705.783505136
+        "Shape_Area": 705.783505136,
+        "Status": "Active"
       }
     },
     {
@@ -9747,10 +9749,11 @@
         "BLDG_NAME": "Manning Hall",
         "BLDG_NO": 2013,
         "Const_Year": 1967,
-        "Short_Name": "Manning",
+        "Short_Name": "MANN",
         "ADDRESS": "240 Bryan Circle",
         "Shape_Leng": 114.784991175,
-        "Shape_Area": 852.340064526
+        "Shape_Area": 852.340064526,
+        "Status": "Active"
       }
     },
     {
@@ -12574,10 +12577,11 @@
         "BLDG_NAME": "Core Campus",
         "BLDG_NO": 1284,
         "Const_Year": 0,
-        "Short_Name": " ",
+        "Short_Name": "CORE",
         "ADDRESS": " ",
         "Shape_Leng": 663.811975787,
-        "Shape_Area": 6502.43796891
+        "Shape_Area": 6502.43796891,
+        "Status": "Active"
       }
     },
     {
@@ -12720,10 +12724,11 @@
         "BLDG_NAME": "Douthit Hills",
         "BLDG_NO": 0,
         "Const_Year": 0,
-        "Short_Name": " ",
+        "Short_Name": "Douthit",
         "ADDRESS": " ",
         "Shape_Leng": 282.820843272,
-        "Shape_Area": 2166.03610831
+        "Shape_Area": 2166.03610831,
+        "Status": "Active"
       }
     },
     {
