@@ -43,6 +43,7 @@ def fetch():
     requestURL = 'https://api.darksky.net/forecast/db6bb38a65d59c7677e8e97db002705b/33.662333,-79.830875'
     r = requests.get(requestURL).json()
     hourlyData = r['hourly']['data']
+    print(hourlyData[0])
 
     # insert every element in the hourly data
     for element in hourlyData:
@@ -135,6 +136,7 @@ def pred(model):
         predictions.append(prediction)
 
 
+    print(predictions)
     insert_sql_total = ''
 
     for i, prediction in enumerate(predictions):

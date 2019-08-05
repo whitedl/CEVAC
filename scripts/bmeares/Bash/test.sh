@@ -1,4 +1,11 @@
 #! /bin/sh
 
-out=`if ! echo "test" ; then exit 1`
-echo "$out"
+# /cevac/scripts/lock.sh
+
+if ! /cevac/scripts/is_unlocked.sh ; then
+  echo "is locked"
+else
+  echo "is unlocked"
+fi
+
+/cevac/scripts/unlock.sh
