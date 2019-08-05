@@ -44,7 +44,7 @@ processed_files = os.listdir(processed_dir)
 yesterdays_files = []
 yesterday = (dt.now() - datetime.timedelta(1)).date()
 for file in processed_files:
-    if "client" in file:
+    if "client" in file and "wfic" in file.lower():
         unix_timestamp = os.path.getmtime(processed_dir + "/" + file)
         fdate = dt.fromtimestamp(unix_timestamp).date()
         if yesterday == fdate:

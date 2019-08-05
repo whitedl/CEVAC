@@ -47,10 +47,10 @@
   ],
   "dependencies": {
     "@loopback/boot": "^1.4.5",
-    "@loopback/context": "^1.20.3",
+    "@loopback/context": "^1.21.1",
     "@loopback/core": "^1.8.6",
     "@loopback/openapi-v3": "^1.8.0",
-    "@loopback/repository": "^1.9.0",
+    "@loopback/repository": "^1.10.1",
     "@loopback/rest": "^1.16.4",
     "@loopback/rest-explorer": "^1.2.6",
     "@loopback/service-proxy": "^1.2.6",
@@ -59,17 +59,17 @@
     "pm2": "^3.5.1"
   },
   "devDependencies": {
-    "@loopback/build": "^2.0.4",
-    "source-map-support": "^0.5.12",
+    "@loopback/build": "^2.0.6",
+    "@loopback/eslint-config": "^3.0.0",
     "@loopback/testlab": "^1.7.0",
     "@types/node": "^10.14.13",
-    "@typescript-eslint/parser": "^1.12.0",
     "@typescript-eslint/eslint-plugin": "^1.12.0",
-    "@loopback/eslint-config": "^2.0.1",
+    "@typescript-eslint/parser": "^1.12.0",
     "eslint": "^6.0.1",
     "eslint-config-prettier": "^6.0.0",
     "eslint-plugin-eslint-plugin": "^2.1.0",
     "eslint-plugin-mocha": "^6.0.0",
+    "source-map-support": "^0.5.12",
     "typescript": "~3.5.3"
   }
 }

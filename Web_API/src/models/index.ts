@@ -1,2 +1,3 @@
 export * from './alert.model';
-export * from './cevac-all-latest-stats.model';
+export * from './building.model';
+export * from './statistic.model';

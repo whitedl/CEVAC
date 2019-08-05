@@ -3,7 +3,8 @@ import json
 import random
 import numpy as np
 import pandas as pd
-import seaborn as sns
+import string
+
 import datetime as dt
 from datetime import date
 from matplotlib import rcParams
@@ -12,15 +13,10 @@ import matplotlib.pylab as plb
 
 
 # read in the data
-pdf = pd.read_csv('CEVAC_WATT_POWER_HIST.csv')
-temp = pd.read_csv('TMY3_StationsMeta.csv')
+pdf = pd.read_csv('CEVAC_WATT_POWER_SUMS_HIST.csv')
 
 # dictionary of dimensions I want to add to the array
-dfDict =    {
-    'temp' : pd.read_csv('H_WEATHER_TEMP.csv'),
-    'clouds' : pd.read_csv('H_WEATHER_CLOUDS.csv'),
-    'humidity' : pd.read_csv('H_WEATHER_HUMIDITY.csv')
-    }
+wdf = pd.read_csv('historicWeather.csv', error_bad_lines=False)
 
 cJSON = {}
 
@@ -59,6 +55,7 @@ numMonth = {
 
 def insertData(df):
     info = {
+    'Month' :   [],
     'Hour' : [],
     'dayOfWeek' : [],
     'intSum': [],
@@ -72,7 +69,10 @@ def insertData(df):
         tm = float(d/numMonth[row['ETDateTime'][5:7]])
         h = int(row['ETDateTime'][11:13])
         d = date(y, m, d).weekday()
+
         intSum = int(row['Total_Usage'])
+
+        info['Month'].append(m)
         info['Hour'].append(h)
         info['dayOfWeek'].append(d)
         info['intSum'].append(intSum)
@@ -83,19 +83,35 @@ def insertData(df):
     return df
 
 # format our weather data
-def formatConditions(df, condition):
+def formatConditions(df):
+
     for index, row in df.iterrows():
-        date = row['time'][0:12]
-        year = str(date[5:9])
-        month = str(monat[date[2:5]])
-        day = str(date[0:2])
-        hour = str(date[10:12])
+
+        # pull the entire date string
+        date = row['time'][0:15]
+
+        # format the year from the date string
+        year = str(date[0:4])
+
+        # format the month from the date string
+        month = date[5:8]
+        month = month.upper()
+        month = str(monat[month])
+
+        # format the rest of the time data
+        day = str(date[10:12])
+        hour = str(date[13:15])
+
+        # make the key from the formatted time data
         key = '-'.join((year, month, day))
         key = key + ' ' + hour
         isDict = cJSON.get(key)
+
         if isDict == None:
             cJSON[key] = {}
-        cJSON[key][condition] = row['value']
+
+        for condition in ['temperature', 'humidity', 'cloudCover', 'uvIndex']:
+            cJSON[key][condition] = row[condition]
 
     with open('combinedData.json', 'w') as f:
         json.dump(cJSON, f)
@@ -123,9 +139,9 @@ def makeArrays(df):
         except:
             weatherData = None
 
-        if weatherData != None and len(weatherData) == 3:
+        if weatherData != None and len(weatherData) == 4:
             # normalize temperature
-            temperature = weatherData['temp']
+            temperature = weatherData['temperature']
             temperature = [(temperature + 20) / 70]
 
             # normalize humidity
@@ -148,7 +164,7 @@ def makeArrays(df):
             throughMonth = [row['throughMonth']]
 
             # normalize clouds
-            clouds = weatherData['clouds']
+            clouds = weatherData['cloudCover']
             clouds = [(clouds / 100)]
 
             tempx = np.concatenate((hour, day, month, throughMonth, temperature, humidity, clouds), axis = -1)
@@ -158,6 +174,9 @@ def makeArrays(df):
                 x.append(tempx)
                 y.append(tempy)
 
+    saveArrays(x, y)
+
+def saveArrays(x, y):
     # empty list of the training and testing sets that we are going to make
     trainingData = []
     trainingLabels = []
@@ -182,8 +201,6 @@ def makeArrays(df):
         testingData.append(element)
         testingLabels.append(y[i])
 
-
-
     # save our numpy arrays
     np.save('powerTrainingData.npy', trainingData)
     np.save('powerTrainingLabels.npy', trainingLabels)
@@ -197,6 +214,5 @@ def makeArrays(df):
     print('TRAINING LABELS:\t{} ENTRIES'.format(len(trainingLabels)))
 
 if __name__ =='__main__':
-    for key in dfDict:
-        formatConditions(dfDict[key], key)
+    formatConditions(wdf)
     makeArrays(pdf)
