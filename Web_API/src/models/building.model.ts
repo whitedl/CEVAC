@@ -1,5 +1,5 @@
 import {Entity, model, property, hasMany} from '@loopback/repository';
-import {Statistic} from './statistic.model';
+import {Statistic, StatisticWithRelations} from './statistic.model';
 
 @model({
   settings: {
@@ -28,7 +28,7 @@ export class Building extends Entity {
     type: String,
     required: true,
     length: 50,
-    id: 1,
+    id: true,
     mssql: {
       columnName: 'BuildingSName',
       dataType: 'nvarchar',
@@ -193,8 +193,8 @@ export class Building extends Entity {
   })
   reportlink?: String;
 
-  // Define well-known properties here
-
+  @hasMany(() => Statistic, {keyTo: 'buildingsname'})
+  statistics: Statistic[];
   // Indexer property to allow additional data
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [prop: string]: any;
@@ -204,8 +204,6 @@ export class Building extends Entity {
   }
 }
 
-export interface BuildingRelations {
-  // describe navigational properties here
-}
+export interface BuildingRelations {}
 
 export type BuildingWithRelations = Building & BuildingRelations;

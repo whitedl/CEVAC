@@ -23,7 +23,7 @@ import {AlertRepository} from '../repositories';
 export class AlertsController {
   constructor(
     @repository(AlertRepository)
-    public alertRepository : AlertRepository,
+    public alertRepository: AlertRepository,
   ) {}
 
   @post('/alerts', {
@@ -38,7 +38,7 @@ export class AlertsController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(Alert, {exclude: ['id']}),
+          schema: getModelSchemaRef(Alert, {exclude: ['EventID']}),
         },
       },
     })
@@ -74,7 +74,8 @@ export class AlertsController {
     },
   })
   async find(
-    @param.query.object('filter', getFilterSchemaFor(Alert)) filter?: Filter<Alert>,
+    @param.query.object('filter', getFilterSchemaFor(Alert))
+    filter?: Filter<Alert>,
   ): Promise<Alert[]> {
     return await this.alertRepository.find(filter);
   }

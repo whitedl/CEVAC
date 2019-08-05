@@ -1,4 +1,5 @@
 import {Entity, model, property} from '@loopback/repository';
+import {BuildingWithRelations} from './building.model';
 
 @model({
   settings: {
@@ -183,8 +184,6 @@ export class Statistic extends Entity {
   }
 }
 
-export interface StatisticRelations {
-  // describe navigational properties here
-}
+export interface StatisticRelations {}
 
-export type CevacAllLatestStatsWithRelations = Statistic & StatisticRelations;
+export type StatisticWithRelations = Statistic & StatisticRelations;

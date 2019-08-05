@@ -68,7 +68,10 @@ export class BuildingController {
         description: 'Array of Building model instances',
         content: {
           'application/json': {
-            schema: {type: 'array', items: getModelSchemaRef(Building)},
+            schema: {
+              type: 'array',
+              items: getModelSchemaRef(Building, {includeRelations: true}),
+            },
           },
         },
       },
@@ -108,7 +111,11 @@ export class BuildingController {
     responses: {
       '200': {
         description: 'Building model instance',
-        content: {'application/json': {schema: getModelSchemaRef(Building)}},
+        content: {
+          'application/json': {
+            schema: getModelSchemaRef(Building, {includeRelations: true}),
+          },
+        },
       },
     },
   })
