@@ -1,16 +1,34 @@
-import {Entity, model, property} from '@loopback/repository';
+import {Entity, model, property, hasMany} from '@loopback/repository';
+import {Statistic} from './statistic.model';
 
 @model({
   settings: {
     idInjection: false,
-    mssql: {schema: 'dbo', table: 'CEVAC_ALL_LATEST_STATS'},
+    mssql: {schema: 'dbo', table: 'CEVAC_BUILDING_INFO'},
   },
 })
-export class CevacAllLatestStats extends Entity {
+export class Building extends Entity {
+  @property({
+    type: Number,
+    required: false,
+    precision: 5,
+    scale: 0,
+    mssql: {
+      columnName: 'BLDG',
+      dataType: 'smallint',
+      dataLength: null,
+      dataPrecision: 5,
+      dataScale: 0,
+      nullable: 'YES',
+    },
+  })
+  bldg?: Number;
+
   @property({
     type: String,
     required: true,
     length: 50,
+    id: 1,
     mssql: {
       columnName: 'BuildingSName',
       dataType: 'nvarchar',
@@ -27,7 +45,7 @@ export class CevacAllLatestStats extends Entity {
     required: true,
     length: 50,
     mssql: {
-      columnName: 'Metric',
+      columnName: 'BuildingDName',
       dataType: 'nvarchar',
       dataLength: 50,
       dataPrecision: null,
@@ -35,14 +53,45 @@ export class CevacAllLatestStats extends Entity {
       nullable: 'NO',
     },
   })
-  metric: String;
+  buildingdname: String;
+
+  @property({
+    type: String,
+    required: true,
+    length: 50,
+    mssql: {
+      columnName: 'BuildingKey',
+      dataType: 'nvarchar',
+      dataLength: 50,
+      dataPrecision: null,
+      dataScale: null,
+      nullable: 'NO',
+    },
+  })
+  buildingkey: String;
+
+  @property({
+    type: Number,
+    required: false,
+    precision: 5,
+    scale: 0,
+    mssql: {
+      columnName: 'YR_BUILT',
+      dataType: 'smallint',
+      dataLength: null,
+      dataPrecision: 5,
+      dataScale: 0,
+      nullable: 'YES',
+    },
+  })
+  yrBuilt?: Number;
 
   @property({
     type: String,
     required: false,
     length: 50,
     mssql: {
-      columnName: 'DataName',
+      columnName: 'BLDG_CLASS',
       dataType: 'nvarchar',
       dataLength: 50,
       dataPrecision: null,
@@ -50,14 +99,14 @@ export class CevacAllLatestStats extends Entity {
       nullable: 'YES',
     },
   })
-  dataname?: String;
+  bldgClass?: String;
 
   @property({
     type: Number,
     required: false,
     precision: 53,
     mssql: {
-      columnName: 'AVG',
+      columnName: 'GSF',
       dataType: 'float',
       dataLength: null,
       dataPrecision: 53,
@@ -65,112 +114,84 @@ export class CevacAllLatestStats extends Entity {
       nullable: 'YES',
     },
   })
-  avg?: Number;
+  gsf?: Number;
 
   @property({
     type: Number,
     required: false,
-    precision: 53,
-    mssql: {
-      columnName: 'SUM',
-      dataType: 'float',
-      dataLength: null,
-      dataPrecision: 53,
-      dataScale: null,
-      nullable: 'YES',
-    },
-  })
-  sum?: Number;
-
-  @property({
-    type: Number,
-    required: false,
-    precision: 53,
-    mssql: {
-      columnName: 'MIN',
-      dataType: 'float',
-      dataLength: null,
-      dataPrecision: 53,
-      dataScale: null,
-      nullable: 'YES',
-    },
-  })
-  min?: Number;
-
-  @property({
-    type: Number,
-    required: false,
-    precision: 53,
-    mssql: {
-      columnName: 'MIN_NZ',
-      dataType: 'float',
-      dataLength: null,
-      dataPrecision: 53,
-      dataScale: null,
-      nullable: 'YES',
-    },
-  })
-  minNz?: Number;
-
-  @property({
-    type: Number,
-    required: false,
-    precision: 53,
-    mssql: {
-      columnName: 'MAX',
-      dataType: 'float',
-      dataLength: null,
-      dataPrecision: 53,
-      dataScale: null,
-      nullable: 'YES',
-    },
-  })
-  max?: Number;
-
-  @property({
-    type: Date,
-    required: false,
-    mssql: {
-      columnName: 'last_ETDateTime',
-      dataType: 'datetime',
-      dataLength: null,
-      dataPrecision: null,
-      dataScale: null,
-      nullable: 'YES',
-    },
-  })
-  lastEtdatetime?: Date;
-
-  @property({
-    type: Date,
-    required: false,
-    mssql: {
-      columnName: 'update_ETDateTime',
-      dataType: 'datetime',
-      dataLength: null,
-      dataPrecision: null,
-      dataScale: null,
-      nullable: 'YES',
-    },
-  })
-  updateEtdatetime?: Date;
-
-  @property({
-    type: Number,
-    required: false,
-    precision: 10,
+    precision: 3,
     scale: 0,
-    id: 1,
     mssql: {
-      columnName: 'TableID',
-      dataType: 'int',
+      columnName: 'FLOORS',
+      dataType: 'tinyint',
       dataLength: null,
-      dataPrecision: 10,
+      dataPrecision: 3,
       dataScale: 0,
       nullable: 'YES',
     },
   })
-  tableid?: Number;
+  floors?: Number;
+
+  @property({
+    type: Number,
+    required: false,
+    precision: 5,
+    scale: 0,
+    mssql: {
+      columnName: 'ROOMS',
+      dataType: 'smallint',
+      dataLength: null,
+      dataPrecision: 5,
+      dataScale: 0,
+      nullable: 'YES',
+    },
+  })
+  rooms?: Number;
+
+  @property({
+    type: String,
+    required: false,
+    length: 50,
+    mssql: {
+      columnName: 'BuildingStatus',
+      dataType: 'nvarchar',
+      dataLength: 50,
+      dataPrecision: null,
+      dataScale: null,
+      nullable: 'YES',
+    },
+  })
+  buildingstatus?: String;
+
+  @property({
+    type: String,
+    required: false,
+    length: 50,
+    mssql: {
+      columnName: 'BuildingFunction',
+      dataType: 'nvarchar',
+      dataLength: 50,
+      dataPrecision: null,
+      dataScale: null,
+      nullable: 'YES',
+    },
+  })
+  buildingfunction?: String;
+
+  @property({
+    type: String,
+    required: false,
+    length: 100,
+    mssql: {
+      columnName: 'ReportLink',
+      dataType: 'nvarchar',
+      dataLength: 100,
+      dataPrecision: null,
+      dataScale: null,
+      nullable: 'YES',
+    },
+  })
+  reportlink?: String;
 
   // Define well-known properties here
 
@@ -178,14 +199,13 @@ export class CevacAllLatestStats extends Entity {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [prop: string]: any;
 
-  constructor(data?: Partial<CevacAllLatestStats>) {
+  constructor(data?: Partial<Building>) {
     super(data);
   }
 }
 
-export interface CevacAllLatestStatsRelations {
+export interface BuildingRelations {
   // describe navigational properties here
 }
 
-export type CevacAllLatestStatsWithRelations = CevacAllLatestStats &
-  CevacAllLatestStatsRelations;
+export type BuildingWithRelations = Building & BuildingRelations;

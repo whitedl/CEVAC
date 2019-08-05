@@ -17,20 +17,20 @@ import {
   del,
   requestBody,
 } from '@loopback/rest';
-import {CevacBuildingInfo} from '../models';
-import {CevacBuildingInfoRepository} from '../repositories';
+import {Building} from '../models';
+import {BuildingRepository} from '../repositories';
 
 export class BuildingController {
   constructor(
-    @repository(CevacBuildingInfoRepository)
-    public cevacBuildingInfoRepository : CevacBuildingInfoRepository,
+    @repository(BuildingRepository)
+    public cevacBuildingInfoRepository: BuildingRepository,
   ) {}
 
   @post('/buildings', {
     responses: {
       '200': {
-        description: 'CevacBuildingInfo model instance',
-        content: {'application/json': {schema: getModelSchemaRef(CevacBuildingInfo)}},
+        description: 'Building model instance',
+        content: {'application/json': {schema: getModelSchemaRef(Building)}},
       },
     },
   })
@@ -38,25 +38,26 @@ export class BuildingController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(CevacBuildingInfo, {exclude: ['buildingsname']}),
+          schema: getModelSchemaRef(Building, {exclude: ['buildingsname']}),
         },
       },
     })
-    cevacBuildingInfo: Omit<CevacBuildingInfo, 'buildingsname'>,
-  ): Promise<CevacBuildingInfo> {
-    return await this.cevacBuildingInfoRepository.create(cevacBuildingInfo);
+    building: Omit<Building, 'buildingsname'>,
+  ): Promise<Building> {
+    return await this.cevacBuildingInfoRepository.create(building);
   }
 
   @get('/buildings/count', {
     responses: {
       '200': {
-        description: 'CevacBuildingInfo model count',
+        description: 'Building model count',
         content: {'application/json': {schema: CountSchema}},
       },
     },
   })
   async count(
-    @param.query.object('where', getWhereSchemaFor(CevacBuildingInfo)) where?: Where<CevacBuildingInfo>,
+    @param.query.object('where', getWhereSchemaFor(Building))
+    where?: Where<Building>,
   ): Promise<Count> {
     return await this.cevacBuildingInfoRepository.count(where);
   }
@@ -64,25 +65,26 @@ export class BuildingController {
   @get('/buildings', {
     responses: {
       '200': {
-        description: 'Array of CevacBuildingInfo model instances',
+        description: 'Array of Building model instances',
         content: {
           'application/json': {
-            schema: {type: 'array', items: getModelSchemaRef(CevacBuildingInfo)},
+            schema: {type: 'array', items: getModelSchemaRef(Building)},
           },
         },
       },
     },
   })
   async find(
-    @param.query.object('filter', getFilterSchemaFor(CevacBuildingInfo)) filter?: Filter<CevacBuildingInfo>,
-  ): Promise<CevacBuildingInfo[]> {
+    @param.query.object('filter', getFilterSchemaFor(Building))
+    filter?: Filter<Building>,
+  ): Promise<Building[]> {
     return await this.cevacBuildingInfoRepository.find(filter);
   }
 
   @patch('/buildings', {
     responses: {
       '200': {
-        description: 'CevacBuildingInfo PATCH success count',
+        description: 'Building PATCH success count',
         content: {'application/json': {schema: CountSchema}},
       },
     },
@@ -91,32 +93,33 @@ export class BuildingController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(CevacBuildingInfo, {partial: true}),
+          schema: getModelSchemaRef(Building, {partial: true}),
         },
       },
     })
-    cevacBuildingInfo: CevacBuildingInfo,
-    @param.query.object('where', getWhereSchemaFor(CevacBuildingInfo)) where?: Where<CevacBuildingInfo>,
+    building: Building,
+    @param.query.object('where', getWhereSchemaFor(Building))
+    where?: Where<Building>,
   ): Promise<Count> {
-    return await this.cevacBuildingInfoRepository.updateAll(cevacBuildingInfo, where);
+    return await this.cevacBuildingInfoRepository.updateAll(building, where);
   }
 
   @get('/buildings/{id}', {
     responses: {
       '200': {
-        description: 'CevacBuildingInfo model instance',
-        content: {'application/json': {schema: getModelSchemaRef(CevacBuildingInfo)}},
+        description: 'Building model instance',
+        content: {'application/json': {schema: getModelSchemaRef(Building)}},
       },
     },
   })
-  async findById(@param.path.string('id') id: string): Promise<CevacBuildingInfo> {
+  async findById(@param.path.string('id') id: string): Promise<Building> {
     return await this.cevacBuildingInfoRepository.findById(id);
   }
 
   @patch('/buildings/{id}', {
     responses: {
       '204': {
-        description: 'CevacBuildingInfo PATCH success',
+        description: 'Building PATCH success',
       },
     },
   })
@@ -125,33 +128,33 @@ export class BuildingController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(CevacBuildingInfo, {partial: true}),
+          schema: getModelSchemaRef(Building, {partial: true}),
         },
       },
     })
-    cevacBuildingInfo: CevacBuildingInfo,
+    building: Building,
   ): Promise<void> {
-    await this.cevacBuildingInfoRepository.updateById(id, cevacBuildingInfo);
+    await this.cevacBuildingInfoRepository.updateById(id, building);
   }
 
   @put('/buildings/{id}', {
     responses: {
       '204': {
-        description: 'CevacBuildingInfo PUT success',
+        description: 'Building PUT success',
       },
     },
   })
   async replaceById(
     @param.path.string('id') id: string,
-    @requestBody() cevacBuildingInfo: CevacBuildingInfo,
+    @requestBody() building: Building,
   ): Promise<void> {
-    await this.cevacBuildingInfoRepository.replaceById(id, cevacBuildingInfo);
+    await this.cevacBuildingInfoRepository.replaceById(id, building);
   }
 
   @del('/buildings/{id}', {
     responses: {
       '204': {
-        description: 'CevacBuildingInfo DELETE success',
+        description: 'Building DELETE success',
       },
     },
   })
