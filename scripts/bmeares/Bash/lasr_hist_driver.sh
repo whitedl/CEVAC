@@ -1,6 +1,6 @@
 #! /bin/bash
 
-! /cevac/scripts/check_lock && exit 1
+! /cevac/scripts/check_lock.sh && exit 1
 /cevac/scripts/lock.sh
 
 runsas="norun"
