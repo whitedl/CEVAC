@@ -1,4 +1,5 @@
 import {Entity, model, property} from '@loopback/repository';
+import {BuildingWithRelations} from './building.model';
 
 @model({
   settings: {
@@ -6,7 +7,7 @@ import {Entity, model, property} from '@loopback/repository';
     mssql: {schema: 'dbo', table: 'CEVAC_ALL_LATEST_STATS'},
   },
 })
-export class CevacAllLatestStats extends Entity {
+export class Statistic extends Entity {
   @property({
     type: String,
     required: true,
@@ -178,14 +179,11 @@ export class CevacAllLatestStats extends Entity {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [prop: string]: any;
 
-  constructor(data?: Partial<CevacAllLatestStats>) {
+  constructor(data?: Partial<Statistic>) {
     super(data);
   }
 }
 
-export interface CevacAllLatestStatsRelations {
-  // describe navigational properties here
-}
+export interface StatisticRelations {}
 
-export type CevacAllLatestStatsWithRelations = CevacAllLatestStats &
-  CevacAllLatestStatsRelations;
+export type StatisticWithRelations = Statistic & StatisticRelations;

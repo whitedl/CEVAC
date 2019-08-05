@@ -17,20 +17,20 @@ import {
   del,
   requestBody,
 } from '@loopback/rest';
-import {CevacAllLatestStats} from '../models';
-import {CevacAllLatestStatsRepository} from '../repositories';
+import {Statistic} from '../models';
+import {StatisticRepository} from '../repositories';
 
 export class StatController {
   constructor(
-    @repository(CevacAllLatestStatsRepository)
-    public cevacAllLatestStatsRepository : CevacAllLatestStatsRepository,
+    @repository(StatisticRepository)
+    public statisticRepository: StatisticRepository,
   ) {}
 
   @post('/stat', {
     responses: {
       '200': {
-        description: 'CevacAllLatestStats model instance',
-        content: {'application/json': {schema: getModelSchemaRef(CevacAllLatestStats)}},
+        description: 'Statistic model instance',
+        content: {'application/json': {schema: getModelSchemaRef(Statistic)}},
       },
     },
   })
@@ -38,51 +38,53 @@ export class StatController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(CevacAllLatestStats, {exclude: ['tableid']}),
+          schema: getModelSchemaRef(Statistic, {exclude: ['tableid']}),
         },
       },
     })
-    cevacAllLatestStats: Omit<CevacAllLatestStats, 'tableid'>,
-  ): Promise<CevacAllLatestStats> {
-    return await this.cevacAllLatestStatsRepository.create(cevacAllLatestStats);
+    statistic: Omit<Statistic, 'tableid'>,
+  ): Promise<Statistic> {
+    return await this.statisticRepository.create(statistic);
   }
 
   @get('/stat/count', {
     responses: {
       '200': {
-        description: 'CevacAllLatestStats model count',
+        description: 'Statistic model count',
         content: {'application/json': {schema: CountSchema}},
       },
     },
   })
   async count(
-    @param.query.object('where', getWhereSchemaFor(CevacAllLatestStats)) where?: Where<CevacAllLatestStats>,
+    @param.query.object('where', getWhereSchemaFor(Statistic))
+    where?: Where<Statistic>,
   ): Promise<Count> {
-    return await this.cevacAllLatestStatsRepository.count(where);
+    return await this.statisticRepository.count(where);
   }
 
   @get('/stat', {
     responses: {
       '200': {
-        description: 'Array of CevacAllLatestStats model instances',
+        description: 'Array of Statistic model instances',
         content: {
           'application/json': {
-            schema: {type: 'array', items: getModelSchemaRef(CevacAllLatestStats)},
+            schema: {type: 'array', items: getModelSchemaRef(Statistic)},
           },
         },
       },
     },
   })
   async find(
-    @param.query.object('filter', getFilterSchemaFor(CevacAllLatestStats)) filter?: Filter<CevacAllLatestStats>,
-  ): Promise<CevacAllLatestStats[]> {
-    return await this.cevacAllLatestStatsRepository.find(filter);
+    @param.query.object('filter', getFilterSchemaFor(Statistic))
+    filter?: Filter<Statistic>,
+  ): Promise<Statistic[]> {
+    return await this.statisticRepository.find(filter);
   }
 
   @patch('/stat', {
     responses: {
       '200': {
-        description: 'CevacAllLatestStats PATCH success count',
+        description: 'Statistic PATCH success count',
         content: {'application/json': {schema: CountSchema}},
       },
     },
@@ -91,32 +93,33 @@ export class StatController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(CevacAllLatestStats, {partial: true}),
+          schema: getModelSchemaRef(Statistic, {partial: true}),
         },
       },
     })
-    cevacAllLatestStats: CevacAllLatestStats,
-    @param.query.object('where', getWhereSchemaFor(CevacAllLatestStats)) where?: Where<CevacAllLatestStats>,
+    statistic: Statistic,
+    @param.query.object('where', getWhereSchemaFor(Statistic))
+    where?: Where<Statistic>,
   ): Promise<Count> {
-    return await this.cevacAllLatestStatsRepository.updateAll(cevacAllLatestStats, where);
+    return await this.statisticRepository.updateAll(statistic, where);
   }
 
   @get('/stat/{id}', {
     responses: {
       '200': {
-        description: 'CevacAllLatestStats model instance',
-        content: {'application/json': {schema: getModelSchemaRef(CevacAllLatestStats)}},
+        description: 'Statistic model instance',
+        content: {'application/json': {schema: getModelSchemaRef(Statistic)}},
       },
     },
   })
-  async findById(@param.path.number('id') id: number): Promise<CevacAllLatestStats> {
-    return await this.cevacAllLatestStatsRepository.findById(id);
+  async findById(@param.path.number('id') id: number): Promise<Statistic> {
+    return await this.statisticRepository.findById(id);
   }
 
   @patch('/stat/{id}', {
     responses: {
       '204': {
-        description: 'CevacAllLatestStats PATCH success',
+        description: 'Statistic PATCH success',
       },
     },
   })
@@ -125,37 +128,37 @@ export class StatController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(CevacAllLatestStats, {partial: true}),
+          schema: getModelSchemaRef(Statistic, {partial: true}),
         },
       },
     })
-    cevacAllLatestStats: CevacAllLatestStats,
+    statistic: Statistic,
   ): Promise<void> {
-    await this.cevacAllLatestStatsRepository.updateById(id, cevacAllLatestStats);
+    await this.statisticRepository.updateById(id, statistic);
   }
 
   @put('/stat/{id}', {
     responses: {
       '204': {
-        description: 'CevacAllLatestStats PUT success',
+        description: 'Statistic PUT success',
       },
     },
   })
   async replaceById(
     @param.path.number('id') id: number,
-    @requestBody() cevacAllLatestStats: CevacAllLatestStats,
+    @requestBody() statistic: Statistic,
   ): Promise<void> {
-    await this.cevacAllLatestStatsRepository.replaceById(id, cevacAllLatestStats);
+    await this.statisticRepository.replaceById(id, statistic);
   }
 
   @del('/stat/{id}', {
     responses: {
       '204': {
-        description: 'CevacAllLatestStats DELETE success',
+        description: 'Statistic DELETE success',
       },
     },
   })
   async deleteById(@param.path.number('id') id: number): Promise<void> {
-    await this.cevacAllLatestStatsRepository.deleteById(id);
+    await this.statisticRepository.deleteById(id);
   }
 }
