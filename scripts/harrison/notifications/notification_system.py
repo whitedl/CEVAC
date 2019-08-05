@@ -188,7 +188,7 @@ custom = {
         "Access Tables": {
             "fun": test_tables,
             "args": [["WATT", "COOPER", "LEE_III", "ASC"],
-                     ["IAQ", "TEMP", "POWER"]],
+                     ["CO2", "TEMP", "POWER"]],
         },
         "Custom Table check": {
             "fun": test_tables_custom,
