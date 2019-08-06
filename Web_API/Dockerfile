@@ -1,5 +1,5 @@
-# Check out https://hub.docker.com/_/node to select a new base image
-FROM node:10-slim
+# Official keymetrics pm2 image
+FROM keymetrics/pm2:latest-alpine
 
 # Set to a non-root built-in user `node`
 USER node
@@ -16,7 +16,6 @@ COPY --chown=node package*.json ./
 
 RUN npm install
 
-# Bundle app source code
 COPY --chown=node . .
 
 RUN npm run build
@@ -25,4 +24,4 @@ RUN npm run build
 ENV HOST=0.0.0.0 PORT=3000
 
 EXPOSE ${PORT}
-CMD [ "node", "." ]
+CMD [ "pm2-runtime", "start", "ecosystem.config.js" ]
