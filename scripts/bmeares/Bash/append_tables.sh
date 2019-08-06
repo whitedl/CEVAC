@@ -22,7 +22,8 @@ for t in "${tables_array[@]}"; do
   [ -z "$t" ] && continue
   echo "$t"
   compare=$(echo "$t" | grep COMPARE)
-  if [ ! -z "$compare" ]; then # always recache COMPARE tables
+  pred=$(echo "$t" | grep pred)
+  if [ ! -z "$compare" ] || [ ! -z "$pred" ]; then # always recache COMPARE and PRED tables
     sql="EXEC CEVAC_CACHE_INIT @tables = '"$t"'"
   else sql="EXEC CEVAC_CACHE_APPEND @tables = '$t'"
   fi
