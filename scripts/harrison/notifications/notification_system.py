@@ -62,7 +62,7 @@ def ping_server(ip_address):
 
 def command_to_json_string(command):
     """Return a string of json from a sql command."""
-    os.system("/home/bmeares/scripts/exec_sql.sh \"" + command +
+    os.system("/cevac/scripts/exec_sql.sh \"" + command +
               "\" temp_csv.csv")
 
     json_string = ""

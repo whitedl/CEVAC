@@ -20,7 +20,7 @@ class Query:
 
     def request_data(self, command):
         """Request data."""
-        os.system(f"/home/bmeares/scripts/exec_sql.sh \"{command}\" "
+        os.system(f"/cevac/scripts/exec_sql.sh \"{command}\" "
                   "temp1_csv.csv")
         json_string = ""
         headers = {}
@@ -92,12 +92,12 @@ class INSERT:
         self.success = False
         if "INSERT" not in COMMAND:
             return self.success
-        f = open(f"/home/bmeares/cache/{fname}", "w")
+        f = open(f"/cevac/cache/{fname}", "w")
         f.write(COMMAND.replace(';', '\nGO\n'))
         f.close()
-        os.system("/home/bmeares/scripts/exec_sql_script.sh "
-                  f"/home/bmeares/cache/{fname}")
-        os.remove(f"/home/bmeares/cache/{fname}")
+        os.system("/cevac/scripts/exec_sql_script.sh "
+                  f"/cevac/cache/{fname}")
+        os.remove(f"/cevac/cache/{fname}")
         self.success = True
         return self.success
 
