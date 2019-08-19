@@ -16,7 +16,8 @@ import safe_move
 # Config Variables
 ######################################
 
-prefix = "//130.127.219.170/Watt/Watt Staff/Building/WAP"
+#  prefix = "//130.127.219.170/Watt/Watt Staff/Building/WAP"
+prefix = "/mnt/bldg/WAP"
 import_dir = prefix + "/to_import"
 processed_dir = prefix + "/processed"
 failed_dir = prefix + "/failed"
@@ -452,7 +453,7 @@ dbconfig_file = sys.argv[1]
 try:
     dbconfig = get_config(dbconfig_file)
     dbconfig2 = get_config(
-        "//130.127.219.170/Watt/Watt Staff/Building/WAP/config/dbconfig2.json")
+        "/mnt/bldg/WAP/config/dbconfig2.json")
 except IOError:
     logging.exception("Unable to locate database config file.")
     logging.shutdown()
