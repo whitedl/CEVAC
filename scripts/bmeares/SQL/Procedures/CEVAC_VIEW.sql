@@ -43,7 +43,7 @@ DECLARE @building_key nvarchar(100);
 
 SET @building_key = (SELECT RTRIM(BuildingKey) FROM CEVAC_BUILDING_INFO WHERE BuildingSName = @Building);
 --IF @building_key IS NULL BEGIN
---	RAISERROR('Add BuildingSName to CECAC_BUILDING_INFO', 0, 1);
+--	RAISERROR('Add BuildingSName to CEVAC_BUILDING_INFO', 0, 1);
 --	RETURN
 --END
 
@@ -60,23 +60,6 @@ DECLARE @LATEST_BROKEN NVARCHAR(200);
 DECLARE @OLDEST NVARCHAR(200);
 DECLARE @XREF nvarchar(200);
 DECLARE @PXREF nvarchar(200);
--- Drop temp table if exists
-IF OBJECT_ID('tempdb.dbo.#cevac_vars', 'U') IS NOT NULL DROP TABLE #cevac_vars;
-IF OBJECT_ID('tempdb.dbo.#cevac_metric_params', 'U') IS NOT NULL DROP TABLE #cevac_metric_params;
-
-
--- Create temporary table for variables
-CREATE TABLE #cevac_vars(
-	Metric nvarchar(30),
-	Building nvarchar(30),
-	Age nvarchar(30),
-	Table_name nvarchar(100),
-	XREF nvarchar(100),
-	building_key nvarchar(100),
-	keys_list nvarchar(500),
-	unitOfMeasureID int
-)
-CREATE TABLE #cevac_metric_params(Params nvarchar(100))
 
 -- Generate table names
 -- Reference names
@@ -103,13 +86,6 @@ IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = @XREF)
 
 -- add quotes for regex search
 SET @building_key = '''' + @building_key + '''';
-
--- add variables to temp table
-INSERT INTO #cevac_vars SELECT @Metric, @Building, @Age, @Table_name, @XREF, @building_key,
---@metric_key,
-@keys_list, @unitOfMeasureID
-
-
 
 DECLARE @Dependencies_list NVARCHAR(MAX);
 -- Verify all dependencies (runs only if table is in CEVAC_TABLES)
@@ -170,6 +146,9 @@ DECLARE @DataName NVARCHAR(100);
 DECLARE @isCustom BIT;
 DECLARE @customLASR BIT;
 DECLARE @XREF_or_PXREF NVARCHAR(100);
+DECLARE @CEVAC_TABLES_config TABLE(COLUMN_NAME NVARCHAR(200), COLUMN_VALUE NVARCHAR(200));
+INSERT INTO @CEVAC_TABLES_config SELECT COLUMN_NAME, NULL AS COLUMN_VALUE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'CEVAC_TABLES';
+
 
 SET @customLASR = 0;  -- DEFAULT
 SET @XREF_or_PXREF = 'XREF'; -- DEFAULT
@@ -215,6 +194,17 @@ IF @Age != 'XREF' AND EXISTS (SELECT TOP 1 * FROM CEVAC_TABLES WHERE BuildingSNa
 	SET @AliasName = RTRIM((SELECT TOP 1 AliasName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age = 'HIST'));
 	SET @DataName = RTRIM((SELECT TOP 1 DataName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age = 'HIST'));
 	SET @isCustom = (SELECT TOP 1 isCustom FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age = 'HIST');
+
+	DECLARE @loop TABLE(VALUE NVARCHAR(200));
+	INSERT INTO @loop SELECT COLUMN_NAME FROM @CEVAC_TABLES_config;
+
+	DECLARE @col_name NVARCHAR(200);
+	WHILE EXISTS(SELECT TOP 1 * FROM @loop) BEGIN
+		SET @col_name = (SELECT TOP 1 VALUE FROM @loop);	
+		DELETE TOP(1) FROM @loop;
+		UPDATE @CEVAC_TABLES_config SET COLUMN_VALUE = 'test' WHERE COLUMN_NAME = @col_name;
+	END -- end loop
+
 END
 
 SET @DataName = ISNULL(@DataName,@RemoteActualValueName);     -- DEFAULT
@@ -640,8 +630,3 @@ IF @Age LIKE '%HIST%' BEGIN
 	--END
 END
 
-
--- Cleanup
-DROP TABLE #cevac_vars
-
-DROP TABLE #cevac_metric_params
