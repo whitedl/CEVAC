@@ -7,7 +7,7 @@
 
 hist_views_query="
 SELECT RTRIM(TableName) FROM CEVAC_TABLES
-WHERE TableName LIKE '%HIST_VIEW%'
+WHERE autoCACHE = 1
 "
 /cevac/scripts/exec_sql.sh "$hist_views_query" "hist_views.csv"
 
@@ -22,7 +22,8 @@ for t in "${tables_array[@]}"; do
   [ -z "$t" ] && continue
   echo "$t"
   compare=$(echo "$t" | grep COMPARE)
-  if [ ! -z "$compare" ]; then # always recache COMPARE tables
+  pred=$(echo "$t" | grep pred)
+  if [ ! -z "$compare" ] || [ ! -z "$pred" ]; then # always recache COMPARE and PRED tables
     sql="EXEC CEVAC_CACHE_INIT @tables = '"$t"'"
   else sql="EXEC CEVAC_CACHE_APPEND @tables = '$t'"
   fi

@@ -29,6 +29,8 @@ END
 
 DECLARE @DataName NVARCHAR(50);
 SET @DataName = (SELECT TOP 1 DataName FROM CEVAC_TABLES WHERE TableName = @LATEST);
+DECLARE @TableID INT;
+SET @TableID = (SELECT TOP 1 TableID FROM CEVAC_TABLES WHERE TableName = @LATEST);
 
 -- Create LATEST_CACHE
 EXEC CEVAC_CACHE_INIT @tables = @LATEST;
@@ -41,6 +43,8 @@ DECLARE @Metric NVARCHAR(50);
 SET @Metric = ''' + @Metric + ''';
 DECLARE @DataName NVARCHAR(50);
 SET @DataName = ''' + @DataName + ''';
+DECLARE @TableID INT;
+SET @TableID = ' + CAST(@TableID AS NVARCHAR(100)) + ';
 
 DECLARE @avg_ FLOAT;
 SET @avg_ = (SELECT AVG(CAST(' + @DataName + ' AS FLOAT)) FROM ' + @stats_source + ');
@@ -64,10 +68,10 @@ IF @update_UTC IS NOT NULL SET @update_ETDateTime = dbo.ConvertUTCToLocal(@updat
 
 IF EXISTS (SELECT * FROM CEVAC_ALL_LATEST_STATS WHERE BuildingSName = @BuildingSName AND Metric = @Metric) BEGIN
 	UPDATE CEVAC_ALL_LATEST_STATS
-	SET DataName = @DataName, AVG = @avg_, SUM = @sum_, MIN = @min_, MIN_NZ = @min_nz_, MAX = @max_, last_ETDateTime = @last_ETDateTime, update_ETDateTime = @update_ETDateTime
+	SET DataName = @DataName, AVG = @avg_, SUM = @sum_, MIN = @min_, MIN_NZ = @min_nz_, MAX = @max_, last_ETDateTime = @last_ETDateTime, update_ETDateTime = @update_ETDateTime, TableID = @TableID
 	WHERE BuildingSName = @BuildingSName AND Metric = @Metric;
 END ELSE BEGIN
-	INSERT INTO CEVAC_ALL_LATEST_STATS (BuildingSName, Metric, DataName, AVG, SUM, MIN, MIN_NZ, MAX, last_ETDateTime, update_ETDateTime)
+	INSERT INTO CEVAC_ALL_LATEST_STATS (BuildingSName, Metric, DataName, AVG, SUM, MIN, MIN_NZ, MAX, last_ETDateTime, update_ETDateTime, TableID)
 	VALUES(
 		@BuildingSName,
 		@Metric,
@@ -78,7 +82,8 @@ END ELSE BEGIN
 		@min_nz_,
 		@max_,
 		@last_ETDateTime,
-		@update_ETDateTime
+		@update_ETDateTime,
+		@TableID
 	);
 END
 
