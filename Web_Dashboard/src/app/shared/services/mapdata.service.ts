@@ -99,7 +99,7 @@ export class MapdataService {
       if (!building && l.feature && l.feature.properties.Short_Name === bName) {
         building = l.feature.properties;
         if(building.reportlink) {
-          building.reportlink = sasBaseURL + building.reportlink;
+          building.reportlink = this.sasBaseURL + building.reportlink;
         }
         return building;
       }
