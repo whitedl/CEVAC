@@ -98,9 +98,6 @@ export class MapdataService {
       const l = layer as L.Polygon;
       if (!building && l.feature && l.feature.properties.Short_Name === bName) {
         building = l.feature.properties;
-        if(building.reportlink) {
-          building.reportlink = this.sasBaseURL + building.reportlink;
-        }
         return building;
       }
     });
@@ -290,6 +287,9 @@ export class MapdataService {
           bData.forEach((element: any) => {
             feature.properties[element.metric] = element;
           });
+          if(feature.properties.reportlink) {
+            feature.properties.reportlink = this.sasBaseURL + feature.properties.reportlink;
+          }
           this.tracked.resetStyle(layer);
 
           layer.bindPopup(
