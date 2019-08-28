@@ -98,6 +98,9 @@ export class MapdataService {
       const l = layer as L.Polygon;
       if (!building && l.feature && l.feature.properties.Short_Name === bName) {
         building = l.feature.properties;
+        if(building.reportlink) {
+          building.reportlink = sasBaseURL + building.reportlink;
+        }
         return building;
       }
     });
