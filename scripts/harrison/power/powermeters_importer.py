@@ -157,12 +157,12 @@ for fname in next(os.walk(import_dir))[2]:
 
 if SEND:
     # urllib.request.urlopen(command_to_query(insert_sql_total)).read()
-    f = open("/home/bmeares/cache/insert_powermeters.sql", "w")
+    f = open("/cevac/cache/insert_powermeters.sql", "w")
     f.write(insert_sql_total.replace(';', '\nGO\n'))
     f.close()
-    os.system("/home/bmeares/scripts/exec_sql_script.sh "
-              "/home/bmeares/cache/insert_powermeters.sql")
-    os.remove("/home/bmeares/cache/insert_powermeters.sql")
+    os.system("/cevac/scripts/exec_sql_script.sh "
+              "/cevac/cache/insert_powermeters.sql")
+    os.remove("/cevac/cache/insert_powermeters.sql")
 else:
     print("DID NOT SEND")
     print(insert_sql_total.replace(';', '\nGO\n'))

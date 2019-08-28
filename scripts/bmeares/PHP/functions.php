@@ -35,4 +35,33 @@ function stats($get){
   return $array;
 }
 
+function buildings_html(){
+  global $db;
+  $query = "
+    SELECT DISTINCT RTRIM(BuildingSName) AS BuildingSName, RTRIM(BuildingDName) AS BuildingDName
+    FROM CEVAC_BUILDING_INFO
+    ORDER BY BuildingDName ASC";
+  $result = sqlsrv_query($db, $query);
+  $out = "";
+  while($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)){
+    $out .= "<option value='".$row['BuildingSName']."'>".$row['BuildingDName']."</option>\n";
+  }
+  return $out;
+}
+
+function metrics_html(){
+  global $db;
+  $query = "
+    SELECT DISTINCT RTRIM(Metric) AS Metric, um.DisplayNameShort AS dn FROM CEVAC_METRIC AS cm
+    INNER JOIN [130.127.238.129].JCIHistorianDB.dbo.tblUnitOfMeasure AS um ON um.UnitOfMeasureID = cm.unitOfMeasureID
+    ORDER BY um.DisplayNameShort ASC
+  ";
+  $result = sqlsrv_query($db, $query);
+  $out = "";
+  while($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)){
+    $out .= "<option value='".$row['Metric']."'>".$row['dn']."</option>\n";
+  }
+  return $out;
+}
+
 ?>

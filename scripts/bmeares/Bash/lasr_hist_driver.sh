@@ -1,14 +1,15 @@
 #! /bin/bash
 
-! /cevac/scripts/check_lock && exit 1
+! /cevac/scripts/check_lock.sh && exit 1
 /cevac/scripts/lock.sh
 
 runsas="norun"
 reset="append"
 customLASR="0"
 error=""
+Age="HIST"
 
-echo "Usage: $0 {customLASR} {runsas} {reset}"
+echo "Usage: $0 {customLASR} {runsas} {reset} {Age}"
 
 if [ ! -z "$1" ]; then
   echo "customLASR detected: Will only load HIST_LASR tables"
@@ -19,6 +20,9 @@ if [ ! -z "$2" ]; then
 fi
 if [ ! -z "$3" ]; then
   reset="$3"
+fi
+if [ ! -z "$4" ]; then
+  Age="$4"
 fi
 if [ "$reset" == "reset" ]; then
   echo "Note: Reset detected. Loading entire HIST CSVs caches into LASR"
@@ -38,9 +42,9 @@ time if ! /cevac/scripts/append_tables.sh ; then
 fi
 hist_views_query="
 SELECT RTRIM(BuildingSName), RTRIM(Metric), RTRIM(Age) FROM CEVAC_TABLES
-WHERE TableName LIKE '%HIST_VIEW%'
+WHERE autoLASR = 1
+AND Age = $Age
 AND customLASR = $customLASR
-AND TableName NOT LIKE '%SPACE%'
 "
 /cevac/scripts/exec_sql.sh "$hist_views_query" "hist_views.csv"
 

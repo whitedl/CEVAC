@@ -152,7 +152,7 @@ fi
 ###
 /cevac/scripts/seperator.sh
 echo "Phase: 2 create new views"
-if ! /cevac/scripts/CREATE_ALL_VIEWS.sh $Building $Metric $keys_list $unitOfMeasureID ; then
+if ! /cevac/scripts/CREATE_ALL_VIEWS.sh "$Building" "$Metric" "$keys_list" "$unitOfMeasureID" ; then
   error="Failed to create views. Aborting bootstrap"
   /cevac/scripts/log_error.sh "$error"
   exit 1
@@ -160,8 +160,6 @@ fi
 
 echo "CHECKPOINT 1"
 /cevac/scripts/exec_sql.sh "CHECKPOINT"
-
-# exit 1
 
 ###
 # Phase 3: Init _CACHE

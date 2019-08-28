@@ -43,10 +43,18 @@ echo "Uploading CSV to LASR Autoloader..."
 
 if [ "$reset" == "reset" ]; then
   echo "Reset detected. Uploading entire $table.csv"
-  rsync -vh --progress /srv/csv/$table.csv wfic-sas-im-hd.clemson.edu:/opt/sasinside/sasconfig/Lev1/AppData/SASVisualAnalytics/VisualAnalyticsAdministrator/AutoLoad/$dest_table.csv
+  if ! rsync -vh --progress /srv/csv/$table.csv sas@wfic-sas-im-hd.clemson.edu:/opt/sasinside/sasconfig/Lev1/AppData/SASVisualAnalytics/VisualAnalyticsAdministrator/AutoLoad/$dest_table.csv ; then
+    error="Cannot rsync to LASR"
+    /cevac/scripts/log_error.sh "$error" "$table"
+    exit 1
+  fi
 else
   echo "Sending newest lines of $table.csv over rsync..."
-  rsync -vh --progress /cevac/cache/$table.csv wfic-sas-im-hd.clemson.edu:/opt/sasinside/sasconfig/Lev1/AppData/SASVisualAnalytics/VisualAnalyticsAdministrator/AutoLoad/Append/$dest_table.csv
+  if ! rsync -vh --progress /cevac/cache/$table.csv sas@wfic-sas-im-hd.clemson.edu:/opt/sasinside/sasconfig/Lev1/AppData/SASVisualAnalytics/VisualAnalyticsAdministrator/AutoLoad/Append/$dest_table.csv ; then
+    error="Cannot rsync cache to LASR"
+    /cevac/scripts/log_error.sh "$error" "$table"
+    exit 1
+  fi
 fi
 
 if [ "$runsas" == "runsas" ]; then
