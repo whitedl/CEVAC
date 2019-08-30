@@ -1,11 +1,12 @@
-#! /bin/sh
+#! /bin/bash
 
-# /cevac/scripts/lock.sh
+while getopts i:t: option; do
+  case "${option}"
+    in
+    i) I=${OPTARG};;
+    t) T=${OPTARG};;
+  esac
+done
 
-if ! /cevac/scripts/is_unlocked.sh ; then
-  echo "is locked"
-else
-  echo "is unlocked"
-fi
-
-/cevac/scripts/unlock.sh
+echo "I is $I"
+echo "T is $T"
