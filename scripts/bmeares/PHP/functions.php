@@ -42,10 +42,11 @@ function buildings_html(){
     FROM CEVAC_BUILDING_INFO
     ORDER BY BuildingDName ASC";
   $result = sqlsrv_query($db, $query);
-  $out = "";
+  $out = "<select id='buildings'>\n";
   while($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)){
     $out .= "<option value='".$row['BuildingSName']."'>".$row['BuildingDName']."</option>\n";
   }
+  $out .= "\n</select>";
   return $out;
 }
 
@@ -57,10 +58,11 @@ function metrics_html(){
     ORDER BY um.DisplayNameShort ASC
   ";
   $result = sqlsrv_query($db, $query);
-  $out = "";
+  $out = "<select id='metrics'>\n";
   while($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)){
-    $out .= "<option value='".$row['Metric']."'>".$row['dn']."</option>\n";
+    $out .= "<option value='".$row['Metric']."'>".$row['Metric']." (".$row['dn'].")"."</option>\n";
   }
+  $out .= "\n</select>";
   return $out;
 }
 
