@@ -21,6 +21,10 @@ failed_dir = prefix + "/failed"
 log_dir = prefix + "/logs"
 xref_dir = prefix + "/xref"
 
+wap_table = "CEVAC_COOPER_WAP_HIST_RAW"
+floor_table = "CEVAC_COOPER_WAP_FLOOR_HIST_RAW"
+building_file_name = "cooper"
+
 DEBUG = False
 SEND = True
 
@@ -165,7 +169,7 @@ def ingest_file_wap(fname):
                 for SSID in hours[hour][name]:
                     total_duration = hours[hour][name][SSID]["time"]
                     unique_users = len(hours[hour][name][SSID]["users"].keys())
-                    insert_sql_total += ("INSERT INTO  CEVAC_COOPER_WAP_HIST_RAW "
+                    insert_sql_total += (f"INSERT INTO  {wap_table} "
                                          "(time, name, ssid, total_duration, "
                                          "predicted_occupancy, unique_users) "
                                          f"VALUES ('{hour.strftime('%Y-%m-%d %H:%M:%S')}',"
@@ -264,7 +268,7 @@ def ingest_file_floor(fname):
                     clemson += len(hours[hour][floor]["eduroam"]["users"])
                 if "clemsonguest" in hours[hour][floor]:
                     guest += len(hours[hour][floor]["clemsonguest"]["users"])
-                insert_sql_total += ("INSERT INTO  CEVAC_COOPER_WAP_FLOOR_HIST_RAW "
+                insert_sql_total += (f"INSERT INTO  {floor_table} "
                                      "(UTCDateTime, floor, guest_count, clemson_count) "
                                      f"VALUES ('{hour.strftime('%Y-%m-%d %H:%M:%S')}',"
                                      f"'{floor}','{guest}','{clemson}');")
@@ -299,7 +303,7 @@ def debug_log(message, LOG):
 file_list = []
 for fname in os.listdir(import_dir):
     is_file = False
-    if "cooper" in fname.lower():
+    if building_file_name in fname.lower():
         is_file = True
     if not is_file:
         continue
