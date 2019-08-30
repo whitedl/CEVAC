@@ -28,11 +28,12 @@ DECLARE @drop_app_data NVARCHAR(MAX);
 DECLARE @row_count INT;
 DECLARE @rows_transferred INT;
 DECLARE @params_rc INT;
+DECLARE @cevac_params TABLE(P NVARCHAR(100));
+
 
 SET @cevac_app_data = 'CEVAC_APPEND_DATA';
 SET @i = 100;
-IF OBJECT_ID('dbo.#cevac_params', 'U') IS NOT NULL DROP TABLE #cevac_params;
-SELECT * INTO #cevac_params FROM ListTable(@tables);
+INSERT INTO @cevac_params SELECT * FROM ListTable(@tables);
 SET @params_rc = @@ROWCOUNT;
 IF @params_rc > 1 AND @destTableName IS NOT NULL BEGIN
 	SET @error = 'Custom append must have only one table';
@@ -62,11 +63,11 @@ END ELSE BEGIN
 	SET @name = NULL;
 	SET @name_CACHE = NULL;
 END
-WHILE (EXISTS(SELECT 1 FROM #cevac_params) AND @i > 0) BEGIN
+WHILE (EXISTS(SELECT 1 FROM @cevac_params) AND @i > 0) BEGIN
 	SET @i = @i - 1;
 	
-	SET @name = (SELECT TOP 1 * FROM #cevac_params);
-	DELETE TOP(1) FROM #cevac_params;
+	SET @name = (SELECT TOP 1 * FROM @cevac_params);
+	DELETE TOP(1) FROM @cevac_params;
 
 	IF @custom = 0 AND @name_CACHE IS NULL BEGIN
 		-- Replace _VIEW with _CACHE, else append _CACHE
@@ -206,21 +207,22 @@ WHILE (EXISTS(SELECT 1 FROM #cevac_params) AND @i > 0) BEGIN
 				RETURN
 			END
 
-			DELETE FROM CEVAC_TABLES WHERE TableName = @name_CACHE;
-			INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, isCustom, Dependencies, customLASR)
-				VALUES (
-					@BuildingSName,
-					@Metric,
-					@Age,
-					@name_CACHE,
-					@DateTimeName,
-					@IDName,
-					@AliasName,
-					@DataName,
-					@isCustom,
-					@name,
-					@customLASR
-				)
+			IF NOT EXISTS(SELECT TOP 1 * FROM CEVAC_TABLES WHERE TableName = @name_CACHE) BEGIN
+				INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, isCustom, Dependencies, customLASR)
+					VALUES (
+						@BuildingSName,
+						@Metric,
+						@Age,
+						@name_CACHE,
+						@DateTimeName,
+						@IDName,
+						@AliasName,
+						@DataName,
+						@isCustom,
+						@name,
+						@customLASR
+					)
+			END -- END of insert
 		END
 	END
 

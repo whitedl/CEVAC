@@ -181,12 +181,12 @@ for fname in next(os.walk(import_dir))[2]:
             print("not moved")
 
 if SEND:
-    f = open("/home/bmeares/cache/insert_chw.sql", "w")
+    f = open("/cevac/cache/insert_chw.sql", "w")
     f.write(insert_sql_total.replace(';', '\nGO\n'))
     f.close()
-    os.system("/home/bmeares/scripts/exec_sql_script.sh "
-              "/home/bmeares/cache/insert_chw.sql")
-    os.remove("/home/bmeares/cache/insert_chw.sql")
+    os.system("/cevac/scripts/exec_sql_script.sh "
+              "/cevac/cache/insert_chw.sql")
+    os.remove("/cevac/cache/insert_chw.sql")
 else:
     print("DID NOT SEND")
     print(insert_sql_total.replace(';', '\nGO\n'))

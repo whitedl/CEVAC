@@ -21,10 +21,6 @@ failed_dir = prefix + "/failed"
 log_dir = prefix + "/logs"
 xref_dir = prefix + "/xref"
 
-wap_table = "CEVAC_COOPER_WAP_HIST_RAW"
-floor_table = "CEVAC_COOPER_WAP_FLOOR_HIST_RAW"
-building_file_name = "cooper"
-
 DEBUG = False
 SEND = True
 
@@ -169,7 +165,7 @@ def ingest_file_wap(fname):
                 for SSID in hours[hour][name]:
                     total_duration = hours[hour][name][SSID]["time"]
                     unique_users = len(hours[hour][name][SSID]["users"].keys())
-                    insert_sql_total += (f"INSERT INTO  {wap_table} "
+                    insert_sql_total += ("INSERT INTO  CEVAC_WATT_WAP_HIST_RAW "
                                          "(time, name, ssid, total_duration, "
                                          "predicted_occupancy, unique_users) "
                                          f"VALUES ('{hour.strftime('%Y-%m-%d %H:%M:%S')}',"
@@ -268,7 +264,7 @@ def ingest_file_floor(fname):
                     clemson += len(hours[hour][floor]["eduroam"]["users"])
                 if "clemsonguest" in hours[hour][floor]:
                     guest += len(hours[hour][floor]["clemsonguest"]["users"])
-                insert_sql_total += (f"INSERT INTO  {floor_table} "
+                insert_sql_total += ("INSERT INTO  CEVAC_WATT_WAP_FLOOR_HIST_RAW "
                                      "(UTCDateTime, floor, guest_count, clemson_count) "
                                      f"VALUES ('{hour.strftime('%Y-%m-%d %H:%M:%S')}',"
                                      f"'{floor}','{guest}','{clemson}');")
@@ -303,7 +299,7 @@ def debug_log(message, LOG):
 file_list = []
 for fname in os.listdir(import_dir):
     is_file = False
-    if building_file_name in fname.lower():
+    if "wfic" in fname.lower():
         is_file = True
     if not is_file:
         continue
@@ -322,6 +318,7 @@ logging.basicConfig(filename=log_file, format=FORMAT, level=logging.INFO)
 
 # Process each file
 insert_sql_total = ""
+print(file_list)
 for fname in file_list:
     fpath = os.path.join(import_dir, fname)
     success = False
@@ -331,6 +328,7 @@ for fname in file_list:
         insert_sql_total += ingest_file_floor(fpath)
         success = True
     except Exception as e:
+        print("error")
         logging.error("Unexpected error while processing file '%s'", fpath)
         #logging.error(e.message)
 
