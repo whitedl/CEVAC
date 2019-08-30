@@ -7,7 +7,7 @@
 
 hist_views_query="
 SELECT RTRIM(TableName) FROM CEVAC_TABLES
-WHERE TableName LIKE '%HIST_VIEW%'
+WHERE autoCACHE = 1
 "
 /cevac/scripts/exec_sql.sh "$hist_views_query" "hist_views.csv"
 

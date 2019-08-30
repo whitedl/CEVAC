@@ -15,11 +15,11 @@ from copy import deepcopy
 from croniter import croniter
 
 
-CONDITIONS_FPATH = "/home/bmeares/cron/alerts/"
+CONDITIONS_FPATH = "/cevac/cron/alerts/"
 KNOWN_ISSUES_FPATH = "/cevac/DEV/known issues/Known Data Issues.csv"
 OCCUPANCY_FPATH = "/cevac/CEVAC/scripts/harrison/alerts/occupancy.csv"
-LOGGING_PATH = "/home/bmeares/cron/alerts/"
-PHONE_PATH = "/home/bmeares/cron/alerts/"
+LOGGING_PATH = "/cevac/cron/alerts/"
+PHONE_PATH = "/cevac/cron/alerts/"
 alert_fname = "/cevac/DEV/alerts/alert_parameters.csv"
 json_fname = "/cevac/cron/alert_log.json"
 json_oc = "/cevac/cron/alert_log_oc.json"
@@ -262,14 +262,14 @@ def rebuild_broken_cache(table):
     broken = "_BROKEN"
     command = f"EXEC CEVAC_CACHE_INIT @tables = '{table+broken}'"
     print(command)
-    os.system("/home/bmeares/scripts/exec_sql.sh \"" + command +
+    os.system("/cevac/scripts/exec_sql.sh \"" + command +
               "\" temp_csv.csv")
     return None
 
 
 def command_to_json_string(command):
     """Return a string of json from a sql command."""
-    os.system("/home/bmeares/scripts/exec_sql.sh \"" + command +
+    os.system("/cevac/scripts/exec_sql.sh \"" + command +
               "\" temp_csv.csv")
 
     json_string = ""
@@ -414,7 +414,7 @@ def get_psid_from_alias(alias, bldgsname, metric):
     try:
         command = (f"EXEC CEVAC_XREF_LOOKUP @BuildingSName = '{bldgsname}', "
                    f"@Metric = '{metric}', @Alias = '{alias}'")
-        os.system("/home/bmeares/scripts/exec_sql.sh \"" + command +
+        os.system("/cevac/scripts/exec_sql.sh \"" + command +
                   "\" temp_psid_csv.csv")
         f = open("/cevac/cache/temp_psid_csv.csv", "r")
         lines = f.readlines()
@@ -825,11 +825,11 @@ if __name__ == "__main__":
     if LOG:
         write_json_generic(new_events, next_id)
     if SEND:
-        f = open("/home/bmeares/cache/insert_alert_system.sql", "w")
+        f = open("/cevac/cache/insert_alert_system.sql", "w")
         f.write(insert_sql_total.replace(';', '\nGO\n'))
         f.close()
-        os.system("/home/bmeares/scripts/exec_sql_script.sh "
-                  "/home/bmeares/cache/insert_alert_system.sql")
+        os.system("/cevac/scripts/exec_sql_script.sh "
+                  "/cevac/cache/insert_alert_system.sql")
     else:
         print(insert_sql_total.replace(';', '\nGO\n'))
 
