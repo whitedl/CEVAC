@@ -287,8 +287,9 @@ export class MapdataService {
           bData.forEach((element: any) => {
             feature.properties[element.metric] = element;
           });
-          if(feature.properties.reportlink) {
-            feature.properties.reportlink = this.sasBaseURL + feature.properties.reportlink;
+          if (feature.properties.reportlink) {
+            feature.properties.reportlink =
+              this.sasBaseURL + feature.properties.reportlink;
           }
           this.tracked.resetStyle(layer);
 
