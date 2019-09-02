@@ -10,6 +10,7 @@ import { switchMap } from 'rxjs/operators';
 })
 export class BuildingDetailComponent implements OnInit {
   building$!: { [index: string]: any };
+  bdata!: string;
 
   constructor(
     private route: ActivatedRoute,
@@ -17,9 +18,12 @@ export class BuildingDetailComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.route.paramMap.subscribe(
-      (params: ParamMap) =>
-        (this.building$ = this.mapdataService.getBuilding(params.get('bldg')))
-    );
+    this.route.paramMap.subscribe((params: ParamMap) => {
+      this.building$ = this.mapdataService.getBuilding(params.get('bldg'));
+      this.bdata = JSON.stringify(this.building$, null, ' ').replace(
+        /[\{\}"]/g,
+        ' '
+      );
+    });
   }
 }

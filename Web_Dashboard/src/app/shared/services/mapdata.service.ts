@@ -292,25 +292,7 @@ export class MapdataService {
               this.sasBaseURL + feature.properties.reportlink;
           }
           this.tracked.resetStyle(layer);
-
-          layer.bindPopup(
-            '<pre>' +
-              JSON.stringify(feature.properties, null, ' ').replace(
-                /[\{\}"]/g,
-                ''
-              ) +
-              '</pre>'
-          );
         });
-    } else {
-      layer.bindPopup(
-        '<pre>' +
-          JSON.stringify(feature.properties, null, ' ').replace(
-            /[\{\}"]/g,
-            ''
-          ) +
-          '</pre>'
-      );
     }
   };
 

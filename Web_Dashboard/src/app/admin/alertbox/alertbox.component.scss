@@ -1,3 +1,8 @@
+:host {
+  flex: 0 1 100%;
+  overflow: hidden;
+}
+
 mat-chip {
   font-size: 0.7em;
   user-select: none;
