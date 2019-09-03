@@ -16,8 +16,12 @@ import matplotlib.pylab as plb
 pdf = pd.read_csv('CEVAC_WATT_POWER_SUMS_HIST.csv')
 
 # dictionary of dimensions I want to add to the array
-wdf = pd.read_csv('historicWeather.csv', error_bad_lines=False)
+''', error_bad_lines=False'''
+wdf = pd.read_csv('historicWeather.csv')
 
+print(wdf)
+
+#   creates a
 cJSON = {}
 
 # use this to change the month from a string to num
@@ -173,6 +177,8 @@ def makeArrays(df):
             if len(tempx) == 47:
                 x.append(tempx)
                 y.append(tempy)
+            else:
+                print(tempx)
 
     saveArrays(x, y)
 
