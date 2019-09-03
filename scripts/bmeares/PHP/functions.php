@@ -42,7 +42,7 @@ function buildings_html(){
     FROM CEVAC_BUILDING_INFO
     ORDER BY BuildingDName ASC";
   $result = sqlsrv_query($db, $query);
-  $out = "<select id='buildings'>\n";
+  $out = "<select id='buildings' name='BuildingSName' onclick='get_Metrics_html(this.value)'>\n";
   while($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)){
     $out .= "<option value='".$row['BuildingSName']."'>".$row['BuildingDName']."</option>\n";
   }
@@ -50,20 +50,28 @@ function buildings_html(){
   return $out;
 }
 
-function metrics_html(){
+function metrics_html($BuildingSName){
   global $db;
   $query = "
-    SELECT DISTINCT RTRIM(Metric) AS Metric, um.DisplayNameShort AS dn FROM CEVAC_METRIC AS cm
-    INNER JOIN [130.127.238.129].JCIHistorianDB.dbo.tblUnitOfMeasure AS um ON um.UnitOfMeasureID = cm.unitOfMeasureID
-    ORDER BY um.DisplayNameShort ASC
+  SELECT DISTINCT RTRIM(ct.Metric) AS Metric, ISNULL(um.DisplayNameShort, 'No units') AS dn
+  FROM CEVAC_TABLES AS ct
+  LEFT OUTER JOIN CEVAC_METRIC AS cm ON cm.Metric = ct.Metric
+  LEFT OUTER JOIN tblUnitOfMeasure AS um ON um.UnitOfMeasureID = cm.unitOfMeasureID
+  WHERE BuildingSName = '$BuildingSName'
+  AND Age = 'HIST'
   ";
   $result = sqlsrv_query($db, $query);
-  $out = "<select id='metrics'>\n";
+  $out = "<select id='metrics' name='Metric' onclick='get_attributes_html(\"$BuildingSName\",this.value)'>\n";
   while($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)){
     $out .= "<option value='".$row['Metric']."'>".$row['Metric']." (".$row['dn'].")"."</option>\n";
   }
   $out .= "\n</select>";
   return $out;
+}
+
+function exec_sql($query){
+  global $db;
+  return sqlsrv_query($db, $query);
 }
 
 ?>

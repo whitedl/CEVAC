@@ -3,7 +3,7 @@
 ! /cevac/scripts/check_lock.sh && exit 1
 /cevac/scripts/lock.sh
 
-while getopts b:m:c:t:v:h: option; do
+while getopts b:m:c:t:v:h option; do
   case "${option}"
     in
     b) BuildingSName=${OPTARG};;
@@ -22,7 +22,7 @@ usage="Usage:
   -v value
   -h help
   "
-HIST="CEVAC_$BuildingSName""_$Metric""_HIST_VIEW"
+HIST="CEVAC_$BuildingSName""_$Metric""_HIST"
 HIST_VIEW="CEVAC_$BuildingSName""_$Metric""_HIST_VIEW"
 if [ ! -z "$h" ]; then
     echo "$usage"

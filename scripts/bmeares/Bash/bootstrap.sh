@@ -1,58 +1,62 @@
 #! /bin/sh
 
-! /cevac/scripts/check_lock.sh && exit 1
-/cevac/scripts/lock.sh
-
-keys_list="NULL"
-unitOfMeasureID="NULL"
-
-if [ ! -z "$3" ]; then
-  keys_list="$3"
+# ! /cevac/scripts/check_lock.sh && exit 1
+# /cevac/scripts/lock.sh
+usage="Usage:
+  -b BuildingSName
+  -m Metric
+  -k keys_list
+  -u unitOfMeasureID
+  -h help
+  -y run without asking
+"
+while getopts b:m:k:u:hycl option; do
+  case "${option}"
+    in
+    b) BuildingSName=${OPTARG};;
+    m) Metric=${OPTARG};;
+    k) keys_list=${OPTARG};;
+    u) unitOfMeasureID=${OPTARG};;
+    h) echo "$usage" && exit 1 ;;
+    y) yes="yes";;
+    l) autoLASR="true";;
+    c) autoCACHE="true";;
+  esac
+done
+[ -z "$BuildingSName" ] && echo "BuildingSName (e.g. WATT): " && read BuildingSName
+[ -z "$Metric" ] && echo "Metric (e.g. TEMP): " && read Metric
+if [ -z "$yes" ]; then
+  [ -z "$unitOfMeasureID" ] && echo "unitOfMeasureID (empty to omit): " && read unitOfMeasureID
+  [ -z "$keys_list" ] && echo "keys_list (empty to omit): " && read keys_list
 fi
-if [ ! -z "$4" ]; then
-  unitOfMeasureID="$4"
-fi
-
-
-Building="$1"
-Metric="$2"
-if [ -z "$1" ] || [ -z "$2" ]; then
-  echo "Usage: $0 [BLDG] [METRIC] {keys_list} {unitOfMeasureID}"
-  echo $'Enter the following information.\n'
-  echo $'Building (e.g. WATT): '; read Building
-  echo $'Metric   (e.g. TEMP): '; read Metric
-  echo $'Keywords (e.g. SLAB,ZN-T,CRAC)\n     (empty to omit): '; read keys_list
-  echo $'UnitOfMeasureID\n     (empty to omit): '; read unitOfMeasureID
-fi
-
 echo "Warning: This will completely rebuild the data pipeline and may take up to an hour."
 echo "Custom tables WILL BE PRESERVED if CREATE_CUSTOM.sh has previously been run."
 echo "Continue? (Y/n)"
-read cont
-if [ "$cont" != "y" ] || [ "$cont" != "Y" ] || [ -z "$cont" ]; then
+[ -z "$yes" ] && read cont
+if [ "$cont" == "y" ] || [ "$cont" == "Y" ] || [ -z "$cont" ]; then
   continue
 else
   /cevac/scripts/unlock.sh
   exit 1
 fi
 
-HIST="CEVAC_"$Building"_"$Metric"_HIST"
-HIST_CACHE="CEVAC_"$Building"_"$Metric"_HIST_CACHE"
-HIST_CSV="CEVAC_"$Building"_"$Metric"_HIST_CSV"
-HIST_VIEW="CEVAC_"$Building"_"$Metric"_HIST_VIEW"
-HIST_LASR="CEVAC_"$Building"_"$Metric"_HIST_LASR"
-LATEST="CEVAC_"$Building"_"$Metric"_LATEST"
-XREF="CEVAC_"$Building"_"$Metric"_XREF"
+HIST="CEVAC_"$BuildingSName"_"$Metric"_HIST"
+HIST_CACHE="CEVAC_"$BuildingSName"_"$Metric"_HIST_CACHE"
+HIST_CSV="CEVAC_"$BuildingSName"_"$Metric"_HIST_CSV"
+HIST_VIEW="CEVAC_"$BuildingSName"_"$Metric"_HIST_VIEW"
+HIST_LASR="CEVAC_"$BuildingSName"_"$Metric"_HIST_LASR"
+LATEST="CEVAC_"$BuildingSName"_"$Metric"_LATEST"
+XREF="CEVAC_"$BuildingSName"_"$Metric"_XREF"
 error=""
 
 isCustom=`/cevac/scripts/sql_value.sh "SELECT isCustom FROM CEVAC_TABLES WHERE TableName = '$HIST_VIEW'"`
 customLASR=`/cevac/scripts/sql_value.sh "SELECT customLASR FROM CEVAC_TABLES WHERE TableName = '$HIST_VIEW'"`
-checkXREF=`/cevac/scripts/sql_value.sh "EXEC CHECK_XREF @BuildingSName = '$Building', @Metric = '$Metric'"`
+checkXREF=`/cevac/scripts/sql_value.sh "EXEC CHECK_XREF @BuildingSName = '$BuildingSName', @Metric = '$Metric'"`
 
 if [ "$checkXREF" != "XREF" ]; then
-  echo "WARNING: CEVAC_$Building""_$Metric""_XREF does not exist!"
+  echo "WARNING: CEVAC_$BuildingSName""_$Metric""_XREF does not exist!"
   echo "You may continue bootstrapping with PointSliceID instead of Alias, but you MUST specify keywords or unitOfMeasureID"
-  echo "CEVAC_$Building"_$Metric""_PXREF will be generated using the parameters provided during bootstrapping.""
+  echo "CEVAC_$BuildingSName"_$Metric""_PXREF will be generated using the parameters provided during bootstrapping.""
   echo "  (Omitting parameters will include all PointSliceIDs for a building - so be careful!)"
 else
   xref_readingType=`/cevac/scripts/sql_value.sh "IF 'ReadingType' IN (SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '$XREF') SELECT 'ReadingType' ELSE SELECT 'No ReadingType'"`
@@ -88,10 +92,10 @@ if [ ! -z "$isCustom" ]; then
     read choice
 
     if [ "$choice" == "1" ] || [ "$choice" == "" ]; then
-      /cevac/scripts/CREATE_CUSTOM.sh "$Building" "$Metric" "$DateTimeName" "$IDName" "$AliasName" "$DataName" "$Dependencies"
+      /cevac/scripts/CREATE_CUSTOM.sh "$BuildingSName" "$Metric" "$DateTimeName" "$IDName" "$AliasName" "$DataName" "$Dependencies"
     elif [ "$choice" == "2" ]; then
       echo "Dropping caches..."
-      /cevac/scripts/exec_sql.sh "DELETE FROM CEVAC_TABLES WHERE BuildingSName = '$Building' AND Metric = '$Metric'"
+      /cevac/scripts/exec_sql.sh "DELETE FROM CEVAC_TABLES WHERE BuildingSName = '$BuildingSName' AND Metric = '$Metric'"
       /cevac/scripts/exec_sql.sh "IF OBJECT_ID('$HIST_CACHE') IS NOT NULL DROP TABLE $HIST_CACHE;"
       /cevac/scripts/exec_sql.sh "IF OBJECT_ID('$HIST_CSV') IS NOT NULL DROP TABLE $HIST_CSV;"
       /cevac/scripts/exec_sql.sh "IF OBJECT_ID('$HIST_LASR') IS NOT NULL DROP TABLE $HIST_LASR;"
@@ -108,8 +112,8 @@ if [ ! -z "$isCustom" ]; then
     
   else # isCustom 0 or NULL, therefore standard table
     echo "Standard table detected"
-    if ! /cevac/scripts/exec_sql.sh "DELETE FROM CEVAC_TABLES WHERE BuildingSName = '$Building' AND Metric = '$Metric'" ; then
-      error="Error: could not delete $Building""_""$Metric from CEVAC_TABLES. Aborting bootstrap..."
+    if ! /cevac/scripts/exec_sql.sh "DELETE FROM CEVAC_TABLES WHERE BuildingSName = '$BuildingSName' AND Metric = '$Metric'" ; then
+      error="Error: could not delete $BuildingSName""_""$Metric from CEVAC_TABLES. Aborting bootstrap..."
       /cevac/scripts/log_error.sh "$error"
       exit 1
     fi
@@ -124,7 +128,7 @@ else # isCustom does not exist therefore not in CEVAC_TABLES
     read choice
     if [ "$choice" == "1" ]; then # rebuild custom
       echo "Executing CREATE_CUSTOM.sh"
-      if ! /cevac/scripts/CREATE_CUSTOM.sh "$Building" "$Metric" ; then
+      if ! /cevac/scripts/CREATE_CUSTOM.sh "$BuildingSName" "$Metric" ; then
         error="Error: Could not create $HIST_VIEW as a custom table. Aborting bootstrap..."
         /cevac/scripts/log_error.sh "$error"
         exit 1
@@ -141,8 +145,8 @@ fi
 /cevac/scripts/seperator.sh
 echo "Phase 1: Delete everything"
 # Delete everything
-if ! /cevac/scripts/delete.sh "$Building" "$Metric" ; then
-  error="Error: could not delete $Building""_$Metric tables. Aborting bootstrap..."
+if ! /cevac/scripts/delete.sh "$BuildingSName" "$Metric" "-y" ; then
+  error="Error: could not delete $BuildingSName""_$Metric tables. Aborting bootstrap..."
   /cevac/scripts/log_error.sh "$error"
   exit 1
 fi
@@ -152,7 +156,7 @@ fi
 ###
 /cevac/scripts/seperator.sh
 echo "Phase: 2 create new views"
-if ! /cevac/scripts/CREATE_ALL_VIEWS.sh "$Building" "$Metric" "$keys_list" "$unitOfMeasureID" ; then
+if ! /cevac/scripts/CREATE_ALL_VIEWS.sh "$BuildingSName" "$Metric" "$keys_list" "$unitOfMeasureID" ; then
   error="Failed to create views. Aborting bootstrap"
   /cevac/scripts/log_error.sh "$error"
   exit 1
@@ -164,20 +168,23 @@ echo "CHECKPOINT 1"
 ###
 # Phase 3: Init _CACHE
 ###
-/cevac/scripts/seperator.sh
-echo "Phase 3: init _CACHE"
-time if ! /cevac/scripts/exec_sql.sh "EXEC CEVAC_CACHE_INIT @tables = '$HIST_VIEW'" ; then
-  error="CEVAC_CACHE_INIT failed. Aborting bootstrap"
-  /cevac/scripts/log_error.sh "$error"
-  exit 1
+if [ "$autoCACHE" == "true" ]; then
+  /cevac/scripts/seperator.sh
+  echo "Phase 3: init _CACHE"
+  time if ! /cevac/scripts/exec_sql.sh "EXEC CEVAC_CACHE_INIT @tables = '$HIST_VIEW'" ; then
+    error="CEVAC_CACHE_INIT failed. Aborting bootstrap"
+    /cevac/scripts/log_error.sh "$error"
+    exit 1
+  fi
+else
+  /cevac/scripts/toggle_CEVAC_TABLES.sh -b "$BuildingSName" -m "$Metric" -c "autoCACHE" -v "0"
 fi
-
 echo "CHECKPOINT 2"
 /cevac/scripts/exec_sql.sh "CHECKPOINT"
 
 if [ "$customLASR" == "1" ]; then # customLASR is true, upload HIST_LASR instead
   echo "Creating $HIST_LASR"
-  if ! /cevac/scripts/CREATE_VIEW.sh "$Building" "$Metric" "HIST_LASR"; then
+  if ! /cevac/scripts/CREATE_VIEW.sh "$BuildingSName" "$Metric" "HIST_LASR"; then
     error="Error: Failed to create $HIST_LASR"
     /cevac/scripts/log_error.sh "$error"
     exit 1
@@ -185,38 +192,41 @@ if [ "$customLASR" == "1" ]; then # customLASR is true, upload HIST_LASR instead
 
   /cevac/scripts/seperator.sh
   echo "Phase 4: create CSVs and rsync to LASR"
-  time if ! /cevac/scripts/lasr_append.sh "$Building" "$Metric" HIST_LASR norun reset ; then
+  time if ! /cevac/scripts/lasr_append.sh "$BuildingSName" "$Metric" HIST_LASR norun reset ; then
     error="Error uploading $HIST_LASR. Aborting bootstrap."
     /cevac/scripts/log_error.sh "$error"
     exit 1
   fi
 
 else # customLASR is false, therefore upload standard HIST
-  /cevac/scripts/seperator.sh
-  echo "Phase 4: create CSVs and rsync to LASR"
-  time if ! /cevac/scripts/lasr_append.sh "$Building" "$Metric" HIST norun reset ; then
-    error="Error uploading $HIST. Aborting bootstrap."
-    /cevac/scripts/log_error.sh "$error"
-    exit 1
+  if [ "$autoLASR" == "true" ]; then
+    /cevac/scripts/seperator.sh
+    echo "Phase 4: create CSVs and rsync to LASR"
+    time if ! /cevac/scripts/lasr_append.sh "$BuildingSName" "$Metric" HIST norun reset ; then
+      error="Error uploading $HIST. Aborting bootstrap."
+      /cevac/scripts/log_error.sh "$error"
+      exit 1
+    fi
+  else
+    /cevac/scripts/toggle_CEVAC_TABLES.sh -b "$BuildingSName" -m "$Metric" -c "autoLASR" -v "0"
   fi
 fi
 
 echo "CHECKPOINT 3"
 /cevac/scripts/exec_sql.sh "CHECKPOINT"
-
-time if ! /cevac/scripts/lasr_append.sh "$Building" "$Metric" LATEST norun reset ; then
-  error="Error uploading $LATEST. Aborting bootstrap."
-  /cevac/scripts/log_error.sh "$error"
-  exit 1
-fi
-if [ "$checkXREF" == "XREF" ]; then
-  time if ! /cevac/scripts/lasr_append.sh "$Building" "$Metric" XREF norun reset ; then
-    error="Error uploading $XREF. Aborting bootstrap."
+if [ "$autoLASR" == "true" ]; then
+  time if ! /cevac/scripts/lasr_append.sh "$BuildingSName" "$Metric" LATEST norun reset ; then
+    error="Error uploading $LATEST. Aborting bootstrap."
     /cevac/scripts/log_error.sh "$error"
     exit 1
   fi
+  if [ "$checkXREF" == "XREF" ]; then
+    time if ! /cevac/scripts/lasr_append.sh "$BuildingSName" "$Metric" XREF norun reset ; then
+      error="Error uploading $XREF. Aborting bootstrap."
+      /cevac/scripts/log_error.sh "$error"
+      exit 1
+    fi
+  fi
 fi
-
-
 /cevac/scripts/unlock.sh
 

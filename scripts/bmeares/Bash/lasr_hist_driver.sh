@@ -35,11 +35,14 @@ if [ "$runsas" == "runsas" ]; then
 fi
 
 # update HIST_CACHE tables
-time if ! /cevac/scripts/append_tables.sh ; then
-  error="Error updating HIST_CACHE tables"
-  /cevac/scripts/log_error.sh "$error"
-  # exit 1
+if [ "$Age" == "HIST" ]; then
+  time if ! /cevac/scripts/append_tables.sh ; then
+    error="Error updating HIST_CACHE tables"
+    /cevac/scripts/log_error.sh "$error"
+    exit 1
+  fi
 fi
+
 hist_views_query="
 SELECT RTRIM(BuildingSName), RTRIM(Metric), RTRIM(Age) FROM CEVAC_TABLES
 WHERE autoLASR = 1
@@ -72,14 +75,14 @@ for t in "${tables_array[@]}"; do
   fi
 
   /cevac/scripts/seperator.sh
-  time if ! /cevac/scripts/lasr_append.sh $B $M $A $runsas $reset ; then
+  time if ! { /cevac/scripts/lasr_append.sh $B $M $A $runsas $reset & } ; then
     error="Error uploading CEVAC_$B""_$M""_$A to LASR";
     /cevac/scripts/log_error.sh "$error"
     continue
     # exit 1
   fi
 done
-
+wait
 echo "All _HIST tables have been loaded."
 if [ "$runsas" != "norun" ]; then
   echo "Executing runsas.sh..."
