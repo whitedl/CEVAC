@@ -1,29 +1,55 @@
+function form_request(script){
+  u = 'console/' + script;
+  $.ajax({
+    type: 'POST',
+    url: u,
+    data: $('form').serialize(),
+    success: success_output
+  });
+}
 function toggle(){
-  var formData = document.getElementById('toggle');
-
-  b_index = formData.buildings.selectedIndex;
-  BuildingDName = formData.buildings[b_index].text;
-  BuildingSName = formData.buildings[b_index].value;
-
-  m_index = formData.metrics.selectedIndex;
-  Metric = formData.metrics[m_index].value;
-
-  attributes = formData.attributes;
-  autoCACHE = 0;
-  autoLASR = 0;
-  if(attributes[0].checked) autoCACHE = 1;
-  if(attributes[1].checked) autoLASR = 1;
-
-  url = "console/toggle.php?b=" + BuildingSName + "&m=" + Metric;
-  url += "&"
-  console.log(url);
-
-  // $.post(url,"", success_output);
-  output.innerHTML = "CEVAC_" + BuildingSName + "_" + Metric;
+  form_request('toggle.php');
+}
+let del = () =>{
+  form_request('delete.php');
+}
+let bootstrap = () =>{
+  form_request('bootstrap.php');
+}
+function get_html_update(b){
+  get_Metrics_html(b);
 }
 
+function get_attributes_html(b,m){
+  attributes = ['autoCACHE', 'autoLASR'];
+  attributes.forEach(function(item, index, array){
+    $.get('console/bin_value.php', { BuildingSName: b, Metric: m, column: item}, function(data){
+      document.getElementById(item).style.display = 'block';
+      document.getElementById(item + "_label").style.display = 'block';
+      if(data == '1'){
+        document.getElementById(item).checked = true;
+      }
+      else document.getElementById(item).checked = false;
+    });
+  });
+
+
+}
+function get_Metrics_html(b){
+  $.get('console/metrics_html.php', { BuildingSName: b }, function(data){
+    metrics = document.getElementById('metrics');
+    metrics.outerHTML = data;
+    metrics.display = 'block';
+    get_attributes_html(b,metrics.value)
+  });
+  show_buttons();
+}
+function show_buttons(){
+  d = document.getElementById('buttons_div');
+  d.style.display = 'block';
+}
 function success_output(data){
   output = document.getElementById('output');
   output.innerHTML = data;
-  console.log(data);
 }
+

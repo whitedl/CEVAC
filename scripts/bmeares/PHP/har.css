@@ -1,0 +1,53 @@
+* {
+  font-family: "Arial", Times, serif;
+  color: #ffffff;
+}
+
+h2 {
+  color: #f8f8f2	;
+}
+
+textarea {
+  background-color: #44475a;
+  color: #8be9fd;
+  border: none;
+  font-size: 20px;
+}
+
+body {
+  background-color: #282a36;
+}
+
+input {
+  background-color: #44475a;
+  color: #50fa7b;
+  border: none;
+  padding: 10px;
+  border-radius: 5%;
+  font-size: 20px;
+}
+button {
+  background-color: #44475a;
+  color: #50fa7b;
+  border: none;
+  padding: 10px;
+  border-radius: 5%;
+  font-size: 20px;
+}
+
+
+select {
+  background-color: #44475a;
+  color: #50fa7b;
+  border: none;
+  padding: 10px;
+  border-radius: 5%;
+  font-size: 20px;
+}
+table {
+    border-spacing: 10px;
+    border-collapse: separate;
+}
+td {
+  color: #ffb45b;
+}
