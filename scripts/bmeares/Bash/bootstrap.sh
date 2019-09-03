@@ -176,8 +176,6 @@ if [ "$autoCACHE" == "true" ]; then
     /cevac/scripts/log_error.sh "$error"
     exit 1
   fi
-else
-  /cevac/scripts/toggle_CEVAC_TABLES.sh -b "$BuildingSName" -m "$Metric" -c "autoCACHE" -v "0"
 fi
 echo "CHECKPOINT 2"
 /cevac/scripts/exec_sql.sh "CHECKPOINT"
@@ -207,8 +205,6 @@ else # customLASR is false, therefore upload standard HIST
       /cevac/scripts/log_error.sh "$error"
       exit 1
     fi
-  else
-    /cevac/scripts/toggle_CEVAC_TABLES.sh -b "$BuildingSName" -m "$Metric" -c "autoLASR" -v "0"
   fi
 fi
 
@@ -228,5 +224,7 @@ if [ "$autoLASR" == "true" ]; then
     fi
   fi
 fi
+[ "$autoCACHE" != "true" ] && /cevac/scripts/toggle_CEVAC_TABLES.sh -b "$BuildingSName" -m "$Metric" -c "autoCACHE" -v "0"
+[ "$autoLASR" != "true" ] && /cevac/scripts/toggle_CEVAC_TABLES.sh -b "$BuildingSName" -m "$Metric" -c "autoLASR" -v "0"
 /cevac/scripts/unlock.sh
 
