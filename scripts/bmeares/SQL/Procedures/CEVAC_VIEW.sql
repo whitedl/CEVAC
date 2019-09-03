@@ -79,7 +79,7 @@ SET @OLDEST = 'CEVAC_' + @Building + '_' + @Metric + '_OLDEST';
 -- Current name
 IF @Age = 'HIST' SET @Table_name = CONCAT('CEVAC_', @Building, '_', @Metric, '_', @Age, '_VIEW')
 ELSE SET @Table_name = CONCAT('CEVAC_', @Building, '_', @Metric, '_', @Age);
-SELECT @Table_name AS 'Table_name init';
+PRINT @Table_name;
 SET @XREF = CONCAT('CEVAC_', @Building, '_', @Metric, '_XREF');
 IF @Metric = 'POWER_SUMS' SET @XREF = CONCAT('CEVAC_', @Building, '_POWER_XREF');
 SET @PXREF = CONCAT('CEVAC_', @Building, '_', @Metric, '_PXREF');
@@ -169,7 +169,7 @@ BEGIN
 	SET @XREF_or_PXREF = 'PXREF';
 	SET @XREF_query = 'INNER JOIN ' + @PXREF + ' AS xref on xref.' + @RemotePSIDName + ' = val.' + @RemotePSIDName + '';
 	SET @Alias_or_PSID = @RemotePSIDName;
-END ELSE BEGIN -- XREF exists
+END ELSE IF @Age = 'HIST' BEGIN -- XREF exists
 	-- Insert XREF into CEVAC_TABLES
 	PRINT 'Adding XREF to table: ' + @XREF;
 	IF @execute = 1 BEGIN
