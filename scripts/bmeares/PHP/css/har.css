@@ -2,7 +2,10 @@
   font-family: "Arial", Times, serif;
   color: #ffffff;
 }
-
+pre {
+  font-family: "Arial", monospace;
+  color: #ffffff
+}
 h2 {
   color: #f8f8f2	;
 }
