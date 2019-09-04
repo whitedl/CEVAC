@@ -79,14 +79,14 @@ td {
 #sql_output_div {
 }
 #advanced_div {
-  width: 30%;
-  /* border: 2px solid red; */
+  width: 50%;
+  border: 2px solid red;
   display: block;
   float: right;
 }
 #buttons_div {
   width: 30%;
-  /* border: 2px solid white; */
+  border: 2px solid white;
   display: block;
   float: left;
 }
@@ -97,4 +97,22 @@ td {
   display: block;
   margin-left: auto;
   margin-right: auto;
+}
+#delete_button{
+  background-color: #cc0000;
+  color: #FFFFFF;
+}
+#PXREF_button{
+  float: left;
+}
+#advanced_right{
+  border: 2px solid green;
+  width: 50%;
+  float: right;
+}
+#unitOfMeasureID{
+  width: 35%;
+}
+.advanced {
+  display: none;
 }
