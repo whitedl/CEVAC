@@ -8,7 +8,7 @@ $TableName = $_POST['TableName'];
 $value = $_POST['value'];
 $script = '/cevac/scripts/bootstrap.sh';
 $config = "";
-$exec = $script." -b $BuildingSName -m $Metric -y ;\n";
+$exec = $script." -b $BuildingSName -m $Metric -y -c ;\n";
 
 if(!isset($_POST['BuildingSName']) || !isset($_POST['Metric'])) die('missing params');
 

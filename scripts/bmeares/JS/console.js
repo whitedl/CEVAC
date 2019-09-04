@@ -11,10 +11,30 @@ function toggle(){
   form_request('toggle.php');
 }
 let del = () =>{
-  form_request('delete.php');
+  button = document.getElementById('delete_button');
+  button.disabled = true;
+  $.ajax({
+    type: 'POST',
+    url: 'console/delete.php',
+    data: $('form').serialize(),
+    success: function(data){
+      document.getElementById('delete_button').disabled = false;
+      document.getElementById('output').innerHTML = data;
+    }
+  });
 }
 let bootstrap = () =>{
-  form_request('bootstrap.php');
+  button = document.getElementById('bootstrap_button');
+  button.disabled = true;
+  $.ajax({
+    type: 'POST',
+    url: 'console/bootstrap.php',
+    data: $('form').serialize(),
+    success: function(data){
+      document.getElementById('bootstrap_button').disabled = false;
+      document.getElementById('output').innerHTML = data;
+    }
+  });
 }
 function get_html_update(b){
   get_Metrics_html(b);
@@ -45,7 +65,7 @@ function get_attributes_html(){
 }
 function get_Metrics_html(){
   b = document.getElementById('buildings').value
-  f = document.getElementById('actions_select').value
+  f = document.forms.toggle.actions_select.value
   $.get('console/metrics_html.php', { BuildingSName: b, filter: f }, function(data){
     metrics = document.getElementById('metrics');
     metrics.outerHTML = data;
@@ -54,6 +74,17 @@ function get_Metrics_html(){
   });
   show_buttons();
 }
+function get_PXREF_html(){
+  b = document.getElementById('buildings').value;
+  m = document.getElementById('metrics').value;
+  $.get('console/PXREF_html.php', { BuildingSName: b, Metric: m }, function(data){
+		document.getElementById('output').innerHTML = "";
+    sql_out = document.getElementById('sql_output');
+    sql_out.innerHTML = data;
+  });
+}
+
+
 function show_buttons(){
   d = document.getElementById('buttons_div');
   d.style.display = 'block';

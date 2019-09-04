@@ -31,13 +31,21 @@ input {
 }
 button {
   background-color: #44475a;
-  color: #50fa7b;
-  border: none;
+  color: #24d655;
+  border: 2px solid transparent;
   padding: 10px;
   border-radius: 5%;
   font-size: 20px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  cursor:pointer;
 }
-
+button:disabled {
+  color: #555555;
+}
+button:hover:enabled{
+  border: 2px solid #aaaaaa;
+  color: #50fa7b;
+}
 
 select {
   background-color: #44475a;
@@ -53,4 +61,40 @@ table {
 }
 td {
   color: #ffb45b;
+}
+#body_left {
+  width: 49%;
+  height: 95%;
+  float: left;
+  margin: auto;
+  /* border: 2px solid green; */
+}
+#body_right {
+  width: 49%;
+  height: 95%;
+  float: right;
+  margin: auto;
+  /* border: 2px solid red; */
+}
+#sql_output_div {
+}
+#advanced_div {
+  width: 30%;
+  /* border: 2px solid red; */
+  display: block;
+  float: right;
+}
+#buttons_div {
+  width: 30%;
+  /* border: 2px solid white; */
+  display: block;
+  float: left;
+}
+#buttons_parent_div {
+  width: 99%;
+  height: 100px;
+  /* border: 2px solid blue; */
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }

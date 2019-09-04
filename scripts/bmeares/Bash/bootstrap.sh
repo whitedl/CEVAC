@@ -1,7 +1,7 @@
-#! /bin/sh
+#! /bin/bash
 
-# ! /cevac/scripts/check_lock.sh && exit 1
-# /cevac/scripts/lock.sh
+! /cevac/scripts/check_lock.sh && exit 1
+/cevac/scripts/lock.sh
 usage="Usage:
   -b BuildingSName
   -m Metric
