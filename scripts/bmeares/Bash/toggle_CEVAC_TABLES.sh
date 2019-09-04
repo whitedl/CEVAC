@@ -23,6 +23,7 @@ usage="Usage:
   -h help
   "
 HIST="CEVAC_$BuildingSName""_$Metric""_HIST"
+LATEST="CEVAC_$BuildingSName""_$Metric""_LATEST"
 HIST_VIEW="CEVAC_$BuildingSName""_$Metric""_HIST_VIEW"
 if [ ! -z "$h" ]; then
     echo "$usage"
@@ -43,16 +44,19 @@ if [ ! -z "$TableName" ]; then
   "
 elif [ ! -z "$BuildingSName" ] && [ ! -z "$Metric" ]; then
   if [ "$column" == "autoCACHE" ]; then
-    TableName="$HIST_VIEW"
+    query="
+    UPDATE CEVAC_TABLES
+    SET $column = '$value'
+    WHERE TableName = '$HIST_VIEW'
+    "
   elif [ "$column" == "autoLASR" ]; then
-    TableName="$HIST"
+    query="
+    UPDATE CEVAC_TABLES
+    SET $column = '$value'
+    WHERE TableName = '$HIST' OR TableName = '$LATEST'
+    "
   fi
   
-  query="
-  UPDATE CEVAC_TABLES
-  SET $column = '$value'
-  WHERE TableName = '$TableName'
-  "
 fi
 
 /cevac/scripts/exec_sql.sh "$query"
