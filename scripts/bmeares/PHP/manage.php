@@ -11,10 +11,10 @@
     <link rel="stylesheet" type="text/css" href="css/radio.css">
     <script src="console/JS/console.js"></script>
     <script src="console/JS/format.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.4.1.min.js"></script>
 	</head>
 	<body onload="get_Metrics_html()">
-    <a onclick="show_hide('advanced_div')" href="#">Advanced options</a><br><br>
+    <a onclick="show_hide_class('advanced');" href="#">Advanced options</a><br><br>
     <div id="body_left">
       <form method="post" id="toggle">
 				<label class="container">Existing
@@ -43,12 +43,20 @@
           </label>
         </div>
 
+          <div id="advanced_right" class="advanced">
+            <label for="custom_metric_name">New Metric</label>
+            <input type="text" name="custom_metric_name" id="custom_metric_name">
+            <label for="keys_list">Keywords</label>
+            <input type="text" name="keys_list" id="keys_list">
+            <label for=unitOfMeasureID"">unitOfMeasureID</label>
+            <input type="number" name="unitOfMeasureID" id="unitOfMeasureID">
+
+          </div>
       </form>
       <br>
       <div id="buttons_parent_div">
-        <div id='advanced_div' style="display: none">
-          <button name="PXREF_button" id="PXREF_button" onclick="get_PXREF_html()">View PXREF</button>
-          <p>Lorem ipsum dolor</p>
+        <div id='advanced_div' class="advanced">
+          <button name="PXREF_button" id="PXREF_button" onclick="get_PXREF_html()">View PXREF</button><br>
         </div>
         <div id="buttons_div" style="display:none">
           <button name="bootstrap_button" id="bootstrap_button" onclick="bootstrap()">Bootstrap</button>
