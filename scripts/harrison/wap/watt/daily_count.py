@@ -8,8 +8,7 @@ import datetime
 from datetime import datetime as dt
 import csv
 import logging
-import urllib.request
-import urllib.parse
+
 
 # Setup configuration
 SEND = True

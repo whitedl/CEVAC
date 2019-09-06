@@ -8,8 +8,6 @@ import datetime
 from datetime import datetime as dt
 import csv
 import logging
-import urllib.request
-import urllib.parse
 
 # Setup configuration
 SEND = True
@@ -24,7 +22,6 @@ database_name = "CEVAC_COOPER_WAP_DAILY_HIST_RAW"
 CLIENT = 0
 MAC = 2
 SSID = 7
-
 
 
 # Script
