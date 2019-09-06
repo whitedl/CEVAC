@@ -22,7 +22,7 @@ to_list = {
     "Bennett Meares": "bmeares@g.clemson.edu",
     #  "Inscribe boi": "bmeares@inscribe.productions",
     "Zach Smith": "ztsmith@g.clemson.edu",
-    # "Zach Klein": "ztklein@g.clemson.edu", 
+    # "Zach Klein": "ztklein@g.clemson.edu",
     "Drewboi": "abemery@clemson.edu",
     "Tim Howard": "timh@clemson.edu",
 }

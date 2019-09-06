@@ -23,7 +23,6 @@ MAC = 2
 SSID = 7
 
 
-
 # Script
 # Setup logging
 FORMAT = '%(asctime)s %(levelname)s:%(message)s'
@@ -74,7 +73,7 @@ for file in yesterdays_files:
 
     except Exception:
         errors += 1
-        logging.error("Could not parse file " + str(file))
+        logging.error("Could not parse file (formatting error) " + str(file))
 
 # Push to database
 eduroam = 0 if "eduroam" not in network else len(network["eduroam"])

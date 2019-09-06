@@ -77,7 +77,7 @@ for file in yesterdays_files:
 
     except Exception:
         errors += 1
-        logging.error("Could not parse file " + str(file))
+        logging.error("Could not parse file (formatting issue) " + str(file))
 
 # Push to database
 eduroam = 0 if "eduroam" not in network else len(network["eduroam"])
@@ -101,7 +101,6 @@ logging.info("clemson_count: " + str(eduroam))
 logging.info("guest_count: " + str(clemsonguest))
 
 if SEND:
-    # urllib.request.urlopen(command_to_query(insert_sql_total)).read()
     f = open("/cevac/cache/insert_daily_wap2.sql", "w")
     f.write(insert_sql_total.replace(';', '\nGO\n'))
     f.close()
@@ -112,7 +111,7 @@ else:
     print(insert_sql_total)
 
 if errors == 0:
-    logging.info("Successfully inserted into daily database")
+    logging.info("Successfully inserted into daily database.")
 logging.shutdown()
 
 """
