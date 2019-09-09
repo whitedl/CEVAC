@@ -43,6 +43,7 @@ function get_html_update(b){
 function get_attributes_html(){
   b = document.getElementById('buildings').value
   m = document.getElementById('metrics').value
+  reset_PXREF();
 
   // form = document.getElementById('toggle');
   // attributes = [];
@@ -74,6 +75,25 @@ function get_Metrics_html(){
   });
   show_buttons();
 }
+function reset_PXREF(){
+  table = document.getElementById('sql_output');
+  table.innerHTML = "";
+  view = "View PXREF";
+  pb = document.getElementById('PXREF_button');
+  pb.innerHTML = view;
+}
+function PXREF_button(){
+  pb = document.getElementById('PXREF_button');
+  view = "View PXREF";
+  update = "Update PXREF";
+  if(pb.innerHTML == view){
+    get_PXREF_html();
+    pb.innerHTML = update;
+  } else{
+    update_aliases();
+    pb.innerHTML = view;
+  }
+}
 function get_PXREF_html(){
   b = document.getElementById('buildings').value;
   m = document.getElementById('metrics').value;
@@ -83,8 +103,6 @@ function get_PXREF_html(){
     sql_out.innerHTML = data;
   });
 }
-
-
 function show_buttons(){
   d = document.getElementById('buttons_div');
   d.style.display = 'block';
@@ -92,5 +110,41 @@ function show_buttons(){
 function success_output(data){
   output = document.getElementById('output');
   output.innerHTML = data;
+  console.log(data);
 }
+function update_aliases(){
+  table = document.getElementById('sql_output');
+  headers = [];
+  tdata = [];
+  for(var i = 0, n = table.rows[0].cells.length; i < n; i++) headers.push(table.rows[0].cells[i].innerHTML);
 
+  for(var r = 1, n = table.rows.length; r < n; r++) {
+    row = [];
+    for(var c = 0, m = table.rows[r].cells.length; c < m; c++) {
+      row.push(table.rows[r].cells[c].innerHTML);
+    }
+    tdata.push(row);
+  }
+  send_xref(headers, tdata);
+}
+function send_xref(l,t){
+  console.log('sending request');
+  u = 'console/update_XREF.php';
+  fd = $('form').serializeArray();
+  // console.log(fd);
+  // fd = document.getElementById('toggle');
+  // for(var i = 0; i < l.length; i++) fd.append('headers[]', l[i]);
+  // d = fd + $(l).serializeArray() + $(t).serializeArray();
+  $.ajax({
+    type: 'POST',
+    url: u,
+    data: { headers: l, tdata: t , fd: fd},
+    // data: { fd },
+    // data: { d },
+    success: success_output
+  });
+}
+function rebuild_PXREF(){
+  form_request('rebuild_PXREF.php');
+  document.getElementById('PXREF_button').innerHTML = "View PXREF";
+}

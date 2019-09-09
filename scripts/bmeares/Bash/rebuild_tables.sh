@@ -1,20 +1,53 @@
 #! /bin/bash
 
-/home/bmeares/scripts/seperator.sh
-echo Appending tables...
-tables_array=(
-CEVAC_WATT_TEMP_HIST_VIEW
-CEVAC_WATT_IAQ_HIST_VIEW
-CEVAC_WATT_POWER_HIST_VIEW
-CEVAC_WATT_POWER_SUMS_HIST_VIEW
-CEVAC_ASC_IAQ_HIST_VIEW
-CEVAC_ASC_TEMP_HIST_VIEW
-CEVAC_LEE_III_TEMP_HIST_VIEW
-)
+usage="Usage:
+  -b BuildingSName
+  -m Metric
+  -a Age
+  -k keys_list
+  -u unitOfMeasureID
+  -h help
+  -y run without asking
+"
+while getopts b:m:k:u:a:hycl option; do
+  case "${option}"
+    in
+    b) BuildingSName=${OPTARG};;
+    m) Metric=${OPTARG};;
+    a) Age=${OPTARG};;
+    k) keys_list=${OPTARG};;
+    u) unitOfMeasureID=${OPTARG};;
+    h) echo "$usage" && exit 1 ;;
+    y) yes="yes";;
+    l) autoLASR="true";;
+    c) autoCACHE="true";;
+  esac
+done
+
+hist_views_query="
+SELECT RTRIM(TableName) AS 'TableName'
+FROM CEVAC_TABLES
+WHERE Age = '$Age'
+AND TableName NOT LIKE '%CSV%'
+"
+/cevac/scripts/exec_sql.sh "$hist_views_query" "hist_views.csv"
+
+# Remove header from csv
+sed -i '1d' /cevac/cache/hist_views.csv
+readarray tables_array < /cevac/cache/hist_views.csv
+
 for t in "${tables_array[@]}"; do
-  sql="EXEC CEVAC_CACHE_APPEND @tables = '"$t"'"
-  /home/bmeares/scripts/exec_sql.sh "$sql"
+  t=`echo "$t" | tr -d '\n'`
+  [ -z "$t" ] && continue
+  query="
+  INSERT INTO CEVAC_ALIAS_LOG(PointSliceID, Alias, UTCDateTime)
+  SELECT PointSliceID, Alias, GETUTCDATE() AS 'UTCDateTime'
+  FROM $t;
+  "
+  echo "$query"
+  /cevac/scripts/exec_sql.sh "$query"
+
 done
 
 
-echo Finished
+

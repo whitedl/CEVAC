@@ -36,7 +36,7 @@ echo "Creating $table.csv"
 
 if ! /cevac/scripts/table_to_csv_append.sh "$table" ; then
   error="$table.csv failed. Aborting..."
-  /cevac/scripts/log_error.sh "$error"
+  /cevac/scripts/log_error.sh "$error" "$table"
   exit 1
 fi
 echo "Uploading CSV to LASR Autoloader..."
@@ -44,7 +44,7 @@ echo "Uploading CSV to LASR Autoloader..."
 if [ "$reset" == "reset" ]; then
   echo "Reset detected. Uploading entire $table.csv"
   if ! rsync -vh --progress /srv/csv/$table.csv sas@wfic-sas-im-hd.clemson.edu:/opt/sasinside/sasconfig/Lev1/AppData/SASVisualAnalytics/VisualAnalyticsAdministrator/AutoLoad/$dest_table.csv ; then
-    error="Cannot rsync to LASR"
+    error="Cannot rsync $table to LASR"
     /cevac/scripts/log_error.sh "$error" "$table"
     exit 1
   fi
