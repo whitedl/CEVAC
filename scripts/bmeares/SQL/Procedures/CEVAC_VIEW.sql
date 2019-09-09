@@ -79,7 +79,7 @@ SET @OLDEST = 'CEVAC_' + @Building + '_' + @Metric + '_OLDEST';
 -- Current name
 IF @Age = 'HIST' SET @Table_name = CONCAT('CEVAC_', @Building, '_', @Metric, '_', @Age, '_VIEW')
 ELSE SET @Table_name = CONCAT('CEVAC_', @Building, '_', @Metric, '_', @Age);
-SELECT @Table_name AS 'Table_name init';
+PRINT @Table_name;
 SET @XREF = CONCAT('CEVAC_', @Building, '_', @Metric, '_XREF');
 IF @Metric = 'POWER_SUMS' SET @XREF = CONCAT('CEVAC_', @Building, '_POWER_XREF');
 SET @PXREF = CONCAT('CEVAC_', @Building, '_', @Metric, '_PXREF');
@@ -169,7 +169,7 @@ BEGIN
 	SET @XREF_or_PXREF = 'PXREF';
 	SET @XREF_query = 'INNER JOIN ' + @PXREF + ' AS xref on xref.' + @RemotePSIDName + ' = val.' + @RemotePSIDName + '';
 	SET @Alias_or_PSID = @RemotePSIDName;
-END ELSE BEGIN -- XREF exists
+END ELSE IF @Age = 'HIST' BEGIN -- XREF exists
 	-- Insert XREF into CEVAC_TABLES
 	PRINT 'Adding XREF to table: ' + @XREF;
 	IF @execute = 1 BEGIN
@@ -305,19 +305,32 @@ IF @Age LIKE '%PXREF%' BEGIN
 	END
 
 	DELETE FROM CEVAC_TABLES WHERE TableName = @PXREF;
+
+	DECLARE @PXREF_Alias_source NVARCHAR(MAX);
+	DECLARE @PXREF_Alias_join NVARCHAR(MAX);
+	IF OBJECT_ID(@XREF) IS NULL BEGIN
+		SET @PXREF_Alias_source = @RemotePointNameName;
+		SET @PXREF_Alias_join = NULL;
+	END ELSE BEGIN
+		SET @PXREF_Alias_source = 'xref.Alias';
+		SET @PXREF_Alias_join = 'INNER JOIN ' + @XREF + ' AS xref ON xref.' + @RemotePSIDName + ' = ps.' + @RemotePSIDName;
+	END
+
 	SET @PXREF_query = '
 		IF OBJECT_ID(''dbo.' + @PXREF + ''', ''U'') IS NOT NULL DROP TABLE ' + @PXREF + ';
 		SELECT DISTINCT
-			ps.' + @RemotePSIDName + ', pt.' + @RemotePointNameName + ' AS Alias, units.' + @RemoteUnitOfMeasureIDName + '
+			ps.' + @RemotePSIDName + ', pt.' + @RemotePointNameName + ', ' + @PXREF_Alias_source + ' AS ''Alias'', units.' + @RemoteUnitOfMeasureIDName + '
 		INTO ' + @PXREF + '
 		FROM
 			[' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemotePtTable + ' AS pt
 			INNER JOIN [' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemotePSTable + ' AS ps ON pt.' + @RemotePointIDName + ' = ps.' + @RemotePointIDName + ' 
 			INNER JOIN [' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemoteUnitTable + ' AS units ON units.' + @RemoteUnitOfMeasureIDName + ' = pt.' + @RemoteUnitOfMeasureIDName + '
+			' + ISNULL(@PXREF_Alias_join, '') + '
 			' + @keys_list_query + '
 		WHERE
 		( pt.' + @RemotePointNameName + ' LIKE ''' + @building_key + ''')
-		AND ' + ISNULL(@unitOfMeasureID_query, '1 = 1');
+		AND ' + ISNULL(@unitOfMeasureID_query, '1 = 1') + '
+		';
 	PRINT @PXREF_query;
 	IF @execute = 1 BEGIN
 		EXEC(@PXREF_query);

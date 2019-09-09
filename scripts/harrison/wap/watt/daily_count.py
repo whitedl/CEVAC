@@ -8,8 +8,7 @@ import datetime
 from datetime import datetime as dt
 import csv
 import logging
-import urllib.request
-import urllib.parse
+
 
 # Setup configuration
 SEND = True
@@ -21,7 +20,6 @@ processed_dir = "/mnt/bldg/WAP/processed"
 CLIENT = 0
 MAC = 2
 SSID = 7
-
 
 
 # Script
@@ -74,7 +72,7 @@ for file in yesterdays_files:
 
     except Exception:
         errors += 1
-        logging.error("Could not parse file " + str(file))
+        logging.error("Could not parse file (formatting error) " + str(file))
 
 # Push to database
 eduroam = 0 if "eduroam" not in network else len(network["eduroam"])
