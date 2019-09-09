@@ -272,8 +272,8 @@ def email_message(email, password, to_list, message, subject):
             m_message.attach(a_msg)
 
             new_message = replace_metric(m_message.as_string())
-            print(new_message)  # .encode("utf-8"))
-            server.sendmail(email, p_email, new_message)  # .encode("utf-8"))
+            print(new_message)
+            server.sendmail(email, p_email, new_message)
 
 
 def main():

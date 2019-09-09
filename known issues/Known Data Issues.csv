@@ -39,9 +39,9 @@ Several CO2 sensors offline (filtered out),WATT,12/8/2015,None,None,"205, 207, 2
 103 Temp offline,WATT,3/25/2019,None ,103 Temp does not report,None,None
 103 Temp restored,WATT,6/24/2019,None,103 Temp begins reporting,None,None
 433 Temp offline,WATT,8/10/2018,None,433 Temp does not report,None,None
-344A Heating SP intentionally decomissioned,WATT,8/20/2016,None,344A Temp no longer reports,None,None
-344A Cooling SP intentionally decomissioned,WATT,8/20/2016,None,344A Temp no longer reports,None,None
-344A Temp intentionally decomissioned,WATT,8/20/2016,None,344A Temp no longer reports,None,None
+344A Heating SP (8880) intentionally decommissioned,WATT,8/20/2016,None,344A Temp no longer reports,None,None
+344A Cooling SP (8879) intentionally decommissioned,WATT,8/20/2016,None,344A Temp no longer reports,None,None
+344A Temp (8884) intentionally decommissioned,WATT,8/20/2016,None,344A Temp no longer reports,None,None
 214 Temp offline,WATT,5/31/2018,None,214 Temp does not report,None,None
 214 Temp Restored,WATT,8/3/2018,None,214 Temp begins reporting,None,None
 339A Temp offline,WATT,2/6/2016,None,339A Temp does not report,None,None
@@ -60,3 +60,9 @@ Air Handler L1 Return Air CO2 Restored,ASC,7/3/2019,None,None,Air Handler L1 Ret
 Air Handler L1 Return Air CO2 1st Floor CO2 Offline,ASC,3/19/2018,None,None,Air Handler L1 Return Air CO2 1st Floor does not report,None
 Air Handler L1 Return Air CO2 3rd Floor CO2 Offline,ASC,10/12/2018,None,None,Air Handler L1 Return Air 3rd Floor CO2 reports very low\,None
 Air Handler R1 Return Air CO2 Offline,ASC,6/29/2016,None,None,Air Handler R1 Return Air CO2 reports very low,None
+Air Handler L1 Return Air 3rd Floor CO2 (6633) intentionally decommissioned,ASC,3/19/2018,None,None,PSID 6633 no longer reports,None
+Air Handler R1 Return Air 3rd Floor CO2 (6640) intentionally decommissioned,ASC,4/12/2018,None,None,PSID 6640 no longer reports,None
+Air Handler L1 Return Air 2nd Floor CO2 (6632) intentionally decommissioned,ASC,3/19/2018,None,None,PSID 6632 no longer reports,None
+Air Handler R1 Return Air 1st Floor CO2 (6629) intentionally decommissioned,ASC,4/12/2018,None,None,PSID 6629 no longer reports,None
+Air Handler R1 Return Air 2nd Floor CO2 (6630) intentionally decommissioned,ASC,4/12/2018,None,None,PSID 6630 no longer reports,None
+Air Handler R1 Return Air 1st Floor CO2 (3) intentionally decommissioned,ASC,9/1/2014,None,None,PSID 3 no longer reports,None

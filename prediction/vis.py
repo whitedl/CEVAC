@@ -19,8 +19,6 @@ pdf = pd.read_csv('CEVAC_WATT_POWER_SUMS_HIST.csv')
 ''', error_bad_lines=False'''
 wdf = pd.read_csv('historicWeather.csv')
 
-print(wdf)
-
 #   creates a
 cJSON = {}
 
@@ -67,11 +65,13 @@ def insertData(df):
     }
 
     for index, row in df.iterrows():
+
         y = int(row['ETDateTime'][0:4])
         m = int(row['ETDateTime'][5:7])
         d = int(row['ETDateTime'][8:10])
         tm = float(d/numMonth[row['ETDateTime'][5:7]])
-        h = int(row['ETDateTime'][11:13])
+        h = int(row['ETDateTime'][-8:-6])
+
         d = date(y, m, d).weekday()
 
         intSum = int(row['Total_Usage'])
@@ -92,7 +92,7 @@ def formatConditions(df):
     for index, row in df.iterrows():
 
         # pull the entire date string
-        date = row['time'][0:15]
+        date = row['time']
 
         # format the year from the date string
         year = str(date[0:4])
@@ -103,8 +103,8 @@ def formatConditions(df):
         month = str(monat[month])
 
         # format the rest of the time data
-        day = str(date[10:12])
-        hour = str(date[13:15])
+        day = str(date[-5:-3])
+        hour = str(date[-2:])
 
         # make the key from the formatted time data
         key = '-'.join((year, month, day))
@@ -134,6 +134,8 @@ def makeArrays(df):
     with open('combinedData.json') as f:
         cJSON = json.load(f)
 
+    dateNotFound = 0
+
     # populate each array for every row that has all of the attributes
     for index, row in df.iterrows():
 
@@ -141,6 +143,10 @@ def makeArrays(df):
         try:
             weatherData = cJSON[row['ETDateTime'][0:13]]
         except:
+            r = random.randint(0,500)
+            if r == 0:
+                print(row['ETDateTime'][0:13])
+            dateNotFound += 1
             weatherData = None
 
         if weatherData != None and len(weatherData) == 4:
@@ -180,6 +186,7 @@ def makeArrays(df):
             else:
                 print(tempx)
 
+    print('DATES NOT FOUND {}'.format(dateNotFound))
     saveArrays(x, y)
 
 def saveArrays(x, y):
