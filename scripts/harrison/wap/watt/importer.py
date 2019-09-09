@@ -322,7 +322,6 @@ print(file_list)
 for fname in file_list:
     fpath = os.path.join(import_dir, fname)
     success = False
-    logging.info("Running for " + str(fpath))
     try:
         insert_sql_total += ingest_file_wap(fpath)
         insert_sql_total += ingest_file_floor(fpath)
@@ -330,7 +329,6 @@ for fname in file_list:
     except Exception as e:
         print("error")
         logging.error("Unexpected error while processing file '%s'", fpath)
-        #logging.error(e.message)
 
     if success:
         if SEND and not DEBUG:

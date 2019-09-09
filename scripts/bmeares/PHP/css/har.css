@@ -1,0 +1,118 @@
+* {
+  font-family: "Arial", Times, serif;
+  color: #ffffff;
+}
+pre {
+  font-family: "Arial", monospace;
+  color: #ffffff
+}
+h2 {
+  color: #f8f8f2	;
+}
+
+textarea {
+  background-color: #44475a;
+  color: #8be9fd;
+  border: none;
+  font-size: 20px;
+}
+
+body {
+  background-color: #282a36;
+}
+
+input {
+  background-color: #44475a;
+  color: #50fa7b;
+  border: none;
+  padding: 10px;
+  border-radius: 5%;
+  font-size: 20px;
+}
+button {
+  background-color: #44475a;
+  color: #24d655;
+  border: 2px solid transparent;
+  padding: 10px;
+  border-radius: 5%;
+  font-size: 20px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  cursor:pointer;
+}
+button:disabled {
+  color: #555555;
+}
+button:hover:enabled{
+  border: 2px solid #aaaaaa;
+  color: #50fa7b;
+}
+
+select {
+  background-color: #44475a;
+  color: #50fa7b;
+  border: none;
+  padding: 10px;
+  border-radius: 5%;
+  font-size: 20px;
+}
+table {
+    border-spacing: 10px;
+    border-collapse: separate;
+}
+td {
+  color: #ffb45b;
+}
+#body_left {
+  width: 49%;
+  height: 95%;
+  float: left;
+  margin: auto;
+  /* border: 2px solid green; */
+}
+#body_right {
+  width: 49%;
+  height: 95%;
+  float: right;
+  margin: auto;
+  /* border: 2px solid red; */
+}
+#sql_output_div {
+}
+#advanced_div {
+  width: 50%;
+  border: 2px solid red;
+  display: block;
+  float: right;
+}
+#buttons_div {
+  width: 30%;
+  border: 2px solid white;
+  display: block;
+  float: left;
+}
+#buttons_parent_div {
+  width: 99%;
+  height: 100px;
+  /* border: 2px solid blue; */
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+#delete_button{
+  background-color: #cc0000;
+  color: #FFFFFF;
+}
+#PXREF_button{
+  float: left;
+}
+#advanced_right{
+  border: 2px solid green;
+  width: 50%;
+  float: right;
+}
+#unitOfMeasureID{
+  width: 35%;
+}
+.advanced {
+  display: none;
+}
