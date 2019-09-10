@@ -74,6 +74,13 @@ def sql_time_str(t):
     return t.strftime('%Y-%m-%d %H:%M:%S')
 
 
+def debug_print(message):
+    """Print message if in debug mode."""
+    if not CHECK_ALERTS or not SEND:
+        print(message)
+    return None
+
+
 def regex_to_numlist(regex_string):
     """Return a num_list.
 
@@ -179,19 +186,24 @@ def import_conditions(fname, logger):
 
 
 def import_known_issues(fname):
-    """Return dict of buildingsname to list of blacklists."""
+    """Return dict of buildingsname to list of blacklist messages."""
     d = {}
     with open(fname, "r") as csvfile:
         csvfile = csv.reader(csvfile)
         next(csvfile)  # header
         for row in csvfile:
-            bldg = row[1]
-            message = row[0]
-            if "decomissioned" in message:
-                if bldg in d:
-                    d[bldg].append(message)
-                else:
-                    d[bldg] = [message]
+            try:
+                bldg = row[1]
+                message = row[0]
+                if "decomissioned" in message:
+                    # psid = bldg.replace(")", "(").split("(")[1]
+                    # debug_print("Found PSID as", psid)
+                    if bldg in d:
+                        d[bldg].append(message)
+                    else:
+                        d[bldg] = [message]
+            except Exception:
+                continue
     return d
 
 
@@ -200,7 +212,7 @@ def skip_alias(known_issues, bldg, alias):
     if bldg not in known_issues:
         return False
     for message in known_issues[bldg]:
-        if alias in message:
+        if f"({alias})" in message:
             return True
     return False
 
@@ -315,7 +327,7 @@ def command_to_list_multiple(command, num_args):
             d = d if d[0] == "{" else "{" + d
             d = d if d[-1] == "}" else d + "}"
             dict_list.append(json.loads(d))
-    except:
+    except Exception:
         print("issue, data:")
         print(data_list)
     data_list = []
@@ -418,12 +430,13 @@ def get_psid_from_alias(alias, bldgsname, metric):
         f = open("/cevac/cache/temp_psid_csv.csv", "r")
         lines = f.readlines()
         try:
-            psids = [int(psid.replace("\n","")) for i, psid in enumerate(lines) if i > 0]
+            psids = [int(psid.replace("\n", "")) for i,
+                     psid in enumerate(lines) if i > 0]
             os.remove("/cevac/cache/temp_psid_csv.csv")
             return str(max(psids))
         except Exception:
             os.remove("/cevac/cache/temp_psid_csv.csv")
-            return str(int(lines[-1].replace("\n","")))
+            return str(int(lines[-1].replace("\n", "")))
     except Exception:
         print("could not get psid from alias")
         os.remove("/cevac/cache/temp_psid_csv.csv")
@@ -448,8 +461,7 @@ def building_is_occupied(occupancy_dict, building):
     return False
 
 
-def check_numerical_alias(alias, alert, next_id, last_events, new_events,
-                          get_psid):
+def check_numerical_alias(alias, alert, next_id, last_events, new_events, get_psid):
     """Check numerical alias alert."""
     selection_command = (f"SELECT TOP {str(alert['num_entries'])} "
                          f"{alert['column']} FROM "
@@ -509,8 +521,7 @@ def check_numerical_alias(alias, alert, next_id, last_events, new_events,
     return (next_id, new_events, com + ";")
 
 
-def check_temp(room, alert, temps, known_issues, next_id, last_events,
-               new_events, get_psid):
+def check_temp(room, alert, temps, known_issues, next_id, last_events, new_events, get_psid):
     """Check temps."""
     if skip_alias(known_issues, alert["building"], room):
         print(room, " is decomissioned")
@@ -574,7 +585,7 @@ def check_temp(room, alert, temps, known_issues, next_id, last_events,
 
         if send_alert:
             a = deepcopy(alert)
-            add = get_psid_from_alias(room + " Temp",alert["building"],alert["type"]) if get_psid else ""
+            add = get_psid_from_alias(room + " Temp", alert["building"],alert["type"]) if get_psid else ""
             a["message"] = angle_brackets_replace_specific(
                             a["message"], "alias",
                             room + " Temp (" + add + ")")
