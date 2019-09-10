@@ -5,7 +5,6 @@ table `CEVAC_ALL_ALERTS_HIST`.
 """
 
 import os
-import sys
 import csv
 import json
 import datetime
@@ -707,7 +706,7 @@ if __name__ == "__main__":
                 z = (f"SELECT DISTINCT "
                      f"{a_or_psid} "
                      f"FROM {alert['database']}")
-                z = command_to_list_multiple(z,2)
+                z = command_to_list_multiple(z, 2)
                 all_aliases = [b[0] for b in command_to_list_multiple(z, 2)]
 
                 for alias in all_aliases:
@@ -715,7 +714,7 @@ if __name__ == "__main__":
                         obj = check_numerical_alias(alias, alert,
                                                     next_id,
                                                     last_events,
-                                                    new_eventsm, get_psid)
+                                                    new_events, get_psid)
                         next_id = obj[0]
                         new_events = obj[1]
                         insert_sql_total += obj[2]
@@ -752,9 +751,9 @@ if __name__ == "__main__":
 
                 for room in temps:
                     obj = check_temp(room, alert, temps,
-                                                   known_issues,
-                                                   next_id, last_events,
-                                                   new_events, get_psid)
+                                     known_issues,
+                                     next_id, last_events,
+                                     new_events, get_psid)
                     next_id = obj[0]
                     new_events = obj[1]
                     insert_sql_total += obj[2]
