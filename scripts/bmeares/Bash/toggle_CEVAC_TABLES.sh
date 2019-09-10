@@ -23,6 +23,7 @@ usage="Usage:
   -h help
   "
 HIST="CEVAC_$BuildingSName""_$Metric""_HIST"
+HIST_LASR="CEVAC_$BuildingSName""_$Metric""_HIST_LASR"
 LATEST="CEVAC_$BuildingSName""_$Metric""_LATEST"
 HIST_VIEW="CEVAC_$BuildingSName""_$Metric""_HIST_VIEW"
 if [ ! -z "$h" ]; then

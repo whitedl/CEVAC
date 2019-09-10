@@ -12,6 +12,8 @@
     <link rel="stylesheet" type="text/css" href="css/radio.css">
     <script src="console/JS/console.js"></script>
     <script src="console/JS/format.js"></script>
+    <script src="console/JS/pull.js"></script>
+    <script src="console/JS/push.js"></script>
     <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.4.1.min.js"></script>
 	</head>
 	<body onload="get_Metrics_html()">
@@ -61,6 +63,7 @@
         <div id='advanced_div' class="advanced" style="visibility: hidden">
           <button name="PXREF_button" id="PXREF_button" onclick="PXREF_button()">View PXREF</button><br>
           <button name="rebuild_PXREF_button" id="rebuild_PXREF_button" onclick="rebuild_PXREF()">Rebuild PXREF</button><br>
+          <button name="building_info_button" id="building_info_button" onclick="building_info_button()">View Buildings</button><br>
         </div>
         <div id="buttons_div" style="display:none">
           <button name="bootstrap_button" id="bootstrap_button" onclick="bootstrap()">Bootstrap</button>

@@ -69,5 +69,6 @@ for($i = 0; $i < sizeof($_POST['tdata']); $i++){
   ";
 
 }
-exec_sql($query);
+echo "$query";
+// exec_sql($query);
 ?>
