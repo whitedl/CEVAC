@@ -195,7 +195,7 @@ def import_known_issues(fname):
             try:
                 bldg = row[1]
                 message = row[0]
-                if "decomissioned" in message:
+                if "decommissioned" in message:
                     # psid = bldg.replace(")", "(").split("(")[1]
                     # debug_print("Found PSID as", psid)
                     if bldg in d:
@@ -212,7 +212,7 @@ def skip_alias(known_issues, bldg, alias):
     if bldg not in known_issues:
         return False
     for message in known_issues[bldg]:
-        if f"({alias})" in message:
+        if f"{alias}" in message:
             return True
     return False
 
@@ -585,7 +585,7 @@ def check_temp(room, alert, temps, known_issues, next_id, last_events, new_event
 
         if send_alert:
             a = deepcopy(alert)
-            add = get_psid_from_alias(room + " Temp", alert["building"],alert["type"]) if get_psid else ""
+            add = get_psid_from_alias(room + " Temp", alert["building"], alert["type"]) if get_psid else ""
             a["message"] = angle_brackets_replace_specific(
                             a["message"], "alias",
                             room + " Temp (" + add + ")")
