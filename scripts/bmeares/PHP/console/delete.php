@@ -12,7 +12,7 @@ $exec = $script." ".$BuildingSName." ".$Metric." -y";
 
 if(!isset($_POST['BuildingSName']) || !isset($_POST['Metric'])) die('missing params');
 
-echo "$exec";
+// echo "$exec";
 echo `$exec`;
 
 ?>

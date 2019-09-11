@@ -92,7 +92,6 @@ def ingest_file(fname):
         for row in reader:
             # insert into CEVAC_ALL_CHW_RATE_HIST (BTU/sec)
             try:
-                #test
                 today = custom_datestring_to_datetime(
                     row[0]).strftime('%Y-%m-%d %H:%M:%S')
                 today_utc = custom_datestring_utc(

@@ -59,6 +59,7 @@ def ingest_file_floor(fname, dbc):
     cursor = dbc.cursor()
     errorCount = 0
 
+    logging.info("opening file")
     with open(fname, "r") as csvfile:
         reader = csv.reader(csvfile)
         insert_sql = "INSERT INTO CEVAC_COOPER_WAP_FLOOR_HIST (UTCDateTime, floor, guest_count, clemson_count) VALUES (?,?,?,?)"
@@ -107,7 +108,9 @@ def ingest_file_floor(fname, dbc):
                 td = ((dissoc_time - assoc_time).total_seconds()/60) % 60
 
                 ## Add count of unique people per wap
+                #debug_log("okay",LOG)
                 if (hour in hours.keys()) and (td > 1):
+                    #debug_log("hour in  keys",LOG)
                     if floor in hours[hour].keys():
                         if SSID in hours[hour][floor].keys():
                             hours[hour][floor][SSID]["time"] += td
@@ -129,6 +132,7 @@ def ingest_file_floor(fname, dbc):
                             }
                         }
                 elif (td > 1):
+                    #debug_log("here",LOG)
                     hours[hour] = {
                         floor : {
                             SSID : {
@@ -139,8 +143,9 @@ def ingest_file_floor(fname, dbc):
                             }
                         }
                     }
+                #debug_log("success insert",LOG)
             except:
-                logging.error(f"WAP name ({name}) not in xref")
+                logging.error("router not in xref")
 
         for hour in hours:
             for floor in hours[hour]:
@@ -232,6 +237,7 @@ try:
         'pwd=' + dbconfig2['pwd'])
 except pypyodbc.Error as dbe:
     logging.exception("Unable to connect to the database.")
+    logging.info("Issue with connection")
     logging.shutdown()
     raise
 
@@ -239,6 +245,7 @@ except pypyodbc.Error as dbe:
 for fname in file_list:
     fpath = os.path.join(processed_dir, fname)
     success = False
+    logging.info("Running for "+str(fpath))
     try:
         if True:
             success = ingest_file_floor(fpath,connection)

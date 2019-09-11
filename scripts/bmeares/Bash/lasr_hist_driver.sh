@@ -46,7 +46,7 @@ fi
 hist_views_query="
 SELECT RTRIM(BuildingSName), RTRIM(Metric), RTRIM(Age) FROM CEVAC_TABLES
 WHERE autoLASR = 1
-AND Age = '$Age'
+AND Age LIKE '%$Age%'
 AND customLASR = $customLASR
 "
 /cevac/scripts/exec_sql.sh "$hist_views_query" "hist_views.csv"

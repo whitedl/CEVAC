@@ -42,7 +42,7 @@ function buildings_html(){
     FROM CEVAC_BUILDING_INFO
     ORDER BY BuildingDName ASC";
   $result = sqlsrv_query($db, $query);
-  $out = "<select id='buildings' name='BuildingSName' onclick='get_Metrics_html()'>\n";
+  $out = "<select id='buildings' name='BuildingSName' onchange='get_Metrics_html()'>\n";
   while($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)){
     $out .= "<option value='".$row['BuildingSName']."'>".$row['BuildingDName']."</option>\n";
   }
@@ -70,7 +70,7 @@ function metrics_html($BuildingSName, $filter){
   }
   
   $result = sqlsrv_query($db, $query);
-  $out = "<select id='metrics' name='Metric' onclick='get_attributes_html()'>\n";
+  $out = "<select id='metrics' name='Metric' onchange='get_attributes_html()'>\n";
   while($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)){
     $out .= "<option value='".$row['Metric']."'>".$row['Metric']." (".$row['dn'].")"."</option>\n";
   }
@@ -80,7 +80,21 @@ function metrics_html($BuildingSName, $filter){
 
 function exec_sql($query){
   global $db;
-  return sqlsrv_query($db, $query);
+  $result = sqlsrv_query($db, $query);
+  if($result === false) die(print_r(sqlsrv_errors(), true));
+  return $result;
 }
-
+function sql_value($query){
+  $result = exec_sql($query);
+  $row = sqlsrv_fetch_array($result, SQLSRV_FETCH_NUMERIC);
+  if($row === false) die(print_r(sqlsrv_errors(), true));
+  return $row[0];
+}
+function CEVAC_CONFIG_value($var){
+  $query = "
+  SELECT VarValue FROM CEVAC_CONFIG
+  WHERE VarName = '$var'
+  ";
+  return sql_value($query);
+}
 ?>
