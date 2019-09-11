@@ -17,7 +17,7 @@ while getopts b:m:k:u:hycl option; do
     m) Metric=${OPTARG};;
     k) keys_list=${OPTARG};;
     u) unitOfMeasureID=${OPTARG};;
-    h) echo "$usage" && exit 1 ;;
+    h) echo "$usage" && /cevac/scripts/unlock.sh && exit 1 ;;
     y) yes="yes";;
     l) autoLASR="true";;
     c) autoCACHE="true";;
@@ -33,9 +33,7 @@ echo "Warning: This will completely rebuild the data pipeline and may take up to
 echo "Custom tables WILL BE PRESERVED if CREATE_CUSTOM.sh has previously been run."
 echo "Continue? (Y/n)"
 [ -z "$yes" ] && read cont
-if [ "$cont" == "y" ] || [ "$cont" == "Y" ] || [ -z "$cont" ]; then
-  continue
-else
+if [ "$cont" != "y" ] && [ "$cont" != "Y" ] && [ ! -z "$cont" ]; then
   /cevac/scripts/unlock.sh
   exit 1
 fi

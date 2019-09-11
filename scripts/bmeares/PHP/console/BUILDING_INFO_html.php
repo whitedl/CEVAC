@@ -8,27 +8,27 @@ $XREF = "CEVAC_$BuildingSName"."_$Metric"."_XREF";
 if(!isset($_GET['BuildingSName']) || !isset($_GET['Metric'])) die('missing params');
 
 $query = "
-  SELECT p.PointSliceID AS 'PointSliceID', PointName AS 'PointName', p.UnitOfMeasureID AS 'UnitOfMeasureID', p.Alias AS 'Alias'
-  FROM $PXREF AS p
-  ORDER BY PointSliceID ASC
+  SELECT BuildingSName, BuildingDName, BuildingKey, ReportLink
+  FROM CEVAC_BUILDING_INFO AS bi
+  ORDER BY BuildingSName ASC
 ";
 $result = exec_sql($query);
 $output = "
 <tr>
-  <th>PointSliceID</th>
-  <th>PointName</th>
-  <th>Alias</th>
-  <th>UnitOfMeasureID</th>
+  <th>BuildingSName</th>
+  <th>BuildingDName</th>
+  <th>BuildingKey</th>
+  <th>ReportLink</th>
 </tr>
 ";
 
 while($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)){
   $output .= "
   <tr>
-    <td>".$row['PointSliceID']."</td>
-    <td>".$row['PointName']."</td>
-    <td contenteditable='true'>".$row['Alias']."</td>
-    <td>".$row['UnitOfMeasureID']."</td>
+    <td contenteditable='true'>".$row['BuildingSName']."</td>
+    <td contenteditable='true'>".$row['BuildingDName']."</td>
+    <td contenteditable='true'>".$row['BuildingKey']."</td>
+    <td contenteditable='true'>".$row['ReportLink']."</td>
   </tr>
   ";
 }
