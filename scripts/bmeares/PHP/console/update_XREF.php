@@ -53,9 +53,13 @@ for($i = 0; $i < sizeof($_POST['tdata']); $i++){
 
   $query .= "
   SET @A = NULL;
-  IF OBJECT_ID('$XREF') IS NOT NULL SET @A = (SELECT TOP 1 Alias FROM $XREF WHERE $RemotePSIDName = $PSID ORDER BY UTCDateTime DESC);
+  IF OBJECT_ID('$XREF') IS NOT NULL SET @A = (SELECT TOP 1 Alias FROM $XREF WHERE $RemotePSIDName = $PSID);
   IF(@A != '$Alias' AND @A IS NOT NULL) BEGIN
     UPDATE $XREF
+    SET Alias = '".$Alias."'
+    WHERE $RemotePSIDName = $PSID;
+
+    UPDATE $PXREF
     SET Alias = '".$Alias."'
     WHERE $RemotePSIDName = $PSID;
 
@@ -69,6 +73,6 @@ for($i = 0; $i < sizeof($_POST['tdata']); $i++){
   ";
 
 }
-echo "$query";
-// exec_sql($query);
+// echo "$query";
+exec_sql($query);
 ?>
