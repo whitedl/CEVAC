@@ -8,7 +8,7 @@ $XREF = "CEVAC_$BuildingSName"."_$Metric"."_XREF";
 if(!isset($_GET['BuildingSName']) || !isset($_GET['Metric'])) die('missing params');
 
 $query = "
-  SELECT p.PointSliceID AS 'PointSliceID', p.PointName AS 'pAlias', p.UnitOfMeasureID AS 'UnitOfMeasureID', p.Alias AS 'xAlias'
+  SELECT p.PointSliceID AS 'PointSliceID', PointName AS 'PointName', p.UnitOfMeasureID AS 'UnitOfMeasureID', p.Alias AS 'Alias'
   FROM $PXREF AS p
   ORDER BY PointSliceID ASC
 ";
@@ -26,8 +26,8 @@ while($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)){
   $output .= "
   <tr>
     <td>".$row['PointSliceID']."</td>
-    <td>".$row['pAlias']."</td>
-    <td contenteditable='true'>".$row['xAlias']."</td>
+    <td>".$row['PointName']."</td>
+    <td contenteditable='true'>".$row['Alias']."</td>
     <td>".$row['UnitOfMeasureID']."</td>
   </tr>
   ";
