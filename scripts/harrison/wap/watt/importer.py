@@ -221,7 +221,7 @@ def ingest_file_floor(fname):
                 snr_db = row[11]
                 rssi_dbm = row[12]
                 td = ((dissoc_time - assoc_time).total_seconds() / 60) % 60
-                # Add count of unique people per wap
+                # Add count of unique people per zone
                 if (hour in hours.keys()) and (td > 1):
                     if floor in hours[hour].keys():
                         if SSID in hours[hour][floor].keys():
@@ -330,7 +330,7 @@ for fname in file_list:
     except Exception as e:
         print("error")
         logging.error("Unexpected error while processing file '%s'", fpath)
-        #logging.error(e.message)
+        # logging.error(e.message)
 
     if success:
         if SEND and not DEBUG:

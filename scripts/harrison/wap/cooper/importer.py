@@ -1,4 +1,4 @@
-"""Import WAP data from csv to sql using pypyodbc."""
+"""Import WAP data from csv to sql."""
 
 import os
 import sys
@@ -91,7 +91,6 @@ def xref_to_dict(fname):
 
 def ingest_file_wap(fname):
     """Use for the new dataset that will fail at ingest_file."""
-
     insert_sql_total = ""
     with open(fname, "r") as csvfile:
         reader = csv.reader(csvfile)

@@ -90,7 +90,7 @@ def ingest_file(fname):
         next(reader)
 
         for row in reader:
-            # insert into CEVAC_ALL_CHW_RATE_HIST (BTU/sec)
+            # insert into CEVAC_ALL_CHW_RATE_HIST (BTUhr)
             try:
                 today = custom_datestring_to_datetime(
                     row[0]).strftime('%Y-%m-%d %H:%M:%S')
@@ -110,7 +110,7 @@ def ingest_file(fname):
             if len(row) < 5:
                 continue
 
-            # insert into CEVAC_ALL_CHW_HIST (kWh)
+            # insert into CEVAC_ALL_CHW_HIST (kW)
             try:
                 today_utc = custom_datestring_to_datetime(
                     row[4]).strftime('%Y-%m-%d %H:%M:%S')
