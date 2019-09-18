@@ -57,4 +57,7 @@ function success_output(data){
   output.innerHTML = data;
   console.log(data);
 }
-
+function upload_xref_button(e){
+  $('#upload_xref').click();
+  e.preventDefault();
+}
