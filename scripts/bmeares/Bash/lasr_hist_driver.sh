@@ -64,6 +64,7 @@ for t in "${tables_array[@]}"; do
   A=`echo "$t" | sed '3!d'`
 
   if [ "$customLASR" == "1" ]; then
+    [ "$B" == "$A" ] && continue
     A="HIST_LASR"
     echo "Updating CEVAC_$B""_$M""_HIST_LASR"
     time if ! /cevac/scripts/CREATE_VIEW.sh "$B" "$M" "HIST_LASR"; then
