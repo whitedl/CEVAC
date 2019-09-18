@@ -81,27 +81,6 @@ def debug_print(message):
     return None
 
 
-def regex_to_numlist(regex_string):
-    """Return a num_list.
-
-    A list of numbers following expressions similar to "1-5 & 9-10" to
-    [1,2,3,4,5,9,10].
-    """
-    if regex_string == "*":
-        return [regex_string]
-    else:
-        rs = regex_string.replace(" ", "").split("&")
-        regex_list = [([int(y)] if len(
-                                y.split("-")) == 1 else list(range(
-                                    int(y.split("-")[0]),
-                                    int(y.split("-")[1]) + 1))) for y in rs]
-        return_list = []
-        for num_list in regex_list:
-            for num in num_list:
-                return_list.append(str(num))
-        return return_list
-
-
 def alias_to_list(regex_string):
     """Return a list of strings that were originally seperated by hyphens."""
     if regex_string == "*":
