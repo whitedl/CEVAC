@@ -7,6 +7,10 @@ usage="Usage:
   -m Metric
   -k keys_list
   -u unitOfMeasureID
+
+  -c cache tables
+  -l load into LASR
+
   -h help
   -y run without asking
 "
@@ -68,7 +72,11 @@ else
     echo "customLASR: $customLASR"
     echo "check_customLASR: $check_customLASR"
     echo "Set points detected in XREF. Create HIST_LASR table? (~5 extra minutes) (Y/n)"
-    read choice
+    if [ -z "$yes" ]; then
+      read choice
+    else
+      choice=""
+    fi
     if [ "$choice" == "y" ] || [ "$choice" == "Y" ] || [ -z "$choice" ]; then
       customLASR="1"
       echo "Will create $HIST_LASR"
@@ -87,10 +95,17 @@ if [ ! -z "$isCustom" ]; then
     echo "Custom table detected. Please choose:"
     echo $'   1: Reuse previous table structure (no change) (empty to default)'
     echo $'   2: New table structure\n   (/cevac/CUSTOM_DEFS/'"$HIST_VIEW"' has changed)'
-    read choice
+    if [ -z "$yes" ]; then
+      read choice
+    else
+      choice=""
+    fi
 
     if [ "$choice" == "1" ] || [ "$choice" == "" ]; then
-      /cevac/scripts/CREATE_CUSTOM.sh "$BuildingSName" "$Metric" "$DateTimeName" "$IDName" "$AliasName" "$DataName" "$Dependencies"
+      if ! /cevac/scripts/CREATE_CUSTOM.sh "$BuildingSName" "$Metric" "$DateTimeName" "$IDName" "$AliasName" "$DataName" "$Dependencies" ; then
+        /cevac/log_errors.sh "failed to bootstrap custom table. Aborting..."
+        exit 1
+      fi
     elif [ "$choice" == "2" ]; then
       echo "Dropping caches..."
       /cevac/scripts/exec_sql.sh "DELETE FROM CEVAC_TABLES WHERE BuildingSName = '$BuildingSName' AND Metric = '$Metric'"
@@ -123,8 +138,12 @@ else # isCustom does not exist therefore not in CEVAC_TABLES
     echo "Choose one:"
     echo $'   1. Build custom   (   use /cevac/CUSTOM_DEFS/'$HIST_VIEW.sql")"
     echo $'   2. Build standard (ignore /cevac/CUSTOM_DEFS/'$HIST_VIEW.sql")"
-    read choice
-    if [ "$choice" == "1" ]; then # rebuild custom
+    if [ -z "$yes" ]; then
+      read choice
+    else
+      choice=""
+    fi
+    if [ "$choice" == "1" ] || [ "$choice" == "" ]; then # rebuild custom
       echo "Executing CREATE_CUSTOM.sh"
       if ! /cevac/scripts/CREATE_CUSTOM.sh "$BuildingSName" "$Metric" ; then
         error="Error: Could not create $HIST_VIEW as a custom table. Aborting bootstrap..."
