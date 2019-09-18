@@ -78,6 +78,10 @@ FLEX UTILITIES
   justify-content: stretch;
 }
 
+.flex-align-stretch {
+  align-items: stretch;
+}
+
 .flex-none {
   flex: none;
 }
@@ -104,10 +108,6 @@ FLEX UTILITIES
   width: 0px;
 }
 
-.routerFiller + * {
-  flex: 1 1 100%;
-}
-
 /******************************************************************************
 MATERIAL CUSTOMIZATION
 ******************************************************************************/
@@ -127,15 +127,6 @@ MATERIAL CUSTOMIZATION
   flex: auto;
   min-height: 0;
   overflow-y: auto;
-}
-
-// for when you need a heading to overflow (badges, notifications, etc.)
-// originally written for alertbox. May or may not work well elsewhere.
-.mat-child-overflow > .mat-content {
-  overflow: visible;
-  .mat-badge-content {
-    margin-top: 2px;
-  }
 }
 
 // Sometimes expansion panel headers are wonky if you don't center content

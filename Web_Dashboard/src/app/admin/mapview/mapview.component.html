@@ -1,14 +1,14 @@
-<mat-sidenav-container style="height:100%">
+<mat-sidenav-container>
   <mat-sidenav
     mode="side"
     opened="true"
     disableClose="false"
     fixedInViewport="false"
   >
-    <div class="sidenav-column">
+    <mat-accordion multi="true" class="flex-col filler flex-align-stretch">
       <app-controlbox></app-controlbox>
       <router-outlet></router-outlet>
-    </div>
+    </mat-accordion>
   </mat-sidenav>
   <mat-sidenav-content>
     <div id="map"></div>
@@ -21,7 +21,7 @@
     fixedInViewport="false"
   >
     <mat-accordion multi="true" class="flex-col filler flex-just-sb">
-      <app-alertbox class="flex-col"></app-alertbox>
+      <app-alertbox></app-alertbox>
     </mat-accordion>
   </mat-sidenav>
 </mat-sidenav-container>

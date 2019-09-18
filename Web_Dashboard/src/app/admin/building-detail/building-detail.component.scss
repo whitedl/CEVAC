@@ -1,11 +1,7 @@
 :host {
-  display: flex;
-  flex-direction: column;
+  width: 100%;
+  padding: 0.4rem;
   flex: 0 1 auto;
-  justify-content: flex-end;
   overflow: hidden;
-}
-
-mat-expansion-panel {
-  margin: 0.4rem;
+  display: flex;
 }
