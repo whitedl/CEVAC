@@ -6,4 +6,4 @@ SELECT
   clemson_count,
   (guest_count + clemson_count) AS total_count
 FROM
-  CEVAC_WATT_WAP_FLOOR_HIST_RAW
+  CEVAC_COOPER_WAP_FLOOR_HIST_RAW

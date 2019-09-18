@@ -8,8 +8,6 @@ import datetime
 from datetime import datetime as dt
 import csv
 import logging
-import urllib.request
-import urllib.parse
 
 # Setup configuration
 SEND = True
@@ -17,19 +15,16 @@ DEBUG = False
 
 log_dir = "/cevac/cron/wap/log"
 processed_dir = "/mnt/bldg/WAP/processed"
-if DEBUG:
-    log_dir = "C:\\Users\\hchall\\Downloads"
-    processed_dir = "//130.127.219.170/Watt/Watt Staff/Building/WAP/processed"
+
+# building_file_name = "cooper"
+# database_name = "CEVAC_COOPER_WAP_DAILY_HIST_RAW"
+alternate_names = {
+    "WFIC": "WATT",
+}
 
 CLIENT = 0
 MAC = 2
 SSID = 7
-
-
-def command_to_query(command):
-    """Return a query-able string from a sql command."""
-    req = "http://wfic-cevac1/requests/query.php?q="
-    return req + urllib.parse.quote_plus(command)
 
 
 # Script
@@ -44,7 +39,7 @@ processed_files = os.listdir(processed_dir)
 yesterdays_files = []
 yesterday = (dt.now() - datetime.timedelta(1)).date()
 for file in processed_files:
-    if "client" in file and "wfic" in file.lower():
+    if "client" in file:
         unix_timestamp = os.path.getmtime(processed_dir + "/" + file)
         fdate = dt.fromtimestamp(unix_timestamp).date()
         if yesterday == fdate:
@@ -52,9 +47,18 @@ for file in processed_files:
 
 # Read files into dictionary
 errors = 0
-network = {}
+databases = {}
 for file in yesterdays_files:
     try:
+        # The building is the third characteristic split by dashes in the
+        # file name
+        building_file_name = file.split('-')[2].upper()
+        if building_file_name in alternate_names:
+            building_file_name = alternate_names[building_file_name]
+        database_name = f"CEVAC_{building_file_name}_WAP_DAILY_HIST_RAW"
+        if database_name not in databases:
+            databases[database_name] = {}
+
         with open(file, "r") as csvfile:
             reader = csv.reader(csvfile)
 
@@ -73,32 +77,39 @@ for file in yesterdays_files:
             for row in reader:
                 username = row[CLIENT] if row[CLIENT] != "test" else row[MAC]
                 if username != "":
-                    if row[SSID] in network:
-                        network[row[SSID]][username] = None
+                    if row[SSID] in databases[database_name]:
+                        databases[database_name][row[SSID]][username] = None
                     else:
-                        network[row[SSID]] = {
+                        databases[database_name][row[SSID]] = {
                             username: None
                         }
 
+        # DO NOT KEEP OLD FILES
+        if SEND and not DEBUG:
+            os.remove(file)
+
     except Exception:
         errors += 1
-        logging.error("Could not parse file " + str(file))
+        logging.error("Could not parse file (formatting issue) " + str(file))
 
 # Push to database
-eduroam = 0 if "eduroam" not in network else len(network["eduroam"])
-clemsonguest = 0 if "clemsonguest" not in network else len(
-    network["clemsonguest"])
-if DEBUG:
-    print(yesterday, eduroam, clemsonguest)
-    print("ERRORS:", errors)
-    print("Files:", len(yesterdays_files))
+insert_sql_total = ""
+for db in databases:
+    network = databases[db]
+    eduroam = 0 if "eduroam" not in network else len(network["eduroam"])
+    clemsonguest = 0 if "clemsonguest" not in network else len(
+        network["clemsonguest"])
+    if DEBUG:
+        print(yesterday, eduroam, clemsonguest)
+        print("ERRORS:", errors)
+        print("Files:", len(yesterdays_files))
 
-insert_sql_total = ("INSERT INTO CEVAC_WATT_WAP_DAILY_HIST_RAW(UTCDateTime, "
-                    "clemson_count, guest_count) VALUES("
-                    "'" + yesterday.strftime('%Y-%m-%d %H:%M:%S') + "',"
-                    "'" + str(eduroam) + "',"
-                    "'" + str(clemsonguest) + "'"
-                    ");")
+    insert_sql_total += (f"INSERT INTO {db}(UTCDateTime, "
+                         "clemson_count, guest_count) VALUES("
+                         "'" + yesterday.strftime('%Y-%m-%d %H:%M:%S') + "',"
+                         "'" + str(eduroam) + "',"
+                         "'" + str(clemsonguest) + "'"
+                         ")\nGO\n")
 
 logging.info("---")
 logging.info("date: " + str(yesterday))
@@ -106,18 +117,18 @@ logging.info("clemson_count: " + str(eduroam))
 logging.info("guest_count: " + str(clemsonguest))
 
 if SEND:
-    # urllib.request.urlopen(command_to_query(insert_sql_total)).read()
-    f = open("/cevac/cache/insert_daily_wap.sql", "w")
+    f = open("/cevac/cache/insert_daily_wap2.sql", "w")
     f.write(insert_sql_total.replace(';', '\nGO\n'))
     f.close()
     os.system("/cevac/scripts/exec_sql_script.sh "
-              "/cevac/cache/insert_daily_wap.sql")
-    os.remove("/cevac/cache/insert_daily_wap.sql")
+              "/cevac/cache/insert_daily_wap2.sql")
+    os.remove("/cevac/cache/insert_daily_wap2.sql")
 else:
-    print(insert_sql_total, "\n", command_to_query(insert_sql_total))
+    print(insert_sql_total)
 
 if errors == 0:
-    logging.info("Successfully inserted into daily database")
+    logging.info("Successfully inserted into daily database.")
+    print("Success")
 logging.shutdown()
 
 """
