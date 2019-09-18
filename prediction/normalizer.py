@@ -82,16 +82,17 @@ def makeArrays(df):
 
         # concatenate all of the lists
         tempx = np.concatenate((hour, day, month, temperature, humidity, clouds), axis = -1)
+        if not np.isnan(tempx).any():
+            powerSum = weatherData['powerSum']
+            # if powerSum < 0.1 or powerSum > .9:
+            #     print('Power Sum:\t{}'.format(powerSum))
+            tempy = [(powerSum/ 400)]
 
-        powerSum = weatherData['powerSum']
-        # if powerSum < 0.1 or powerSum > .9:
-        #     print('Power Sum:\t{}'.format(powerSum))
-        tempy = [(powerSum/ 400)]
-
-        # if powerSum > 0.01:
-        x.append(tempx)
-        y.append(tempy)
-
+            # if powerSum > 0.01:
+            x.append(tempx)
+            y.append(tempy)
+        else:
+            print('OMITTED')
     return x, y
 
 def saveArrays(x, y):

@@ -104,7 +104,7 @@ def createModel():
 	model = keras.Sequential()
 
 	# add layers
-	model.add(Dense(100, input_shape=(47,)))
+	model.add(Dense(100, input_shape=(46,)))
 	model.add(Activation('sigmoid'))
 
 	model.add(Dense(1))
@@ -133,10 +133,10 @@ def pred(model):
         humidity = [hourly['humidities'][i]]
         temperature = [hourly['temperatures'][i]]
         cloudCoverage = [hourly['clouds'][i]]
-        input = np.concatenate((hour, day, month, throughMonth, temperature, humidity, cloudCoverage), axis = -1)
+        input = np.concatenate((hour, day, month, temperature, humidity, cloudCoverage), axis = -1)
         model.load_weights('powerModel.h5')
 
-        prediction = model.predict(input.reshape(1,-1))[0][0] * 275
+        prediction = model.predict(input.reshape(1,-1))[0][0] * 400
         predictions.append(prediction)
 
 
@@ -190,8 +190,8 @@ def pred(model):
     f.close()
     os.system("/cevac/scripts/exec_sql_script.sh "
               "/cevac/cache/insert_predictions.sql")
-    # os.remove("/cevac/cache/insert_predictions.sql")
+    os.remove("/cevac/cache/insert_predictions.sql")
 
 if __name__ == '__main__':
     model = createModel()
-    predictions = pred(model)
+    pred(model)
