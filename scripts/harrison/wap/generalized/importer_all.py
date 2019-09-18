@@ -99,7 +99,6 @@ def ingest_file_wap(fname):
     building_file_name = fname.split('-')[2].upper()
     if building_file_name in alternate_names:
         building_file_name = alternate_names[building_file_name]
-    database_name = f"CEVAC_{building_file_name}_WAP_DAILY_HIST_RAW"
     unique_buildings[building_file_name] = None
 
     with open(fname, "r") as csvfile:
@@ -196,7 +195,6 @@ def ingest_file_floor(fname):
     building_file_name = fname.split('-')[2].upper()
     if building_file_name in alternate_names:
         building_file_name = alternate_names[building_file_name]
-    database_name = f"CEVAC_{building_file_name}_WAP_DAILY_HIST_RAW"
     unique_buildings[building_file_name] = None
 
     with open(fname, "r") as csvfile:
@@ -315,7 +313,25 @@ def debug_log(message, LOG):
 
 def ensure_tables_procedure():
     """Make tables if they do not exist."""
-    building_list = list(alternate_names.keys())
+    building_list = list(unique_buildings.keys())
+    ensure_tables_str = ""
+    for building in building_list:
+        if building in alternate_names:
+            building = alternate_names[building]
+        ensure_tables_str += (f"EXEC CEVAC_WAP @BuildingSName = '{building}',"
+                              f" @Metric = 'WAP'\nGO\n"
+                              f"EXEC CEVAC_WAP @BuildingSName = '{building}',"
+                              f" @Metric = 'WAP_FLOOR'\nGO\n"
+                              f"EXEC CEVAC_WAP @BuildingSName = '{building}',"
+                              f" @Metric = 'WAP_DAILY'\nGO\n")
+    print(ensure_tables_str)
+    if SEND:
+        f = open("/cevac/cache/ensure_wap_tables.sql", "w")
+        f.write(ensure_tables_str)
+        f.close()
+        os.system("/cevac/scripts/exec_sql_script.sh "
+                  "/cevac/cache/ensure_wap_tables.sql")
+        os.remove("/cevac/cache/ensure_wap_tables.sql")
     return None
 
 
@@ -362,7 +378,8 @@ for fname in file_list:
                 safe_move(fpath, os.path.join(processed_dir, fname))
                 logging.info("Successfully imported data in file " + fname)
             except WindowsError:
-                logging.exception("Failed to move %s to %s.", fname, processed_dir)
+                logging.exception("Failed to move %s to %s.",
+                                  fname, processed_dir)
     else:
         if SEND and not DEBUG:
             try:
@@ -370,9 +387,8 @@ for fname in file_list:
             except WindowsError:
                 logging.exception("Failed to move %s to %s", fname, failed_dir)
 
-
+ensure_tables_procedure()
 if SEND:
-    ensure_tables_procedure()
     f = open("/cevac/cache/insert_daily_wap3.sql", "w")
     f.write(insert_sql_total.replace(';', '\nGO\n'))
     f.close()
@@ -380,7 +396,7 @@ if SEND:
               "/cevac/cache/insert_daily_wap3.sql")
     os.remove("/cevac/cache/insert_daily_wap3.sql")
 else:
-    print(insert_sql_total.replace(";","\nGO\n"))
+    print(insert_sql_total.replace(";", "\nGO\n"))
 
 # Clean output directories
 cleanup()
