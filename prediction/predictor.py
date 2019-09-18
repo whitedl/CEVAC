@@ -59,7 +59,6 @@ def fetch():
         hourly['humidities'].append(element['humidity'])
         hourly['temperatures'].append(((element['temperature'] - 32) / 1.8 + 20) / 70)
         hourly['clouds'].append(element['cloudCover'])
-    print(hourly)
     return hourly
 
 # normalize the hours, days, and months
