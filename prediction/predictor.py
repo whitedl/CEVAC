@@ -44,6 +44,7 @@ def fetch():
     r = requests.get(requestURL).json()
     hourlyData = r['hourly']['data']
 
+
     # insert every element in the hourly data
     for element in hourlyData:
         hourly['hours'].append(int(time.strftime('%H', time.localtime(element['time']))))
@@ -58,7 +59,7 @@ def fetch():
         hourly['humidities'].append(element['humidity'])
         hourly['temperatures'].append(((element['temperature'] - 32) / 1.8 + 20) / 70)
         hourly['clouds'].append(element['cloudCover'])
-
+    print(hourly)
     return hourly
 
 # normalize the hours, days, and months
@@ -96,19 +97,20 @@ def generateInput(h, d, m, y):
 # prediction with the built-in keras model
 def createModel():
 
-	# create the keras instance
-	model = keras.Sequential()
+    # create the keras instance
+    model = keras.Sequential()
 
-	# add layers
-	model.add(Dense(100, input_shape=(46,)))
-	model.add(Activation('sigmoid'))
+    # add layers
+    model.add(Dense(100, input_shape=(46,)))
+    model.add(Activation('sigmoid'))
 
-	model.add(Dense(1))
-	model.add(Activation('sigmoid'))
+    model.add(Dense(1))
+    model.add(Activation('sigmoid'))
 
-	model.compile(optimizer='adam',loss=losses.mse, metrics=['accuracy'])
+    model.compile(optimizer='adam',loss=losses.mse, metrics=['accuracy'])
+    model.load_weights('powerModel.h5')
 
-	return model
+    return model
 
 def pred(model):
 
@@ -116,8 +118,6 @@ def pred(model):
     hourly = fetch()
 
     for i, hour in enumerate(hourly['hours']):
-
-
 
         day = hourly['days'][i]
         month = hourly['months'][i]
@@ -127,70 +127,64 @@ def pred(model):
         hour, day, month, throughMonth = generateInput(hour, day, month, year)
 
         humidity = hourly['humidities'][i]
-        if humidity != 'NULL':
-            humidity = [humidity]
+        humidity = [humidity]
 
         temperature = hourly['temperatures'][i]
-        if temperature != 'NULL':
-            temperature = [temperature]
+        temperature = [temperature]
 
         cloudCoverage = hourly['clouds'][i]
-        if cloudCoverage != 'NULL':
-            cloudCoverage = [cloudCoverage]
+        cloudCoverage = [cloudCoverage]
 
         input = np.concatenate((hour, day, month, temperature, humidity, cloudCoverage), axis = -1)
-        model.load_weights('powerModel.h5')
 
         prediction = model.predict(input.reshape(1,-1))[0][0] * 400
         predictions.append(prediction)
 
-
-    print(predictions)
     insert_sql_total = ''
 
     for i, prediction in enumerate(predictions):
-            m = hourly['months'][i]
-            d = (hourly['days'][i] - 1) % 7
-            Y = hourly['years'][i]
-            H = hourly['hours'][i]
+        m = hourly['months'][i]
+        d = (hourly['days'][i] - 1) % 7
+        Y = hourly['years'][i]
+        H = hourly['hours'][i]
 
-            weekdayName = hourly['weekdayNames'][i]
-            day = hourly['days'][i]
-            monthName = hourly['monthNames'][i]
-            second = hourly['seconds'][i]
-            weekNumber = hourly['weekNumbers'][i]
-            minute = hourly['minutes'][i]
-            month = hourly['months'][i]
+        weekdayName = hourly['weekdayNames'][i]
+        day = hourly['days'][i]
+        monthName = hourly['monthNames'][i]
+        second = hourly['seconds'][i]
+        weekNumber = hourly['weekNumbers'][i]
+        minute = hourly['minutes'][i]
+        month = hourly['months'][i]
 
-            hms = ':'.join((str(H), str(minute), str(second)))
-            datestring = ' '.join((weekdayName, monthName, str(day)))
+        hms = ':'.join((str(H), str(minute), str(second)))
+        datestring = ' '.join((weekdayName, monthName, str(day)))
 
-            datestring = datestring + ' ' + hms + ' ' + str(Y)
+        datestring = datestring + ' ' + hms + ' ' + str(Y)
 
-            # datestring = ' '.join((weekdayName, monthName, str(day), ':'.join((str(H), str(minute), str(second)), str(Y))))
+        # datestring = ' '.join((weekdayName, monthName, str(day), ':'.join((str(H), str(minute), str(second)), str(Y))))
 
-            t = datetime.datetime.strptime(datestring, "%a %b %d %H:%M:%S %Y")
-            ETDateTime = t.strftime("%Y-%m-%d %H:%M:%S")
+        t = datetime.datetime.strptime(datestring, "%a %b %d %H:%M:%S %Y")
+        ETDateTime = t.strftime("%Y-%m-%d %H:%M:%S")
 
-            dst = False
-            local = pytz.timezone ("America/New_York")
-            naive = datetime.datetime.strptime(datestring, "%a %b %d %H:%M:%S %Y")
-            local_dt = local.localize(naive, is_dst=dst)
-            t_utc = local_dt.astimezone (pytz.utc)
-            UTCDateTime = t_utc.strftime("%Y-%m-%d %H:%M:%S")
+        dst = False
+        local = pytz.timezone ("America/New_York")
+        naive = datetime.datetime.strptime(datestring, "%a %b %d %H:%M:%S %Y")
+        local_dt = local.localize(naive, is_dst=dst)
+        t_utc = local_dt.astimezone (pytz.utc)
+        UTCDateTime = t_utc.strftime("%Y-%m-%d %H:%M:%S")
 
-            deleteString = ('''DECLARE @utc DATETIME;
-            SET @utc = '{}';
-            DELETE FROM CEVAC_WATT_POWER_SUMS_PRED_HIST_RAW
-            WHERE UTCDateTime = @utc;
-            GO
-                            ''').format(UTCDateTime)
+        deleteString = ('''DECLARE @utc DATETIME;
+        SET @utc = '{}';
+        DELETE FROM CEVAC_WATT_POWER_SUMS_PRED_HIST_RAW
+        WHERE UTCDateTime = @utc;
+        GO
+                        ''').format(UTCDateTime)
 
-            insert_sql_total += (deleteString +
-                                 "INSERT INTO CEVAC_WATT_POWER_SUMS_PRED_HIST_RAW "
-                                 "(UTCDateTime, ETDateTime, Total_Usage) "
-                                 f" VALUES('{UTCDateTime}','{ETDateTime}',"
-                                 f"'{str(prediction)}')\nGO\n")
+        insert_sql_total += (deleteString +
+                             "INSERT INTO CEVAC_WATT_POWER_SUMS_PRED_HIST_RAW "
+                             "(UTCDateTime, ETDateTime, Total_Usage) "
+                             f" VALUES('{UTCDateTime}','{ETDateTime}',"
+                             f"'{str(prediction)}')\nGO\n")
 
     # Write to `CEVAC_WATT_POWER_SUMS_PRED_HIST`
     # f = open("/cevac/cache/insert_predictions.sql", "w")
