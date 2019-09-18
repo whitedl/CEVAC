@@ -3,7 +3,6 @@
 import os
 import sys
 from stat import S_ISREG
-import json
 import datetime
 import time
 import pytz
@@ -21,12 +20,14 @@ failed_dir = prefix + "/failed"
 log_dir = prefix + "/logs"
 xref_dir = prefix + "/xref"
 
-wap_table = "CEVAC_COOPER_WAP_HIST_RAW"
-floor_table = "CEVAC_COOPER_WAP_FLOOR_HIST_RAW"
-building_file_name = "cooper"
-
 DEBUG = False
 SEND = True
+
+unique_buildings = {}
+
+alternate_names = {
+    "WFIC": "WATT",
+}
 
 
 #######################################
@@ -92,6 +93,14 @@ def xref_to_dict(fname):
 def ingest_file_wap(fname):
     """Use for the new dataset that will fail at ingest_file."""
     insert_sql_total = ""
+
+    # The building is the third characteristic split by dashes in the
+    # file name
+    building_file_name = fname.split('-')[2].upper()
+    if building_file_name in alternate_names:
+        building_file_name = alternate_names[building_file_name]
+    unique_buildings[building_file_name] = None
+
     with open(fname, "r") as csvfile:
         reader = csv.reader(csvfile)
 
@@ -168,7 +177,7 @@ def ingest_file_wap(fname):
                 for SSID in hours[hour][name]:
                     total_duration = hours[hour][name][SSID]["time"]
                     unique_users = len(hours[hour][name][SSID]["users"].keys())
-                    insert_sql_total += (f"INSERT INTO  {wap_table} "
+                    insert_sql_total += (f"INSERT INTO CEVAC_{building_file_name}_WAP_HIST_RAW "
                                          "(time, name, ssid, total_duration, "
                                          "predicted_occupancy, unique_users) "
                                          f"VALUES ('{hour.strftime('%Y-%m-%d %H:%M:%S')}',"
@@ -180,6 +189,14 @@ def ingest_file_wap(fname):
 def ingest_file_floor(fname):
     """Use to insert by floor."""
     insert_sql_total = ""
+
+    # The building is the third characteristic split by dashes in the
+    # file name
+    building_file_name = fname.split('-')[2].upper()
+    if building_file_name in alternate_names:
+        building_file_name = alternate_names[building_file_name]
+    unique_buildings[building_file_name] = None
+
     with open(fname, "r") as csvfile:
         reader = csv.reader(csvfile)
         # Move reader to 'Client Sessions' line
@@ -267,7 +284,7 @@ def ingest_file_floor(fname):
                     clemson += len(hours[hour][floor]["eduroam"]["users"])
                 if "clemsonguest" in hours[hour][floor]:
                     guest += len(hours[hour][floor]["clemsonguest"]["users"])
-                insert_sql_total += (f"INSERT INTO  {floor_table} "
+                insert_sql_total += (f"INSERT INTO  CEVAC_{building_file_name}_WAP_FLOOR_HIST_RAW "
                                      "(UTCDateTime, floor, guest_count, clemson_count) "
                                      f"VALUES ('{hour.strftime('%Y-%m-%d %H:%M:%S')}',"
                                      f"'{floor}','{guest}','{clemson}');")
@@ -294,6 +311,30 @@ def debug_log(message, LOG):
         logging.info(message)
 
 
+def ensure_tables_procedure():
+    """Make tables if they do not exist."""
+    building_list = list(unique_buildings.keys())
+    ensure_tables_str = ""
+    for building in building_list:
+        if building in alternate_names:
+            building = alternate_names[building]
+        ensure_tables_str += (f"EXEC CEVAC_WAP @BuildingSName = '{building}',"
+                              f" @Metric = 'WAP'\nGO\n"
+                              f"EXEC CEVAC_WAP @BuildingSName = '{building}',"
+                              f" @Metric = 'WAP_FLOOR'\nGO\n"
+                              f"EXEC CEVAC_WAP @BuildingSName = '{building}',"
+                              f" @Metric = 'WAP_DAILY'\nGO\n")
+    print(ensure_tables_str)
+    if SEND:
+        f = open("/cevac/cache/ensure_wap_tables.sql", "w")
+        f.write(ensure_tables_str)
+        f.close()
+        os.system("/cevac/scripts/exec_sql_script.sh "
+                  "/cevac/cache/ensure_wap_tables.sql")
+        os.remove("/cevac/cache/ensure_wap_tables.sql")
+    return None
+
+
 ######################################
 # Begin Script
 ######################################
@@ -302,7 +343,7 @@ def debug_log(message, LOG):
 file_list = []
 for fname in os.listdir(import_dir):
     is_file = False
-    if building_file_name in fname.lower():
+    if "client" in fname.lower():
         is_file = True
     if not is_file:
         continue
@@ -337,7 +378,8 @@ for fname in file_list:
                 safe_move(fpath, os.path.join(processed_dir, fname))
                 logging.info("Successfully imported data in file " + fname)
             except WindowsError:
-                logging.exception("Failed to move %s to %s.", fname, processed_dir)
+                logging.exception("Failed to move %s to %s.",
+                                  fname, processed_dir)
     else:
         if SEND and not DEBUG:
             try:
@@ -345,7 +387,7 @@ for fname in file_list:
             except WindowsError:
                 logging.exception("Failed to move %s to %s", fname, failed_dir)
 
-
+ensure_tables_procedure()
 if SEND:
     f = open("/cevac/cache/insert_daily_wap3.sql", "w")
     f.write(insert_sql_total.replace(';', '\nGO\n'))
@@ -354,7 +396,7 @@ if SEND:
               "/cevac/cache/insert_daily_wap3.sql")
     os.remove("/cevac/cache/insert_daily_wap3.sql")
 else:
-    print(insert_sql_total.replace(";","\nGO\n"))
+    print(insert_sql_total.replace(";", "\nGO\n"))
 
 # Clean output directories
 cleanup()
