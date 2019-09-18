@@ -20,6 +20,7 @@ DECLARE @b_DateTimeName NVARCHAR(MAX);
 DECLARE @b_DataName NVARCHAR(MAX);
 DECLARE @b_AliasName NVARCHAR(MAX);
 DECLARE @b_IDName NVARCHAR(MAX);
+DECLARE @b_label NVARCHAR(MAX);
 
 DECLARE @DateTimeName NVARCHAR(MAX);
 DECLARE @DataName NVARCHAR(MAX);
@@ -74,6 +75,7 @@ WHILE EXISTS (SELECT 1 FROM @buildings) AND @i > 0 BEGIN
 	SET @BuildingSName = (SELECT TOP 1 BuildingSName FROM @buildings);
 	DELETE TOP(1) FROM @buildings;
 	SET @i = @i - 1;
+	SET @b_label = 'b_' + CAST(@i AS NVARCHAR(100));
 	SET @b_LATEST = 'CEVAC_' + @BuildingSName + '_' + @source_Metric + '_LATEST';
 
 	SET @b_DateTimeName = (SELECT TOP 1 RTRIM(DateTimeName) FROM CEVAC_TABLES WHERE TableName = @b_LATEST);
@@ -82,8 +84,8 @@ WHILE EXISTS (SELECT 1 FROM @buildings) AND @i > 0 BEGIN
 	SET @b_IDName = (SELECT TOP 1 RTRIM(IDName) FROM CEVAC_TABLES WHERE TableName = @b_LATEST);
 
 	SET @union_subquery = '
-	SELECT b.' + @b_IDName + ' AS ''' + @IDName + ''', b.' + @b_AliasName + ' AS ''' + @AliasName + ''', b.' + @b_DateTimeName + ' AS ''' + @DateTimeName
-	 + ''', b.' + @b_DataName + ' AS ''' + @DataName + ''', ''' + @BuildingSName + ''' AS ''BuildingSName'' FROM ' + @b_LATEST + ' AS b
+	SELECT ' + @b_label + '.' + @b_IDName + ' AS ''' + @IDName + ''', ' + @b_label + '.' + @b_AliasName + ' AS ''' + @AliasName + ''', ' + @b_label + '.' + @b_DateTimeName + ' AS ''' + @DateTimeName + ''', '
+	 + @b_label + '.' + @b_DataName + ' AS ''' + @DataName + ''', ''' + @BuildingSName + ''' AS ''BuildingSName'' FROM ' + @b_LATEST + ' AS ' + @b_label + '
 	UNION';
 	SET @Definition = @Definition + @union_subquery;
 	SET @Dependencies = @Dependencies + @b_LATEST + ',';
@@ -115,5 +117,6 @@ IF @execute = 1 BEGIN
 --	EXEC(@Definition);
 	EXEC CEVAC_CUSTOM_HIST @BuildingSName = 'ALL', @Metric = @Metric;
 	EXEC CEVAC_VIEW @Building = 'ALL', @Metric = @Metric, @Age = 'HIST';
+	EXEC CEVAC_VIEW @Building = 'ALL', @Metric = @Metric, @Age = 'DAY';
 	EXEC CEVAC_VIEW @Building = 'ALL', @Metric = @Metric, @Age = 'LATEST';
 END

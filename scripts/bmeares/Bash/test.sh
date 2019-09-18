@@ -1,11 +1,8 @@
-#! /bin/sh
+#! /bin/bash
 
-# /cevac/scripts/lock.sh
-
-if ! /cevac/scripts/is_unlocked.sh ; then
-  echo "is locked"
-else
-  echo "is unlocked"
+echo "about to do a difficult task"
+if ! { /cevac/scripts/test1.sh & } ; then
+  echo "Error!!"
 fi
-
-/cevac/scripts/unlock.sh
+wait
+echo "done sleeping"
