@@ -45,6 +45,7 @@ def createModel(opt, length):
 
 # trains the model
 def train(model):
+
     # load data
     train_data, train_labels, test_data, test_labels = loadData()
 
@@ -52,7 +53,7 @@ def train(model):
     early_stopping = EarlyStopping(monitor='loss', patience=5)
 
     #more epochs = more work training ~= higher accuracy
-    model.fit(train_data, train_labels, epochs=50, verbose=1, callbacks=[early_stopping]) #
+    model.fit(train_data, train_labels, batch_size=16, epochs=50, verbose=1, callbacks=[early_stopping]) #
 
     # for making re-running faster, toggle this to re-run with the same weights from the previous run
     model.save_weights('powerModel.h5')
@@ -80,7 +81,18 @@ def pred(model):
 	print('STANDARD DEV:\t{}'.format(np.std(differences)))
 	print('MEAN DIFFERENCE:\t{}'.format(np.mean(differences)))
 
+def pls(model):
+
+	train_data, train_labels, test_data, test_labels = loadData()
+
+	model.load_weights('powerModel.h5')
+	input = train_data[0]
+	prediction = model.predict(input.reshape(1,-1))[0][0] * 400
+	print(prediction)
+
+
 if __name__ == '__main__':
 	model = createModel('adam', 46)
-	train(model)
-	pred(model)
+	# train(model)
+	# pred(model)
+	pls(model)
