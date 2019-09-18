@@ -43,7 +43,6 @@ def fetch():
     requestURL = 'https://api.darksky.net/forecast/db6bb38a65d59c7677e8e97db002705b/33.662333,-79.830875'
     r = requests.get(requestURL).json()
     hourlyData = r['hourly']['data']
-    print(hourlyData[0])
 
     # insert every element in the hourly data
     for element in hourlyData:
@@ -101,7 +100,7 @@ def createModel():
 	model = keras.Sequential()
 
 	# add layers
-	model.add(Dense(100, input_shape=(47,)))
+	model.add(Dense(100, input_shape=(46,)))
 	model.add(Activation('sigmoid'))
 
 	model.add(Dense(1))
@@ -126,13 +125,23 @@ def pred(model):
 
         # formats and normalizes the data for the numpy array
         hour, day, month, throughMonth = generateInput(hour, day, month, year)
-        humidity = [hourly['humidities'][i]]
-        temperature = [hourly['temperatures'][i]]
-        cloudCoverage = [hourly['clouds'][i]]
-        input = np.concatenate((hour, day, month, throughMonth, temperature, humidity, cloudCoverage), axis = -1)
+
+        humidity = hourly['humidities'][i]
+        if humidity != 'NULL':
+            humidity = [humidity]
+
+        temperature = hourly['temperatures'][i]
+        if temperature != 'NULL':
+            temperature = [temperature]
+
+        cloudCoverage = hourly['clouds'][i]
+        if cloudCoverage != 'NULL':
+            cloudCoverage = [cloudCoverage]
+
+        input = np.concatenate((hour, day, month, temperature, humidity, cloudCoverage), axis = -1)
         model.load_weights('powerModel.h5')
 
-        prediction = model.predict(input.reshape(1,-1))[0][0] * 275
+        prediction = model.predict(input.reshape(1,-1))[0][0] * 400
         predictions.append(prediction)
 
 
@@ -184,11 +193,11 @@ def pred(model):
                                  f"'{str(prediction)}')\nGO\n")
 
     # Write to `CEVAC_WATT_POWER_SUMS_PRED_HIST`
-    f = open("/cevac/cache/insert_predictions.sql", "w")
-    f.write(insert_sql_total)
-    f.close()
-    os.system("/cevac/scripts/exec_sql_script.sh "
-              "/cevac/cache/insert_predictions.sql")
+    # f = open("/cevac/cache/insert_predictions.sql", "w")
+    # f.write(insert_sql_total)
+    # f.close()
+    # os.system("/cevac/scripts/exec_sql_script.sh "
+    #           "/cevac/cache/insert_predictions.sql")
     # os.remove("/cevac/cache/insert_predictions.sql")
 
 if __name__ == '__main__':
