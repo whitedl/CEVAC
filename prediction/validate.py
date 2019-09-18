@@ -1,6 +1,12 @@
 import numpy as np
 import pandas as pd
 
+'''
+Tyler: if you could
+1. write a function to check every entry is between 0 and 1
+2. write a function to make sure that every trainingData is 46 long 
+'''
+
 # load the data and the labels
 data = np.load('powerTrainingData.npy')
 labels = np.load('powerTrainingLabels.npy')
@@ -11,4 +17,4 @@ def findNAN(dataset):
     return locations
 
 if __name__ == '__main__':
-    print(findNan(data))
+    print(findNAN(data))
