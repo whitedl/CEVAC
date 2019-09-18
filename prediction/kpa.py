@@ -18,11 +18,11 @@ import os
 # read in our data
 def loadData():
 
-	train_data = np.load("powerTrainingData.npy")
-	train_labels = np.load("powerTrainingLabels.npy")
+	train_data = np.load('powerTrainingData.npy')
+	train_labels = np.load('powerTrainingLabels.npy')
 
-	test_data = np.load("powerTestingData.npy")
-	test_labels = np.load("powerTestingLabels.npy")
+	test_data = np.load('powerTestingData.npy')
+	test_labels = np.load('powerTestingLabels.npy')
 
 	return train_data, train_labels, test_data, test_labels
 
@@ -81,6 +81,6 @@ def pred(model):
 	print('MEAN DIFFERENCE:\t{}'.format(np.mean(differences)))
 
 if __name__ == '__main__':
-	model = createModel('adam', 47)
+	model = createModel('adam', 46)
 	train(model)
 	pred(model)

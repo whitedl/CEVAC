@@ -143,19 +143,20 @@ def makeArrays(df):
         try:
             weatherData = cJSON[row['ETDateTime'][0:13]]
         except:
-            r = random.randint(0,500)
-            if r == 0:
-                print(row['ETDateTime'][0:13])
+
             dateNotFound += 1
             weatherData = None
 
         if weatherData != None and len(weatherData) == 4:
+
             # normalize temperature
             temperature = weatherData['temperature']
             temperature = [(temperature + 20) / 70]
 
             # normalize humidity
             humidity = weatherData['humidity']
+            if humidity == 'NULL':
+                print('FOUND ONE')
             humidity = [(humidity / 100)]
 
             # one hot encode month
@@ -175,12 +176,14 @@ def makeArrays(df):
 
             # normalize clouds
             clouds = weatherData['cloudCover']
+            if clouds == 'NULL':
+                print('FOUND ONE')
             clouds = [(clouds / 100)]
 
-            tempx = np.concatenate((hour, day, month, throughMonth, temperature, humidity, clouds), axis = -1)
-            tempy = [(row['intSum'] / 275)]
+            tempx = np.concatenate((hour, day, month, temperature, humidity, clouds), axis = -1)
+            tempy = [(row['intSum'] / 400)]
 
-            if len(tempx) == 47:
+            if len(tempx) == 46:
                 x.append(tempx)
                 y.append(tempy)
             else:

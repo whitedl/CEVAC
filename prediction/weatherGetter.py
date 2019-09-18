@@ -12,15 +12,24 @@ with open('api.json') as f:
 
 apiKey = account['key']
 
+exceptionCount = 0
+
 def fetch(days):
     try:
         t = str(int(time.time() - 86400 * days))
         url = 'https://api.darksky.net/forecast/' + apiKey + '/33.662333,-79.830875' + ',' + t
         r = requests.get(url).json()
         data = r['hourly']['data']
-        appendData(data)
+        try:
+            appendData(data)
+        except:
+            with open('errorLog.txt', 'a') as f:
+                f.write('FAILED TO APPEND DATA FROM TIME {}\n'.format(t))
+            print('APPEND EXCEPTION')
     except:
-        print('EXCEPTION')
+        with open('errorLog.txt', 'a') as f:
+            f.write('FAILED TO GET TIME {}\n'.format(t))
+        print('TIME EXCEPTION')
         pass
 
 def appendData(data):
@@ -30,7 +39,7 @@ def appendData(data):
         # create a temporary list to append to the historic data
         temp = []
 
-        for key in ["time", 'precipIntensity', 'precipProbability', 'temperature', 'apparentTemperature', 'humidity', 'cloudCover', 'uvIndex', 'visibility']:
+        for key in ['time', 'precipIntensity', 'precipProbability', 'temperature', 'apparentTemperature', 'humidity', 'cloudCover', 'uvIndex', 'visibility']:
             if key == 'time':
                 temp.append(time.strftime('%Y-%B-%d %H', time.localtime(element['time'])))
             else:
@@ -52,6 +61,8 @@ def writeData():
 
 if __name__ == '__main__':
 
-    for i in range(40, 0, -1):
+    exceptionCount = 0
+
+    for i in range(950, 0, -1):
         fetch(i)
     writeData()
