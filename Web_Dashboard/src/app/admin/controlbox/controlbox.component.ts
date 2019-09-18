@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { MapdataService } from '@services/mapdata.service';
 import { Measurement } from '@app/shared/interfaces/measurement';
 
