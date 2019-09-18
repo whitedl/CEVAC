@@ -532,9 +532,9 @@ END
 --------------------------------------
 PRINT @Create_View;
 IF @execute = 1 AND @Create_View IS NOT NULL BEGIN
-	EXEC(@Create_View)
-
-
+	PRINT('Create view:');
+	PRINT(@Create_View);
+	EXEC(@Create_View);
 	DELETE FROM CEVAC_TABLES WHERE TableName = @Table_name;
 	IF NOT EXISTS (SELECT TableName FROM CEVAC_TABLES WHERE TableName = @Table_name) BEGIN
 		INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, isCustom, Definition, Dependencies, customLASR, autoCACHE, autoLASR)
