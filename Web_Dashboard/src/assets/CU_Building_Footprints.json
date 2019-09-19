@@ -502,7 +502,7 @@
         "BLDG_NAME": "McFadden Building",
         "BLDG_NO": 1199,
         "Const_Year": 0,
-        "Short_Name": "MCF",
+        "Short_Name": "MCFADDEN",
         "ADDRESS": " ",
         "Shape_Leng": 220.514510426,
         "Shape_Area": 2406.50395903,
@@ -4194,10 +4194,11 @@
         "BLDG_NAME": "Brackett Hall",
         "BLDG_NO": 30,
         "Const_Year": 1951,
-        "Short_Name": "Brackett",
+        "Short_Name": "BRACK",
         "ADDRESS": "321 Calhoun Drive",
         "Shape_Leng": 256.351456088,
-        "Shape_Area": 3026.7051035
+        "Shape_Area": 3026.7051035,
+        "Status": "Active"
       }
     },
     {
@@ -5152,7 +5153,7 @@
         "BLDG_NAME": "McAdams Hall",
         "BLDG_NO": 38,
         "Const_Year": 1951,
-        "Short_Name": "McAdams",
+        "Short_Name": "MCADAMS",
         "ADDRESS": "821 McMillan Road",
         "Shape_Leng": 489.225569967,
         "Shape_Area": 5216.97031869
@@ -9537,7 +9538,7 @@
         "BLDG_NAME": "Hardin Hall",
         "BLDG_NO": 29,
         "Const_Year": 1890,
-        "Short_Name": "Hardin",
+        "Short_Name": "HARDIN",
         "ADDRESS": "403 Calhoun Drive",
         "Shape_Leng": 210.492849997,
         "Shape_Area": 1305.24873767
@@ -12724,7 +12725,7 @@
         "BLDG_NAME": "Douthit Hills",
         "BLDG_NO": 0,
         "Const_Year": 0,
-        "Short_Name": "Douthit",
+        "Short_Name": "DOUTHIT",
         "ADDRESS": " ",
         "Shape_Leng": 282.820843272,
         "Shape_Area": 2166.03610831,
