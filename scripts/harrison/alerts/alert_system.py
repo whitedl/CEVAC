@@ -412,7 +412,8 @@ def building_is_occupied(occupancy_dict, building):
     return False
 
 
-def check_numerical_alias(alias, alert, next_id, last_events, new_events, get_psid):
+def check_numerical_alias(alias, alert, next_id, last_events, new_events,
+                          get_psid):
     """Check numerical alias alert."""
     selection_command = (f"SELECT TOP {str(alert['num_entries'])} "
                          f"{alert['column']} FROM "
@@ -446,14 +447,15 @@ def check_numerical_alias(alias, alert, next_id, last_events, new_events, get_ps
     if send_alert:
         a = deepcopy(alert)
         if get_psid:
-            a['message'] = angle_brackets_replace_specific(a["message"], "alias",
-                                        room
-                                        + "(" + get_psid_from_alias(room,
-                                                              alert["building"],
-                                                              alert["type"]) + ")")
+            a['message'] = (angle_brackets_replace_specific(
+                            a["message"], "alias", room
+                            + "(" + get_psid_from_alias(
+                                    room,
+                                    alert["building"],
+                                    alert["type"]) + ")"))
         else:
-            a['message'] = angle_brackets_replace_specific(a["message"], "alias",
-                                        room)
+            a['message'] = (angle_brackets_replace_specific(
+                            a["message"], "alias", room))
         event_id, next_id, new_events = assign_event_id(next_id,
                                                         last_events,
                                                         new_events,
@@ -473,7 +475,8 @@ def check_numerical_alias(alias, alert, next_id, last_events, new_events, get_ps
     return (next_id, new_events, com + ";")
 
 
-def check_temp(room, alert, temps, known_issues, next_id, last_events, new_events, get_psid):
+def check_temp(room, alert, temps, known_issues, next_id, last_events,
+               new_events, get_psid):
     """Check relative temperature values."""
     if skip_alias(known_issues, alert["building"], room):
         print(room, " is decomissioned")
@@ -537,7 +540,8 @@ def check_temp(room, alert, temps, known_issues, next_id, last_events, new_event
 
         if send_alert:
             a = deepcopy(alert)
-            add = get_psid_from_alias(room + " Temp", alert["building"], alert["type"]) if get_psid else ""
+            add = get_psid_from_alias(room + " Temp", alert["building"],
+                                      alert["type"]) if get_psid else ""
             a["message"] = angle_brackets_replace_specific(
                             a["message"], "alias",
                             room + " Temp (" + add + ")")
@@ -596,7 +600,8 @@ def check_time(data, alert, next_id, last_events, new_events, get_psid):
     # Add to alerts to send
     safe_log("An alert was sent for " + str(alert), "info")
     a = deepcopy(alert)
-    add = " (" +get_psid_from_alias(alias, alert["building"],alert["type"]) + ")" if get_psid else ""
+    add = (" (" + get_psid_from_alias(alias, alert["building"], alert["type"])
+           + ")" if get_psid else "")
     a["message"] = angle_brackets_replace_specific(
                         a["message"], "alias", alias + add)
     a["message"] = angle_brackets_replace_specific(
