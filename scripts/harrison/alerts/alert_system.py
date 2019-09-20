@@ -439,6 +439,8 @@ def check_numerical_alias(alias, alert, next_id, last_events, new_events, get_ps
         send_alert = (avg_data > alert["value"])
     elif alert["condition"] == "<":
         send_alert = (avg_data < alert["value"])
+    elif alert["condition"] == "=":
+        send_alert = (avg_data == alert["value"])
 
     alias = "Alias"
     if send_alert:
