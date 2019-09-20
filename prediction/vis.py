@@ -16,8 +16,7 @@ import matplotlib.pylab as plb
 pdf = pd.read_csv('CEVAC_WATT_POWER_SUMS_HIST.csv')
 
 # dictionary of dimensions I want to add to the array
-''', error_bad_lines=False'''
-wdf = pd.read_csv('historicWeather.csv')
+wdf = pd.read_csv('historicWeather.csv', error_bad_lines=False)
 
 #   creates a
 cJSON = {}
@@ -54,7 +53,7 @@ numMonth = {
     '12' : 31
 }
 
-
+# inserts time series data into the df
 def insertData(df):
     info = {
     'Month' :   [],
@@ -151,12 +150,10 @@ def makeArrays(df):
 
             # normalize temperature
             temperature = weatherData['temperature']
-            temperature = [(temperature + 20) / 70]
+            temperature = [(temperature + 20) / 150]
 
             # normalize humidity
             humidity = weatherData['humidity']
-            if humidity == 'NULL':
-                print('FOUND ONE')
             humidity = [(humidity / 100)]
 
             # one hot encode month
@@ -172,16 +169,19 @@ def makeArrays(df):
             day[row['dayOfWeek'] - 1] = 1
 
             # throughMonth value was already normalized when inserted into df
-            throughMonth = [row['throughMonth']]
+            # throughMonth = [row['throughMonth']]
 
             # normalize clouds
             clouds = weatherData['cloudCover']
-            if clouds == 'NULL':
-                print('FOUND ONE')
             clouds = [(clouds / 100)]
 
+            # concatenate all of the lists
             tempx = np.concatenate((hour, day, month, temperature, humidity, clouds), axis = -1)
+
             tempy = [(row['intSum'] / 400)]
+            for entry in tempy:
+                if entry > 1:
+                    print('NORMALISATION ERROR IN Y')
 
             if len(tempx) == 46:
                 x.append(tempx)
@@ -201,7 +201,7 @@ def saveArrays(x, y):
     testingLabels = []
 
     # this is the dimension of our training dataset
-    tDim = int(len(x) * .7)
+    tDim = int(len(x) * .9)
 
     for i in range(0, tDim):
         size = len(x)
@@ -230,5 +230,5 @@ def saveArrays(x, y):
     print('TRAINING LABELS:\t{} ENTRIES'.format(len(trainingLabels)))
 
 if __name__ =='__main__':
-    formatConditions(wdf)
+    # formatConditions(wdf)
     makeArrays(pdf)

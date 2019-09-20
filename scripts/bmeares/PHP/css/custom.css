@@ -70,3 +70,6 @@
 #autoCACHE_div{
   float: left;
 }
+#upload_xref{
+  display: none;
+}
