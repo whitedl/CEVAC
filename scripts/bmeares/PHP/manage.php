@@ -28,6 +28,7 @@
 					<input type="radio" name="actions_select" value="new" onchange="get_Metrics_html()">
 					<span class="checkmark"></span>
 				</label>
+        <input type="file" name="upload_xref" id="upload_xref" />
        <?php echo buildings_html(); ?>
         <select name="Metric" id="metrics" style="display: none"></select><br>
 
@@ -63,6 +64,7 @@
         <div id='advanced_div' class="advanced" style="visibility: hidden">
           <button name="PXREF_button" id="PXREF_button" onclick="PXREF_button()">View PXREF</button><br>
           <button name="rebuild_PXREF_button" id="rebuild_PXREF_button" onclick="rebuild_PXREF()">Rebuild PXREF</button><br>
+          <button name="upload_xref_button" id="upload_xref_button" onclick="upload_xref_button()">Upload XREF</button><br>
           <button name="building_info_button" id="building_info_button" onclick="building_info_button()">View Buildings</button><br>
         </div>
         <div id="buttons_div" style="display:none">
