@@ -16,6 +16,7 @@ def findNAN(dataset):
     locations = list(map(tuple, np.where(np.isnan(data))))
     return locations
 
+# verify all data is between 0 and 1
 def verifyData(dataset):
     a=np.random.randint(0,17849)
     c=np.random.randint(0,17849)
@@ -52,9 +53,28 @@ def verifyData(dataset):
 
     print("Done")
 
+# verify trainingData is 46 long
+def verifylength(dataset):
+
+    y=0
+    tally=0
+    while y < len(dataset):
+        if (len(dataset[y])!=46):
+            print("Attention, trainingData number",y,"is not 46 long.")
+            tally+=1
+        y+=1
+    if tally != 0:
+        print(tally, "sets of trainingData were of incorrect length.")
+    else:
+        print("Entire array was of correct length.")
+
+    print("Done")
+
 
 
 if __name__ == '__main__':
     print(findNAN(data))
 
     verifyData(data)
+
+    verifylength(data)
