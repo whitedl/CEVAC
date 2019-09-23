@@ -8,9 +8,8 @@ describe('ControlboxComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ControlboxComponent ]
-    })
-    .compileComponents();
+      declarations: [ControlboxComponent]
+    }).compileComponents();
   }));
 
   beforeEach(() => {
