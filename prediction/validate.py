@@ -17,30 +17,44 @@ def findNAN(dataset):
     return locations
 
 def verifyData(dataset):
-    rangecount=0
-    c=0
-    vdata=dataset.tolist()
-    print(type(dataset))
-    # print(len(vdata))
-    #print(vdata)
-    # for rindex,row in vdata:
-    #
-    #      print(len(row))
-    #         print(vdata[rindex][0])
-    #     if c >= 1.00:
-    #         print("Value ", index, "is greater than 1")
-    #         rangecount+=1
-    #     elif c <= 0.00:
-    #         print("Value ", index, "is less than 0")
-    #         rangecount+=1
-    # if rangecount==0:
-    #     print("All values are within range")
-    # return None
+    a=np.random.randint(0,17849)
+    c=np.random.randint(0,17849)
+    b=np.random.randint(0,45)
+    d=np.random.randint(0,45)
 
-##in enumerate(vdata):
+    dataset[a][b]= -1
+    dataset[c][d]=1.5
+    print("Test 1: a is:",a," and b is:",b)
+    print("Test 2: c is:",c," and d is:",d)
+    c=0
+    counter=0
+
+    for x in np.nditer(dataset):
+
+        if x > 1:
+            print("Out of range value is:",x)
+            print("<",c,">")
+            rowind=int(c/46)
+            colind=c%46
+            print("Array Index:",rowind, ",",colind)
+            counter+=1
+        elif x < 0:
+            print("Out of range value is:",x)
+            print("<",c,">")
+            rowind=int(c/46)
+            colind=c%46
+            print("Array Index:",rowind, ",",colind)
+            counter+=1
+
+        c+=1
+    if counter==0:
+        print("No Values were out of range.")
+
+    print("Done")
+
+
 
 if __name__ == '__main__':
     print(findNAN(data))
 
     verifyData(data)
-    print("test\n")
