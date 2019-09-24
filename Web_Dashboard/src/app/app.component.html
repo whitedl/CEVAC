@@ -2,6 +2,16 @@
   <div class="toolbarStart"></div>
   <div class="toolbarCenter"><h1>Clemson Campus Overview</h1></div>
   <div class="toolbarEnd">
+    <button
+      mat-icon-button
+      [matMenuTriggerFor]="alerts"
+      style="margin-right:1rem"
+    >
+      <mat-icon>error</mat-icon>
+    </button>
+    <mat-menu #alerts="matMenu" xPosition="before">
+      hi
+    </mat-menu>
     <button mat-raised-button (click)="menu.toggle()">
       <mat-icon>menu</mat-icon>
     </button>
