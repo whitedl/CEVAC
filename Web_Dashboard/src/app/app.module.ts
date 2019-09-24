@@ -9,7 +9,7 @@ import { LayoutModule } from '@angular/cdk/layout';
 import { MaterialModule } from '@app/material.module';
 import { PageNotFoundComponent } from '@app/page-not-found/page-not-found.component';
 
-import { AdminModule } from '@app/admin/admin.module';
+import { MapviewModule } from '@app/mapview/mapview.module';
 
 @NgModule({
   declarations: [AppComponent, PageNotFoundComponent],
@@ -19,7 +19,7 @@ import { AdminModule } from '@app/admin/admin.module';
     BrowserAnimationsModule,
     LayoutModule,
     MaterialModule,
-    AdminModule,
+    MapviewModule,
     AppRoutingModule
   ],
   providers: [],
