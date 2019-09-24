@@ -1,16 +1,17 @@
 <?php
 include "../functions.php";
 
-$BuildingSName = $_POST['BuildingSName'];
-$Metric = $_POST['Metric'];
-$unitOfMeasureID = $_POST['unitOfMeasureID'];
-$key_words = $_POST['key_words'];
+$tmp_name = $_FILES['file']['tmp_name'];
+$name = strtoupper($_FILES['file']['name']);
+$dest_name = "/cevac/cache/".$name;
+if(copy($tmp_name, $dest_name)){
+  echo "success\n";
+} else echo "failure\n";
+// $script = '/cevac/scripts/upload_XREF.sh';
+$script = 'python3 /home/cevac/temp/test.py';
+$exec = "sudo $script $dest_name";
 
-$script = '/cevac/python/CREATE_VIEW.sh';
-$config = "";
-$exec = "$script $BuildingSName $Metric PXREF";
-
-echo "$exec";
-// echo `$exec`;
+echo "$exec\n";
+echo passthru($exec);
 
 ?>

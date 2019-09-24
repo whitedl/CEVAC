@@ -62,10 +62,10 @@
       <br>
       <div id="buttons_parent_div">
         <div id='advanced_div' class="advanced" style="visibility: hidden">
-          <button name="PXREF_button" id="PXREF_button" onclick="PXREF_button()">View PXREF</button><br>
-          <button name="rebuild_PXREF_button" id="rebuild_PXREF_button" onclick="rebuild_PXREF()">Rebuild PXREF</button><br>
-          <button name="upload_xref_button" id="upload_xref_button" onclick="upload_xref_button()">Upload XREF</button><br>
-          <button name="building_info_button" id="building_info_button" onclick="building_info_button()">View Buildings</button><br>
+          <button name="PXREF_button" id="PXREF_button" onclick="PXREF_button_click()">View PXREF</button><br>
+          <button name="rebuild_PXREF_button" id="rebuild_PXREF_button" onclick="rebuild_PXREF_click()">Rebuild PXREF</button><br>
+          <button name="upload_xref_button" id="upload_xref_button" onclick="upload_xref_button_click()">Upload XREF</button><br>
+          <button name="building_info_button" id="building_info_button" onclick="building_info_button_click()">View Buildings</button><br>
         </div>
         <div id="buttons_div" style="display:none">
           <button name="bootstrap_button" id="bootstrap_button" onclick="bootstrap()">Bootstrap</button>
@@ -74,6 +74,14 @@
       </div>
     </div>
     <div id="body_right">
+      <div id="add_building_div">
+        <form id="add_building_form">
+          <input type="text" id="new_BuildingSName" name="new_BuildingSName"/>
+          <input type="text" id="new_BuildingDName" name="new_BuildingDName"/>
+          <input type="text" id="new_BuildingKey" name="new_BuildingKey"/>
+        </form>
+        <button id="add_building_button" onclick="add_building_click()">Add Building</button>
+      </div>
       <pre id="output"></pre>
       <div id="sql_output_div">
         <table id="sql_output"></table>
