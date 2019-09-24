@@ -10,6 +10,7 @@ import { MaterialModule } from '@app/material.module';
 import { PageNotFoundComponent } from '@app/page-not-found/page-not-found.component';
 
 import { MapviewModule } from '@app/mapview/mapview.module';
+import { AlertsviewModule } from '@app/alertsview/alertsview.module';
 
 @NgModule({
   declarations: [AppComponent, PageNotFoundComponent],
@@ -20,6 +21,7 @@ import { MapviewModule } from '@app/mapview/mapview.module';
     LayoutModule,
     MaterialModule,
     MapviewModule,
+    AlertsviewModule,
     AppRoutingModule
   ],
   providers: [],
