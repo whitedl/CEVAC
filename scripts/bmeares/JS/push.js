@@ -33,9 +33,9 @@ function send_xref(l,t){
     success: success_output
   });
 }
-function rebuild_PXREF(){
+function rebuild_PXREF_click(){
   form_request('rebuild_PXREF.php');
-  document.getElementById('PXREF_button').innerHTML = "View PXREF";
+  reset_buttons();
 }
 function del(){
   button = document.getElementById('delete_button');
@@ -49,4 +49,20 @@ function del(){
       document.getElementById('output').innerHTML = data;
     }
   });
+}
+function add_building_click(){
+  button = document.getElementById('add_building_button');
+  console.log('click');
+  $.ajax({
+    type: 'POST',
+    url: 'console/add_building.php',
+    data: $('form').serialize(),
+    success: function(data){
+      console.log(data);
+      get_BUILDING_INFO_html();
+      reset_buttons(button);
+      document.getElementById('add_building_div').style.display = "block";
+    }
+  });
+  // form_request('add_building.php');
 }

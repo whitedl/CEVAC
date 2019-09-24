@@ -101,12 +101,12 @@ if [ ! -z "$isCustom" ]; then
       choice=""
     fi
 
-    if [ "$choice" == "1" ] || [ "$choice" == "" ]; then
-      if ! /cevac/scripts/CREATE_CUSTOM.sh "$BuildingSName" "$Metric" "$DateTimeName" "$IDName" "$AliasName" "$DataName" "$Dependencies" ; then
-        /cevac/log_errors.sh "failed to bootstrap custom table. Aborting..."
-        exit 1
-      fi
-    elif [ "$choice" == "2" ]; then
+    # if [ "$choice" == "1" ] || [ "$choice" == "" ]; then
+      # if ! /cevac/scripts/CREATE_CUSTOM.sh "$BuildingSName" "$Metric" "$DateTimeName" "$IDName" "$AliasName" "$DataName" "$Dependencies" ; then
+        # /cevac/scripts/log_error.sh "failed to bootstrap custom table. Aborting..."
+        # exit 1
+      # fi
+    if [ "$choice" == "2" ]; then
       echo "Dropping caches..."
       /cevac/scripts/exec_sql.sh "DELETE FROM CEVAC_TABLES WHERE BuildingSName = '$BuildingSName' AND Metric = '$Metric'"
       /cevac/scripts/exec_sql.sh "IF OBJECT_ID('$HIST_CACHE') IS NOT NULL DROP TABLE $HIST_CACHE;"
@@ -118,7 +118,7 @@ if [ ! -z "$isCustom" ]; then
         /cevac/scripts/log_error.sh "$error"
         exit 1
       fi
-    else
+    elif [ "$choice" != "1" ] && [ "$choice" != "" ]; then
       /cevac/scripts/unlock.sh
       exit 1
     fi
