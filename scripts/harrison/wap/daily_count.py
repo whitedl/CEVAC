@@ -15,7 +15,7 @@ import urllib.parse
 SEND = True
 DEBUG = False
 
-log_dir = "/home/bmeares/cron/wap/log"
+log_dir = "/cevac/cron/wap/log"
 processed_dir = "/mnt/bldg/WAP/processed"
 if DEBUG:
     log_dir = "C:\\Users\\hchall\\Downloads"
@@ -107,12 +107,12 @@ logging.info("guest_count: " + str(clemsonguest))
 
 if SEND:
     # urllib.request.urlopen(command_to_query(insert_sql_total)).read()
-    f = open("/home/bmeares/cache/insert_daily_wap.sql", "w")
+    f = open("/cevac/cache/insert_daily_wap.sql", "w")
     f.write(insert_sql_total.replace(';', '\nGO\n'))
     f.close()
-    os.system("/home/bmeares/scripts/exec_sql_script.sh "
-              "/home/bmeares/cache/insert_daily_wap.sql")
-    os.remove("/home/bmeares/cache/insert_daily_wap.sql")
+    os.system("/cevac/scripts/exec_sql_script.sh "
+              "/cevac/cache/insert_daily_wap.sql")
+    os.remove("/cevac/cache/insert_daily_wap.sql")
 else:
     print(insert_sql_total, "\n", command_to_query(insert_sql_total))
 

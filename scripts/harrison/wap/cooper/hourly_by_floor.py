@@ -108,9 +108,7 @@ def ingest_file_floor(fname, dbc):
                 td = ((dissoc_time - assoc_time).total_seconds()/60) % 60
 
                 ## Add count of unique people per wap
-                #debug_log("okay",LOG)
                 if (hour in hours.keys()) and (td > 1):
-                    #debug_log("hour in  keys",LOG)
                     if floor in hours[hour].keys():
                         if SSID in hours[hour][floor].keys():
                             hours[hour][floor][SSID]["time"] += td
@@ -132,7 +130,6 @@ def ingest_file_floor(fname, dbc):
                             }
                         }
                 elif (td > 1):
-                    #debug_log("here",LOG)
                     hours[hour] = {
                         floor : {
                             SSID : {
@@ -143,9 +140,8 @@ def ingest_file_floor(fname, dbc):
                             }
                         }
                     }
-                #debug_log("success insert",LOG)
             except:
-                logging.error("router not in xref")
+                logging.error(f"WAP name ({name}) not in xref")
 
         for hour in hours:
             for floor in hours[hour]:
@@ -156,7 +152,6 @@ def ingest_file_floor(fname, dbc):
                 if "clemsonguest" in hours[hour][floor]:
                     guest += len(hours[hour][floor]["clemsonguest"]["users"])
 
-                print(hour,floor,guest,clemson)
                 cursor.execute(insert_sql, [hour, floor, guest, clemson])
 
         #commit insertions
@@ -208,8 +203,6 @@ except IOError as ioe:
     raise
 
 # Connect to second database
-logging.info("Connecting to CEVAC_WATT_WAP_HIST and CEVAC_WATT_WAP_HIST_FLOOR")
-
 file_list = []
 try:
     for fname in os.listdir(processed_dir):
@@ -222,7 +215,6 @@ except:
 
 
 if len(file_list) == 0:
-    print("hmm")
     logging.info("No cooper files in processed_dir")
     logging.shutdown()
     sys.exit()
@@ -237,7 +229,6 @@ try:
         'pwd=' + dbconfig2['pwd'])
 except pypyodbc.Error as dbe:
     logging.exception("Unable to connect to the database.")
-    logging.info("Issue with connection")
     logging.shutdown()
     raise
 
@@ -245,20 +236,17 @@ except pypyodbc.Error as dbe:
 for fname in file_list:
     fpath = os.path.join(processed_dir, fname)
     success = False
-    logging.info("Running for "+str(fpath))
     try:
         if True:
-            success = ingest_file_floor(fpath,connection)
+            success = ingest_file_floor(fpath, connection)
         else:
-            #success = ingest_file_fail(fpath, connection)
+            # success = ingest_file_fail(fpath, connection)
             logging.error("Unable to append to CEVAC_WATT_WAP_HIST_FLOOR")
     except csv.Error as e:
         logging.error("Failed to read %s as a csv file.", fpath)
     except Exception as e:
         logging.error("Unexpected error while processing file '%s'", fpath)
         raise
-
-
 
 
 connection.close()

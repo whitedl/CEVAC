@@ -1,4 +1,4 @@
-"""Import WAP data from csv to sql using pypyodbc."""
+"""Import WAP data from csv to sql."""
 
 import os
 import sys
@@ -21,6 +21,10 @@ failed_dir = prefix + "/failed"
 log_dir = prefix + "/logs"
 xref_dir = prefix + "/xref"
 
+wap_table = "CEVAC_COOPER_WAP_HIST_RAW"
+floor_table = "CEVAC_COOPER_WAP_FLOOR_HIST_RAW"
+building_file_name = "cooper"
+
 DEBUG = False
 SEND = True
 
@@ -29,17 +33,17 @@ SEND = True
 # Function Definitions
 #######################################
 def safe_move(old_path, new_path):
-	try:
-		os.rename(old_path, new_path)
-	except WindowsError as e:
-		ext = new_path.rfind('.')
-		timestring = str(time.time()).replace(".", "_")
-		if(ext != -1):
-			new_path = new_path[0:ext] + '(' + timestring + ')' + new_path[ext:len(new_path)]
-			os.rename(old_path, new_path)
-		else:
-			new_path = new_path + '(' + timestring + ')'
-			os.rename(old_path, new_path)
+    try:
+        os.rename(old_path, new_path)
+    except WindowsError as e:
+        ext = new_path.rfind('.')
+        timestring = str(time.time()).replace(".", "_")
+        if(ext != -1):
+            new_path = new_path[0:ext] + '(' + timestring + ')' + new_path[ext:len(new_path)]
+            os.rename(old_path, new_path)
+        else:
+            new_path = new_path + '(' + timestring + ')'
+            os.rename(old_path, new_path)
 
 
 def custom_datestring_to_datetime(datestring):
@@ -87,7 +91,6 @@ def xref_to_dict(fname):
 
 def ingest_file_wap(fname):
     """Use for the new dataset that will fail at ingest_file."""
-
     insert_sql_total = ""
     with open(fname, "r") as csvfile:
         reader = csv.reader(csvfile)
@@ -165,7 +168,7 @@ def ingest_file_wap(fname):
                 for SSID in hours[hour][name]:
                     total_duration = hours[hour][name][SSID]["time"]
                     unique_users = len(hours[hour][name][SSID]["users"].keys())
-                    insert_sql_total += ("INSERT INTO  CEVAC_COOPER_WAP_HIST_RAW "
+                    insert_sql_total += (f"INSERT INTO  {wap_table} "
                                          "(time, name, ssid, total_duration, "
                                          "predicted_occupancy, unique_users) "
                                          f"VALUES ('{hour.strftime('%Y-%m-%d %H:%M:%S')}',"
@@ -264,7 +267,7 @@ def ingest_file_floor(fname):
                     clemson += len(hours[hour][floor]["eduroam"]["users"])
                 if "clemsonguest" in hours[hour][floor]:
                     guest += len(hours[hour][floor]["clemsonguest"]["users"])
-                insert_sql_total += ("INSERT INTO  CEVAC_COOPER_WAP_FLOOR_HIST_RAW "
+                insert_sql_total += (f"INSERT INTO  {floor_table} "
                                      "(UTCDateTime, floor, guest_count, clemson_count) "
                                      f"VALUES ('{hour.strftime('%Y-%m-%d %H:%M:%S')}',"
                                      f"'{floor}','{guest}','{clemson}');")
@@ -299,7 +302,7 @@ def debug_log(message, LOG):
 file_list = []
 for fname in os.listdir(import_dir):
     is_file = False
-    if "cooper" in fname.lower():
+    if building_file_name in fname.lower():
         is_file = True
     if not is_file:
         continue
@@ -321,14 +324,12 @@ insert_sql_total = ""
 for fname in file_list:
     fpath = os.path.join(import_dir, fname)
     success = False
-    logging.info("Running for " + str(fpath))
     try:
         insert_sql_total += ingest_file_wap(fpath)
         insert_sql_total += ingest_file_floor(fpath)
         success = True
     except Exception as e:
         logging.error("Unexpected error while processing file '%s'", fpath)
-        #logging.error(e.message)
 
     if success:
         if SEND and not DEBUG:

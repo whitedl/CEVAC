@@ -8,8 +8,6 @@ import datetime
 from datetime import datetime as dt
 import csv
 import logging
-import urllib.request
-import urllib.parse
 
 # Setup configuration
 SEND = True
@@ -18,10 +16,12 @@ DEBUG = False
 log_dir = "/cevac/cron/wap/log"
 processed_dir = "/mnt/bldg/WAP/processed"
 
+building_file_name = "cooper"
+database_name = "CEVAC_COOPER_WAP_DAILY_HIST_RAW"
+
 CLIENT = 0
 MAC = 2
 SSID = 7
-
 
 
 # Script
@@ -36,7 +36,7 @@ processed_files = os.listdir(processed_dir)
 yesterdays_files = []
 yesterday = (dt.now() - datetime.timedelta(1)).date()
 for file in processed_files:
-    if "client" in file and "cooper" in file.lower():
+    if "client" in file and building_file_name in file.lower():
         unix_timestamp = os.path.getmtime(processed_dir + "/" + file)
         fdate = dt.fromtimestamp(unix_timestamp).date()
         if yesterday == fdate:
@@ -74,7 +74,7 @@ for file in yesterdays_files:
 
     except Exception:
         errors += 1
-        logging.error("Could not parse file " + str(file))
+        logging.error("Could not parse file (formatting issue) " + str(file))
 
 # Push to database
 eduroam = 0 if "eduroam" not in network else len(network["eduroam"])
@@ -85,7 +85,7 @@ if DEBUG:
     print("ERRORS:", errors)
     print("Files:", len(yesterdays_files))
 
-insert_sql_total = ("INSERT INTO CEVAC_COOPER_WAP_DAILY_HIST_RAW(UTCDateTime, "
+insert_sql_total = (f"INSERT INTO {database_name}(UTCDateTime, "
                     "clemson_count, guest_count) VALUES("
                     "'" + yesterday.strftime('%Y-%m-%d %H:%M:%S') + "',"
                     "'" + str(eduroam) + "',"
@@ -98,7 +98,6 @@ logging.info("clemson_count: " + str(eduroam))
 logging.info("guest_count: " + str(clemsonguest))
 
 if SEND:
-    # urllib.request.urlopen(command_to_query(insert_sql_total)).read()
     f = open("/cevac/cache/insert_daily_wap2.sql", "w")
     f.write(insert_sql_total.replace(';', '\nGO\n'))
     f.close()
@@ -109,7 +108,7 @@ else:
     print(insert_sql_total)
 
 if errors == 0:
-    logging.info("Successfully inserted into daily database")
+    logging.info("Successfully inserted into daily database.")
 logging.shutdown()
 
 """
