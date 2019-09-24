@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 
 import { MaterialModule } from '@app/material.module';
 
-import { AdminRoutingModule } from './admin-routing.module';
+import { MapviewRoutingModule } from './mapview-routing.module';
 
 import { MapviewComponent } from './mapview/mapview.component';
 import { AlertboxComponent } from './alertbox/alertbox.component';
@@ -18,6 +18,6 @@ import { BuildingDetailComponent } from './building-detail/building-detail.compo
     ControlboxComponent,
     BuildingDetailComponent
   ],
-  imports: [CommonModule, MaterialModule, AdminRoutingModule, FormsModule]
+  imports: [CommonModule, MaterialModule, MapviewRoutingModule, FormsModule]
 })
-export class AdminModule {}
+export class MapviewModule {}
