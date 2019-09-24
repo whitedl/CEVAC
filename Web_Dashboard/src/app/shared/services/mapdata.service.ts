@@ -276,6 +276,10 @@ export class MapdataService {
         )
         .subscribe(bdata => {
           feature.properties = Object.assign(feature.properties, bdata);
+          if (feature.properties.reportlink) {
+            feature.properties.reportlink =
+              this.sasBaseURL + feature.properties.reportlink;
+          }
         });
       this.http
         .get<BuildingData[]>(
@@ -287,10 +291,6 @@ export class MapdataService {
           bData.forEach((element: any) => {
             feature.properties[element.metric] = element;
           });
-          if (feature.properties.reportlink) {
-            feature.properties.reportlink =
-              this.sasBaseURL + feature.properties.reportlink;
-          }
           this.tracked.resetStyle(layer);
         });
     }
