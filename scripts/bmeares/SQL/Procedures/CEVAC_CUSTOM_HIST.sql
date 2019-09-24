@@ -34,14 +34,16 @@ END
 
 SET @Dependencies_list = (SELECT TOP 1 Dependencies FROM CEVAC_TABLES WHERE TableName = @HIST_VIEW)
 
+DECLARE @cevac_dep TABLE(dep NVARCHAR(MAX));
+INSERT INTO @cevac_dep SELECT * FROM ListTable(@Dependencies_list);
+
 SET @Dependencies_query = '';
-SELECT * INTO #cevac_dep FROM ListTable(@Dependencies_list);
 
 DECLARE @i INT;
 SET @i = 100;
-WHILE (EXISTS(SELECT 1 FROM #cevac_dep) AND @i > 0) BEGIN
-	SET @dependency = (SELECT TOP 1 * FROM #cevac_dep);
-	DELETE TOP(1) FROM #cevac_dep;
+WHILE (EXISTS(SELECT 1 FROM @cevac_dep) AND @i > 0) BEGIN
+	SET @dependency = (SELECT TOP 1 * FROM @cevac_dep);
+	DELETE TOP(1) FROM @cevac_dep;
 	SET @dependecy_query = '
 	IF OBJECT_ID(''' + RTRIM(@dependency) + ''') IS NULL BEGIN
 		EXEC CEVAC_LOG_ERROR @ErrorMessage = ''' + RTRIM(@HIST) + ' requires ' + RTRIM(@dependency) + ''', @ProcessName = ''' + @ProcessName + ''', @TableName = ''' + RTRIM(@HIST) + ''';

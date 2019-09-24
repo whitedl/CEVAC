@@ -1,0 +1,65 @@
+* {
+  font-family: "Arial", Times, serif;
+  color: #ffffff;
+}
+pre {
+  font-family: "Arial", monospace;
+  color: #ffffff
+}
+h2 {
+  color: #f8f8f2	;
+}
+
+textarea {
+  background-color: #44475a;
+  color: #8be9fd;
+  border: none;
+  font-size: 20px;
+}
+
+body {
+  background-color: #282a36;
+}
+
+input {
+  background-color: #44475a;
+  color: #50fa7b;
+  border: none;
+  padding: 10px;
+  border-radius: 5%;
+  font-size: 20px;
+}
+button {
+  background-color: #44475a;
+  color: #24d655;
+  border: 2px solid transparent;
+  padding: 10px;
+  border-radius: 5%;
+  font-size: 20px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  cursor:pointer;
+}
+button:disabled {
+  color: #555555;
+}
+button:hover:enabled{
+  border: 2px solid #aaaaaa;
+  color: #50fa7b;
+}
+
+select {
+  background-color: #44475a;
+  color: #50fa7b;
+  border: none;
+  padding: 10px;
+  border-radius: 5%;
+  font-size: 20px;
+}
+table {
+    border-spacing: 10px;
+    border-collapse: separate;
+}
+td {
+  color: #ffb45b;
+}
+

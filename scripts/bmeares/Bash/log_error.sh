@@ -8,6 +8,7 @@ p='5wattcevacmaint$'
 PARENT_COMMAND=$(ps -o comm= $PPID)
 ErrorMessage="$1"
 ProcessName="$PARENT_COMMAND"
+TableName="$2"
 
 if [ -z "$1" ] ; then
   echo "Usage: $0 [ErrorMessage] {TableName}"

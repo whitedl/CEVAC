@@ -5,7 +5,7 @@ if [ -z "$1" ]; then
   exit 1
 fi
 
-script=$1
+script="$1"
 h='130.127.218.11'
 u='wficcm'
 db='WFIC-CEVAC'

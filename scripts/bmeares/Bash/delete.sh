@@ -2,6 +2,7 @@
 error=""
 Building="$1"
 Metric="$2"
+yes="$3"
 if [ -z "$1" ] || [ -z "$2" ]; then
   echo "Usage: $0 [BLDG] [METRIC]"
   echo $'Enter the following information.\n'
@@ -21,8 +22,10 @@ echo ""
 echo "You are deleting all $Building""_$Metric tables (_RAW and _XREF will be ignored)"
 echo "THIS CANNOT BE UNDONE. "
 echo "Continue? (Y/n)"
-read cont
-if [ "$cont" != "y" ] || [ "$cont" != "Y" ] || [ -z "$cont" ]; then
+if [ "$yes" != "-y" ]; then
+  read cont
+fi
+if [ "$cont" == "y" ] || [ "$cont" == "Y" ] || [ -z "$cont" ]; then
   continue
 else
   exit 1
