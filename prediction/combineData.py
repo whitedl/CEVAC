@@ -35,7 +35,9 @@ wdf['powerSum'] = 0
 
 
 for i, entry in wdf.iterrows():
+
     weatherDate = entry['time']
+
     year = weatherDate[0:4]
     month = weatherDate[5:8].upper()
     month = strToNum[month]
