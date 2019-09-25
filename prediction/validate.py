@@ -18,15 +18,17 @@ def findNAN(dataset):
 
 # verify all data is between 0 and 1
 def verifyData(dataset):
-    a=np.random.randint(0,17849)
-    c=np.random.randint(0,17849)
-    b=np.random.randint(0,45)
-    d=np.random.randint(0,45)
 
-    dataset[a][b]= -1
-    dataset[c][d]=1.5
-    print("Test 1: a is:",a," and b is:",b)
-    print("Test 2: c is:",c," and d is:",d)
+    # #Code for Testing Function
+    # a=np.random.randint(0,17849)
+    # c=np.random.randint(0,17849)
+    # b=np.random.randint(0,45)
+    # d=np.random.randint(0,45)
+    #
+    # dataset[a][b]= -1
+    # dataset[c][d]=1.5
+    # print("Test 1: a is:",a," and b is:",b)
+    # print("Test 2: c is:",c," and d is:",d)
     c=0
     counter=0
 
@@ -34,14 +36,12 @@ def verifyData(dataset):
 
         if x > 1:
             print("Out of range value is:",x)
-            print("<",c,">")
             rowind=int(c/46)
             colind=c%46
             print("Array Index:",rowind, ",",colind)
             counter+=1
         elif x < 0:
             print("Out of range value is:",x)
-            print("<",c,">")
             rowind=int(c/46)
             colind=c%46
             print("Array Index:",rowind, ",",colind)
@@ -49,9 +49,8 @@ def verifyData(dataset):
 
         c+=1
     if counter==0:
-        print("No Values were out of range.")
+        print("No values were out of range.")
 
-    print("Done")
 
 # verify trainingData is 46 long
 def verifylength(dataset):
@@ -66,9 +65,8 @@ def verifylength(dataset):
     if tally != 0:
         print(tally, "sets of trainingData were of incorrect length.")
     else:
-        print("Entire array was of correct length.")
+        print("Entire array is of correct length.")
 
-    print("Done")
 
 
 
