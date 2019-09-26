@@ -12,14 +12,14 @@ from keras.callbacks import EarlyStopping
 import os
 import numpy as np
 from numpy import array
-from sys import argv
+# from sys import argv
 import requests
 import json
 import time
 import datetime
 from datetime import date
 import numpy as np
-import pytz
+# import pytz
 # import matplotlib as plt
 
 # fetch our weather forecast
@@ -140,6 +140,8 @@ def pred(model):
         predictions.append(prediction)
 
     insert_sql_total = ''
+
+    print(predictions)
 
     for i, prediction in enumerate(predictions):
         m = hourly['months'][i]
