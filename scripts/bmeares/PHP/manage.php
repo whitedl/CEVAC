@@ -76,9 +76,9 @@
     <div id="body_right">
       <div id="add_building_div">
         <form id="add_building_form">
-          <input type="text" id="new_BuildingSName" name="new_BuildingSName"/>
-          <input type="text" id="new_BuildingDName" name="new_BuildingDName"/>
-          <input type="text" id="new_BuildingKey" name="new_BuildingKey"/>
+          <input placeholder="BuildingSName" type="text" id="new_BuildingSName" name="new_BuildingSName"/>
+          <input placeholder="BuildingDName" type="text" id="new_BuildingDName" name="new_BuildingDName"/>
+          <input placeholder="BuildingKey" type="text" id="new_BuildingKey" name="new_BuildingKey"/>
         </form>
         <button id="add_building_button" onclick="add_building_click()">Add Building</button>
       </div>

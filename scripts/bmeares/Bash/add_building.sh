@@ -1,7 +1,7 @@
 #! /bin/bash
 
-# ! /cevac/scripts/check_lock.sh && exit 1
-# /cevac/scripts/lock.sh
+! /cevac/scripts/check_lock.sh && exit 1
+/cevac/scripts/lock.sh
 usage="Usage:
   -b BuildingSName
   -d BuildingDName
@@ -38,4 +38,4 @@ if ! /cevac/scripts/exec_sql.sh "$sql" ; then
   /cevac/scripts/log_error.sh
 fi
 
-# /cevac/scripts/unlock.sh
+/cevac/scripts/unlock.sh

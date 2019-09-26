@@ -1,3 +1,4 @@
+#! /usr/bin/python3
 # -*- coding: utf-8 -*-
 """
 Created on Mon Sep 16 09:39:07 2019
@@ -25,10 +26,49 @@ filename = dlg.GetPathName()
 def sql_creat(filename):
     df = pd.read_csv(filename, header=0)
     df = df.dropna(axis=0, how='all')
+    #df = df.astype(str)
+    
+    total_header = ['PointSliceID', 'Room','RoomType','ObjectName','BLG','Floor','ReadingType','Alias','Com','DeCom']
+    
+    #null_df = pd.DataFrame(np.full((len(df),len(total_header)), 'NULL'),columns = total_header) 
+    null_df = pd.DataFrame(columns = total_header)
 
+    #df = pd.merge(df,null_df, how='left').fillna('NULL')
+    #df = pd.concat([df,null_df],ignore_index=True,sort=True).fillna('NULL')
+    df = pd.concat([df,null_df],ignore_index=True,sort=False)
+    
     df.name = filename.split('/')[-1][:-4].upper()
     build_name = (df.name).split('_')[1]
     metric_name = (df.name).split('_')[2]
+    
+    core_df = df[['PointSliceID','Room','RoomType','Floor','ReadingType','Alias']] 
+    '''
+    error_rows = []
+    for i in range(len(core_df)):
+        for j in core_df.iloc[i]:
+            if j=='NULL':
+                error_rows.append(i)
+                break
+    '''
+    error_rows = core_df[core_df.isnull().values==True]
+    
+    if(len(error_rows)):
+        #print('Null value in row: ',[i+1 for i in error_rows])
+        print('Null value in row: ')
+        print(error_rows)
+        sys.exit()
+        
+    if(len(df[df.duplicated('PointSliceID')])):
+        print('duplicated value in PointsliceID: ')
+        print(core_df[df.duplicated('PointSliceID')])
+        sys.exit()
+    
+    '''
+    for i in len(df['PointSliceID']):
+        if df['PointSliceID'][i] == 'NULL':
+            df = df.drop(i)
+            print('Null PointSliceID value in row: ',i)
+    '''
     
     check_query_building = "SELECT BuildingSName FROM CEVAC_BUILDING_INFO; "
     query_res_b = bsql.Query(check_query_building).json_list
@@ -68,24 +108,25 @@ def sql_creat(filename):
             
         for i in range(len(df)):
             insert_str = ['INSERT INTO ', df.name ,' (PointSliceID, Room, RoomType, ObjectName, BLG, Floor, ReadingType, Alias, Com, DeCom) VALUES (\n',\
-                "'",str(df.iloc[i][0]),"'",',',\
-                "'",str(df.iloc[i][1]),"'",',',\
-                "'",str(df.iloc[i][2]),"'",',',\
-                "'",str(df.iloc[i][3]),"'",',',\
-                "'",str(df.iloc[i][4]),"'",',',\
-                "'",str(df.iloc[i][5]),"'",',',\
-                "'",str(df.iloc[i][6]),"'",',',\
-                "'",str(df.iloc[i][7]),"'",',',\
-                "'",str(df.iloc[i][8]),"'",',',\
-                "'",str(df.iloc[i][9]),"'",\
+                "'",str(df.iloc[i]['PointSliceID']),"'",',',\
+                "'",str(df.iloc[i]['Room']),"'",',',\
+                "'",str(df.iloc[i]['RoomType']),"'",',',\
+                "'",str(df.iloc[i]['ObjectName']),"'",',',\
+                "'",str(df.iloc[i]['BLG']),"'",',',\
+                "'",str(df.iloc[i]['Floor']),"'",',',\
+                "'",str(df.iloc[i]['ReadingType']),"'",',',\
+                "'",str(df.iloc[i]['Alias']),"'",',',\
+                "'",str(df.iloc[i]['Com']),"'",',',\
+                "'",str(df.iloc[i]['DeCom']),"'",\
                     ');',\
                     '\nGO\n']
             for j in range(len(insert_str)):
                 if insert_str[j]=="nan":
-                    insert_str[j-1]=" "
+                    insert_str[j-1]=""
                     insert_str[j]='NULL'
-                    insert_str[j+1]=" "
+                    insert_str[j+1]=""
             sql_f.writelines(insert_str)
+            #print(''.join(insert_str))
         sql_f.close()
         
         print(len(df), "lines have been written in: ", new_filename)
@@ -104,7 +145,8 @@ def rename_raw_csv(filename):
 if __name__ == '__main__':
     filename = str(sys.argv[1])
     #filename = file_path + filename
-    #filename = input("filename: ")
+    #filename = input("filename: ")   
+    
     new_sql = sql_creat(filename)
     if(new_sql):
         new_csv_filename = rename_raw_csv(filename)

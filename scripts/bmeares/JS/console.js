@@ -65,19 +65,45 @@ function success_output(data){
 function upload_xref_button_click(){
   input = $('#upload_xref');
   input.change(function(e){
-    e.preventDefault();
-    var formData = new FormData();
-    formData.append('file', $('#upload_xref')[0].files[0]);
 
-    $.ajax({
-      url : 'console/upload_XREF.php',
-      type : 'POST',
-      data : formData,
-      processData: false,  // tell jQuery not to process the data
-      contentType: false,  // tell jQuery not to set contentType
-        success : success_output
-    });
+    var fullPath = document.getElementById('upload_xref').value;
+    if (fullPath) {
+      var startIndex = (fullPath.indexOf('\\') >= 0 ? fullPath.lastIndexOf('\\') : fullPath.lastIndexOf('/'));
+      var filename = fullPath.substring(startIndex);
+      if (filename.indexOf('\\') === 0 || filename.indexOf('/') === 0) {
+        filename = filename.substring(1);
+      }
+      confirm_message = "Are you sure you want to upload " + filename + "?";
+      if(confirm(confirm_message)){
+        e.preventDefault();
+        var formData = new FormData();
+        formData.append('file', $('#upload_xref')[0].files[0]);
+
+        $.ajax({
+          url : 'console/upload_XREF.php',
+          type : 'POST',
+          data : formData,
+          processData: false,  // tell jQuery not to process the data
+          contentType: false,  // tell jQuery not to set contentType
+            success : success_output
+        });
+      }
+    }
   });
 
   $('#upload_xref').click();
+}
+function delete_building_link_click(BSN){
+  confirm_message = "Are you sure you want to delete all tables with the BuildingSName " + BSN + "?";
+  super_confirm = "Are you REALLY sure? (deleting every single table with BuildingSName " + BSN + ")";
+  if(confirm(confirm_message)){
+    if(confirm(super_confirm)){
+      $.ajax({
+        url : 'console/delete_building.php',
+        type : 'POST',
+        data : { BuildingSName : BSN },
+        success : get_BUILDING_INFO_html
+      });
+    }
+  }
 }
