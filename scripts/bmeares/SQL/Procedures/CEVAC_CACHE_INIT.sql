@@ -14,6 +14,7 @@ DECLARE @params_rc INT;
 DECLARE @error NVARCHAR(MAX);
 DECLARE @ProcessName NVARCHAR(MAX);
 SET @ProcessName = OBJECT_NAME(@@PROCID);
+EXEC CEVAC_ACTIVITY @TableName = @tables, @ProcessName = @ProcessName;
 
 DECLARE @custom BIT;
 SET @custom = 0;

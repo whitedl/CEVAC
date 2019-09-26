@@ -12,6 +12,7 @@ SET @execute = 1;
 DECLARE @error NVARCHAR(MAX);
 DECLARE @ProcessName NVARCHAR(MAX);
 SET @ProcessName = OBJECT_NAME(@@PROCID);
+EXEC CEVAC_ACTIVITY @TableName = @tables, @ProcessName = @ProcessName;
 
 DECLARE @name NVARCHAR(300);
 DECLARE @name_CACHE NVARCHAR(300);

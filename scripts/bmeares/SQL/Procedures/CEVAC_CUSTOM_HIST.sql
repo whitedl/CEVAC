@@ -23,6 +23,7 @@ DECLARE @Dependencies_list NVARCHAR(MAX);
 SET @HIST = 'CEVAC_' + @BuildingSName + '_' + @Metric + '_HIST';
 SET @HIST_VIEW =  @HIST + '_VIEW';
 SELECT @HIST_VIEW AS 'HIST_VIEW';
+EXEC CEVAC_ACTIVITY @TableName = @HIST, @ProcessName = @ProcessName;
 IF NOT EXISTS(SELECT TOP 1 Definition FROM CEVAC_TABLES WHERE TableName = @HIST_VIEW) BEGIN
 	SET @error = 'Missing Definition from CEVAC_TABLES. Run CREATE_CUSTOM.sh to resolve';
 	EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @HIST_VIEW;
