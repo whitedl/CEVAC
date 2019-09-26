@@ -112,6 +112,10 @@ FLEX UTILITIES
 MATERIAL CUSTOMIZATION
 ******************************************************************************/
 
+.scrollContainer {
+  @include scrollcontainer;
+}
+
 // exactly what it says it is
 .scrollableExpansion {
   display: flex !important;
