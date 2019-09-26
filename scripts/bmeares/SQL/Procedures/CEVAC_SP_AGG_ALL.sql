@@ -35,6 +35,10 @@ SET @IDName = (SELECT TOP 1 RTRIM(IDName) FROM CEVAC_TABLES WHERE TableName = @H
 SET @DataName = (SELECT TOP 1 RTRIM(DataName) FROM CEVAC_TABLES WHERE TableName = @HIST);
 SET @now_UTC_string = CAST(GETUTCDATE() AS NVARCHAR(100));
 
+DECLARE @ProcessName NVARCHAR(MAX);
+SET @ProcessName = OBJECT_NAME(@@PROCID);
+EXEC CEVAC_ACTIVITY @TableName = @HIST_LASR, @ProcessName = @ProcessName;
+
 --DECLARE @drop_lasr NVARCHAR(MAX);
 --SET @drop_lasr = '
 --IF OBJECT_ID(''' + @HIST_LASR + ''') IS NOT NULL DROP TABLE ' + @HIST_LASR + ';
