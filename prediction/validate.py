@@ -1,17 +1,6 @@
 import numpy as np
 import pandas as pd
 
-'''
-Tyler: if you could
-<<<<<<< HEAD
-1. write a function to check every entry is between 0 and 1
-2. write a function to make sure that every trainingData is 46 long
-=======
-1. write a function to check every entry is between 0 and 1 -- DONE
-2. write a function to make sure that every trainingData is 46 long -- DONE
->>>>>>> a5da265461c3e0b208aa553e06390c3fcc5aa681
-'''
-
 # load the data and the labels
 data = np.load('powerTrainingData.npy')
 labels = np.load('powerTrainingLabels.npy')
@@ -79,7 +68,6 @@ def verifylength(dataset):
         print(tally, "set(s) of trainingData were of incorrect length.")
     else:
         print("Entire array is of correct length.")
-
 
 
 
