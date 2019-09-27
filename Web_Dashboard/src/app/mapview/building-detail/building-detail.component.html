@@ -1,0 +1,15 @@
+<mat-expansion-panel expanded="{{ building$ }}" class="scrollableExpansion">
+  <mat-expansion-panel-header class="mat-child-overflow">
+    <mat-panel-title>
+      {{ building$.BLDG_NAME ? building$.BLDG_NAME : building$.Short_Name }}
+    </mat-panel-title>
+  </mat-expansion-panel-header>
+  <ng-template matExpansionPanelContent>
+    <div *ngIf="building$.reportlink">
+      <a href="{{ building$.reportlink }}" target="_blank">
+        Report Link
+      </a>
+    </div>
+    <div>{{ bdata }}</div>
+  </ng-template>
+</mat-expansion-panel>

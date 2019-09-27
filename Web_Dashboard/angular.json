@@ -27,10 +27,6 @@
               "src/styles.scss",
               "node_modules/leaflet/dist/leaflet.css"
             ],
-            "scripts": [
-              "node_modules/leaflet/dist/leaflet.js",
-              "node_modules/chroma-js/chroma.js"
-            ],
             "es5BrowserSupport": true
           },
           "configurations": {
@@ -41,6 +37,7 @@
                   "with": "src/environments/environment.prod.ts"
                 }
               ],
+              "baseHref": "/cevac_web/",
               "outputPath": "build",
               "deleteOutputPath": false,
               "optimization": true,
