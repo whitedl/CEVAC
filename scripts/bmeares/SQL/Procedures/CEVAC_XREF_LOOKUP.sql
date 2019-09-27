@@ -18,6 +18,8 @@ SET @PXREF = 'CEVAC_' + @BuildingSName + '_' + @Metric + '_PXREF';
 DECLARE @XREF_source NVARCHAR(MAX);
 SET @XREF_source = @XREF;
 
+EXEC CEVAC_ACTIVITY @TableName = @XREF, @ProcessName = @ProcessName;
+
 DECLARE @RemotePSIDName NVARCHAR(MAX);
 SET @RemotePSIDName = (SELECT TOP 1 VarValue FROM CEVAC_CONFIG WHERE VarName = 'RemotePSIDName')
 

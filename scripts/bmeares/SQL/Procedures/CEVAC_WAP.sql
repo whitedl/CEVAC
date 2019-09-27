@@ -20,6 +20,8 @@ SET @HIST_VIEW = 'CEVAC_' + @BuildingSName + '_' + @Metric + '_HIST_VIEW';
 SET @HIST_RAW = 'CEVAC_' + @BuildingSName + '_' + @Metric + '_HIST_RAW';
 SET @XREF = 'CEVAC_' + @BuildingSName + '_' + @Metric + '_XREF';
 
+EXEC CEVAC_ACTIVITY @TableName = @HIST, @ProcessName = @ProcessName;
+
 DECLARE @DateTimeName NVARCHAR(MAX);
 DECLARE @IDName NVARCHAR(MAX);
 DECLARE @AliasName NVARCHAR(MAX);
