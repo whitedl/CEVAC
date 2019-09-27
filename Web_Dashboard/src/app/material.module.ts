@@ -13,6 +13,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 @NgModule({
   imports: [
@@ -28,7 +29,8 @@ import { MatMenuModule } from '@angular/material/menu';
     MatChipsModule,
     MatDividerModule,
     MatSnackBarModule,
-    MatMenuModule
+    MatMenuModule,
+    MatCheckboxModule
   ],
   exports: [
     MatSidenavModule,
@@ -43,7 +45,8 @@ import { MatMenuModule } from '@angular/material/menu';
     MatChipsModule,
     MatDividerModule,
     MatSnackBarModule,
-    MatMenuModule
+    MatMenuModule,
+    MatCheckboxModule
   ]
 })
 export class MaterialModule {}

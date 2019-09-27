@@ -8,5 +8,19 @@
     hi there
     <router-outlet></router-outlet>
   </mat-sidenav>
-  <mat-sidenav-content> </mat-sidenav-content>
+  <mat-sidenav-content>
+    <table mat-table>
+      <ng-container matColumnDef="select">
+        <th mat-header-cell *matHeaderCellDef>
+          <mat-checkbox
+            (change)="$event ? masterToggle() : null"
+            [checked]="selection.hasValue() && isAllSelected()"
+            [indeterminate]="selection.hasValue() && !isAllSelected()"
+            [aria-label]="checkboxLabel()"
+          >
+          </mat-checkbox>
+        </th>
+      </ng-container>
+    </table>
+  </mat-sidenav-content>
 </mat-sidenav-container>
