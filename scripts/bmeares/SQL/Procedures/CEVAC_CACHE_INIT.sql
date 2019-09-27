@@ -4,7 +4,8 @@ SET ANSI_NULLS, QUOTED_IDENTIFIER ON;
 GO
 CREATE PROCEDURE CEVAC_CACHE_INIT
 	@tables NVARCHAR(MAX),
-	@destTableName NVARCHAR(300) = NULL
+	@destTableName NVARCHAR(300) = NULL,
+	@execute BIT = 1
 AS
 
 DECLARE @name NVARCHAR(100);
@@ -76,5 +77,5 @@ IF @tables LIKE '%HIST_LASR%' AND @params_rc = 1 BEGIN
 END ELSE BEGIN
 	SET @CEVAC_CACHE_APPEND = 'EXEC CEVAC_CACHE_APPEND @tables = ''' + @tables + '''';
 END
-
-EXEC(@CEVAC_CACHE_APPEND)
+RAISERROR('CACHE has been dropped. Calling CEVAC_CACHE_APPEND...', 0, 1) WITH NOWAIT;
+EXEC CEVAC_CACHE_APPEND @tables = @tables, @execute = @execute
