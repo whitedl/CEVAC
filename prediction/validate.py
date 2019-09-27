@@ -3,8 +3,8 @@ import pandas as pd
 
 '''
 Tyler: if you could
-1. write a function to check every entry is between 0 and 1
-2. write a function to make sure that every trainingData is 46 long
+1. write a function to check every entry is between 0 and 1 -- DONE
+2. write a function to make sure that every trainingData is 46 long -- DONE
 '''
 
 # load the data and the labels
@@ -24,11 +24,11 @@ def verifyData(dataset):
     # c=np.random.randint(0,17849)
     # b=np.random.randint(0,45)
     # d=np.random.randint(0,45)
-    #
     # dataset[a][b]= -1
     # dataset[c][d]=1.5
     # print("Test 1: a is:",a," and b is:",b)
     # print("Test 2: c is:",c," and d is:",d)
+
     c=0
     counter=0
 
@@ -57,13 +57,21 @@ def verifylength(dataset):
 
     y=0
     tally=0
+
+    # #Testing Code for functionality
+    # new=dataset.sum(1)[...,None]
+    # print(new)
+    # dataset=np.append(dataset,new,axis=1)
+    # print(np.shape(dataset))
+
+    #Verification
     while y < len(dataset):
         if (len(dataset[y])!=46):
-            print("Attention, trainingData number",y,"is not 46 long.")
+            print("Attention, trainingData number",y+1,"is not 46 long.")
             tally+=1
         y+=1
     if tally != 0:
-        print(tally, "sets of trainingData were of incorrect length.")
+        print(tally, "set(s) of trainingData were of incorrect length.")
     else:
         print("Entire array is of correct length.")
 
