@@ -6,6 +6,10 @@ CREATE PROCEDURE CEVAC_ACTIVITY
 	@TableName NVARCHAR(MAX),
 	@ProcessName NVARCHAR(MAX)
 AS
+DECLARE @msg NVARCHAR(MAX);
+SET @msg = 'Recording process: ' + @ProcessName;
+
+RAISERROR(@msg, 0, 1) WITH NOWAIT;
 
 INSERT INTO CEVAC_ACTIVITY_LOG(TableName, UTCDateTime, ProcessName)
 VALUES (
