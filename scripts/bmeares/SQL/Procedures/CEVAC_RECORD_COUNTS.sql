@@ -18,7 +18,7 @@ SET @CEVAC_ALL_RECORD_COUNT_HIST_RAW = 'CEVAC_ALL_RECORDS_COUNTS_COMPARE_HIST_RA
 DECLARE @HIST NVARCHAR(400);
 
 SET @HIST = 'CEVAC_' + @BuildingSName + '_' + @Metric + '_HIST';
-
+EXEC CEVAC_ACTIVITY @TableName = @HIST, @ProcessName = @ProcessName;
 DECLARE @DateTimeName NVARCHAR(100);
 SET @DateTimeName = RTRIM((SELECT TOP 1 DateTimeName FROM CEVAC_TABLES WHERE BuildingSName = @BuildingSName AND Metric = @Metric AND Age = 'HIST'));
 

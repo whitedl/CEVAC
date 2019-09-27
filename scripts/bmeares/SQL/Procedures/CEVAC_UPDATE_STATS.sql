@@ -20,6 +20,8 @@ SET @LATEST_CACHE = @LATEST + '_CACHE';
 DECLARE @stats_source NVARCHAR(300);
 SET @stats_source = @LATEST_CACHE;
 
+EXEC CEVAC_ACTIVITY @TableName = @LATEST, @ProcessName = @ProcessName;
+
 IF OBJECT_ID(@LATEST) IS NULL OR @LATEST IS NULL BEGIN
 	SET @error = @LATEST + ' does not exist';
 	EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @LATEST;

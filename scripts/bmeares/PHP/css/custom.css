@@ -73,3 +73,12 @@
 #upload_xref{
   display: none;
 }
+#add_building_div{
+  display: none;
+}
+.delete_building_link{
+  float: right;
+  color: #999999;
+  cursor: pointer;
+  font-size: small;
+}

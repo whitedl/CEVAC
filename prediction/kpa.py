@@ -81,18 +81,8 @@ def pred(model):
 	print('STANDARD DEV:\t{}'.format(np.std(differences)))
 	print('MEAN DIFFERENCE:\t{}'.format(np.mean(differences)))
 
-def pls(model):
-
-	train_data, train_labels, test_data, test_labels = loadData()
-
-	model.load_weights('powerModel.h5')
-	input = train_data[0]
-	prediction = model.predict(input.reshape(1,-1))[0][0] * 400
-	print(prediction)
-
 
 if __name__ == '__main__':
 	model = createModel('adam', 46)
 	train(model)
 	pred(model)
-	# pls(model)

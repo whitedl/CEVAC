@@ -15,7 +15,9 @@ DECLARE @HIST_LASR NVARCHAR(310);
 SET @HIST = 'CEVAC_' + @BuildingSName + '_' + @Metric + '_HIST';
 SET @HIST_LASR = @HIST + '_LASR';
 
-
+DECLARE @ProcessName NVARCHAR(MAX);
+SET @ProcessName = OBJECT_NAME(@@PROCID);
+EXEC CEVAC_ACTIVITY @TableName = @HIST_LASR, @ProcessName = @ProcessName;
 
 
 DECLARE @EXEC_SQL NVARCHAR(MAX);
