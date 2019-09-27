@@ -84,8 +84,8 @@ def verifylength(dataset):
 
 
 if __name__ == '__main__':
-    print(findNAN(data))
-
+    # verify all data is valid (non nan)
     verifyData(data)
 
+    # verify length of eveyr training set is correct
     verifylength(data)
