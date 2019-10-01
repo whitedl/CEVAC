@@ -22,6 +22,7 @@ function reset_PXREF(){
   view = "View PXREF";
   pb = document.getElementById('PXREF_button');
   pb.innerHTML = view;
+  document.getElementById('PXREF_div').style.display = 'none';
 }
 function PXREF_button_click(){
   pb = document.getElementById('PXREF_button');
@@ -30,10 +31,12 @@ function PXREF_button_click(){
   if(pb.innerHTML == view){
     get_PXREF_html();
     pb.innerHTML = update;
-  reset_buttons();  } else{
+    reset_buttons(pb);
+  } else{
     update_aliases();
     pb.innerHTML = view;
   }
+  document.getElementById('PXREF_div').style.display = 'block';
   reset_buttons(pb);
 }
 function building_info_button_click(){
@@ -107,3 +110,12 @@ function delete_building_link_click(BSN){
     }
   }
 }
+function download_PXREF_click(){
+  $.ajax({
+    url : 'console/download_PXREF.php',
+    type : 'GET',
+    data: $('form').serialize(),
+    success : success_PXREF_csv
+  });
+}
+

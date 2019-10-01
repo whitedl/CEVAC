@@ -82,3 +82,12 @@
   cursor: pointer;
   font-size: small;
 }
+.in_xref{
+  /* color: orange; */
+}
+.not_in_xref{
+  color: #999999;
+}
+#PXREF_div{
+  display: none;
+}

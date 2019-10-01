@@ -76,14 +76,14 @@ for t in "${tables_array[@]}"; do
   fi
 
   /cevac/scripts/seperator.sh
-  time if ! { /cevac/scripts/lasr_append.sh $B $M $A $runsas $reset & } ; then
+  time if ! /cevac/scripts/lasr_append.sh $B $M $A $runsas $reset ; then
     error="Error uploading CEVAC_$B""_$M""_$A to LASR";
     /cevac/scripts/log_error.sh "$error"
     continue
     # exit 1
   fi
 done
-wait
+# wait
 echo "All _HIST tables have been loaded."
 if [ "$runsas" != "norun" ]; then
   echo "Executing runsas.sh..."

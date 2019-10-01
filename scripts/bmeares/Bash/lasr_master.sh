@@ -18,5 +18,5 @@ if ! /cevac/scripts/UPDATE_STATS.sh ; then
   /cevac/scripts/log_error.sh "Failed updating stats"
   exit 1
 fi
-
+/cevac/scripts/exec_sql.sh "CHECKPOINT"
 /cevac/scripts/unlock.sh

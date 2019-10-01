@@ -46,3 +46,18 @@ function get_PXREF_html(){
     sql_out.innerHTML = data;
   });
 }
+function success_PXREF_csv(data){
+  alert(data);
+  var datetime = new Date().getTime();
+  filename = String(datetime) + '_' + data.substring(4, data.length);
+
+  console.log(data);
+  var element = document.createElement('a');
+  element.setAttribute('href',data);
+  element.setAttribute('download',filename);
+  element.style.display = 'none';
+  document.body.appendChild(element);
+  element.click();
+  document.body.removeChild(element);
+
+}
