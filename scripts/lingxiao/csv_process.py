@@ -108,7 +108,7 @@ def sql_creat(filename):
             
         for i in range(len(df)):
             insert_str = ['INSERT INTO ', df.name ,' (PointSliceID, Room, RoomType, ObjectName, BLG, Floor, ReadingType, Alias, Com, DeCom) VALUES (\n',\
-                "'",str(df.iloc[i]['PointSliceID']),"'",',',\
+                "'",str(int(df.iloc[i]['PointSliceID'])),"'",',',\
                 "'",str(df.iloc[i]['Room']),"'",',',\
                 "'",str(df.iloc[i]['RoomType']),"'",',',\
                 "'",str(df.iloc[i]['ObjectName']),"'",',',\
