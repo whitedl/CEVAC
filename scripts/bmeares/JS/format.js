@@ -18,7 +18,10 @@ function reset_buttons(active_button = ""){
   add_building_button = document.getElementById('add_building_button');
   console.log('reset');
 
-  if(PXREF_button != active_button) PXREF_button.innerHTML = 'View PXREF';
+  if(PXREF_button != active_button){
+    PXREF_button.innerHTML = 'View PXREF';
+    document.getElementById('PXREF_div').style.display = 'none';
+  }
   if(rebuild_PXREF_button != active_button) rebuild_PXREF_button.innerHTML = 'Rebuild PXREF';
   if(upload_xref_button != active_button) upload_xref_button.innerHTML = 'Upload XREF';
   if(building_info_button != active_button){

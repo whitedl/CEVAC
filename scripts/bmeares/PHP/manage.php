@@ -74,6 +74,9 @@
       </div>
     </div>
     <div id="body_right">
+      <div id="PXREF_div">
+        <button onclick='download_PXREF_click()'>Download PXREF</button>
+      </div>
       <div id="add_building_div">
         <form id="add_building_form">
           <input placeholder="BuildingSName" type="text" id="new_BuildingSName" name="new_BuildingSName"/>

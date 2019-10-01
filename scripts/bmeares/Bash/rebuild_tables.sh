@@ -25,10 +25,11 @@ while getopts b:m:k:u:a:hycl option; do
 done
 
 hist_views_query="
-SELECT RTRIM(TableName) AS 'TableName'
+SELECT BuildingSName, Metric, Age
 FROM CEVAC_TABLES
 WHERE Age = '$Age'
 AND TableName NOT LIKE '%CSV%'
+AND isCustom = 0
 "
 /cevac/scripts/exec_sql.sh "$hist_views_query" "hist_views.csv"
 
@@ -38,14 +39,15 @@ readarray tables_array < /cevac/cache/hist_views.csv
 
 for t in "${tables_array[@]}"; do
   t=`echo "$t" | tr -d '\n'`
-  [ -z "$t" ] && continue
-  query="
-  INSERT INTO CEVAC_ALIAS_LOG(PointSliceID, Alias, UTCDateTime)
-  SELECT PointSliceID, Alias, GETUTCDATE() AS 'UTCDateTime'
-  FROM $t;
-  "
-  echo "$query"
-  /cevac/scripts/exec_sql.sh "$query"
+  if [ -z "$t" ]; then
+    continue
+  fi
+  t=`echo "$t" | sed 's/,/\n/g'`
+  B=`echo "$t" | sed '1!d'`
+  M=`echo "$t" | sed '2!d'`
+  A=`echo "$t" | sed '3!d'`
+  tableName="CEVAC_$B""_$M""_$A"
+  /cevac/scripts/CREATE_VIEW.sh "$B" "$M" "$A"
 
 done
 

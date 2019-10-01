@@ -36,6 +36,7 @@ function send_xref(l,t){
 function rebuild_PXREF_click(){
   form_request('rebuild_PXREF.php');
   reset_buttons();
+  // get_PXREF_html();
 }
 function del(){
   button = document.getElementById('delete_button');
