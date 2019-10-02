@@ -86,9 +86,7 @@ def makeArrays(df):
 
         if not np.isnan(tempx).any():
             powerSum = weatherData['powerSum']
-            # if powerSum < 0.1 or powerSum > .9:
-            #     print('Power Sum:\t{}'.format(powerSum))
-            tempy = 
+            tempy = [powerSum]
 
             # if powerSum > 0.01:
             x.append(tempx)
