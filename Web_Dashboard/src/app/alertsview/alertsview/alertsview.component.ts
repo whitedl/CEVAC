@@ -25,6 +25,7 @@ export class AlertsviewComponent implements AfterViewInit {
   alerts: Alert[] = [];
   isLoading = false;
   count = 0;
+  pageSize = 10;
 
   apiUrl = 'http://wfic-cevac1/api/alerts';
 
@@ -34,7 +35,8 @@ export class AlertsviewComponent implements AfterViewInit {
   constructor(private http: HttpClient) {}
 
   getAlerts(): Observable<Alert[]> {
-    return this.http.get<Alert[]>(this.apiUrl);
+    const requestUrl = this.apiUrl + '?filter[limit]=' + this.pageSize;
+    return this.http.get<Alert[]>(requestUrl);
   }
 
   ngAfterViewInit() {
@@ -50,7 +52,6 @@ export class AlertsviewComponent implements AfterViewInit {
         map(alerts => {
           this.isLoading = false;
           this.count = alerts.length;
-          console.log(typeof alerts);
           return alerts;
         }),
         catchError(() => {
