@@ -14,7 +14,9 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatPaginator } from '@angular/material/paginator';
+import { MatSortModule } from '@angular/material/sort';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatTableModule } from '@angular/material/table';
 
 @NgModule({
   imports: [
@@ -32,7 +34,9 @@ import { MatPaginator } from '@angular/material/paginator';
     MatSnackBarModule,
     MatMenuModule,
     MatCheckboxModule,
-    MatPaginator
+    MatPaginatorModule,
+    MatSortModule,
+    MatTableModule
   ],
   exports: [
     MatSidenavModule,
@@ -49,7 +53,9 @@ import { MatPaginator } from '@angular/material/paginator';
     MatSnackBarModule,
     MatMenuModule,
     MatCheckboxModule,
-    MatPaginator
+    MatPaginatorModule,
+    MatSortModule,
+    MatTableModule
   ]
 })
 export class MaterialModule {}
