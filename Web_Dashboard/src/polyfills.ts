@@ -60,3 +60,8 @@ import 'zone.js/dist/zone'; // Included with Angular CLI.
 /***************************************************************************************************
  * APPLICATION IMPORTS
  */
+// This is all for IE compatibility. Remove it to reduce package load.
+// TODO:  When Angular finally adds differential loading of polyfills come back and shift this all to the es5 polyfill
+//      issue tracked at https://github.com/angular/angular-cli/issues/14168
+(window as any).__Zone_enable_cross_context_check = true;
+import 'core-js';

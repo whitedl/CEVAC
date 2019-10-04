@@ -31,10 +31,10 @@ LOG = True
 CHECK_ALERTS = True
 
 # Determines whether or not to insert the found alerts into the alert databse
-SEND = True
+SEND = False
 
 # Determines whether or not to update the cache alerts are checked against
-UPDATE_CACHE = True
+UPDATE_CACHE = False
 
 # The positions for columns in the csv
 COLUMNS = {
