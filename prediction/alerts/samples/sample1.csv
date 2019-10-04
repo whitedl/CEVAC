@@ -1,0 +1,101 @@
+AlertID,AlertType,AlertMessage,Metric,BuildingSName,BuildingDName,Acknowledged,UTCDateTime,MessageID,Alias,EventID,Resolved
+1,warning,206 Temp 8619 reads 69.8 [deg-F] (Cooling SP = 68.5 [deg-F]),TEMP,WATT,Watt Family Innovation Center,0,2019-07-25 19:23:29.000,8,206,2532,0
+2,alert,206 Temp 8619 reads 69.8 [deg-F] (Cooling SP = 68.5 [deg-F]),TEMP,WATT,Watt Family Innovation Center,0,2019-07-25 19:23:29.000,9,206,2533,0
+3,alert,212 Temp 8211 has not reported in 4 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-25 19:23:29.000,14,212 Temp,2247,0
+4,alert,AHU1 Cooling Coil Discharge SP 8230 has not reported in 59 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-25 19:23:29.000,14,AHU1 Cooling Coil Discharge SP,2251,0
+5,alert,113 Temp 8698 has not reported in 59 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-25 19:23:29.000,14,113 Temp,2272,0
+6,alert,216B Temp 8825 has not reported in 4 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-25 19:23:29.000,14,216B Temp,2177,0
+7,alert,20866 has not reported in 22 days.,POWER,ASC,Academic Success Center,0,2019-07-25 19:23:29.000,18,20866,2085,0
+8,alert,20975 has not reported in 22 days.,POWER,ASC,Academic Success Center,0,2019-07-25 19:23:29.000,18,20975,2086,0
+9,alert,20915 has not reported in 22 days.,POWER,ASC,Academic Success Center,0,2019-07-25 19:23:29.000,18,20915,2087,0
+10,alert,Air Handler L1 Return Air 3rd Floor CO2 6633 has not reported in 494 days.,CO2,ASC,Academic Success Center,0,2019-07-25 19:23:29.000,19,Air Handler L1 Return Air 3rd Floor CO2,2412,0
+11,alert,Air Handler R1 Return Air 3rd Floor CO2 6640 has not reported in 470 days.,CO2,ASC,Academic Success Center,0,2019-07-25 19:23:29.000,19,Air Handler R1 Return Air 3rd Floor CO2,2413,0
+12,alert,Air Handler L1 Return Air 1st Floor CO2 6631 has not reported in 494 days.,CO2,ASC,Academic Success Center,0,2019-07-25 19:23:29.000,19,Air Handler L1 Return Air 1st Floor CO2,2414,0
+13,alert,Air Handler L1 Return Air 2nd Floor CO2 6632 has not reported in 494 days.,CO2,ASC,Academic Success Center,0,2019-07-25 19:23:29.000,19,Air Handler L1 Return Air 2nd Floor CO2,2415,0
+14,alert,Air Handler R1 Return Air 2nd Floor CO2 6630 has not reported in 470 days.,CO2,ASC,Academic Success Center,0,2019-07-25 19:23:29.000,19,Air Handler R1 Return Air 2nd Floor CO2,2417,0
+15,alert,Air Handler R1 Return Air 1st Floor CO2 6629 has not reported in 470 days.,CO2,ASC,Academic Success Center,0,2019-07-25 19:23:29.000,19,Air Handler R1 Return Air 1st Floor CO2,2416,0
+16,alert,311 Temp 4761 has not reported in 4 days.,TEMP,COOPER,Robert Muldrow Cooper Library,0,2019-07-25 19:23:29.000,20,311 Temp,2429,0
+17,alert,311A Temp 4760 has not reported in 4 days.,TEMP,COOPER,Robert Muldrow Cooper Library,0,2019-07-25 19:23:29.000,20,311A Temp,2430,0
+18,alert,301 Temp 6274 has not reported in 4 days.,TEMP,COOPER,Robert Muldrow Cooper Library,0,2019-07-25 19:23:29.000,20,301 Temp,2426,0
+19,alert,2902 has not reported in 45 days.,POWER,COOPER,Robert Muldrow Cooper Library,0,2019-07-25 19:23:29.000,21,2902,2099,0
+20,alert,2927 has not reported in 45 days.,POWER,COOPER,Robert Muldrow Cooper Library,0,2019-07-25 19:23:29.000,21,2927,2100,0
+21,alert,2914 has not reported in 30 days.,POWER,COOPER,Robert Muldrow Cooper Library,0,2019-07-25 19:23:29.000,21,2914,2097,0
+22,alert,2915 has not reported in 45 days.,POWER,COOPER,Robert Muldrow Cooper Library,0,2019-07-25 19:23:29.000,21,2915,2098,0
+23,warning,205 Temp 177 reads 74.3 [deg-F] (Cooling SP = 73.1 [deg-F]),TEMP,ASC,Academic Success Center,0,2019-07-25 19:23:29.000,26,205,2476,0
+24,alert,205 Temp 177 reads 74.3 [deg-F] (Cooling SP = 73.1 [deg-F]),TEMP,ASC,Academic Success Center,0,2019-07-25 19:23:29.000,27,205,2477,0
+25,warning,206 Temp ( (8619)) reads 69.8 [deg-F] (Cooling SP = 68.5 [deg-F]),TEMP,WATT,Watt Family Innovation Center,0,2019-07-25 19:33:04.000,8,206,2532,0
+26,alert,206 Temp ( (8619)) reads 69.8 [deg-F] (Cooling SP = 68.5 [deg-F]),TEMP,WATT,Watt Family Innovation Center,0,2019-07-25 19:33:04.000,9,206,2533,0
+27,alert,216B Temp (8825) has not reported in 4 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-25 19:33:04.000,14,216B Temp,2177,0
+28,alert,212 Temp (8211) has not reported in 4 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-25 19:33:04.000,14,212 Temp,2247,0
+29,alert,AHU1 Cooling Coil Discharge SP (8230) has not reported in 59 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-25 19:33:04.000,14,AHU1 Cooling Coil Discharge SP,2251,0
+30,alert,113 Temp (8698) has not reported in 59 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-25 19:33:04.000,14,113 Temp,2272,0
+31,alert,20866 has not reported in 22 days.,POWER,ASC,Academic Success Center,0,2019-07-25 19:33:04.000,18,20866,2085,0
+32,alert,20975 has not reported in 22 days.,POWER,ASC,Academic Success Center,0,2019-07-25 19:33:04.000,18,20975,2086,0
+33,alert,20915 has not reported in 22 days.,POWER,ASC,Academic Success Center,0,2019-07-25 19:33:04.000,18,20915,2087,0
+34,alert,Air Handler L1 Return Air 3rd Floor CO2 (6633) has not reported in 494 days.,CO2,ASC,Academic Success Center,0,2019-07-25 19:33:04.000,19,Air Handler L1 Return Air 3rd Floor CO2,2412,0
+35,alert,Air Handler R1 Return Air 3rd Floor CO2 (6640) has not reported in 470 days.,CO2,ASC,Academic Success Center,0,2019-07-25 19:33:04.000,19,Air Handler R1 Return Air 3rd Floor CO2,2413,0
+36,alert,Air Handler L1 Return Air 1st Floor CO2 (6631) has not reported in 494 days.,CO2,ASC,Academic Success Center,0,2019-07-25 19:33:04.000,19,Air Handler L1 Return Air 1st Floor CO2,2414,0
+37,alert,Air Handler L1 Return Air 2nd Floor CO2 (6632) has not reported in 494 days.,CO2,ASC,Academic Success Center,0,2019-07-25 19:33:04.000,19,Air Handler L1 Return Air 2nd Floor CO2,2415,0
+38,alert,Air Handler R1 Return Air 2nd Floor CO2 (6630) has not reported in 470 days.,CO2,ASC,Academic Success Center,0,2019-07-25 19:33:04.000,19,Air Handler R1 Return Air 2nd Floor CO2,2417,0
+39,alert,Air Handler R1 Return Air 1st Floor CO2 (6629) has not reported in 470 days.,CO2,ASC,Academic Success Center,0,2019-07-25 19:33:04.000,19,Air Handler R1 Return Air 1st Floor CO2,2416,0
+40,alert,311 Temp (4761) has not reported in 4 days.,TEMP,COOPER,Robert Muldrow Cooper Library,0,2019-07-25 19:33:04.000,20,311 Temp,2429,0
+41,alert,311A Temp (4760) has not reported in 4 days.,TEMP,COOPER,Robert Muldrow Cooper Library,0,2019-07-25 19:33:04.000,20,311A Temp,2430,0
+42,alert,301 Temp (6274) has not reported in 4 days.,TEMP,COOPER,Robert Muldrow Cooper Library,0,2019-07-25 19:33:04.000,20,301 Temp,2426,0
+43,alert,2902 has not reported in 45 days.,POWER,COOPER,Robert Muldrow Cooper Library,0,2019-07-25 19:33:04.000,21,2902,2099,0
+44,alert,2927 has not reported in 45 days.,POWER,COOPER,Robert Muldrow Cooper Library,0,2019-07-25 19:33:04.000,21,2927,2100,0
+45,alert,2914 has not reported in 30 days.,POWER,COOPER,Robert Muldrow Cooper Library,0,2019-07-25 19:33:04.000,21,2914,2097,0
+46,alert,2915 has not reported in 45 days.,POWER,COOPER,Robert Muldrow Cooper Library,0,2019-07-25 19:33:04.000,21,2915,2098,0
+47,warning,205 Temp ( (177)) reads 74.3 [deg-F] (Cooling SP = 73.1 [deg-F]),TEMP,ASC,Academic Success Center,0,2019-07-25 19:33:04.000,26,205,2476,0
+48,alert,205 Temp ( (177)) reads 74.3 [deg-F] (Cooling SP = 73.1 [deg-F]),TEMP,ASC,Academic Success Center,0,2019-07-25 19:33:04.000,27,205,2477,0
+49,warning,206 Temp (8619) reads 69.8 [deg-F] (Cooling SP = 68.5 [deg-F]),TEMP,WATT,Watt Family Innovation Center,0,2019-07-25 19:36:24.000,8,206,2532,0
+50,alert,206 Temp (8619) reads 69.8 [deg-F] (Cooling SP = 68.5 [deg-F]),TEMP,WATT,Watt Family Innovation Center,0,2019-07-25 19:36:24.000,9,206,2533,0
+51,alert,216B Temp (8825) has not reported in 4 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-25 19:36:24.000,14,216B Temp,2177,0
+52,alert,212 Temp (8211) has not reported in 4 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-25 19:36:24.000,14,212 Temp,2247,0
+53,alert,AHU1 Cooling Coil Discharge SP (8230) has not reported in 59 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-25 19:36:24.000,14,AHU1 Cooling Coil Discharge SP,2251,0
+54,alert,113 Temp (8698) has not reported in 59 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-25 19:36:24.000,14,113 Temp,2272,0
+55,alert,20915 has not reported in 22 days.,POWER,ASC,Academic Success Center,0,2019-07-25 19:36:24.000,18,20915,2087,0
+56,alert,20866 has not reported in 22 days.,POWER,ASC,Academic Success Center,0,2019-07-25 19:36:24.000,18,20866,2085,0
+57,alert,20975 has not reported in 22 days.,POWER,ASC,Academic Success Center,0,2019-07-25 19:36:24.000,18,20975,2086,0
+58,alert,Air Handler L1 Return Air 3rd Floor CO2 (6633) has not reported in 494 days.,CO2,ASC,Academic Success Center,0,2019-07-25 19:36:24.000,19,Air Handler L1 Return Air 3rd Floor CO2,2412,0
+59,alert,Air Handler R1 Return Air 3rd Floor CO2 (6640) has not reported in 470 days.,CO2,ASC,Academic Success Center,0,2019-07-25 19:36:24.000,19,Air Handler R1 Return Air 3rd Floor CO2,2413,0
+60,alert,Air Handler L1 Return Air 1st Floor CO2 (6631) has not reported in 494 days.,CO2,ASC,Academic Success Center,0,2019-07-25 19:36:24.000,19,Air Handler L1 Return Air 1st Floor CO2,2414,0
+61,alert,Air Handler L1 Return Air 2nd Floor CO2 (6632) has not reported in 494 days.,CO2,ASC,Academic Success Center,0,2019-07-25 19:36:24.000,19,Air Handler L1 Return Air 2nd Floor CO2,2415,0
+62,alert,Air Handler R1 Return Air 2nd Floor CO2 (6630) has not reported in 470 days.,CO2,ASC,Academic Success Center,0,2019-07-25 19:36:24.000,19,Air Handler R1 Return Air 2nd Floor CO2,2417,0
+63,alert,Air Handler R1 Return Air 1st Floor CO2 (6629) has not reported in 470 days.,CO2,ASC,Academic Success Center,0,2019-07-25 19:36:24.000,19,Air Handler R1 Return Air 1st Floor CO2,2416,0
+64,alert,311 Temp (4761) has not reported in 4 days.,TEMP,COOPER,Robert Muldrow Cooper Library,0,2019-07-25 19:36:24.000,20,311 Temp,2429,0
+65,alert,311A Temp (4760) has not reported in 4 days.,TEMP,COOPER,Robert Muldrow Cooper Library,0,2019-07-25 19:36:24.000,20,311A Temp,2430,0
+66,alert,301 Temp (6274) has not reported in 4 days.,TEMP,COOPER,Robert Muldrow Cooper Library,0,2019-07-25 19:36:24.000,20,301 Temp,2426,0
+67,alert,2902 has not reported in 45 days.,POWER,COOPER,Robert Muldrow Cooper Library,0,2019-07-25 19:36:24.000,21,2902,2099,0
+68,alert,2927 has not reported in 45 days.,POWER,COOPER,Robert Muldrow Cooper Library,0,2019-07-25 19:36:24.000,21,2927,2100,0
+69,alert,2914 has not reported in 30 days.,POWER,COOPER,Robert Muldrow Cooper Library,0,2019-07-25 19:36:24.000,21,2914,2097,0
+70,alert,2915 has not reported in 45 days.,POWER,COOPER,Robert Muldrow Cooper Library,0,2019-07-25 19:36:24.000,21,2915,2098,0
+71,warning,205 Temp (177) reads 74.3 [deg-F] (Cooling SP = 73.1 [deg-F]),TEMP,ASC,Academic Success Center,0,2019-07-25 19:36:24.000,26,205,2476,0
+72,alert,205 Temp (177) reads 74.3 [deg-F] (Cooling SP = 73.1 [deg-F]),TEMP,ASC,Academic Success Center,0,2019-07-25 19:36:24.000,27,205,2477,0
+73,alert,106 Temp (8208) has not reported in 2 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-26 13:04:09.000,14,106 Temp,2534,0
+74,alert,100V1 Temp (8209) has not reported in 2 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-26 13:04:09.000,14,100V1 Temp,2535,0
+75,alert,203 Temp (8215) has not reported in 2 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-26 13:04:09.000,14,203 Temp,2536,0
+76,alert,110 Temp (8309) has not reported in 2 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-26 13:04:09.000,14,110 Temp,2537,0
+77,alert,L101 Temp (8325) has not reported in 2 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-26 13:04:09.000,14,L101 Temp,2538,0
+78,alert,116U2 Heating SP (8452) has not reported in 2 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-26 13:04:09.000,14,116U2 Heating SP,2539,0
+79,alert,L101B Temp (8474) has not reported in 2 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-26 13:04:09.000,14,L101B Temp,2540,0
+80,alert,L101B Cooling SP (8499) has not reported in 2 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-26 13:04:09.000,14,L101B Cooling SP,2541,0
+81,alert,116U2 Temp (8507) has not reported in 2 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-26 13:04:09.000,14,116U2 Temp,2542,0
+82,alert,206 Heating SP (8534) has not reported in 2 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-26 13:04:09.000,14,206 Heating SP,2543,0
+83,alert,100E Heating SP (8673) has not reported in 2 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-26 13:04:09.000,14,100E Heating SP,2544,0
+84,alert,200SS Heating SP (8543) has not reported in 2 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-26 13:04:09.000,14,200SS Heating SP,2545,0
+85,alert,112 Cooling SP (8552) has not reported in 2 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-26 13:04:09.000,14,112 Cooling SP,2546,0
+86,alert,400U Cooling SP (8558) has not reported in 2 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-26 13:04:09.000,14,400U Cooling SP,2547,0
+87,alert,400SN Cooling SP (8560) has not reported in 2 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-26 13:04:09.000,14,400SN Cooling SP,2548,0
+88,alert,103 Heating SP (8569) has not reported in 2 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-26 13:04:09.000,14,103 Heating SP,2549,0
+89,alert,100S Temp (8575) has not reported in 2 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-26 13:04:09.000,14,100S Temp,2550,0
+90,alert,100V1 Cooling SP (8583) has not reported in 2 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-26 13:04:09.000,14,100V1 Cooling SP,2551,0
+91,alert,104 Cooling SP (8584) has not reported in 2 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-26 13:04:09.000,14,104 Cooling SP,2552,0
+92,alert,200D Cooling SP (8592) has not reported in 2 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-26 13:04:09.000,14,200D Cooling SP,2553,0
+93,alert,206 Cooling Output (8610) has not reported in 2 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-26 13:04:09.000,14,206 Cooling Output,2554,0
+94,alert,110 Heating SP (8616) has not reported in 2 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-26 13:04:09.000,14,110 Heating SP,2555,0
+95,alert,200S Heating SP (8617) has not reported in 2 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-26 13:04:09.000,14,200S Heating SP,2556,0
+96,alert,206 Temp (8619) has not reported in 2 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-26 13:04:09.000,14,206 Temp,2557,0
+97,alert,208 Cooling SP (8624) has not reported in 2 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-26 13:04:09.000,14,208 Cooling SP,2558,0
+98,alert,104 Heating SP (8625) has not reported in 2 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-26 13:04:09.000,14,104 Heating SP,2559,0
+99,alert,306 Temp (8626) has not reported in 2 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-26 13:04:09.000,14,306 Temp,2560,0
+100,alert,400SS Temp (8632) has not reported in 2 days.,TEMP,WATT,Watt Family Innovation Center,0,2019-07-26 13:04:09.000,14,400SS Temp,2561,0
