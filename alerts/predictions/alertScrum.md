@@ -24,3 +24,19 @@
      - ranking by importance
        - initial importance of the alert
        - time the alert has been active
+---
+#### Alert Classification
+A basic alert classification procedure:
+1. Manually build table mapping a unique alert type to another (or message),
+with weight(s)
+2. Build graph of unique alert types (nodes) connected via the weights (edges)
+3. Trace through the graph if edges exceed a value, and sort the end results
+by some weight
+4. Insert the sorted results into a database
+---
+#### Breakdown
+1. Decide outputs and inputs
+   * Outputs:
+   * Inputs:
+2. Determine best approach
+3. Profit
