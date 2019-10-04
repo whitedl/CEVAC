@@ -35,7 +35,14 @@ export class AlertsviewComponent implements AfterViewInit {
   constructor(private http: HttpClient) {}
 
   getAlerts(): Observable<Alert[]> {
-    const requestUrl = this.apiUrl + '?filter[limit]=' + this.pageSize;
+    let requestUrl = `${this.apiUrl}?`;
+    if (this.sort.direction) {
+      requestUrl += `filter[order]=${this.sort.active} ${this.sort.direction}&`;
+    }
+    requestUrl += `filter[limit]=${this.pageSize}&filter[skip]=${this.paginator
+      .pageIndex * this.pageSize}`;
+    const countUrl = `${this.apiUrl}/count`;
+    this.http.get<any>(countUrl).subscribe(count => (this.count = count.count));
     return this.http.get<Alert[]>(requestUrl);
   }
 
@@ -51,7 +58,6 @@ export class AlertsviewComponent implements AfterViewInit {
         }),
         map(alerts => {
           this.isLoading = false;
-          this.count = alerts.length;
           return alerts;
         }),
         catchError(() => {
