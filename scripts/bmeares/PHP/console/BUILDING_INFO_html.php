@@ -15,6 +15,7 @@ $query = "
 $result = exec_sql($query);
 $output = "
 <tr>
+  <th></th>
   <th>BuildingSName</th>
   <th>BuildingDName</th>
   <th>BuildingKey</th>
@@ -25,6 +26,7 @@ $output = "
 while($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)){
   $output .= "
   <tr>
+  <td><a onclick='delete_building_link_click(\"".$row['BuildingSName']."\")' class='delete_building_link' id='delete_building_link_".$row['BuildingSName']."'>delete</a></td>
     <td contenteditable='true'>".$row['BuildingSName']."</td>
     <td contenteditable='true'>".$row['BuildingDName']."</td>
     <td contenteditable='true'>".$row['BuildingKey']."</td>

@@ -8,7 +8,8 @@ $XREF = "CEVAC_$BuildingSName"."_$Metric"."_XREF";
 if(!isset($_GET['BuildingSName']) || !isset($_GET['Metric'])) die('missing params');
 
 $query = "
-  SELECT p.PointSliceID AS 'PointSliceID', PointName AS 'PointName', p.UnitOfMeasureID AS 'UnitOfMeasureID', p.Alias AS 'Alias'
+  SELECT p.PointSliceID AS 'PointSliceID', PointName AS 'PointName',
+  (CASE WHEN p.in_xref = 1 THEN 'True' ELSE 'False' END ) AS 'in_xref', p.Alias AS 'Alias'
   FROM $PXREF AS p
   ORDER BY PointSliceID ASC
 ";
@@ -18,17 +19,20 @@ $output = "
   <th>PointSliceID</th>
   <th>PointName</th>
   <th>Alias</th>
-  <th>UnitOfMeasureID</th>
+  <th>Exists in $XREF</th>
 </tr>
 ";
 
 while($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)){
+  $in_xref = $row['in_xref'];
+  if($in_xref == "True") $class = 'in_xref';
+  else $class = 'not_in_xref';
   $output .= "
   <tr>
-    <td>".$row['PointSliceID']."</td>
-    <td>".$row['PointName']."</td>
-    <td contenteditable='true'>".$row['Alias']."</td>
-    <td>".$row['UnitOfMeasureID']."</td>
+    <td class='$class'>".$row['PointSliceID']."</td>
+    <td class='$class'>".$row['PointName']."</td>
+    <td class='$class' contenteditable='true'>".$row['Alias']."</td>
+    <td class='$class'>".$row['in_xref']."</td>
   </tr>
   ";
 }

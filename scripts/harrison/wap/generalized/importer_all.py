@@ -318,6 +318,16 @@ def ensure_tables_procedure():
     for building in building_list:
         if building in alternate_names:
             building = alternate_names[building]
+        test_str = ("\"SELECT TOP 1 TableName "
+                    "FROM CEVAC_TABLES WHERE BuildingSName "
+                    f"= '{building}' AND Metric = 'WAP'\"")
+        try:
+            output = os.popen("/cevac/scripts/sql_value.sh "+test_str).read()
+            if output != "":
+                continue
+        except Exception:
+            pass
+
         ensure_tables_str += (f"EXEC CEVAC_WAP @BuildingSName = '{building}',"
                               f" @Metric = 'WAP'\nGO\n"
                               f"EXEC CEVAC_WAP @BuildingSName = '{building}',"
