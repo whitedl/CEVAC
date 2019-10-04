@@ -333,13 +333,13 @@ if [ -z "$xref" ]; then
   fi
 fi
 
-echo "Adding to CEVAC_TABLES"
-echo "$cevac_tables_query" > /cevac/cache/CEVAC_TABLES_$table_CSV.sql
-if ! /cevac/scripts/exec_sql_script.sh "/cevac/cache/CEVAC_TABLES_$table_CSV.sql" ; then
-  error="Could not add $table_CSV to CEVAC_TABLES"
-  /cevac/scripts/log_error.sh "$error" "$table_CSV"
+# echo "Adding to CEVAC_TABLES"
+# echo "$cevac_tables_query" > /cevac/cache/CEVAC_TABLES_$table_CSV.sql
+# if ! /cevac/scripts/exec_sql_script.sh "/cevac/cache/CEVAC_TABLES_$table_CSV.sql" ; then
+  # error="Could not add $table_CSV to CEVAC_TABLES"
+  # /cevac/scripts/log_error.sh "$error" "$table_CSV"
   # exit 1
-fi
+# fi
 
 echo "Finished updating /srv/csv/$table.csv"
 # /cevac/scripts/unlock.sh

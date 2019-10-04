@@ -13,9 +13,14 @@ DECLARE @Create_RAW NVARCHAR(MAX);
 DECLARE @HIST NVARCHAR(MAX);
 DECLARE @HIST_VIEW NVARCHAR(MAX);
 DECLARE @HIST_RAW NVARCHAR(MAX);
+DECLARE @XREF NVARCHAR(MAX);
+
 SET @HIST = 'CEVAC_' + @BuildingSName + '_' + @Metric + '_HIST';
 SET @HIST_VIEW = 'CEVAC_' + @BuildingSName + '_' + @Metric + '_HIST_VIEW';
 SET @HIST_RAW = 'CEVAC_' + @BuildingSName + '_' + @Metric + '_HIST_RAW';
+SET @XREF = 'CEVAC_' + @BuildingSName + '_' + @Metric + '_XREF';
+
+EXEC CEVAC_ACTIVITY @TableName = @HIST, @ProcessName = @ProcessName;
 
 DECLARE @DateTimeName NVARCHAR(MAX);
 DECLARE @IDName NVARCHAR(MAX);
@@ -54,6 +59,17 @@ IF @Metric = 'WAP' BEGIN
         SELECT time AS ''UTCDateTime'', dbo.ConvertUTCToLocal(time) AS ''ETDateTime'', name AS ''Alias'', ssid, total_duration, predicted_occupancy, unique_users
         FROM ' + @HIST_RAW + '
     ';
+
+    IF OBJECT_ID(@XREF) IS NOT NULL BEGIN
+        SET @Create_HIST = '
+            CREATE VIEW ' + @HIST_VIEW + ' AS
+            SELECT r.time AS ''UTCDateTime'', dbo.ConvertUTCToLocal(time) AS ''ETDateTime'', x.Alias AS ''Alias'', r.ssid, r.total_duration, r.predicted_occupancy, r.unique_users
+            FROM ' + @HIST_RAW + ' AS r
+            INNER JOIN ' + @XREF + ' AS x ON x.WAP_name = r.name
+        ';
+
+    END
+
     SET @DateTimeName = 'UTCDateTime';
     SET @IDName = 'Alias';
     SET @AliasName = 'Alias';

@@ -14,6 +14,9 @@ AS
 DECLARE @execute BIT;
 SET @execute = 1;
 
+DECLARE @ProcessName NVARCHAR(MAX);
+SET @ProcessName = OBJECT_NAME(@@PROCID);
+EXEC CEVAC_ACTIVITY @TableName = @HIST, @ProcessName = @ProcessName;
 
 DECLARE @EXEC_SQL NVARCHAR(MAX);
 SET @EXEC_SQL = '

@@ -73,3 +73,21 @@
 #upload_xref{
   display: none;
 }
+#add_building_div{
+  display: none;
+}
+.delete_building_link{
+  float: right;
+  color: #999999;
+  cursor: pointer;
+  font-size: small;
+}
+.in_xref{
+  /* color: orange; */
+}
+.not_in_xref{
+  color: #999999;
+}
+#PXREF_div{
+  display: none;
+}

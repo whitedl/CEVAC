@@ -4,14 +4,14 @@ SET ANSI_NULLS, QUOTED_IDENTIFIER ON;
 GO
 CREATE PROCEDURE CEVAC_CACHE_APPEND
 	@tables NVARCHAR(1000),
-	@destTableName NVARCHAR(300) = NULL
+	@destTableName NVARCHAR(300) = NULL,
+	@execute BIT = 1
 AS
 
-DECLARE @execute int;
-SET @execute = 1;
 DECLARE @error NVARCHAR(MAX);
 DECLARE @ProcessName NVARCHAR(MAX);
 SET @ProcessName = OBJECT_NAME(@@PROCID);
+EXEC CEVAC_ACTIVITY @TableName = @tables, @ProcessName = @ProcessName;
 
 DECLARE @name NVARCHAR(300);
 DECLARE @name_CACHE NVARCHAR(300);
@@ -159,7 +159,7 @@ WHILE (EXISTS(SELECT 1 FROM @cevac_params) AND @i > 0) BEGIN
 
 	END;
 
-	PRINT @select_query;
+	RAISERROR(@select_query, 0, 1) WITH NOWAIT;
 	IF @execute = 1 BEGIN
 		EXEC(@select_query);
 		-- insert into CEVAC_TABLES
@@ -251,7 +251,7 @@ WHILE (EXISTS(SELECT 1 FROM @cevac_params) AND @i > 0) BEGIN
 	INSERT INTO CEVAC_CACHE_RECORDS(table_name, update_time, storage, last_UTC, row_count, rows_transferred) VALUES ('''
 	+ isnull(@name,'NAME_NULL') + ''', ''' + CAST(@now AS nvarchar(100)) + ''', ''SQL'', @last_UTC, ' + @row_count_string + ', ' + @rows_transferred_string + ' )';
 
-	PRINT @cache_query;
+	RAISERROR(@cache_query, 0, 1) WITH NOWAIT;
 	IF @execute = 1 EXEC(@cache_query);
 
 
