@@ -36,7 +36,7 @@ by some weight
 ---
 #### Breakdown
 1. Decide outputs and inputs
-   * Outputs:
-   * Inputs:
+   * Outputs: unique alerts -> unique alerts, unique alerts -> message,
+   * Inputs: 
 2. Determine best approach
 3. Profit
