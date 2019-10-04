@@ -46,6 +46,7 @@
     "!*/__tests__"
   ],
   "dependencies": {
+    "@loopback/authentication": "^2.1.8",
     "@loopback/boot": "^1.4.5",
     "@loopback/context": "^1.21.1",
     "@loopback/core": "^1.8.6",
@@ -54,9 +55,7 @@
     "@loopback/rest": "^1.16.4",
     "@loopback/rest-explorer": "^1.2.6",
     "@loopback/service-proxy": "^1.2.6",
-    "@pm2/io": "^4.2.5",
-    "loopback-connector-mssql": "^3.3.0",
-    "pm2": "^3.5.1"
+    "loopback-connector-mssql": "^3.3.0"
   },
   "devDependencies": {
     "@loopback/build": "^2.0.6",
