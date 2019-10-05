@@ -3,6 +3,7 @@
 - Grouping / Prioritization of Alerts
   - Be able to tell if an alert is **<u>Low</u>**, **<u>Medium</u>**, or **<u>High</u>** Priority
   - Need to:
+    - **Specifically define all metrics to gather regarding Alerts**
     - [x] Assign priority
     - [x] Group Similar Alerts
     - [x] Order alerts appropriately by `Total Calculated Importance`
