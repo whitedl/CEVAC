@@ -9,11 +9,8 @@ import { LayoutModule } from '@angular/cdk/layout';
 import { MaterialModule } from '@app/material.module';
 import { PageNotFoundComponent } from '@app/page-not-found/page-not-found.component';
 
-import { AdminModule } from '@app/admin/admin.module';
-
-// for simulating api; remove for production
-import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
-import { InMemoryDataService } from '@app/in-memory-data.service';
+import { MapviewModule } from '@app/mapview/mapview.module';
+import { AlertsviewModule } from '@app/alertsview/alertsview.module';
 
 @NgModule({
   declarations: [AppComponent, PageNotFoundComponent],
@@ -23,13 +20,9 @@ import { InMemoryDataService } from '@app/in-memory-data.service';
     BrowserAnimationsModule,
     LayoutModule,
     MaterialModule,
-    AdminModule,
+    MapviewModule,
+    AlertsviewModule,
     AppRoutingModule
-
-    // remove when real api is ready
-    /*HttpClientInMemoryWebApiModule.forRoot(
-      InMemoryDataService, { dataEncapsulation: false }
-    )*/
   ],
   providers: [],
   bootstrap: [AppComponent]
