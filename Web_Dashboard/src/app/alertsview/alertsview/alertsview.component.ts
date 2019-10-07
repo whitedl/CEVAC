@@ -28,7 +28,6 @@ export class AlertsviewComponent implements AfterViewInit {
   alerts: Alert[] = [];
   isLoading = false;
   count = 0;
-  pageSize = 10;
 
   apiUrl = 'http://wfic-cevac1/api/alerts';
 
@@ -54,8 +53,8 @@ export class AlertsviewComponent implements AfterViewInit {
     if (this.sort.direction) {
       requestUrl += `filter[order]=${this.sort.active} ${this.sort.direction}&`;
     }
-    requestUrl += `filter[limit]=${this.pageSize}&filter[skip]=${this.paginator
-      .pageIndex * this.pageSize}`;
+    requestUrl += `filter[limit]=${this.paginator.pageSize}&filter[skip]=${this
+      .paginator.pageIndex * this.paginator.pageSize}`;
     const countUrl = `${this.apiUrl}/count`;
     this.http.get<any>(countUrl).subscribe(count => (this.count = count.count));
     return this.http.get<Alert[]>(requestUrl);
