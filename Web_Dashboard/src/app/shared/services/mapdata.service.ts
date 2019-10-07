@@ -90,7 +90,7 @@ export class MapdataService {
     private router: Router
   ) {}
 
-  getMap = () => (!this.map ? this.initMap() : this.map);
+  getMap = () => this.initMap();
 
   getBuilding = (bName: string | null) => {
     let building!: { [index: string]: any };

@@ -112,6 +112,15 @@ FLEX UTILITIES
 MATERIAL CUSTOMIZATION
 ******************************************************************************/
 
+//Globally set size of sidebars
+mat-sidenav {
+  width: 18rem;
+}
+
+.scrollContainer {
+  @include scrollcontainer;
+}
+
 // exactly what it says it is
 .scrollableExpansion {
   display: flex !important;
