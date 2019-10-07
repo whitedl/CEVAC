@@ -8,6 +8,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 
 import { Alert } from '@shared/interfaces/alert';
+import { MatTable } from '@angular/material/table';
 
 @Component({
   selector: 'app-alertsview',
@@ -22,7 +23,8 @@ export class AlertsviewComponent implements AfterViewInit {
     'BuildingSName',
     'Acknowledged',
     'Resolved',
-    'AlertMessage'
+    'AlertMessage',
+    'Delete'
   ];
   selection = new SelectionModel<Alert>(true, []);
   alerts: Alert[] = [];
@@ -31,10 +33,18 @@ export class AlertsviewComponent implements AfterViewInit {
 
   apiUrl = 'http://wfic-cevac1/api/alerts';
 
+  @ViewChild(MatTable, { static: false }) table!: MatTable<any>;
   @ViewChild(MatPaginator, { static: false }) paginator!: MatPaginator;
   @ViewChild(MatSort, { static: false }) sort!: MatSort;
 
   constructor(private http: HttpClient) {}
+
+  deleteRow = (eid: number) => {
+    this.http
+      .delete<any>(`${this.apiUrl}/${eid}`)
+      .subscribe(() => this.getAlerts());
+    this.table.renderRows();
+  };
 
   isAllSelected() {
     const numSelected = this.selection.selected.length;
