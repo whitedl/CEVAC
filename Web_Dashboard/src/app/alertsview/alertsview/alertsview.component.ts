@@ -3,6 +3,7 @@ import { merge, Observable, of as observableOf } from 'rxjs';
 import { catchError, map, startWith, switchMap } from 'rxjs/operators';
 
 import { Component, ViewChild, AfterViewInit } from '@angular/core';
+import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 
@@ -15,6 +16,7 @@ import { Alert } from '@shared/interfaces/alert';
 })
 export class AlertsviewComponent implements AfterViewInit {
   displayedColumns: string[] = [
+    'select',
     'EventID',
     'AlertType',
     'BuildingSName',
@@ -22,6 +24,7 @@ export class AlertsviewComponent implements AfterViewInit {
     'Resolved',
     'AlertMessage'
   ];
+  selection = new SelectionModel<Alert>(true, []);
   alerts: Alert[] = [];
   isLoading = false;
   count = 0;
@@ -33,6 +36,18 @@ export class AlertsviewComponent implements AfterViewInit {
   @ViewChild(MatSort, { static: false }) sort!: MatSort;
 
   constructor(private http: HttpClient) {}
+
+  isAllSelected() {
+    const numSelected = this.selection.selected.length;
+    const numRows = this.alerts.length;
+    return numSelected === numRows;
+  }
+
+  masterToggle() {
+    this.isAllSelected()
+      ? this.selection.clear()
+      : this.alerts.forEach(row => this.selection.select(row));
+  }
 
   getAlerts(): Observable<Alert[]> {
     let requestUrl = `${this.apiUrl}?`;
@@ -54,6 +69,7 @@ export class AlertsviewComponent implements AfterViewInit {
         startWith({}),
         switchMap(() => {
           this.isLoading = true;
+          this.selection.clear();
           return this.getAlerts();
         }),
         map(alerts => {

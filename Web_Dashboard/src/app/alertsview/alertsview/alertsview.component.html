@@ -11,17 +11,24 @@
   </mat-sidenav>
   <mat-sidenav-content>
     <table mat-table [dataSource]="alerts" matSort>
-      <!--<ng-container matColumnDef="select">
+      <ng-container matColumnDef="select">
         <th mat-header-cell *matHeaderCellDef>
           <mat-checkbox
             (change)="$event ? masterToggle() : null"
             [checked]="selection.hasValue() && isAllSelected()"
             [indeterminate]="selection.hasValue() && !isAllSelected()"
-            [aria-label]="checkboxLabel()"
           >
           </mat-checkbox>
         </th>
-      </ng-container>-->
+        <td mat-cell *matCellDef="let row">
+          <mat-checkbox
+            (click)="$event.stopPropagation()"
+            (change)="$event ? selection.toggle(row) : null"
+            [checked]="selection.isSelected(row)"
+          >
+          </mat-checkbox>
+        </td>
+      </ng-container>
 
       <ng-container matColumnDef="EventID">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>EventID</th>
