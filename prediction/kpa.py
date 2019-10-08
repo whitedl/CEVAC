@@ -53,7 +53,7 @@ def train(model):
     early_stopping = EarlyStopping(monitor='loss', patience=5)
 
     #more epochs = more work training ~= higher accuracy
-    model.fit(train_data, train_labels, epochs=50, verbose=1, callbacks=[early_stopping]) #
+    model.fit(train_data, train_labels, epochs = 50, verbose = 1, callbacks=[early_stopping]) #
 
     # for making re-running faster, toggle this to re-run with the same weights from the previous run
     model.save_weights('powerModel.h5')
