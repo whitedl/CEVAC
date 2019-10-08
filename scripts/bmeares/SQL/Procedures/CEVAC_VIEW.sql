@@ -49,6 +49,7 @@ SET @building_key = (SELECT RTRIM(BuildingKey) FROM CEVAC_BUILDING_INFO WHERE Bu
 
 DECLARE @Table_name NVARCHAR(MAX);
 DECLARE @HIST_VIEW NVARCHAR(MAX);
+DECLARE @HIST_RAW NVARCHAR(MAX);
 DECLARE @HIST_CACHE NVARCHAR(MAX);
 DECLARE @HIST_LASR NVARCHAR(MAX);
 DECLARE @HIST_LASR_INT NVARCHAR(MAX);
@@ -65,6 +66,7 @@ DECLARE @TABLE_CONFIG NVARCHAR(MAX);
 -- Generate table names
 -- Reference names
 SET @HIST_VIEW = 'CEVAC_' + @Building + '_' + @Metric + '_HIST_VIEW';
+SET @HIST_RAW = 'CEVAC_' + @Building + '_' + @Metric + '_HIST_RAW';
 SET @HIST_CACHE = 'CEVAC_' + @Building + '_' + @Metric + '_HIST_CACHE';
 SET @HIST_LASR = 'CEVAC_' + @Building + '_' + @Metric + '_HIST_LASR';
 SET @HIST_LASR_INT = 'CEVAC_' + @Building + '_' + @Metric + '_HIST_LASR_INT';
@@ -84,7 +86,7 @@ SET @XREF = CONCAT('CEVAC_', @Building, '_', @Metric, '_XREF');
 IF @Metric = 'POWER_SUMS' SET @XREF = CONCAT('CEVAC_', @Building, '_POWER_XREF');
 SET @PXREF = CONCAT('CEVAC_', @Building, '_', @Metric, '_PXREF');
 --IF @Metric = 'POWER_RAW' SET @XREF = CONCAT('CEVAC_', @Building, '_', REPLACE(@Metric, 'POWER_RAW', 'POWER'), '_XREF');
-IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = @XREF) SET @XREF = NULL;
+--IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = @XREF) SET @XREF = NULL;
 
 SET @TABLE_CONFIG = @Table_name + '_CONFIG';
 DECLARE @Create_TABLE_CONFIG NVARCHAR(MAX);
@@ -313,46 +315,92 @@ IF @Age LIKE '%PXREF%' BEGIN
 		SET @PXREF_Alias_join = NULL;
 	END ELSE BEGIN
 		SET @PXREF_Alias_source = 'xref.Alias';
-		SET @PXREF_Alias_join = 'INNER JOIN ' + @XREF + ' AS xref ON xref.' + @RemotePSIDName + ' = ps.' + @RemotePSIDName;
+		SET @PXREF_Alias_join = 'FULL OUTER JOIN ' + @XREF + ' AS xref ON xref.' + @RemotePSIDName + ' = ps.' + @RemotePSIDName;
 	END
 
-	SET @PXREF_query = '
-		IF OBJECT_ID(''dbo.' + @PXREF + ''', ''U'') IS NOT NULL DROP TABLE ' + @PXREF + ';
+	DECLARE @DROP_PXREF NVARCHAR(MAX);
+	DECLARE @UPDATE_PXREF NVARCHAR(MAX);
+	SET @DROP_PXREF = 'IF OBJECT_ID(''' + @PXREF + ''') IS NOT NULL DROP TABLE ' + @PXREF + ';';
+
+	IF OBJECT_ID(@XREF) IS NOT NULL BEGIN
+		SET @IDName = @RemotePSIDName;
+		SET @AliasName = 'Alias';
+		SET @DataName = @RemotePSIDName;
+		SET @isCustom = 0;
+		DECLARE @xref_ObjectNameSource NVARCHAR(MAX);
+		SET @xref_ObjectNameSource = (SELECT CASE WHEN COL_LENGTH(@XREF, 'ObjectName') IS NOT NULL THEN 'xref.ObjectName'
+			WHEN COL_LENGTH(@XREF, 'PointName') IS NOT NULL THEN 'xref.PointName'
+			ELSE 'NULL'
+		END);
+		SET @PXREF_query = '
 		SELECT DISTINCT
-			ps.' + @RemotePSIDName + ', pt.' + @RemotePointNameName + ', ' + @PXREF_Alias_source + ' AS ''Alias'', units.' + @RemoteUnitOfMeasureIDName + '
+			xref.' + @RemotePSIDName + ', ISNULL(pt.' + @RemotePointNameName + ', ' + @xref_ObjectNameSource + ') AS ' + @RemotePointNameName + ', ISNULL(CAST(' + @PXREF_Alias_source + ' AS NVARCHAR(MAX)), ' + @RemotePointNameName + ') AS ''Alias'', units.' + @RemoteUnitOfMeasureIDName + ', CAST(0 AS BIT) AS ''in_xref''
 		INTO ' + @PXREF + '
 		FROM
-			[' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemotePtTable + ' AS pt
-			INNER JOIN [' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemotePSTable + ' AS ps ON pt.' + @RemotePointIDName + ' = ps.' + @RemotePointIDName + ' 
-			INNER JOIN [' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemoteUnitTable + ' AS units ON units.' + @RemoteUnitOfMeasureIDName + ' = pt.' + @RemoteUnitOfMeasureIDName + '
-			' + ISNULL(@PXREF_Alias_join, '') + '
-			' + @keys_list_query + '
-		WHERE
-		( pt.' + @RemotePointNameName + ' LIKE ''' + @building_key + ''')
-		AND ' + ISNULL(@unitOfMeasureID_query, '1 = 1') + '
+			' + @XREF + ' AS xref
+			LEFT OUTER JOIN [' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemotePSTable + ' AS ps ON ps.' + @RemotePSIDName + ' = xref.' + @RemotePSIDName + ' 
+			LEFT OUTER JOIN [' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemotePtTable + ' AS pt ON pt.' + @RemotePointIDName + ' = ps.' + @RemotePointIDName + '
+			LEFT OUTER JOIN [' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemoteUnitTable + ' AS units ON units.' + @RemoteUnitOfMeasureIDName + ' = pt.' + @RemoteUnitOfMeasureIDName + ';';
+	END ELSE BEGIN
+		SET @PXREF_query = '
+			SELECT DISTINCT
+				ps.' + @RemotePSIDName + ', pt.' + @RemotePointNameName + ', ISNULL(CAST(' + @PXREF_Alias_source + ' AS NVARCHAR(MAX)), ' + @RemotePointNameName + ') AS ''Alias'', units.' + @RemoteUnitOfMeasureIDName + ', CAST(0 AS BIT) AS ''in_xref''
+			INTO ' + @PXREF + '
+			FROM
+				[' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemotePtTable + ' AS pt
+				INNER JOIN [' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemotePSTable + ' AS ps ON pt.' + @RemotePointIDName + ' = ps.' + @RemotePointIDName + ' 
+				INNER JOIN [' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemoteUnitTable + ' AS units ON units.' + @RemoteUnitOfMeasureIDName + ' = pt.' + @RemoteUnitOfMeasureIDName + '
+				' + ISNULL(@PXREF_Alias_join, '') + '
+				' + @keys_list_query + '
+			WHERE
+			( pt.' + @RemotePointNameName + ' LIKE ''' + @building_key + ''')
+			AND ' + ISNULL(@unitOfMeasureID_query, '1 = 1') + ';';
+	END
+	SET @UPDATE_PXREF = 'IF OBJECT_ID(''' + @XREF + ''') IS NOT NULL BEGIN
+			UPDATE ' + ISNULL(@PXREF, 'ERROR') + '
+			SET in_xref = 1
+			WHERE ' + ISNULL(@RemotePSIDName, 'ERROR') + ' IN (SELECT ' + @RemotePSIDName + ' FROM ' + @XREF + ')
+		END
 		';
+	IF @Metric = 'WAP' BEGIN
+		SET @UPDATE_PXREF = NULL;
+		SET @IDName = 'WAP_name';
+		SET @AliasName = 'Alias';
+		SET @DataName = NULL;
+		SET @isCustom = 1;
+		SET @PXREF_query = '
+		SELECT DISTINCT name AS WAP_name, name AS Alias, name AS PointName, 0 AS ''in_xref''
+		INTO ' + @PXREF + '
+		FROM ' + @HIST_RAW + '
+		';
+	END
+
+	PRINT @DROP_PXREF;
 	PRINT @PXREF_query;
 	IF @execute = 1 BEGIN
+		EXEC(@DROP_PXREF);
 		EXEC(@PXREF_query);
-		DELETE FROM CEVAC_TABLES WHERE TableName = @PXREF;
-		INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, isCustom, Definition, Dependencies, customLASR, autoCACHE, autoLASR)
-		VALUES (
-			@Building,
-			@Metric,
-			@Age,
-			@PXREF,
-			@RemotePSIDName,
-			@RemotePSIDName,
-			'Alias',
-			@RemotePSIDName,
-			@isCustom,
-			@PXREF_query,
-			NULL,
-			isnull(@customLASR,0),
-			isnull(@autoCACHE,0),
-			isnull(@autoLASR,0)
-		)
-		
+		EXEC(@UPDATE_PXREF);
+--		DELETE FROM CEVAC_TABLES WHERE TableName = @PXREF;
+		IF NOT EXISTS (SELECT * FROM CEVAC_TABLES WHERE TableName = @PXREF) BEGIN
+			INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, isCustom, Definition, Dependencies, customLASR, autoCACHE, autoLASR)
+			VALUES (
+				@Building,
+				@Metric,
+				@Age,
+				@PXREF,
+				NULL,
+				@IDName,
+				'Alias',
+				@DataName,
+				@isCustom,
+				@PXREF_query,
+				NULL,
+				isnull(@customLASR,0),
+				isnull(@autoCACHE,0),
+				isnull(@autoLASR,0)
+			)
+		END -- END of insert	
 	END
 END
 

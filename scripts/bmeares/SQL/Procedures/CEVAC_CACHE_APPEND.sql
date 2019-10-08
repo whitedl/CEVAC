@@ -30,7 +30,6 @@ DECLARE @rows_transferred INT;
 DECLARE @params_rc INT;
 DECLARE @cevac_params TABLE(P NVARCHAR(100));
 
-
 SET @cevac_app_data = 'CEVAC_APPEND_DATA';
 SET @i = 100;
 INSERT INTO @cevac_params SELECT * FROM ListTable(@tables);
@@ -110,11 +109,10 @@ WHILE (EXISTS(SELECT 1 FROM @cevac_params) AND @i > 0) BEGIN
 	';
 
 	-- if cache exists, only grab latest data
-	IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME=@name_CACHE) BEGIN
+	IF OBJECT_ID(@name_CACHE) IS NOT NULL BEGIN
+		PRINT(@name + ' exits! Appending...');
 		DECLARE @update_time DATETIME;
 		SET @update_time = ISNULL((SELECT TOP 1 update_time FROM CEVAC_CACHE_RECORDS WHERE table_name = @name AND storage = 'SQL' ORDER BY update_time DESC),CAST(0 AS DATETIME));
-		--SET @where_subquery = ' WHERE UTCDateTime BETWEEN ' + '''' + CAST(@update_time AS NVARCHAR(50)) + '''' + ' AND ' + '''' + CAST(@now AS NVARCHAR(50)) + '''';
---		SET @where_subquery = ' WHERE UTCDateTime BETWEEN @update_time AND @now';
 		SET @select_or_insert = 'INSERT';
 	
 		DECLARE @begin DATETIME;
@@ -247,7 +245,6 @@ WHILE (EXISTS(SELECT 1 FROM @cevac_params) AND @i > 0) BEGIN
 	DECLARE @last_UTC DATETIME;
 	SET @last_UTC = ISNULL((SELECT TOP 1 ' + @DateTimeName + ' FROM ' + @name_CACHE + ' ORDER BY ' + @DateTimeName + ' DESC), CAST(0 AS DATETIME));
 
-
 	INSERT INTO CEVAC_CACHE_RECORDS(table_name, update_time, storage, last_UTC, row_count, rows_transferred) VALUES ('''
 	+ isnull(@name,'NAME_NULL') + ''', ''' + CAST(@now AS nvarchar(100)) + ''', ''SQL'', @last_UTC, ' + @row_count_string + ', ' + @rows_transferred_string + ' )';
 
@@ -256,12 +253,12 @@ WHILE (EXISTS(SELECT 1 FROM @cevac_params) AND @i > 0) BEGIN
 
 
 	-- rebuild _HIST API
-	IF @name_CACHE LIKE '%HIST_CACHE%' AND @custom = 0 BEGIN
+	IF @name_CACHE LIKE '%HIST_CACHE%' AND @custom = 0 AND @name LIKE '%HIST%' BEGIN
 		IF OBJECT_ID(REPLACE(@name_CACHE, '_CACHE', ''), 'V') IS NOT NULL BEGIN
 		DECLARE @drop_HIST NVARCHAR(MAX);
 		SET @drop_HIST = 'DROP VIEW ' + REPLACE(@name_CACHE, '_CACHE', '');
 		
-		SELECT @drop_HIST AS 'Drop _HIST';
+		SELECT @drop_HIST AS 'Drop HIST';
 		IF @execute = 1 EXEC(@drop_HIST);
 		END
 		DECLARE @Create_view NVARCHAR(MAX);
