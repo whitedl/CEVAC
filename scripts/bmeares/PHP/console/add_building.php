@@ -6,7 +6,7 @@ $new_BuildingKey = $_POST['new_BuildingKey'];
 
 $script = '/cevac/scripts/add_building.sh';
 $config = "-b $BuildingSName -d $BuildingDName -k $BuildingKey";
-$exec = $script." -b $new_BuildingSName -d $new_BuildingDName -k $new_BuildingKey";
+$exec = $script." -b \"$new_BuildingSName\" -d \"$new_BuildingDName\" -k \"$new_BuildingKey\"";
 
 if(!isset($_POST['new_BuildingSName']) || 
   !isset($_POST['new_BuildingDName']) ||

@@ -40,18 +40,39 @@ function get_BUILDING_INFO_html(){
 function get_PXREF_html(){
   b = document.getElementById('buildings').value;
   m = document.getElementById('metrics').value;
-  $.get('console/PXREF_html.php', { BuildingSName: b, Metric: m }, function(data){
+  PXREF = 'CEVAC_' + b + '_' + m + '_PXREF';
+  $.get('console/table_exists.php',
+    { TableName : PXREF },
+    function(data){
+      if(data == "DNE"){
+        document.getElementById('download_PXREF_button').disabled = true;
+        document.getElementById('output').innerHTML = PXREF + ' does not exist. Click \"Rebuild PXREF\" to create the PXREF.';
+      } else {
+        document.getElementById('download_PXREF_button').disabled = false;
+        $.get('console/PXREF_html.php', { BuildingSName: b, Metric: m }, function(data){
+          document.getElementById('output').innerHTML = "";
+          sql_out = document.getElementById('sql_output');
+          sql_out.innerHTML = data;
+        });
+      }
+    }
+  );
+
+
+}
+function get_BuildingKeySearch_html(){
+  b = document.getElementById('buildings').value;
+  m = document.getElementById('metrics').value;
+  bk = document.getElementById('search_BuildingKey').value;
+  $.get('console/BuildingKeySearch_html.php', { BuildingSName: b, Metric: m, BuildingKey: bk }, function(data){
 		document.getElementById('output').innerHTML = "";
     sql_out = document.getElementById('sql_output');
     sql_out.innerHTML = data;
   });
 }
 function success_PXREF_csv(data){
-  alert(data);
   var datetime = new Date().getTime();
   filename = String(datetime) + '_' + data.substring(4, data.length);
-
-  console.log(data);
   var element = document.createElement('a');
   element.setAttribute('href',data);
   element.setAttribute('download',filename);
@@ -60,4 +81,24 @@ function success_PXREF_csv(data){
   element.click();
   document.body.removeChild(element);
 
+}
+function success_BuildingKeySearch_csv(data){
+  var datetime = new Date().getTime();
+  filename = String(datetime) + '_' + data.substring(4, data.length);
+  var element = document.createElement('a');
+  element.setAttribute('href',data);
+  element.setAttribute('download',filename);
+  element.style.display = 'none';
+  document.body.appendChild(element);
+  element.click();
+  document.body.removeChild(element);
+
+}
+function table_exists(tn){
+  $.get('console/table_exists.php',
+    { TableName : tn },
+    function(data){
+
+    }
+  );
 }

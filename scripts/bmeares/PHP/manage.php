@@ -16,7 +16,7 @@
     <script src="console/JS/push.js"></script>
     <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.4.1.min.js"></script>
 	</head>
-	<body onload="get_Metrics_html()">
+	<body onload="get_Metrics_html(); enable_BuildingKeySearch()">
     <a onclick="show_hide_class('advanced');" href="#">Advanced options</a><br><br>
     <div id="body_left">
       <form method="post" id="toggle">
@@ -66,6 +66,7 @@
           <button name="rebuild_PXREF_button" id="rebuild_PXREF_button" onclick="rebuild_PXREF_click()">Rebuild PXREF</button><br>
           <button name="upload_xref_button" id="upload_xref_button" onclick="upload_xref_button_click()">Upload XREF</button><br>
           <button name="building_info_button" id="building_info_button" onclick="building_info_button_click()">View Buildings</button><br>
+          <button name="BuildingKey_search_button" id="BuildingKey_search_button" onclick="BuildingKey_search_button_click()">Search BuildingKeys</button><br>
         </div>
         <div id="buttons_div" style="display:none">
           <button name="bootstrap_button" id="bootstrap_button" onclick="bootstrap()">Bootstrap</button>
@@ -74,8 +75,14 @@
       </div>
     </div>
     <div id="body_right">
+      <div id="BuildingKey_search_div">
+        <input placeholder="BuildingKey" type="text" id="search_BuildingKey" oninput="enable_BuildingKeySearch()">
+        <button onclick="get_BuildingKeySearch_html()" id="BuildingKeySearch_submit_button">Search</button>
+        <button onclick="download_BuildingKeySearch_click()" id="BuildingKeySearch_download_button">Download</button>
+      </div>
       <div id="PXREF_div">
-        <button onclick='download_PXREF_click()'>Download PXREF</button>
+        <button onclick='download_PXREF_click()' id="download_PXREF_button">Download PXREF</button>
+        <button onclick='download_XREF_click()' id="download_XREF_button">Download XREF</button>
       </div>
       <div id="add_building_div">
         <form id="add_building_form">

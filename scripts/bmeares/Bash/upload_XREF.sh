@@ -7,7 +7,7 @@ fname="$1"
 
 # python3 -V
 echo "Calling python script..."
-/cevac/scripts/log_activity.sh -p $PARENT_COMMAND -t "$fname"
+# /cevac/scripts/log_activity.sh -p $PARENT_COMMAND -t "$fname"
 out=`/usr/bin/python3 /cevac/python/csv_process.py "$fname" 2>&1`
 echo "$out"
 # if ! python3 /cevac/python/csv_process.py "$fname" ; then

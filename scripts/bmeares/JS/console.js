@@ -30,7 +30,7 @@ function PXREF_button_click(){
   update = "Update PXREF";
   if(pb.innerHTML == view){
     get_PXREF_html();
-    pb.innerHTML = update;
+    // pb.innerHTML = update;
     reset_buttons(pb);
   } else{
     update_aliases();
@@ -110,6 +110,17 @@ function delete_building_link_click(BSN){
     }
   }
 }
+function download_XREF_click(){
+  $.ajax({
+    url : 'console/download_XREF.php',
+    type : 'GET',
+    data: $('form').serialize(),
+    // success : success_PXREF_csv
+    success : function(data){
+      alert(data);
+    }
+  });
+}
 function download_PXREF_click(){
   $.ajax({
     url : 'console/download_PXREF.php',
@@ -118,4 +129,17 @@ function download_PXREF_click(){
     success : success_PXREF_csv
   });
 }
-
+function download_BuildingKeySearch_click(){
+  bk = document.getElementById('search_BuildingKey').value;
+  $.ajax({
+    url : 'console/download_BuildingKeySearch.php',
+    type : 'GET',
+    data: { BuildingKey: bk },
+    success : success_BuildingKeySearch_csv
+  });
+}
+function BuildingKey_search_button_click(){
+  button = document.getElementById('BuildingKey_search_button');
+  document.getElementById('BuildingKey_search_div').style.display = 'block';
+  reset_buttons(button);
+}
