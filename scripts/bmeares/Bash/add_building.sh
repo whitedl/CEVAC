@@ -21,9 +21,9 @@ while getopts b:d:k:hy option; do
   esac
 done
 
-[ -z "$BuildingDName" ] && echo "$usage" && exit 1
-[ -z "$BuildingSName" ] && echo "$usage" && exit 1
-[ -z "$BuildingKey" ] && echo "$usage" && exit 1
+[ -z "$BuildingDName" ] && echo "$usage" && /cevac/scripts/unlock.sh && exit 1
+[ -z "$BuildingSName" ] && echo "$usage" && /cevac/scripts/unlock.sh && exit 1
+[ -z "$BuildingKey" ] && echo "$usage" && /cevac/scripts/unlock.sh && exit 1
 
 sql="
 DELETE FROM CEVAC_BUILDING_INFO WHERE BuildingSName = '$BuildingSName';

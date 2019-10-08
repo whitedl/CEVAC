@@ -16,7 +16,9 @@ function reset_buttons(active_button = ""){
   rebuild_PXREF_button = document.getElementById('rebuild_PXREF_button');
   building_info_button = document.getElementById('building_info_button');
   add_building_button = document.getElementById('add_building_button');
-  console.log('reset');
+  BuildingKey_search_button = document.getElementById('BuildingKey_search_button');
+  document.getElementById('output').innerHTML = '';
+  // console.log('reset');
 
   if(PXREF_button != active_button){
     PXREF_button.innerHTML = 'View PXREF';
@@ -27,5 +29,23 @@ function reset_buttons(active_button = ""){
   if(building_info_button != active_button){
     building_info_button.innerHTML = 'View Buildings';
     document.getElementById('add_building_div').style.display = "none";
+  }
+  if(BuildingKey_search_button != active_button){
+    document.getElementById('BuildingKey_search_div').style.display = "none";
+  }
+}
+function enable_BuildingKeySearch(){
+  console.log('hm');
+  sbutton = document.getElementById('BuildingKeySearch_submit_button');
+  dbutton = document.getElementById('BuildingKeySearch_download_button');
+  input = document.getElementById('search_BuildingKey');
+  if(input.value.length > 0){
+    sbutton.disabled = false;
+    // sbutton.style.color = 'green';
+    dbutton.disabled = false;
+    // dbutton.style.color = 'green';
+  } else{
+    sbutton.disabled = true;
+    dbutton.disabled = true;
   }
 }

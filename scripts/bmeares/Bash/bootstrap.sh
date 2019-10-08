@@ -1,7 +1,5 @@
 #! /bin/bash
 
-! /cevac/scripts/check_lock.sh && exit 1
-/cevac/scripts/lock.sh
 usage="Usage:
   -b BuildingSName
   -m Metric
@@ -21,12 +19,14 @@ while getopts b:m:k:u:hycl option; do
     m) Metric=${OPTARG};;
     k) keys_list=${OPTARG};;
     u) unitOfMeasureID=${OPTARG};;
-    h) echo "$usage" && /cevac/scripts/unlock.sh && exit 1 ;;
+    h) echo "$usage" && exit 1 ;;
     y) yes="yes";;
     l) autoLASR="true";;
     c) autoCACHE="true";;
   esac
 done
+! /cevac/scripts/check_lock.sh && exit 1
+/cevac/scripts/lock.sh
 [ -z "$BuildingSName" ] && echo "BuildingSName (e.g. WATT): " && read BuildingSName
 [ -z "$Metric" ] && echo "Metric (e.g. TEMP): " && read Metric
 if [ -z "$yes" ]; then

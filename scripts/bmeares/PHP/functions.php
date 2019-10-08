@@ -90,11 +90,22 @@ function sql_value($query){
   if($row === false) die(print_r(sqlsrv_errors(), true));
   return $row[0];
 }
+function CEVAC_TABLES_value($TableName, $var){
+  $query = "
+  SELECT $var FROM CEVAC_TABLES
+  WHERE TableName = '$TableName'
+  ";
+  return sql_value($query);
+}
 function CEVAC_CONFIG_value($var){
   $query = "
   SELECT VarValue FROM CEVAC_CONFIG
   WHERE VarName = '$var'
   ";
+  return sql_value($query);
+}
+function table_exists($tablename){
+  $query = "IF OBJECT_ID('$tablename') IS NOT NULL SELECT 'EXISTS' AS 'e' ELSE SELECT 'DNE' AS 'e';";
   return sql_value($query);
 }
 ?>
