@@ -20,10 +20,12 @@ export class AlertsviewComponent implements AfterViewInit {
     'select',
     'EventID',
     'AlertType',
+    'DetectionTimeET',
+    'ETDateTime',
     'BuildingSName',
+    'AlertMessage',
     'Acknowledged',
     'Resolved',
-    'AlertMessage',
     'Delete'
   ];
   selection = new SelectionModel<Alert>(true, []);
