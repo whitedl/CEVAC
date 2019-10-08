@@ -1,7 +1,7 @@
 // Exists to centralize management of color in the app
 // *primarily for the map and map keys at the moment*
 import { Injectable } from '@angular/core';
-import chroma from 'chroma-js';
+import * as chroma from 'chroma-js';
 
 interface Palette {
   [index: string]: string;
@@ -12,7 +12,7 @@ interface PaletteSet {
 
 // Using a class for Scale makes life easier. You can't define a generic getter/setter for interfaces.
 class Scale {
-  domain: [number, number];
+  domain: number[];
   get min() {
     return this.domain[0];
   }
@@ -20,12 +20,12 @@ class Scale {
     this.domain[0] = n;
   }
   get max() {
-    return this.domain[1];
+    return this.domain[this.domain.length - 1];
   }
   set max(n: number) {
-    this.domain[1] = n;
+    this.domain[this.domain.length - 1] = n;
   }
-  constructor(domain: [number, number] = [0, 1000]) {
+  constructor(domain: number[] = [0, 1000]) {
     this.domain = domain;
   }
 }
@@ -44,6 +44,8 @@ export class ColorService {
     ClemsonPalette: {
       clemsonOrange: '#F66733',
       regalia: '#522D80',
+      bowmansField: '#566127',
+      centennialOak: '#562E19',
       hartwellMoon: '#D4C99E',
       howardsRock: '#685C53',
       blueRidge: '#3A4958',
@@ -67,54 +69,15 @@ export class ColorService {
     }
   };
   private scales: ScaleSet = {
-    Power: {
-      domain: [0, 1000],
-      get min() {
-        return this.domain[0];
-      },
-      set min(n: number) {
-        this.domain[0] = n;
-      },
-      get max() {
-        return this.domain[1];
-      },
-      set max(n: number) {
-        this.domain[1] = n;
-      }
-    },
-    Temperature: {
-      domain: [50, 100],
-      get min() {
-        return this.domain[0];
-      },
-      set min(n: number) {
-        this.domain[0] = n;
-      },
-      get max() {
-        return this.domain[1];
-      },
-      set max(n: number) {
-        this.domain[1] = n;
-      }
-    },
-    CO2: {
-      domain: [0, 500],
-      get min() {
-        return this.domain[0];
-      },
-      set min(n: number) {
-        this.domain[0] = n;
-      },
-      get max() {
-        return this.domain[1];
-      },
-      set max(n: number) {
-        this.domain[1] = n;
-      }
-    }
+    POWER: new Scale([0, 75, 150, 225, 300, 375]),
+    TEMP_SPACE: new Scale([61, 68, 73, 80]),
+    CO2: new Scale([0, 500, 800, 1000, 1200]),
+    IAQ: new Scale([0, 500, 800, 1000, 1200]),
+    CHW: new Scale([0, 10000]),
+    HUM: new Scale([0, 70, 90, 100])
   };
   private crg: BuildingRegistry = {};
-  private crgPalette = 'ClemsonComplementary';
+  private crgPalette = 'ClemsonPalette';
 
   constructor() {
     this.crg['undefined'] = this.getPassive();
@@ -123,7 +86,10 @@ export class ColorService {
   // If name is not passed, assumes first ColorSet (ClemsonPalette).
   // If pos is passed, will return color at position in chosen set
   // If pos is not passed, will return first in set
-  getColor = (name: string = Object.keys(this.colors)[0], pos: number = 0) => {
+  getColor = (
+    name: string = Object.keys(this.colors)[0],
+    pos: number = 0
+  ): string => {
     if (!(name in this.colors)) {
       name = Object.keys(this.colors)[0];
     }
@@ -131,13 +97,34 @@ export class ColorService {
     return set[pos % set.length];
   };
 
-  getScaledColor = (category: string, scale?: string, val?: number) => {
+  getColorScale = (category: string): chroma.Scale<chroma.Color> =>
+    chroma
+      .bezier(this.labDomain(this.crg[category]))
+      .scale()
+      .correctLightness();
+
+  getScaledColor = (category: string, scale?: string, val?: number): string => {
     if (typeof val === 'undefined' || typeof scale === 'undefined') {
       return this.crg[category];
     }
-    return chroma
-      .scale(this.labDomain(this.crg[category]))
-      .domain(this.scales[scale].domain)(val);
+    const domain = this.scales[scale].domain;
+    const retScale = chroma
+      .bezier(this.labDomain(this.crg[category]))
+      .scale()
+      // @ts-ignore
+      // chroma.js typings don't include the nodata function
+      .correctLightness();
+    if (!val) {
+      return retScale(0).name();
+    } else if (domain.length !== 2) {
+      return retScale
+        .classes([...domain, domain[domain.length - 1]])(val)
+        .name();
+    } else {
+      return retScale
+        .domain(domain)(val)
+        .name();
+    }
   };
 
   registerCategory = (cat: string) => {
@@ -149,21 +136,24 @@ export class ColorService {
     }
   };
 
-  registerScale = (scale: string, domain: [number, number]) => {
+  registerScale = (scale: string, domain: number[]) => {
     if (!this.scales.hasOwnProperty(scale)) {
-      this.scales[scale].domain = domain;
+      this.scales[scale] = new Scale(domain);
     }
   };
 
-  getScale = (scaleType: string) =>
-    scaleType in this.scales ? this.scales[scaleType].domain : null;
+  getScale = (scaleType: string): number[] =>
+    scaleType in this.scales ? this.scales[scaleType].domain : [-1, -1];
+
+  setScale = (scaleType: string, domain: number[]) =>
+    scaleType in this.scales ? (this.scales[scaleType].domain = domain) : null;
 
   // if scale is in Scales, return the lower bound
   scaleLowBound = (scaleType: string) =>
     scaleType in this.scales ? this.scales[scaleType].min : null;
 
   // if scale is in Scales, set the minimum. Returnset value on success and null on fail.
-  setScaleLowBound = (n: number, scaleType: string) =>
+  setScaleLowBound = (scaleType: string, n: number) =>
     scaleType in this.scales ? (this.scales[scaleType].min = n) : null;
 
   // if scale is in Scales, return the upper bound
@@ -171,7 +161,7 @@ export class ColorService {
     scaleType in this.scales ? this.scales[scaleType].max : null;
 
   // if scale is in Scales, set the maximum. Returns set value on success and null on fail.
-  setScaleHighBound = (n: number, scaleType: string) =>
+  setScaleHighBound = (scaleType: string, n: number) =>
     scaleType in this.scales ? (this.scales[scaleType].max = n) : null;
 
   getComplementary = (pos: number = 0) =>
@@ -185,8 +175,14 @@ export class ColorService {
 
   getUnnamed = () => this.colors.ClemsonPalette.innovation;
 
-  brighten = (color: string, n: number = 1) => chroma(color).brighten(n);
-  darken = (color: string, n: number = 1) => chroma(color).darken(n);
+  brighten = (color: string, n: number = 1) =>
+    chroma(color)
+      .brighten(n)
+      .hex();
+  darken = (color: string, n: number = 1) =>
+    chroma(color)
+      .darken(n)
+      .hex();
 
   get alert() {
     return this.colors.Alerts.alert;
@@ -195,7 +191,16 @@ export class ColorService {
     return this.colors.Alerts.warn;
   }
 
-  labDomain = (color: string) => [this.labMin(color), this.labMax(color)];
-  private labMax = (color: string) => chroma(color).set('lab.l', 100);
-  private labMin = (color: string) => chroma(color).set('lab.l', 0);
+  labDomain = (color: string): [string, string] => [
+    this.labMax(color),
+    this.labMin(color)
+  ];
+  private labMax = (color: string): string =>
+    chroma(color)
+      .set('lab.l', 90)
+      .hex();
+  private labMin = (color: string): string =>
+    chroma(color)
+      .set('lab.l', 10)
+      .hex();
 }

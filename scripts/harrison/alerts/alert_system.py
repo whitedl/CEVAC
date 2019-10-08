@@ -31,10 +31,10 @@ LOG = True
 CHECK_ALERTS = True
 
 # Determines whether or not to insert the found alerts into the alert databse
-SEND = True
+SEND = False
 
 # Determines whether or not to update the cache alerts are checked against
-UPDATE_CACHE = True
+UPDATE_CACHE = False
 
 # The positions for columns in the csv
 COLUMNS = {
@@ -157,12 +157,13 @@ def import_known_issues(fname):
     return d
 
 
-def skip_alias(known_issues, bldg, alias):
+def skip_alias(known_issues, bldg, alias, metric):
     """Check known issues for decomissioned alias."""
+    psid = get_psid_from_alias(alias, bldg, metric)
     if bldg not in known_issues:
         return False
     for message in known_issues[bldg]:
-        if f"{alias}" in message:
+        if f"({psid})" in message:
             return True
     return False
 
@@ -478,7 +479,7 @@ def check_numerical_alias(alias, alert, next_id, last_events, new_events,
 def check_temp(room, alert, temps, known_issues, next_id, last_events,
                new_events, get_psid):
     """Check relative temperature values."""
-    if skip_alias(known_issues, alert["building"], room):
+    if skip_alias(known_issues, alert["building"], room, "TEMP"):
         print(room, " is decomissioned")
         return (next_id, new_events, "")
     else:
@@ -582,7 +583,7 @@ def check_temp(room, alert, temps, known_issues, next_id, last_events,
 def check_time(data, alert, next_id, last_events, new_events, get_psid):
     """Check time off since last report."""
     alias = data
-    if skip_alias(known_issues, alert["building"], alias):
+    if skip_alias(known_issues, alert["building"], alias, alert["type"]):
         print(alias, " is decomissioned")
         return (next_id, new_events, "")
     else:
