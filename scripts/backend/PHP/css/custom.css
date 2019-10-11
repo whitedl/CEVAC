@@ -7,7 +7,7 @@
   height: 95%;
   float: left;
   margin: auto;
-  border: 2px solid green;
+  /* border: 2px solid green; */
 }
 #body_right {
   width: 63%;
@@ -20,20 +20,21 @@
 }
 #advanced_div {
   width: 55%;
-  border: 2px solid red;
+  /* border: 2px solid red; */
   display: block;
   float: right;
 }
 #buttons_div {
+  padding-top: 50px;
   width: 30%;
-  border: 2px solid white;
+  /* border: 2px solid white; */
   display: block;
   float: left;
 }
 #buttons_parent_div {
   width: 100%;
   /* height: 100px; */
-  border: 2px solid blue;
+  /* border: 2px solid blue; */
   display: block;
   float: right;
   /* margin-left: auto; */
@@ -44,16 +45,16 @@
   color: #FFFFFF;
 }
 #PXREF_button{
-  float: left;
-  display: block;
-  vertical-align: top;
+  /* float: left; */
+  /* display: block; */
+  /* vertical-align: top; */
 }
 #rebuild_PXREF_button{
-  float: left;
-  vertical-align: top;
+  /* float: left; */
+  /* vertical-align: top; */
 }
 #advanced_right{
-  border: 2px solid green;
+  /* border: 2px solid green; */
   width: 50%;
   float: right;
 }
@@ -61,7 +62,7 @@
   width: 35%;
 }
 #toggles_div{
-  border: 2px solid orange;
+  /* border: 2px solid orange; */
   width: 30%;
 }
 #autoLASR_div{
@@ -94,3 +95,17 @@
 #BuildingKey_search_div{
   display: none;
 }
+#metrics{
+  float: right;
+  display: inline;
+  width: 50%;
+}
+#buildings{
+  float: left;
+  display: inline;
+  width: 50%;
+}
+#select_options_div{
+  display: block;
+}
+

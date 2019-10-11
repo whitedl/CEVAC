@@ -102,3 +102,16 @@ function table_exists(tn){
     }
   );
 }
+function get_latest_html(){
+  button = document.getElementById('view_latest_button');
+  button.classList.add('disabled');
+  button.disabled = true;
+  $.get('console/LATEST_html.php',
+    $('form').serialize(),
+    function(data){
+      document.getElementById('sql_output').innerHTML = data;
+      button.disabled = false;
+      button.classList.remove('disabled');
+    }
+  );
+}

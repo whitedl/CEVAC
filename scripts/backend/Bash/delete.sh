@@ -33,7 +33,7 @@ fi
 isCustom=`/cevac/scripts/sql_value.sh "SELECT isCustom FROM CEVAC_TABLES WHERE TableName = '$HIST_VIEW'"`
 exclude_array=("RAW" "XREF")
 exclude_query=""
-[ "$isCustom" == "1" ] && exclude_array+=('HIST_VIEW')
+# [ "$isCustom" == "1" ] && exclude_array+=('HIST_VIEW')
 for t in "${exclude_array[@]}"; do
   exclude_query="$exclude_query
   AND TableName NOT LIKE '%$t%'"

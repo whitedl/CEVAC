@@ -29,7 +29,6 @@ SELECT BuildingSName, Metric, Age
 FROM CEVAC_TABLES
 WHERE Age = '$Age'
 AND TableName NOT LIKE '%CSV%'
-AND isCustom = 0
 "
 /cevac/scripts/exec_sql.sh "$hist_views_query" "hist_views.csv"
 
