@@ -6,8 +6,14 @@
     fixedInViewport="false"
     class="scrollContainer"
   >
-    hi there
-    <router-outlet></router-outlet>
+    <mat-card>
+      <mat-checkbox [checked]="ackStatus" (change)="ackStatus = !ackStatus">
+        Show Acknowledged
+      </mat-checkbox>
+      <mat-checkbox [checked]="resStatus" (change)="resStatus = !resStatus">
+        Show Resolved
+      </mat-checkbox>
+    </mat-card>
   </mat-sidenav>
   <mat-sidenav-content>
     <table mat-table [dataSource]="alerts" matSort>
