@@ -49,11 +49,14 @@ SET @building_key = (SELECT RTRIM(BuildingKey) FROM CEVAC_BUILDING_INFO WHERE Bu
 
 DECLARE @Table_name NVARCHAR(MAX);
 DECLARE @HIST_VIEW NVARCHAR(MAX);
+DECLARE @HIST_RAW NVARCHAR(MAX);
 DECLARE @HIST_CACHE NVARCHAR(MAX);
 DECLARE @HIST_LASR NVARCHAR(MAX);
 DECLARE @HIST_LASR_INT NVARCHAR(MAX);
 DECLARE @HIST NVARCHAR(MAX);
 DECLARE @DAY NVARCHAR(MAX);
+DECLARE @DAY_CACHE NVARCHAR(MAX);
+DECLARE @DAY_VIEW NVARCHAR(MAX);
 DECLARE @LATEST NVARCHAR(MAX);
 DECLARE @LATEST_FULL NVARCHAR(MAX);
 DECLARE @LATEST_BROKEN NVARCHAR(MAX);
@@ -65,11 +68,14 @@ DECLARE @TABLE_CONFIG NVARCHAR(MAX);
 -- Generate table names
 -- Reference names
 SET @HIST_VIEW = 'CEVAC_' + @Building + '_' + @Metric + '_HIST_VIEW';
+SET @HIST_RAW = 'CEVAC_' + @Building + '_' + @Metric + '_HIST_RAW';
 SET @HIST_CACHE = 'CEVAC_' + @Building + '_' + @Metric + '_HIST_CACHE';
 SET @HIST_LASR = 'CEVAC_' + @Building + '_' + @Metric + '_HIST_LASR';
 SET @HIST_LASR_INT = 'CEVAC_' + @Building + '_' + @Metric + '_HIST_LASR_INT';
 SET @HIST = 'CEVAC_' + @Building + '_' + @Metric + '_HIST';
 SET @DAY = 'CEVAC_' + @Building + '_' + @Metric + '_DAY';
+SET @DAY_CACHE = 'CEVAC_' + @Building + '_' + @Metric + '_DAY_CACHE';
+SET @DAY_VIEW = 'CEVAC_' + @Building + '_' + @Metric + '_DAY_VIEW';
 SET @LATEST = 'CEVAC_' + @Building + '_' + @Metric + '_LATEST';
 SET @LATEST_FULL = 'CEVAC_' + @Building + '_' + @Metric + '_LATEST_FULL';
 SET @LATEST_BROKEN = 'CEVAC_' + @Building + '_' + @Metric + '_LATEST_BROKEN';
@@ -77,14 +83,14 @@ SET @OLDEST = 'CEVAC_' + @Building + '_' + @Metric + '_OLDEST';
 
 
 -- Current name
-IF @Age = 'HIST' SET @Table_name = CONCAT('CEVAC_', @Building, '_', @Metric, '_', @Age, '_VIEW')
+IF @Age = 'HIST' OR @Age = 'DAY' SET @Table_name = CONCAT('CEVAC_', @Building, '_', @Metric, '_', @Age, '_VIEW')
 ELSE SET @Table_name = CONCAT('CEVAC_', @Building, '_', @Metric, '_', @Age);
 PRINT @Table_name;
 SET @XREF = CONCAT('CEVAC_', @Building, '_', @Metric, '_XREF');
 IF @Metric = 'POWER_SUMS' SET @XREF = CONCAT('CEVAC_', @Building, '_POWER_XREF');
 SET @PXREF = CONCAT('CEVAC_', @Building, '_', @Metric, '_PXREF');
 --IF @Metric = 'POWER_RAW' SET @XREF = CONCAT('CEVAC_', @Building, '_', REPLACE(@Metric, 'POWER_RAW', 'POWER'), '_XREF');
-IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = @XREF) SET @XREF = NULL;
+--IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = @XREF) SET @XREF = NULL;
 
 SET @TABLE_CONFIG = @Table_name + '_CONFIG';
 DECLARE @Create_TABLE_CONFIG NVARCHAR(MAX);
@@ -128,8 +134,10 @@ END
 
 -- Drop view for rebuilding
 IF OBJECT_ID(@Table_name, 'V') IS NOT NULL BEGIN
-	DECLARE @DropView NVARCHAR(500);
+	DECLARE @DropView NVARCHAR(MAX);
 	SET @DropView = 'DROP VIEW ' + @Table_name;
+	PRINT('DROPPING');
+	PRINT(@DropView);
 	EXEC(@DropView);
 END
 
@@ -313,46 +321,92 @@ IF @Age LIKE '%PXREF%' BEGIN
 		SET @PXREF_Alias_join = NULL;
 	END ELSE BEGIN
 		SET @PXREF_Alias_source = 'xref.Alias';
-		SET @PXREF_Alias_join = 'INNER JOIN ' + @XREF + ' AS xref ON xref.' + @RemotePSIDName + ' = ps.' + @RemotePSIDName;
+		SET @PXREF_Alias_join = 'FULL OUTER JOIN ' + @XREF + ' AS xref ON xref.' + @RemotePSIDName + ' = ps.' + @RemotePSIDName;
 	END
 
-	SET @PXREF_query = '
-		IF OBJECT_ID(''dbo.' + @PXREF + ''', ''U'') IS NOT NULL DROP TABLE ' + @PXREF + ';
+	DECLARE @DROP_PXREF NVARCHAR(MAX);
+	DECLARE @UPDATE_PXREF NVARCHAR(MAX);
+	SET @DROP_PXREF = 'IF OBJECT_ID(''' + @PXREF + ''') IS NOT NULL DROP TABLE ' + @PXREF + ';';
+
+	IF OBJECT_ID(@XREF) IS NOT NULL BEGIN
+		SET @IDName = @RemotePSIDName;
+		SET @AliasName = 'Alias';
+		SET @DataName = @RemotePSIDName;
+		SET @isCustom = 0;
+		DECLARE @xref_ObjectNameSource NVARCHAR(MAX);
+		SET @xref_ObjectNameSource = (SELECT CASE WHEN COL_LENGTH(@XREF, 'ObjectName') IS NOT NULL THEN 'xref.ObjectName'
+			WHEN COL_LENGTH(@XREF, 'PointName') IS NOT NULL THEN 'xref.PointName'
+			ELSE 'NULL'
+		END);
+		SET @PXREF_query = '
 		SELECT DISTINCT
-			ps.' + @RemotePSIDName + ', pt.' + @RemotePointNameName + ', ' + @PXREF_Alias_source + ' AS ''Alias'', units.' + @RemoteUnitOfMeasureIDName + '
+			xref.' + @RemotePSIDName + ', ISNULL(pt.' + @RemotePointNameName + ', ' + @xref_ObjectNameSource + ') AS ' + @RemotePointNameName + ', ISNULL(CAST(' + @PXREF_Alias_source + ' AS NVARCHAR(MAX)), ' + @RemotePointNameName + ') AS ''Alias'', units.' + @RemoteUnitOfMeasureIDName + ', CAST(0 AS BIT) AS ''in_xref''
 		INTO ' + @PXREF + '
 		FROM
-			[' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemotePtTable + ' AS pt
-			INNER JOIN [' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemotePSTable + ' AS ps ON pt.' + @RemotePointIDName + ' = ps.' + @RemotePointIDName + ' 
-			INNER JOIN [' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemoteUnitTable + ' AS units ON units.' + @RemoteUnitOfMeasureIDName + ' = pt.' + @RemoteUnitOfMeasureIDName + '
-			' + ISNULL(@PXREF_Alias_join, '') + '
-			' + @keys_list_query + '
-		WHERE
-		( pt.' + @RemotePointNameName + ' LIKE ''' + @building_key + ''')
-		AND ' + ISNULL(@unitOfMeasureID_query, '1 = 1') + '
+			' + @XREF + ' AS xref
+			LEFT OUTER JOIN [' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemotePSTable + ' AS ps ON ps.' + @RemotePSIDName + ' = xref.' + @RemotePSIDName + ' 
+			LEFT OUTER JOIN [' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemotePtTable + ' AS pt ON pt.' + @RemotePointIDName + ' = ps.' + @RemotePointIDName + '
+			LEFT OUTER JOIN [' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemoteUnitTable + ' AS units ON units.' + @RemoteUnitOfMeasureIDName + ' = pt.' + @RemoteUnitOfMeasureIDName + ';';
+	END ELSE BEGIN
+		SET @PXREF_query = '
+			SELECT DISTINCT
+				ps.' + @RemotePSIDName + ', pt.' + @RemotePointNameName + ', ISNULL(CAST(' + @PXREF_Alias_source + ' AS NVARCHAR(MAX)), ' + @RemotePointNameName + ') AS ''Alias'', units.' + @RemoteUnitOfMeasureIDName + ', CAST(0 AS BIT) AS ''in_xref''
+			INTO ' + @PXREF + '
+			FROM
+				[' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemotePtTable + ' AS pt
+				INNER JOIN [' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemotePSTable + ' AS ps ON pt.' + @RemotePointIDName + ' = ps.' + @RemotePointIDName + ' 
+				INNER JOIN [' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemoteUnitTable + ' AS units ON units.' + @RemoteUnitOfMeasureIDName + ' = pt.' + @RemoteUnitOfMeasureIDName + '
+				' + ISNULL(@PXREF_Alias_join, '') + '
+				' + @keys_list_query + '
+			WHERE
+			( pt.' + @RemotePointNameName + ' LIKE ''' + @building_key + ''')
+			AND ' + ISNULL(@unitOfMeasureID_query, '1 = 1') + ';';
+	END
+	SET @UPDATE_PXREF = 'IF OBJECT_ID(''' + @XREF + ''') IS NOT NULL BEGIN
+			UPDATE ' + ISNULL(@PXREF, 'ERROR') + '
+			SET in_xref = 1
+			WHERE ' + ISNULL(@RemotePSIDName, 'ERROR') + ' IN (SELECT ' + @RemotePSIDName + ' FROM ' + @XREF + ')
+		END
 		';
+	IF @Metric = 'WAP' BEGIN
+		SET @UPDATE_PXREF = NULL;
+		SET @IDName = 'WAP_name';
+		SET @AliasName = 'Alias';
+		SET @DataName = NULL;
+		SET @isCustom = 1;
+		SET @PXREF_query = '
+		SELECT DISTINCT name AS WAP_name, name AS Alias, name AS PointName, 0 AS ''in_xref''
+		INTO ' + @PXREF + '
+		FROM ' + @HIST_RAW + '
+		';
+	END
+
+	PRINT @DROP_PXREF;
 	PRINT @PXREF_query;
 	IF @execute = 1 BEGIN
+		EXEC(@DROP_PXREF);
 		EXEC(@PXREF_query);
-		DELETE FROM CEVAC_TABLES WHERE TableName = @PXREF;
-		INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, isCustom, Definition, Dependencies, customLASR, autoCACHE, autoLASR)
-		VALUES (
-			@Building,
-			@Metric,
-			@Age,
-			@PXREF,
-			@RemotePSIDName,
-			@RemotePSIDName,
-			'Alias',
-			@RemotePSIDName,
-			@isCustom,
-			@PXREF_query,
-			NULL,
-			isnull(@customLASR,0),
-			isnull(@autoCACHE,0),
-			isnull(@autoLASR,0)
-		)
-		
+		EXEC(@UPDATE_PXREF);
+--		DELETE FROM CEVAC_TABLES WHERE TableName = @PXREF;
+		IF NOT EXISTS (SELECT * FROM CEVAC_TABLES WHERE TableName = @PXREF) BEGIN
+			INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, isCustom, Definition, Dependencies, customLASR, autoCACHE, autoLASR)
+			VALUES (
+				@Building,
+				@Metric,
+				@Age,
+				@PXREF,
+				NULL,
+				@IDName,
+				'Alias',
+				@DataName,
+				@isCustom,
+				@PXREF_query,
+				NULL,
+				isnull(@customLASR,0),
+				isnull(@autoCACHE,0),
+				isnull(@autoLASR,0)
+			)
+		END -- END of insert	
 	END
 END
 
@@ -494,7 +548,7 @@ END ELSE IF @Age LIKE '%OLDEST%' BEGIN
 	' temp.* FROM '  + @Oldest_source + ' AS temp
 	INNER JOIN
 	(
-		SELECT ' + @IDName + ', 
+		SELECT ' + @IDName + ', FDROP
 		MIN(' + @DateTimeName + ') AS LastTime
 		FROM
 		' + @Oldest_source + '
@@ -530,7 +584,6 @@ END
 --------------------------------------
 -- Execute and create the view
 --------------------------------------
-PRINT @Create_View;
 IF @execute = 1 AND @Create_View IS NOT NULL BEGIN
 	PRINT('Create view:');
 	PRINT(@Create_View);
@@ -561,24 +614,30 @@ END
 --------------------------------------
 -- Create HIST API Table
 --------------------------------------
-IF @Age LIKE '%HIST%' BEGIN
-	DECLARE @Drop_API NVARCHAR(MAX);
-	SET @Drop_API = 'DROP VIEW ' + @HIST;
-	IF OBJECT_ID(@HIST, 'V') IS NOT NULL BEGIN
-		SELECT @Drop_API AS 'DROP _HIST API View'
-		IF @execute = 1 BEGIN
-			EXEC(@Drop_API);
-			IF EXISTS (SELECT TableName FROM CEVAC_TABLES WHERE TableName = @HIST) BEGIN
-				DELETE FROM CEVAC_TABLES WHERE TableName = @HIST;
-			END
+IF @Age LIKE '%HIST%' OR @Age = 'DAY' BEGIN
+	DECLARE @Drop_HIST_API NVARCHAR(MAX);
+	DECLARE @Drop_DAY_API NVARCHAR(MAX);
+	SET @Drop_HIST_API = 'DROP VIEW ' + @HIST;
+	SET @Drop_DAY_API = 'DROP VIEW ' + @DAY;
+	PRINT @Drop_HIST_API;
+	PRINT @Drop_DAY_API;
+	IF @execute = 1 BEGIN
+		IF OBJECT_ID(@HIST) IS NOT NULL EXEC(@Drop_HIST_API);
+		IF OBJECT_ID(@DAY) IS NOT NULL EXEC(@Drop_DAY_API);
+		IF EXISTS (SELECT TableName FROM CEVAC_TABLES WHERE TableName = @HIST) AND EXISTS (SELECT TableName FROM CEVAC_TABLES WHERE TableName = @DAY) BEGIN
+			DELETE FROM CEVAC_TABLES WHERE TableName = @HIST;
+			DELETE FROM CEVAC_TABLES WHERE TableName = @DAY;
 		END
 	END
 
 	DECLARE @_HIST_source NVARCHAR(MAX);
+	DECLARE @DAY_source NVARCHAR(MAX);
 	DECLARE @Create_API_View NVARCHAR(MAX);
 	-- _HIST selects from _VIEW if _CACHE does not exist
 	IF OBJECT_ID(@HIST_CACHE, 'U') IS NOT NULL SET @_HIST_source = @HIST_CACHE;
 	ELSE SET @_HIST_source = @HIST_VIEW;
+	IF OBJECT_ID(@DAY_CACHE, 'U') IS NOT NULL SET @DAY_source = @DAY_CACHE;
+	ELSE SET @DAY_CACHE = @DAY_VIEW;
 
 	SET @DateTimeName = (SELECT TOP 1 DateTimeName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age = 'HIST');
 	SET @AliasName = (SELECT TOP 1 AliasName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age = 'HIST');
@@ -596,12 +655,17 @@ IF @Age LIKE '%HIST%' BEGIN
 		RETURN
 	END
 
-
+	DECLARE @Create_DAY_API NVARCHAR(MAX);
+	SET @Create_DAY_API = '
+	CREATE VIEW ' + @DAY + '
+	AS
+	SELECT * FROM ' + @DAY_source + '
+	';
 	SET @Create_API_View = '
 	CREATE VIEW ' + @HIST + '
 	AS 
-	SELECT * FROM ' + @_HIST_source;
-	SELECT @Create_API_View AS '_HIST_API';
+	SELECT * FROM ' + @_HIST_source + ';';
+	PRINT @Create_API_View;
 	IF @execute = 1 BEGIN
 		EXEC(@Create_API_View);
 		IF NOT EXISTS (SELECT * FROM CEVAC_TABLES WHERE TableName = @HIST) BEGIN
@@ -616,8 +680,27 @@ IF @Age LIKE '%HIST%' BEGIN
 				@AliasName,
 				@DataName,
 				isnull(@isCustom,0),
-				@Create_View,
+				@Create_API_View,
 				@_HIST_source,
+				isnull(@customLASR,0),
+				isnull(@autoCACHE,0),
+				isnull(@autoLASR,0)
+			);
+		END
+		IF NOT EXISTS (SELECT * FROM CEVAC_TABLES WHERE TableName = @DAY) BEGIN
+			INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, isCustom, Definition, Dependencies, customLASR, autoCACHE, autoLASR)
+			VALUES (
+				@Building,
+				@Metric,
+				@Age,
+				@DAY,
+				@DateTimeName,
+				@IDName,
+				@AliasName,
+				@DataName,
+				isnull(@isCustom,0),
+				@Create_DAY_API,
+				@DAY_source,
 				isnull(@customLASR,0),
 				isnull(@autoCACHE,0),
 				isnull(@autoLASR,0)
@@ -625,3 +708,4 @@ IF @Age LIKE '%HIST%' BEGIN
 		END
 	END
 END
+
