@@ -41,15 +41,20 @@ function rebuild_PXREF_click(){
 function del(){
   button = document.getElementById('delete_button');
   button.disabled = true;
-  $.ajax({
-    type: 'POST',
-    url: 'console/delete.php',
-    data: $('form').serialize(),
-    success: function(data){
-      document.getElementById('delete_button').disabled = false;
-      document.getElementById('output').innerHTML = data;
-    }
-  });
+  b = document.getElementById("buildings").value;
+  m = document.getElementById("metrics").value;
+  confirm_message = "Are you sure you want to delete " + b + "_" + m + "?";
+  if(confirm(confirm_message)){
+    $.ajax({
+      type: 'POST',
+      url: 'console/delete.php',
+      data: $('form').serialize(),
+      success: function(data){
+        document.getElementById('delete_button').disabled = false;
+        document.getElementById('output').innerHTML = data;
+      }
+    });
+  }
 }
 function add_building_click(){
   button = document.getElementById('add_building_button');

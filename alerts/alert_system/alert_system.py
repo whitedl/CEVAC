@@ -15,11 +15,11 @@ from croniter import croniter
 
 
 CONDITIONS_FPATH = "/cevac/cron/alerts/"
-KNOWN_ISSUES_FPATH = "/cevac/DEV/known issues/Known Data Issues.csv"
-OCCUPANCY_FPATH = "/cevac/CEVAC/scripts/harrison/alerts/occupancy.csv"
+KNOWN_ISSUES_FPATH = "/cevac/CEVAC/known_issues/Known Data Issues.csv"
+OCCUPANCY_FPATH = "/cevac/CEVAC/alerts/alert_system/occupancy.csv"
 LOGGING_PATH = "/cevac/cron/alerts/"
 PHONE_PATH = "/cevac/cron/alerts/"
-alert_fname = "/cevac/DEV/alerts/alert_parameters.csv"
+alert_fname = "/cevac/CEVAC/alerts/alert_parameters.csv"
 json_oc = "/cevac/cron/alert_log_oc.json"
 json_unoc = "/cevac/cron/alert_log_unoc.json"
 
@@ -31,10 +31,10 @@ LOG = True
 CHECK_ALERTS = True
 
 # Determines whether or not to insert the found alerts into the alert databse
-SEND = False
+SEND = True
 
 # Determines whether or not to update the cache alerts are checked against
-UPDATE_CACHE = False
+UPDATE_CACHE = True
 
 # The positions for columns in the csv
 COLUMNS = {

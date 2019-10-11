@@ -14,7 +14,7 @@ from time import sleep
 
 import base64
 
-KNOWN_ISSUES_FPATH = "/cevac/CEVAC/known issues/Known Data Issues.csv"
+KNOWN_ISSUES_FPATH = "/cevac/CEVAC/known_issues/Known Data Issues.csv"
 email = "cevac5733@gmail.com"
 password = "cevacsteve5733"
 to_list = {
@@ -32,7 +32,8 @@ emergency_to_list = {
     "Tim Howard": "timh@clemson.edu",
 }
 
-f = open("/cevac/DEV/scripts/harrison/alerts/alert_email.html", "r")
+alert_email_html_loc = "/cevac/CEVAC/alerts/alert_system/alert_email.html"
+f = open(alert_email_html_loc, "r")
 page = Template("".join(f.readlines()))
 
 
@@ -41,7 +42,7 @@ def encode64(image_fpath):
     return base64.b64encode(open(image_fpath, 'rb').read()).decode('utf-8')
 
 
-pic_path = "/cevac/DEV/scripts/harrison/alerts/pics/"
+pic_path = "/cevac/CEVAC/alerts/alert_system/pics/"
 metrics_a = {
     "TEMP": {
         "key": "<TEMP>",

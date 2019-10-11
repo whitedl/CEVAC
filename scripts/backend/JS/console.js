@@ -141,5 +141,12 @@ function download_BuildingKeySearch_click(){
 function BuildingKey_search_button_click(){
   button = document.getElementById('BuildingKey_search_button');
   document.getElementById('BuildingKey_search_div').style.display = 'block';
+  document.getElementById('output').innerHTML = "";
+  document.getElementById('sql_output').innerHTML = "";
   reset_buttons(button);
+}
+function view_latest_button_click(){
+  button = document.getElementById('view_latest_button');
+  reset_buttons(button);
+  get_latest_html();
 }
