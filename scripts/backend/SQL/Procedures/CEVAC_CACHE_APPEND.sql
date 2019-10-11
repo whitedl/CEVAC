@@ -256,19 +256,19 @@ WHILE (EXISTS(SELECT 1 FROM @cevac_params) AND @i > 0) BEGIN
 
 
 	-- rebuild _HIST API
-	IF @name_CACHE LIKE '%HIST_CACHE%' AND @custom = 0 BEGIN
+	IF (@name_CACHE LIKE '%HIST_CACHE%' OR @name_CACHE LIKE '%DAY_CACHE%') AND @custom = 0 BEGIN
 		IF OBJECT_ID(REPLACE(@name_CACHE, '_CACHE', ''), 'V') IS NOT NULL BEGIN
 		DECLARE @drop_HIST NVARCHAR(MAX);
 		SET @drop_HIST = 'DROP VIEW ' + REPLACE(@name_CACHE, '_CACHE', '');
 		
-		SELECT @drop_HIST AS 'Drop _HIST';
+		PRINT @drop_HIST;
 		IF @execute = 1 EXEC(@drop_HIST);
 		END
 		DECLARE @Create_view NVARCHAR(MAX);
 		SET @Create_view = '
 		CREATE VIEW ' + REPLACE(@name_CACHE, '_CACHE', '') + '
 		AS SELECT * FROM ' + @name_CACHE;
-		SELECT @Create_view AS 'Rebuild _HIST API';
+		PRINT @Create_view;
 		IF @execute = 1 EXEC(@Create_view);
 
 	END
