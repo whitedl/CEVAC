@@ -39,8 +39,8 @@ export class AlertsviewComponent implements AfterViewInit {
   eventIDs: string[] = [];
   startDate: Date = new Date();
   endDate: Date = new Date();
-  ackStatus = false;
-  resStatus = false;
+  ackStatus = 0;
+  resStatus = 0;
 
   apiUrl = 'http://wfic-cevac1/api/alerts';
 
@@ -69,19 +69,57 @@ export class AlertsviewComponent implements AfterViewInit {
       : this.alerts.forEach(row => this.selection.select(row));
   }
 
+  ackSlideThumb = (val: number) => {
+    switch (val) {
+      case 0:
+        return 'unack';
+      case 1:
+        return 'both';
+      case 2:
+        return 'ack';
+      default:
+        console.log('How did you set the slider to that?');
+        return 'something broke';
+    }
+  };
+
+  resSlideThumb = (val: number) => {
+    switch (val) {
+      case 0:
+        return 'unres';
+      case 1:
+        return 'both';
+      case 2:
+        return 'res';
+      default:
+        console.log('How did you set the slider to that?');
+        return 'something broke';
+    }
+  };
+
+  resetTable = () => {
+    this.paginator.pageIndex = 0;
+  };
+
   getAlerts(): Observable<Alert[]> {
     let requestUrl = `${this.apiUrl}?`;
     let countUrl = `${this.apiUrl}/count?`;
     if (this.sort.direction) {
       requestUrl += `filter[order]=${this.sort.active} ${this.sort.direction}&`;
     }
-    if (!this.ackStatus) {
+    if (this.ackStatus === 0) {
       requestUrl += `filter[where][Acknowledged]=false&`;
-      countUrl += `filter[where][Acknowledged]=false&`;
+      countUrl += `where[Acknowledged]=false&`;
+    } else if (this.ackStatus === 2) {
+      requestUrl += `filter[where][Acknowledged]=true&`;
+      countUrl += `where[Acknowledged]=true&`;
     }
-    if (!this.resStatus) {
+    if (this.resStatus === 0) {
       requestUrl += `filter[where][Resolved]=false&`;
-      countUrl += `filter[where][Resolved]=false&`;
+      countUrl += `where[Resolved]=false&`;
+    } else if (this.resStatus === 2) {
+      requestUrl += `filter[where][Resolved]=true&`;
+      countUrl += `where[Resolved]=true&`;
     }
     requestUrl += `filter[limit]=${this.paginator.pageSize}&filter[skip]=${this
       .paginator.pageIndex * this.paginator.pageSize}`;
