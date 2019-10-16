@@ -20,16 +20,27 @@ export class AlertsviewComponent implements AfterViewInit {
     'select',
     'EventID',
     'AlertType',
+    'DetectionTimeET',
+    'ETDateTime',
     'BuildingSName',
+    'AlertMessage',
     'Acknowledged',
     'Resolved',
-    'AlertMessage',
     'Delete'
   ];
   selection = new SelectionModel<Alert>(true, []);
   alerts: Alert[] = [];
   isLoading = false;
+
   count = 0;
+
+  // Filters
+  buildingNames: string[] = [];
+  eventIDs: string[] = [];
+  startDate: Date = new Date();
+  endDate: Date = new Date();
+  ackStatus = false;
+  resStatus = false;
 
   apiUrl = 'http://wfic-cevac1/api/alerts';
 
@@ -60,12 +71,20 @@ export class AlertsviewComponent implements AfterViewInit {
 
   getAlerts(): Observable<Alert[]> {
     let requestUrl = `${this.apiUrl}?`;
+    let countUrl = `${this.apiUrl}/count?`;
     if (this.sort.direction) {
       requestUrl += `filter[order]=${this.sort.active} ${this.sort.direction}&`;
     }
+    if (!this.ackStatus) {
+      requestUrl += `filter[where][Acknowledged]=false&`;
+      countUrl += `filter[where][Acknowledged]=false&`;
+    }
+    if (!this.resStatus) {
+      requestUrl += `filter[where][Resolved]=false&`;
+      countUrl += `filter[where][Resolved]=false&`;
+    }
     requestUrl += `filter[limit]=${this.paginator.pageSize}&filter[skip]=${this
       .paginator.pageIndex * this.paginator.pageSize}`;
-    const countUrl = `${this.apiUrl}/count`;
     this.http.get<any>(countUrl).subscribe(count => (this.count = count.count));
     return this.http.get<Alert[]>(requestUrl);
   }
