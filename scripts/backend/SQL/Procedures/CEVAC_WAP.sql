@@ -128,6 +128,34 @@ IF @Metric = 'WAP_FLOOR' BEGIN
     SET @DataName = 'total_count';
 END
 
+------------------------
+-- WAP_FLOOR_SUMS
+------------------------
+IF @Metric = 'WAP_FLOOR_SUMS' BEGIN
+	SET @Create_RAW = NULL;
+	SET @HIST_RAW = 'CEVAC_' + @BuildingSName + '_WAP_FLOOR_HIST';
+	SET @Create_HIST = '
+		CREATE VIEW ' + @HIST_VIEW + ' AS
+		WITH original AS (
+			SELECT * FROM ' + @HIST_RAW + '
+		), sums AS (
+			SELECT UTCDateTime, dbo.ConvertUTCToLocal(UTCDateTime) AS ''ETDateTime'', SUM(guest_count) AS ''SUM_guest_count'', SUM(clemson_count) AS ''SUM_clemson_count''
+			FROM original
+			GROUP BY UTCDateTime
+		)
+		SELECT UTCDateTime,
+		ETDateTime,
+		(SUM_guest_count + SUM_clemson_count) AS ''SUM_total'',
+		SUM_guest_count,
+		SUM_clemson_count
+		FROM sums
+	';
+	SET @DateTimeName = 'UTCDateTime';
+    SET @IDName = 'UTCDateTime';
+    SET @AliasName = 'UTCDateTime';
+    SET @DataName = 'SUM_total';
+END
+
 
 -- insert into CEVAC_TABLES for CEVAC_CUSTOM to grab definition
 DELETE FROM CEVAC_TABLES WHERE TableName = @HIST_VIEW;
