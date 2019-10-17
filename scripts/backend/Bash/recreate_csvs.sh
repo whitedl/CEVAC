@@ -1,6 +1,6 @@
 #! /bin/bash
 error=""
-echo "Warning: This will delete everything in /srv/csv/ and will take some time to recreate."
+# echo "Warning: This will delete everything in /srv/csv/ and will take some time to recreate."
 echo "Continue? (y/N)"
 read choice
 if [ "$choice" != "y" ] && [ "$choice" != "Y" ]; then
@@ -8,13 +8,12 @@ if [ "$choice" != "y" ] && [ "$choice" != "Y" ]; then
   exit 1
 fi
 
-echo "Deleting everything in /srv/csv/"
-rm -f /srv/csv/*
+# echo "Deleting everything in /srv/csv/"
+# rm -f /srv/csv/*
 
 csv_tables_query="
 SELECT RTRIM(BuildingSName), RTRIM(Metric), RTRIM(Age) FROM CEVAC_TABLES
-WHERE TableName LIKE '%_CSV%' AND TableName NOT LIKE '%BROKEN%' AND TableName NOT LIKE '%FULL%'
-AND customLASR = 0
+WHERE autoLASR = 1
 "
 if ! /cevac/scripts/exec_sql.sh "$csv_tables_query" "csv_tables.csv" ; then
   error="Failed to get CSV tables"
@@ -26,7 +25,7 @@ fi
 sed -i '1d' /cevac/cache/csv_tables.csv
 readarray tables_array < /cevac/cache/csv_tables.csv
 
-echo "Dropping all _CSV tables..."
+# echo "Dropping all _CSV tables..."
 for t in "${tables_array[@]}"; do
   t=`echo "$t" | tr -d '\n'`
   if [ -z "$t" ]; then
@@ -40,18 +39,18 @@ for t in "${tables_array[@]}"; do
   table_csv="CEVAC_$B""_$M""_$A""_CSV"
   echo $table_csv
  
-  if ! /cevac/scripts/exec_sql.sh "IF OBJECT_ID('$table_csv') IS NOT NULL DROP TABLE $table_csv" ; then
-    error="Error dropping $table_csv"
-    /cevac/scripts/log_error.sh "$error" "CEVAC_$B""_$M""_$A"
-    exit 1
-  fi
+  # if ! /cevac/scripts/exec_sql.sh "IF OBJECT_ID('$table_csv') IS NOT NULL DROP TABLE $table_csv" ; then
+    # error="Error dropping $table_csv"
+    # /cevac/scripts/log_error.sh "$error" "CEVAC_$B""_$M""_$A"
+    # exit 1
+  # fi
 
-  echo "Recreating and uploading $table_csv"
-  time if ! /cevac/scripts/lasr_append.sh $B $M $A "norun" "reset" ; then
-    error="Failed lasr_append for $B""_$M""_$A"
-    /cevac/scripts/log_error.sh "$error" "CEVAC_$B""_$M""_$A"
-    exit 1
-  fi
+  # echo "Recreating and uploading $table_csv"
+  # time if ! /cevac/scripts/lasr_append.sh $B $M $A "norun" "reset" ; then
+    # error="Failed lasr_append for $B""_$M""_$A"
+    # /cevac/scripts/log_error.sh "$error" "CEVAC_$B""_$M""_$A"
+    # exit 1
+  # fi
 
 done
 

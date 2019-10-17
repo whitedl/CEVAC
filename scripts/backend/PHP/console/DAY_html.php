@@ -3,22 +3,21 @@ include "../functions.php";
 // var_dump($_POST);
 $BuildingSName = $_GET['BuildingSName'];
 $Metric = $_GET['Metric'];
-$Age = $_GET['Age'];
-$LATEST = "CEVAC_$BuildingSName"."_$Metric"."_LATEST";
+$DAY = "CEVAC_$BuildingSName"."_$Metric"."_DAY";
 $XREF = "CEVAC_$BuildingSName"."_$Metric"."_XREF";
 if(!isset($_GET['BuildingSName']) || !isset($_GET['Metric'])) die('missing params');
 
-$exists = table_exists($LATEST);
-if($exists == "DNE"){ die("$LATEST does not exist. Click Rebuild PXREF to create the table."); }
+$exists = table_exists($DAY);
+if($exists == "DNE"){ die("$DAY does not exist."); }
 
-$IDName = CEVAC_TABLES_value($LATEST, 'IDName');
-$AliasName = CEVAC_TABLES_value($LATEST, 'AliasName');
-$DateTimeName = CEVAC_TABLES_value($LATEST, 'DateTimeName');
-$DataName = CEVAC_TABLES_value($LATEST, 'DataName');
+$IDName = CEVAC_TABLES_value($DAY, 'IDName');
+$AliasName = CEVAC_TABLES_value($DAY, 'AliasName');
+$DateTimeName = CEVAC_TABLES_value($DAY, 'DateTimeName');
+$DataName = CEVAC_TABLES_value($DAY, 'DataName');
 
 $query = "
   SELECT $AliasName, $DateTimeName, $DataName
-  FROM $LATEST
+  FROM $DAY
   ORDER BY $DateTimeName DESC
 ";
 // die($query);

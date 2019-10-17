@@ -19,7 +19,7 @@ import time
 import datetime
 from datetime import date
 import numpy as np
-# import pytz
+import pytz
 # import matplotlib as plt
 
 # fetch our weather forecast

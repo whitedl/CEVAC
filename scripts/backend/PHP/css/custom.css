@@ -1,5 +1,5 @@
 .advanced {
-  visibility: hidden;
+  /* visibility: hidden; */
   /* display: none; */
 }
 #body_left {
@@ -26,7 +26,7 @@
 }
 #buttons_div {
   padding-top: 50px;
-  width: 30%;
+  width: 40%;
   /* border: 2px solid white; */
   display: block;
   float: left;
@@ -43,6 +43,10 @@
 #delete_button{
   background-color: #cc0000;
   color: #FFFFFF;
+  float: right;
+}
+#bootstrap_button{
+  float: left;
 }
 #PXREF_button{
   /* float: left; */
@@ -108,4 +112,9 @@
 #select_options_div{
   display: block;
 }
-
+#download_button_div{
+  display: none;
+}
+#Age_text{
+  display: none;
+}
