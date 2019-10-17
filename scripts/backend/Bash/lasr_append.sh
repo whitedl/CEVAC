@@ -14,6 +14,7 @@ metric="$2"
 age="$3"
 table="CEVAC_""$building""_""$metric""_""$age"
 table_CSV="$table""_CSV"
+/cevac/scripts/log_activity.sh -t "$table_CSV"
 error=""
 [ "$4" == "runsas" ] && runsas="runsas"
 

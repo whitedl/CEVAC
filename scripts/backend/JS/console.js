@@ -26,6 +26,7 @@ function reset_PXREF(){
 }
 function PXREF_button_click(){
   pb = document.getElementById('PXREF_button');
+  document.getElementById('Age_text').value = 'PXREF';
   view = "View PXREF";
   update = "Update PXREF";
   if(pb.innerHTML == view){
@@ -138,6 +139,14 @@ function download_BuildingKeySearch_click(){
     success : success_BuildingKeySearch_csv
   });
 }
+function download_button_click(){
+  $.ajax({
+    url : 'console/download_table.php',
+    type : 'GET',
+    data: $('form').serialize(),
+    success : success_table_csv
+  });
+}
 function BuildingKey_search_button_click(){
   button = document.getElementById('BuildingKey_search_button');
   document.getElementById('BuildingKey_search_div').style.display = 'block';
@@ -147,6 +156,17 @@ function BuildingKey_search_button_click(){
 }
 function view_latest_button_click(){
   button = document.getElementById('view_latest_button');
+  document.getElementById('download_button').innerHTML = 'Download LATEST';
+  document.getElementById('download_button_div').style.display = 'block';
+  document.getElementById('Age_text').value = 'LATEST';
   reset_buttons(button);
   get_latest_html();
+}
+function view_day_button_click(){
+  button = document.getElementById('view_day_button');
+  document.getElementById('download_button').innerHTML = 'Download DAY';
+  document.getElementById('download_button_div').style.display = 'block';
+  document.getElementById('Age_text').value = 'DAY';
+  reset_buttons(button);
+  get_day_html();
 }

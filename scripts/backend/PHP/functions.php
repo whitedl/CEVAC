@@ -108,4 +108,8 @@ function table_exists($tablename){
   $query = "IF OBJECT_ID('$tablename') IS NOT NULL SELECT 'EXISTS' AS 'e' ELSE SELECT 'DNE' AS 'e';";
   return sql_value($query);
 }
+function get_columns($TableName){
+  $query = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '$TableName'";
+  return exec_sql($query);
+}
 ?>

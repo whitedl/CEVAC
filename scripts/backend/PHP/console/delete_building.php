@@ -13,7 +13,7 @@ $query =  "
 $result = exec_sql($query);
 $exec = "";
 while($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)){
-  $exec .= $script." \"".$row['BuildingSName']."\" \"".$row['Metric']."\" -y;\n";
+  $exec .= $script." -b \"".$row['BuildingSName']."\" -m \"".$row['Metric']."\" -y;\n";
 }
 
 $query = "DELETE FROM CEVAC_BUILDING_INFO WHERE BuildingSName = '$BuildingSName'";
