@@ -49,7 +49,7 @@ function get_PXREF_html(){
         document.getElementById('output').innerHTML = PXREF + ' does not exist. Click \"Rebuild PXREF\" to create the PXREF.';
       } else {
         document.getElementById('download_PXREF_button').disabled = false;
-        $.get('console/PXREF_html.php', { BuildingSName: b, Metric: m }, function(data){
+        $.get('console/PXREF_html.php', $('form').serialize(), function(data){
           document.getElementById('output').innerHTML = "";
           sql_out = document.getElementById('sql_output');
           sql_out.innerHTML = data;
@@ -94,6 +94,17 @@ function success_BuildingKeySearch_csv(data){
   document.body.removeChild(element);
 
 }
+function success_table_csv(data){
+  var datetime = new Date().getTime();
+  filename = String(datetime) + '_' + data.substring(4, data.length);
+  var element = document.createElement('a');
+  element.setAttribute('href',data);
+  element.setAttribute('download',filename);
+  element.style.display = 'none';
+  document.body.appendChild(element);
+  element.click();
+  document.body.removeChild(element);
+}
 function table_exists(tn){
   $.get('console/table_exists.php',
     { TableName : tn },
@@ -106,7 +117,20 @@ function get_latest_html(){
   button = document.getElementById('view_latest_button');
   button.classList.add('disabled');
   button.disabled = true;
-  $.get('console/LATEST_html.php',
+  $.get('console/table_html.php',
+    $('form').serialize(),
+    function(data){
+      document.getElementById('sql_output').innerHTML = data;
+      button.disabled = false;
+      button.classList.remove('disabled');
+    }
+  );
+}
+function get_day_html(){
+  button = document.getElementById('view_day_button');
+  button.classList.add('disabled');
+  button.disabled = true;
+  $.get('console/table_html.php',
     $('form').serialize(),
     function(data){
       document.getElementById('sql_output').innerHTML = data;

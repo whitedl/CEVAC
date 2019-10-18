@@ -17,7 +17,8 @@
     <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.4.1.min.js"></script>
 	</head>
 	<body onload="get_Metrics_html(); enable_BuildingKeySearch()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-    <a onclick="show_hide_class('advanced');" href="#">Advanced options</a><br><br>
+    <h2>CEVAC Administrative Console</h2>
+    <!-- <a onclick="show_hide_class('advanced');" href="#">Advanced options</a><br><br> -->
     <div id="body_left">
       <form method="post" id="toggle">
 				<label class="container">Existing
@@ -28,6 +29,7 @@
 					<input type="radio" name="actions_select" value="new" onchange="get_Metrics_html()">
 					<span class="checkmark"></span>
 				</label>
+        <input type="text" id="Age_text" name="Age">
         <input type="file" name="upload_xref" id="upload_xref" />
         <div id="select_options_div">
           <?php echo buildings_html(); ?>
@@ -50,7 +52,7 @@
           </div>
         </div>
 
-        <div id="advanced_right" class="advanced" style="visibility: hidden">
+        <div id="advanced_right" class="advanced">
 <!--          <label for="custom_metric_name">New Metric</label>
           <input type="text" name="custom_metric_name" id="custom_metric_name">
           <label for="keys_list">Keywords</label>
@@ -62,7 +64,7 @@
       </form>
       <br>
       <div id="buttons_parent_div">
-        <div id='advanced_div' class="advanced" style="visibility: hidden">
+        <div id='advanced_div' class="advanced">
           <h5>Table Actions</h5>
           <ul id="table_actions_list">
             <li><a href="#" id="view_latest_button" onclick="view_latest_button_click()">View Latest</a></li>
@@ -86,8 +88,8 @@
           <button name="BuildingKey_search_button" id="BuildingKey_search_button" onclick="BuildingKey_search_button_click()">Search BuildingKeys</button><br>
 -->
         </div>
-        <div id="buttons_div" style="display:none">
-          <button name="bootstrap_button" id="bootstrap_button" onclick="bootstrap()">Bootstrap</button>
+        <div id="buttons_div">
+          <button name="bootstrap_button" id="bootstrap_button" onclick="bootstrap()">Build Pipeline</button>
           <button name="delete_button" id="delete_button" onclick="del()">Delete</button>
         </div>
       </div>
@@ -101,6 +103,9 @@
       <div id="PXREF_div">
         <button onclick='download_PXREF_click()' id="download_PXREF_button">Download PXREF</button>
         <button onclick='download_XREF_click()' id="download_XREF_button">Download XREF</button>
+      </div>
+      <div id="download_button_div">
+        <button onclick='download_button_click()' id="download_button">Download</button>
       </div>
       <div id="add_building_div">
         <form id="add_building_form">

@@ -458,6 +458,12 @@ END -- END of HIST_VIEW
 -- HIST
 -----------------------------------------------
 ELSE IF @Age = 'DAY' BEGIN
+	IF @DateTimeName IS NULL OR @HIST IS NULL OR @Table_name IS NULL BEGIN
+		SET @error = 'DAY variables are NULL';
+		EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @Table_name;
+		RAISERROR(@error, 11, 1);
+		RETURN
+	END
 	SET @Dependencies_list = @HIST;
 	SET @Create_View = '
 	CREATE VIEW ' + @Table_name + ' AS
@@ -548,8 +554,7 @@ END ELSE IF @Age LIKE '%OLDEST%' BEGIN
 	' temp.* FROM '  + @Oldest_source + ' AS temp
 	INNER JOIN
 	(
-		SELECT ' + @IDName + ', FDROP
-		MIN(' + @DateTimeName + ') AS LastTime
+		SELECT ' + @IDName + ', MIN(' + @DateTimeName + ') AS LastTime
 		FROM
 		' + @Oldest_source + '
 		WHERE ' + @DataName + ' > 0 
@@ -622,10 +627,12 @@ IF @Age LIKE '%HIST%' OR @Age = 'DAY' BEGIN
 	PRINT @Drop_HIST_API;
 	PRINT @Drop_DAY_API;
 	IF @execute = 1 BEGIN
-		IF OBJECT_ID(@HIST) IS NOT NULL EXEC(@Drop_HIST_API);
-		IF OBJECT_ID(@DAY) IS NOT NULL EXEC(@Drop_DAY_API);
-		IF EXISTS (SELECT TableName FROM CEVAC_TABLES WHERE TableName = @HIST) AND EXISTS (SELECT TableName FROM CEVAC_TABLES WHERE TableName = @DAY) BEGIN
+		IF @Age LIKE '%HIST%' BEGIN
+			IF OBJECT_ID(@HIST) IS NOT NULL EXEC(@Drop_HIST_API);
 			DELETE FROM CEVAC_TABLES WHERE TableName = @HIST;
+		END
+		IF @Age = 'DAY' BEGIN
+			IF OBJECT_ID(@DAY) IS NOT NULL EXEC(@Drop_DAY_API);
 			DELETE FROM CEVAC_TABLES WHERE TableName = @DAY;
 		END
 	END
@@ -637,7 +644,7 @@ IF @Age LIKE '%HIST%' OR @Age = 'DAY' BEGIN
 	IF OBJECT_ID(@HIST_CACHE, 'U') IS NOT NULL SET @_HIST_source = @HIST_CACHE;
 	ELSE SET @_HIST_source = @HIST_VIEW;
 	IF OBJECT_ID(@DAY_CACHE, 'U') IS NOT NULL SET @DAY_source = @DAY_CACHE;
-	ELSE SET @DAY_CACHE = @DAY_VIEW;
+	ELSE SET @DAY_source = @DAY_VIEW;
 
 	SET @DateTimeName = (SELECT TOP 1 DateTimeName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age = 'HIST');
 	SET @AliasName = (SELECT TOP 1 AliasName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age = 'HIST');
@@ -666,8 +673,10 @@ IF @Age LIKE '%HIST%' OR @Age = 'DAY' BEGIN
 	AS 
 	SELECT * FROM ' + @_HIST_source + ';';
 	PRINT @Create_API_View;
+	PRINT @Create_DAY_API;
 	IF @execute = 1 BEGIN
-		EXEC(@Create_API_View);
+		IF @Age LIKE '%HIST%' EXEC(@Create_API_View);
+		IF @Age = 'DAY' EXEC(@Create_DAY_API);
 		IF NOT EXISTS (SELECT * FROM CEVAC_TABLES WHERE TableName = @HIST) BEGIN
 			INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, isCustom, Definition, Dependencies, customLASR, autoCACHE, autoLASR)
 			VALUES (
