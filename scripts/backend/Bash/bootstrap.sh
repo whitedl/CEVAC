@@ -47,6 +47,8 @@ HIST_CACHE="CEVAC_"$BuildingSName"_"$Metric"_HIST_CACHE"
 HIST_CSV="CEVAC_"$BuildingSName"_"$Metric"_HIST_CSV"
 HIST_VIEW="CEVAC_"$BuildingSName"_"$Metric"_HIST_VIEW"
 HIST_LASR="CEVAC_"$BuildingSName"_"$Metric"_HIST_LASR"
+DAY="CEVAC_"$BuildingSName"_"$Metric"_DAY"
+DAY_VIEW="CEVAC_"$BuildingSName"_"$Metric"_DAY_VIEW"
 LATEST="CEVAC_"$BuildingSName"_"$Metric"_LATEST"
 XREF="CEVAC_"$BuildingSName"_"$Metric"_XREF"
 error=""
@@ -55,11 +57,12 @@ isCustom=`/cevac/scripts/sql_value.sh "SELECT isCustom FROM CEVAC_TABLES WHERE T
 customLASR=`/cevac/scripts/sql_value.sh "SELECT customLASR FROM CEVAC_TABLES WHERE TableName = '$HIST_VIEW'"`
 checkXREF=`/cevac/scripts/sql_value.sh "EXEC CHECK_XREF @BuildingSName = '$BuildingSName', @Metric = '$Metric'"`
 
+# Parse XREF for setpoints
 if [ "$checkXREF" != "XREF" ]; then
   echo "WARNING: CEVAC_$BuildingSName""_$Metric""_XREF does not exist!"
-  echo "You may continue bootstrapping with PointSliceID instead of Alias, but you MUST specify keywords or unitOfMeasureID"
+  echo "You may continue bootstrapping with PointSliceName instead of Alias, but if this is a standard table, you MUST specify keywords or unitOfMeasureID"
   echo "CEVAC_$BuildingSName"_$Metric""_PXREF will be generated using the parameters provided during bootstrapping.""
-  echo "  (Omitting parameters will include all PointSliceIDs for a building - so be careful!)"
+  echo "  (Omitting parameters for XREF-less standard tables will include all PointSliceIDs for a building - so be careful!)"
 else
   xref_readingType=`/cevac/scripts/sql_value.sh "IF 'ReadingType' IN (SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '$XREF') SELECT 'ReadingType' ELSE SELECT 'No ReadingType'"`
   # See if ReadingType is in XREF. If so, see if Set Points exist
@@ -84,7 +87,7 @@ else
   fi
 fi
 
-# isCustom is set, therefore exists
+## isCustom is set, therefore exists in CEVAC_TABLES
 if [ ! -z "$isCustom" ]; then
   IDName=`/cevac/scripts/sql_value.sh "SELECT IDName FROM CEVAC_TABLES WHERE TableName = '$HIST_VIEW'"`
   AliasName=`/cevac/scripts/sql_value.sh "SELECT AliasName FROM CEVAC_TABLES WHERE TableName = '$HIST_VIEW'"`
@@ -100,12 +103,7 @@ if [ ! -z "$isCustom" ]; then
     else
       choice=""
     fi
-
-    # if [ "$choice" == "1" ] || [ "$choice" == "" ]; then
-      # if ! /cevac/scripts/CREATE_CUSTOM.sh "$BuildingSName" "$Metric" "$DateTimeName" "$IDName" "$AliasName" "$DataName" "$Dependencies" ; then
-        # /cevac/scripts/log_error.sh "failed to bootstrap custom table. Aborting..."
-        # exit 1
-      # fi
+    ## Detected a custom table but decided to disregard
     if [ "$choice" == "2" ]; then
       echo "Dropping caches..."
       /cevac/scripts/exec_sql.sh "DELETE FROM CEVAC_TABLES WHERE BuildingSName = '$BuildingSName' AND Metric = '$Metric'"
@@ -118,23 +116,24 @@ if [ ! -z "$isCustom" ]; then
         /cevac/scripts/log_error.sh "$error"
         exit 1
       fi
+    ## Exit on invalid answer
     elif [ "$choice" != "1" ] && [ "$choice" != "" ]; then
       /cevac/scripts/unlock.sh
       exit 1
     fi
-    
+  
   else # isCustom 0 or NULL, therefore standard table
     echo "Standard table detected"
-    if ! /cevac/scripts/exec_sql.sh "DELETE FROM CEVAC_TABLES WHERE BuildingSName = '$BuildingSName' AND Metric = '$Metric'" ; then
-      error="Error: could not delete $BuildingSName""_""$Metric from CEVAC_TABLES. Aborting bootstrap..."
-      /cevac/scripts/log_error.sh "$error"
-      exit 1
-    fi
-  fi
-else # isCustom does not exist therefore not in CEVAC_TABLES
+    # if ! /cevac/scripts/exec_sql.sh "DELETE FROM CEVAC_TABLES WHERE BuildingSName = '$BuildingSName' AND Metric = '$Metric'" ; then
+      # error="Error: could not delete $BuildingSName""_""$Metric from CEVAC_TABLES. Aborting bootstrap..."
+      # /cevac/scripts/log_error.sh "$error"
+      # exit 1
+    # fi
+  fi ## end of isCustom == 1
+else ## isCustom does not exist therefore not in CEVAC_TABLES
   echo "New table (not located in CEVAC_TABLES)"
   if [ -f "/cevac/CUSTOM_DEFS/$HIST_VIEW.sql" ]; then # custom def exists
-    echo "$HIST_VIEW is not in CEVAC_TABLES, but a custom definition was found in /cevac/CUSTOM_DEFS"
+    echo "$HIST_VIEW is not in CEVAC_TABLES, but a custom definition was found in /cevac/CUSTOM_DEFS/"
     echo "Choose one:"
     echo $'   1. Build custom   (   use /cevac/CUSTOM_DEFS/'$HIST_VIEW.sql")"
     echo $'   2. Build standard (ignore /cevac/CUSTOM_DEFS/'$HIST_VIEW.sql")"
@@ -156,13 +155,16 @@ else # isCustom does not exist therefore not in CEVAC_TABLES
 
   fi
 fi
+# exit 1
 ###
 # Phase 1: Drop caches
 ###
 /cevac/scripts/seperator.sh
 echo "Phase 1: Delete everything"
+exclude=""
+[ "$isCustom" == "1" ] && exclude="HIST"
 # Delete everything
-if ! /cevac/scripts/delete.sh "$BuildingSName" "$Metric" "-y" ; then
+if ! /cevac/scripts/delete.sh -b "$BuildingSName" -m "$Metric" -e "$exclude" -y ; then
   error="Error: could not delete $BuildingSName""_$Metric tables. Aborting bootstrap..."
   /cevac/scripts/log_error.sh "$error"
   exit 1
@@ -188,7 +190,7 @@ echo "CHECKPOINT 1"
 if [ "$autoCACHE" == "true" ]; then
   /cevac/scripts/seperator.sh
   echo "Phase 3: init _CACHE"
-  time if ! /cevac/scripts/exec_sql.sh "EXEC CEVAC_CACHE_INIT @tables = '$HIST_VIEW'" ; then
+  time if ! /cevac/scripts/exec_sql.sh "EXEC CEVAC_CACHE_INIT @tables = '$HIST_VIEW'; EXEC CEVAC_CACHE_INIT @tables = '$DAY_VIEW'" ; then
     error="CEVAC_CACHE_INIT failed. Aborting bootstrap"
     /cevac/scripts/log_error.sh "$error"
     exit 1
