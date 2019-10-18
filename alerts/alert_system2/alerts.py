@@ -24,7 +24,10 @@ class Alert:
 
 class Alerts:
     def __init__(self):
-        pass
+        occ = Occupancy()
+        par = Parameters()
+        
+
 
     def alert_system(self):
         print("Will run alert system.")
@@ -35,7 +38,7 @@ class Occupancy:
         pass
 
 
-class Paremters:
+class Parameters:
     def __init__(self):
         pass
 
