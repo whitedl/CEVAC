@@ -54,7 +54,7 @@ elif [ ! -z "$BuildingSName" ] && [ ! -z "$Metric" ]; then
     query="
     UPDATE CEVAC_TABLES
     SET $column = '$value'
-    WHERE TableName = '$HIST' OR TableName LIKE '%$LATEST%'
+    WHERE TableName = '$HIST' OR TableName = '$LATEST' OR TableName = '$HIST_LASR'
     "
   fi
   
