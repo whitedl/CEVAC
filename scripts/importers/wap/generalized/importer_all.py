@@ -333,7 +333,9 @@ def ensure_tables_procedure():
                               f"EXEC CEVAC_WAP @BuildingSName = '{building}',"
                               f" @Metric = 'WAP_FLOOR'\nGO\n"
                               f"EXEC CEVAC_WAP @BuildingSName = '{building}',"
-                              f" @Metric = 'WAP_DAILY'\nGO\n")
+                              f" @Metric = 'WAP_DAILY'\nGO\n"
+                              f"EXEC CEVAC_WAP @BuildingSName = '{building}',"
+                              f" @Metric = 'WAP_FLOOR_SUMS'\nGO\n")
     print(ensure_tables_str)
     if SEND:
         f = open("/cevac/cache/ensure_wap_tables.sql", "w")
