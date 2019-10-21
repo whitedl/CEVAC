@@ -74,7 +74,7 @@ WHILE (EXISTS(SELECT 1 FROM @cevac_params) AND @i > 0) BEGIN
 		SET @name_CACHE = REPLACE(@name, '_VIEW', '');
 		SET @name_CACHE = @name_CACHE + '_CACHE';
 	END
-	SELECT @name_CACHE AS 'CACHE Table name';
+	PRINT @name_CACHE;
 
 	EXEC CEVAC_ALIAS_OR_PSID_OUTPUT @table = @name, @Alias_or_PSID_out = @Alias_or_PSID OUTPUT;
 	SET @DateTimeName = ISNULL((SELECT TOP 1 RTRIM(DateTimeName) FROM CEVAC_TABLES WHERE TableName = @name), 'UTCDateTime');
@@ -164,9 +164,9 @@ WHILE (EXISTS(SELECT 1 FROM @cevac_params) AND @i > 0) BEGIN
 		EXEC(@select_query);
 		-- insert into CEVAC_TABLES
 		IF EXISTS (SELECT TableName FROM CEVAC_TABLES WHERE TableName = @name) BEGIN
-			DECLARE @BuildingSName NVARCHAR(100);
-			DECLARE @Metric NVARCHAR(100);
-			DECLARE @Age NVARCHAR(100);
+			DECLARE @BuildingSName NVARCHAR(MAX);
+			DECLARE @Metric NVARCHAR(MAX);
+			DECLARE @Age NVARCHAR(MAX);
 			DECLARE @isCustom BIT;
 			DECLARE @customLASR BIT;
 
@@ -175,6 +175,7 @@ WHILE (EXISTS(SELECT 1 FROM @cevac_params) AND @i > 0) BEGIN
 			SET @Age = (SELECT Age FROM CEVAC_TABLES WHERE TableName = @name);
 			SET @isCustom = (SELECT isCustom FROM CEVAC_TABLES WHERE TableName = @name);
 			SET @customLASR = (SELECT customLASR FROM CEVAC_TABLES WHERE TableName = @name);
+			IF @name_CACHE LIKE '%CACHE%' SET @Age = @Age + '_CACHE';
 
 			IF @BuildingSName IS NULL BEGIN
 				SET @error = 'BuildingSName is NULL';
@@ -208,7 +209,7 @@ WHILE (EXISTS(SELECT 1 FROM @cevac_params) AND @i > 0) BEGIN
 			END
 
 			IF NOT EXISTS(SELECT TOP 1 * FROM CEVAC_TABLES WHERE TableName = @name_CACHE) BEGIN
-				INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, isCustom, Dependencies, customLASR)
+				INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, isCustom, Dependencies, customLASR, autoCACHE,autoLASR)
 					VALUES (
 						@BuildingSName,
 						@Metric,
@@ -220,7 +221,9 @@ WHILE (EXISTS(SELECT 1 FROM @cevac_params) AND @i > 0) BEGIN
 						@DataName,
 						@isCustom,
 						@name,
-						@customLASR
+						@customLASR,
+						0,
+						0
 					)
 			END -- END of insert
 		END
