@@ -1,44 +1,21 @@
-"""CEVAC Alert System alert_system.py.
+"""CEVAC alert managment, object oriented.
 
-This CEVAC alert system script reads from alert_system.csv to populate the
-table `CEVAC_ALL_ALERTS_HIST`.
+This CEVAC alert system script populates the table `CEVAC_ALL_ALERTS_HIST`.
 """
 
 import os
-import csv
 import json
 import datetime
 import pytz
 import logging
 from copy import deepcopy
 from croniter import croniter
+import pyodbc
 
 
+# JSON files
 json_oc = "/cevac/cron/alert_log_oc.json"
 json_unoc = "/cevac/cron/alert_log_unoc.json"
-
-class Alert:
-    def __init__(self):
-        self.message = ""
-
-
-class Alerts:
-    def __init__(self):
-        pass
-
-    def alert_system(self):
-        print("Will run alert system.")
-
-
-class Occupancy:
-    def __init__(self):
-        pass
-
-
-class Paremters:
-    def __init__(self):
-        pass
-
 
 # Time constants
 TIME = {
@@ -51,23 +28,47 @@ TIME = {
 }
 
 
-def sql_time_str(t):
-    """Return time in sql format."""
-    return t.strftime('%Y-%m-%d %H:%M:%S')
+class Alert:
+    def __init__(self, verbose=False):
+        self.message = ""
+        self.verbose = verbose
 
 
-def debug_print(message):
-    """Print message if in debug mode."""
-    if not CHECK_ALERTS or not SEND:
-        print(message)
-    return None
+class Alerts:
+    def __init__(self, verbose=False):
+        conn = None  # TODO
+        self.occ = Occupancy(conn)
+        self.par = Parameters(conn)
+        self.known_issues = Known_Issues(conn)
+        self.verbose = verbose
+        self.all_alerts = []
+        self.anomalies = []
+
+    def alert_system(self):
+        """Find and catalog all anomalies."""
+        print("Will run alert system.")
 
 
-def alias_to_list(regex_string):
-    """Return a list of strings that were originally seperated by hyphens."""
-    if regex_string == "*":
-        return ["*"]
-    return regex_string.split("-")
+class Anomalie:
+    def __init__(self, actual_value, alert, psid):
+        self.psid = psid
+        self.alert = alert
+        self.actual_value = actual_value
+
+
+class Occupancy:
+    def __init__(self, conn):
+        pass
+
+
+class Parameters:
+    def __init__(self, conn):
+        pass
+
+
+class Known_Issues:
+    def __init__(self, conn):
+        pass
 
 
 def angle_brackets_replace_specific(regex_string, key, replacement):
@@ -80,64 +81,6 @@ def angle_brackets_replace_specific(regex_string, key, replacement):
         return "".join(regex_list)
     except Exception:
         return regex_string
-
-
-def import_conditions(fname, logger):
-    """Move a CSV file to dict of alert condtions."""
-    alerts = {}
-    unique_databases = {}
-    with open(fname) as csvfile:
-        csvfile = csv.reader(csvfile)
-        next(csvfile)
-        for i, row in enumerate(csvfile):
-            try:
-                if (i >= 0):
-                    alerts[row[COLUMNS["alert_name"]]] = {
-                        "type": row[COLUMNS["type"]],
-                        "message": row[COLUMNS["message"]],
-                        "database": row[COLUMNS["database"]],
-                        "column": row[COLUMNS["column"]],
-                        "num_entries": int(row[COLUMNS["num_entries"]]),
-                        "time_dependent": int(row[COLUMNS["time_dependent"]]),
-                        "occupancy_status": (int(
-                                            row[COLUMNS["occupancy_status"]])
-                                             if row[COLUMNS["occupancy_status"]
-                                                    ] != "*" else 0),
-                        "condition": row[COLUMNS["condition"]],
-                        "value": row[COLUMNS["value"]],
-                        "operation": row[COLUMNS["operation"]],
-                        "aliases": alias_to_list(row[COLUMNS["aliases"]]),
-                        "sort_column": row[COLUMNS["sort_column"]],
-                        "building": row[COLUMNS["building"]],
-                        "bldg_disp": row[COLUMNS["bldg_disp"]],
-                        "message_id": row[COLUMNS["message_id"]]
-                    }
-                    unique_databases[row[COLUMNS["database"]]] = None
-            except Exception:
-                safe_log("Issue importing conditions " + str(i), "error")
-    return (alerts, unique_databases)
-
-
-def import_known_issues(fname):
-    """Return dict of buildingsname to list of blacklist messages."""
-    d = {}
-    with open(fname, "r") as csvfile:
-        csvfile = csv.reader(csvfile)
-        next(csvfile)  # header
-        for row in csvfile:
-            try:
-                bldg = row[1]
-                message = row[0]
-                if "decommissioned" in message:
-                    # psid = bldg.replace(")", "(").split("(")[1]
-                    # debug_print("Found PSID as", psid)
-                    if bldg in d:
-                        d[bldg].append(message)
-                    else:
-                        d[bldg] = [message]
-            except Exception:
-                continue
-    return d
 
 
 def skip_alias(known_issues, bldg, alias, metric):
@@ -162,43 +105,6 @@ def cron_is_now(cron, offset=5):
     return False
 
 
-def str_to_bool(some_str):
-    """Return True/False for 'true/false'."""
-    if "true" in some_str.lower():
-        return True
-    return False
-
-
-def import_occupancy():
-    """Import occupancy for each building."""
-    d = {"*": False}
-    past_header = False
-    with open(OCCUPANCY_FPATH, "r") as csvfile:
-        csvfile = csv.reader(csvfile)
-        for row in csvfile:
-            if ("BuildingSName" in row[0]):
-                past_header = True
-                continue
-            if not past_header:
-                continue
-            try:
-                bldgsname = row[0]
-                cron_occupancy = str_to_bool(row[2])
-                is_occupied = str_to_bool(row[3])
-                crontab = f"{row[4]} {row[5]} {row[6]} {row[7]} {row[8]}"
-                if cron_is_now(crontab) and cron_occupancy:
-                    if "*" in bldgsname:
-                        for item in d:
-                            d[item] = is_occupied
-                        d["*"] = is_occupied
-                    else:
-                        d[bldgsname] = is_occupied
-            except Exception:
-                continue
-
-    return d
-
-
 def rebuild_broken_cache(table):
     """Rebuild a broken cache."""
     if "LATEST" not in table:
@@ -210,80 +116,6 @@ def rebuild_broken_cache(table):
     os.system("/cevac/scripts/exec_sql.sh \"" + command +
               "\" temp_csv.csv")
     return None
-
-
-def command_to_json_string(command):
-    """Return a string of json from a sql command."""
-    os.system("/cevac/scripts/exec_sql.sh \"" + command +
-              "\" temp_csv.csv")
-
-    json_string = ""
-    headers = {}
-    with open("/cevac/cache/temp_csv.csv", "r") as temp_csv:
-        csvfile = csv.reader(temp_csv)
-        for i, row in enumerate(csvfile):
-            if i == 0:
-                for j, item in enumerate(row):
-                    headers[j] = item
-            else:
-                temp_dict = {}
-                try:
-                    for j, item in enumerate(row):
-                        temp_dict[headers[j]] = item
-                    json_string += str(temp_dict)
-                except Exception:
-                    continue
-
-    return json_string
-
-
-def command_to_list_single(command):
-    """Return a list of data from a query."""
-    data = command_to_json_string(command)
-    data_readable = data.replace("}{", "} {").replace("\'", "\"")
-    data_list = data_readable.split("} {")
-    dict_list = [json.loads(d) for d in data_list]
-    data_list = [sd[list(sd.keys())[0]] for sd in dict_list]
-    return data_list
-
-
-def command_to_list_multiple(command, num_args):
-    """Return a list of lists.
-
-    list of lists (with length up to num_args) of data from a query.
-    This can break if the SQL server is manipulating the data currently.
-    """
-    data = command_to_json_string(command)
-    data_readable = data.replace("}{", "} {").replace("\'", "\"")
-    data_list = data_readable.split("} {")
-    dict_list = []
-    try:
-        for i, d in enumerate(data_list):
-            d = d if d[0] == "{" else "{" + d
-            d = d if d[-1] == "}" else d + "}"
-            dict_list.append(json.loads(d))
-    except Exception:
-        print("issue, data:")
-        print(data_list)
-    data_list = []
-    for sd in dict_list:
-        try:
-            dl = []
-            for k in sd:
-                dl.append(sd[k])
-            data_list.append(dl)
-        except Exception:
-            print(Exception, data_list)
-    return data_list
-
-
-def safe_log(message, type):
-    """Log a message safely."""
-    if LOG:
-        if type.lower() == "error":
-            logging.error(message)
-        else:
-            logging.info(message)
 
 
 def parse_json(*filenames):
@@ -305,17 +137,11 @@ def parse_json(*filenames):
 
 def write_json_generic(new_events, next_id):
     """Write json independent of time."""
-    if is_occupied():
-        write_json(json_oc, new_events, next_id)
-    else:
-        write_json(json_unoc, new_events, next_id)
-    return None
-
-
-def write_json(filename, new_events, next_id):
-    """Write json to file."""
     new_events["next_id"] = next_id
-    f = open(filename, "w")
+    if is_occupied():
+        f = open(json_oc, "w")
+    else:
+        f = open(json_unoc, "w")
     f.write(json.dumps(new_events))
     f.close()
     return None
