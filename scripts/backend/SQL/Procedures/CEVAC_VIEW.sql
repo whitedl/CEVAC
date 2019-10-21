@@ -65,7 +65,6 @@ DECLARE @XREF NVARCHAR(MAX);
 DECLARE @PXREF NVARCHAR(MAX);
 DECLARE @TABLE_CONFIG NVARCHAR(MAX);
 
--- Generate table names
 -- Reference names
 SET @HIST_VIEW = 'CEVAC_' + @Building + '_' + @Metric + '_HIST_VIEW';
 SET @HIST_RAW = 'CEVAC_' + @Building + '_' + @Metric + '_HIST_RAW';
@@ -81,10 +80,11 @@ SET @LATEST_FULL = 'CEVAC_' + @Building + '_' + @Metric + '_LATEST_FULL';
 SET @LATEST_BROKEN = 'CEVAC_' + @Building + '_' + @Metric + '_LATEST_BROKEN';
 SET @OLDEST = 'CEVAC_' + @Building + '_' + @Metric + '_OLDEST';
 
-
--- Current name
-IF @Age = 'HIST' OR @Age = 'DAY' SET @Table_name = CONCAT('CEVAC_', @Building, '_', @Metric, '_', @Age, '_VIEW')
-ELSE SET @Table_name = CONCAT('CEVAC_', @Building, '_', @Metric, '_', @Age);
+-- Set Age to X_VIEW for HIST and DAY tables
+IF @Age = 'HIST' OR @Age = 'DAY' BEGIN
+	SET @Age = @Age + '_VIEW';
+END
+SET @Table_name = CONCAT('CEVAC_', @Building, '_', @Metric, '_', @Age);
 PRINT @Table_name;
 SET @XREF = CONCAT('CEVAC_', @Building, '_', @Metric, '_XREF');
 IF @Metric = 'POWER_SUMS' SET @XREF = CONCAT('CEVAC_', @Building, '_POWER_XREF');
@@ -177,7 +177,7 @@ BEGIN
 	SET @XREF_or_PXREF = 'PXREF';
 	SET @XREF_query = 'INNER JOIN ' + @PXREF + ' AS xref on xref.' + @RemotePSIDName + ' = val.' + @RemotePSIDName + '';
 	SET @Alias_or_PSID = @RemotePSIDName;
-END ELSE IF @Age = 'HIST' BEGIN -- XREF exists
+END ELSE IF @Age LIKE '%HIST%' BEGIN -- XREF exists
 	-- Insert XREF into CEVAC_TABLES
 	PRINT 'Adding XREF to table: ' + @XREF;
 	IF @execute = 1 BEGIN
@@ -191,8 +191,8 @@ END ELSE IF @Age = 'HIST' BEGIN -- XREF exists
 			IF @customLASR_rc > 0 SET @customLASR = 1;
 		END
 		
-		DELETE FROM CEVAC_TABLES WHERE TableName = @XREF;
-		INSERT INTO CEVAC_TABLES(BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, customLASR)
+		--DELETE FROM CEVAC_TABLES WHERE TableName = @XREF;
+		IF NOT EXISTS(SELECT * FROM CEVAC_TABLES WHERE TableName = @XREF) INSERT INTO CEVAC_TABLES(BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, customLASR)
 		VALUES (@Building, @Metric, 'XREF', @XREF, @RemotePSIDName, @RemotePSIDName, 'Alias', @RemotePSIDName, @customLASR);
 	END
 END
@@ -340,13 +340,16 @@ IF @Age LIKE '%PXREF%' BEGIN
 		END);
 		SET @PXREF_query = '
 		SELECT DISTINCT
-			xref.' + @RemotePSIDName + ', ISNULL(pt.' + @RemotePointNameName + ', ' + @xref_ObjectNameSource + ') AS ' + @RemotePointNameName + ', ISNULL(CAST(' + @PXREF_Alias_source + ' AS NVARCHAR(MAX)), ' + @RemotePointNameName + ') AS ''Alias'', units.' + @RemoteUnitOfMeasureIDName + ', CAST(0 AS BIT) AS ''in_xref''
+			ISNULL(xref.' + @RemotePSIDName + ', ps.' + @RemotePSIDName + ') AS ''' + @RemotePSIDName + ''', ISNULL(pt.' + @RemotePointNameName + ', ' + @xref_ObjectNameSource + ') AS ' + @RemotePointNameName + ', ISNULL(CAST(' + @PXREF_Alias_source + ' AS NVARCHAR(MAX)), ' + @RemotePointNameName + ') AS ''Alias'', units.' + @RemoteUnitOfMeasureIDName + ', CAST(0 AS BIT) AS ''in_xref''
 		INTO ' + @PXREF + '
 		FROM
 			' + @XREF + ' AS xref
-			LEFT OUTER JOIN [' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemotePSTable + ' AS ps ON ps.' + @RemotePSIDName + ' = xref.' + @RemotePSIDName + ' 
-			LEFT OUTER JOIN [' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemotePtTable + ' AS pt ON pt.' + @RemotePointIDName + ' = ps.' + @RemotePointIDName + '
-			LEFT OUTER JOIN [' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemoteUnitTable + ' AS units ON units.' + @RemoteUnitOfMeasureIDName + ' = pt.' + @RemoteUnitOfMeasureIDName + ';';
+			RIGHT OUTER JOIN [' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemotePSTable + ' AS ps ON ps.' + @RemotePSIDName + ' = xref.' + @RemotePSIDName + ' 
+			INNER JOIN [' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemotePtTable + ' AS pt ON pt.' + @RemotePointIDName + ' = ps.' + @RemotePointIDName + '
+			INNER JOIN [' + @RemoteIP + '].' + @RemoteDB + '.' + @RemoteSchema + '.' + @RemoteUnitTable + ' AS units ON units.' + @RemoteUnitOfMeasureIDName + ' = pt.' + @RemoteUnitOfMeasureIDName + '
+		WHERE
+			Alias != ' + @RemotePointNameName + ' OR (' + @RemotePointNameName + ' LIKE ''' + @building_key + ''' AND ' + ISNULL(@unitOfMeasureID_query, '1 = 1') + ')
+			';
 	END ELSE BEGIN
 		SET @PXREF_query = '
 			SELECT DISTINCT
@@ -457,7 +460,7 @@ END -- END of HIST_VIEW
 -- Requires:
 -- HIST
 -----------------------------------------------
-ELSE IF @Age = 'DAY' BEGIN
+ELSE IF @Age LIKE '%DAY%' BEGIN
 	IF @DateTimeName IS NULL OR @HIST IS NULL OR @Table_name IS NULL BEGIN
 		SET @error = 'DAY variables are NULL';
 		EXEC CEVAC_LOG_ERROR @ErrorMessage = @error, @ProcessName = @ProcessName, @TableName = @Table_name;
@@ -466,9 +469,9 @@ ELSE IF @Age = 'DAY' BEGIN
 	END
 	SET @Dependencies_list = @HIST;
 	SET @Create_View = '
-	CREATE VIEW ' + @Table_name + ' AS
-	SELECT * FROM ' + @HIST + '
-	WHERE ' + @DateTimeName + ' <= GETUTCDATE() AND ' + @DateTimeName + ' >= DATEADD(day, -1, GETUTCDATE())
+	CREATE VIEW ' + ISNULL(@Table_name,'Table_name') + ' AS
+	SELECT * FROM ' + ISNULL(@HIST,'HIST') + '
+	WHERE ' + ISNULL(@DateTimeName,'DateTimeName') + ' <= GETUTCDATE() AND ' + ISNULL(@DateTimeName,'DateTimeName') + ' >= DATEADD(day, -1, GETUTCDATE())
 	';
 	SET @autoCACHE = 0;
 	SET @autoLASR = 0;
@@ -499,9 +502,14 @@ END	 -- END of MONTH
 -- LATEST, LATEST_FULL (for LATEST_BROKEN)
 -----------------------------------------------
 ELSE IF @Age LIKE '%LATEST%' BEGIN
+	SET @autoLASR = 1;
+	SET @autoCACHE = 0;
 	SET @Dependencies_list = @HIST + ',' + @DAY;
 	DECLARE @Latest_source NVARCHAR(500);
-	IF @Age LIKE '%FULL%' SET @Latest_source = @HIST;
+	IF @Age LIKE '%FULL%' BEGIN
+		SET @Latest_source = @HIST;
+		SET @autoLASR = 0;
+	END
 	ELSE SET @Latest_source = @DAY;
 	SET @Create_View = '
 	CREATE VIEW ' + @Table_name + ' AS
@@ -519,8 +527,7 @@ ELSE IF @Age LIKE '%LATEST%' BEGIN
 	temp.' + @IDName + ' = recent.' + @IDName + '
 	AND temp.' + @DateTimeName + ' = recent.LastTime
 	';
-	SET @autoLASR = 1;
-	SET @autoCACHE = 0;
+
 
 	-- NOTE: LATEST and LATEST_FULL must exist
 	IF @Age LIKE '%BROKEN%' BEGIN
@@ -584,8 +591,6 @@ IF EXISTS(SELECT * FROM CEVAC_TABLES WHERE TableName = @Table_name) AND @isCusto
 	SELECT @createTableName AS 'Create Custom Table';
 END
 
-
-
 --------------------------------------
 -- Execute and create the view
 --------------------------------------
@@ -619,7 +624,7 @@ END
 --------------------------------------
 -- Create HIST API Table
 --------------------------------------
-IF @Age LIKE '%HIST%' OR @Age = 'DAY' BEGIN
+IF @Age LIKE '%HIST%' OR @Age LIKE '%DAY%' BEGIN
 	DECLARE @Drop_HIST_API NVARCHAR(MAX);
 	DECLARE @Drop_DAY_API NVARCHAR(MAX);
 	SET @Drop_HIST_API = 'DROP VIEW ' + @HIST;
@@ -631,7 +636,7 @@ IF @Age LIKE '%HIST%' OR @Age = 'DAY' BEGIN
 			IF OBJECT_ID(@HIST) IS NOT NULL EXEC(@Drop_HIST_API);
 			DELETE FROM CEVAC_TABLES WHERE TableName = @HIST;
 		END
-		IF @Age = 'DAY' BEGIN
+		IF @Age LIKE '%DAY%' BEGIN
 			IF OBJECT_ID(@DAY) IS NOT NULL EXEC(@Drop_DAY_API);
 			DELETE FROM CEVAC_TABLES WHERE TableName = @DAY;
 		END
@@ -640,17 +645,17 @@ IF @Age LIKE '%HIST%' OR @Age = 'DAY' BEGIN
 	DECLARE @_HIST_source NVARCHAR(MAX);
 	DECLARE @DAY_source NVARCHAR(MAX);
 	DECLARE @Create_API_View NVARCHAR(MAX);
-	-- _HIST selects from _VIEW if _CACHE does not exist
+	-- HIST selects from VIEW if CACHE does not exist
 	IF OBJECT_ID(@HIST_CACHE, 'U') IS NOT NULL SET @_HIST_source = @HIST_CACHE;
 	ELSE SET @_HIST_source = @HIST_VIEW;
 	IF OBJECT_ID(@DAY_CACHE, 'U') IS NOT NULL SET @DAY_source = @DAY_CACHE;
 	ELSE SET @DAY_source = @DAY_VIEW;
 
-	SET @DateTimeName = (SELECT TOP 1 DateTimeName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age = 'HIST');
-	SET @AliasName = (SELECT TOP 1 AliasName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age = 'HIST');
-	SET @IDName = (SELECT TOP 1 IDName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age = 'HIST');
-	SET @DataName = ISNULL((SELECT TOP 1 DataName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age = 'HIST'),@DataName);
-	SET @isCustom = (SELECT TOP 1 isCustom FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age = 'HIST');
+	SET @DateTimeName = (SELECT TOP 1 DateTimeName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age LIKE '%HIST%');
+	SET @AliasName = (SELECT TOP 1 AliasName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age LIKE '%HIST%');
+	SET @IDName = (SELECT TOP 1 IDName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age LIKE '%HIST%');
+	SET @DataName = ISNULL((SELECT TOP 1 DataName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age LIKE '%HIST%'),@DataName);
+	SET @isCustom = (SELECT TOP 1 isCustom FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age LIKE '%HIST%');
 	SET @autoCACHE = 0;
 	SET @autoLASR = 1;
 --	SET @customLASR = (SELECT TOP 1 customLASR FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age = 'HIST');
@@ -676,13 +681,13 @@ IF @Age LIKE '%HIST%' OR @Age = 'DAY' BEGIN
 	PRINT @Create_DAY_API;
 	IF @execute = 1 BEGIN
 		IF @Age LIKE '%HIST%' EXEC(@Create_API_View);
-		IF @Age = 'DAY' EXEC(@Create_DAY_API);
+		IF @Age LIKE '%DAY%' EXEC(@Create_DAY_API);
 		IF NOT EXISTS (SELECT * FROM CEVAC_TABLES WHERE TableName = @HIST) BEGIN
 			INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, isCustom, Definition, Dependencies, customLASR, autoCACHE, autoLASR)
 			VALUES (
 				@Building,
 				@Metric,
-				@Age,
+				'HIST',
 				@HIST,
 				@DateTimeName,
 				@IDName,
@@ -701,7 +706,7 @@ IF @Age LIKE '%HIST%' OR @Age = 'DAY' BEGIN
 			VALUES (
 				@Building,
 				@Metric,
-				@Age,
+				'DAY',
 				@DAY,
 				@DateTimeName,
 				@IDName,
@@ -711,8 +716,8 @@ IF @Age LIKE '%HIST%' OR @Age = 'DAY' BEGIN
 				@Create_DAY_API,
 				@DAY_source,
 				isnull(@customLASR,0),
-				isnull(@autoCACHE,0),
-				isnull(@autoLASR,0)
+				0,
+				0
 			);
 		END
 	END
