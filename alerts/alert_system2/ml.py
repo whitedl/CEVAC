@@ -6,7 +6,9 @@ class ML:
 
     def __init__(self):
         """Initialize data and connections."""
-        pass
+        nodes = None  # TODO
+	edges = None # TODO
+	
 
     def add_nodes(self, alerts):
         """Manage new nodes from alerts.
@@ -23,3 +25,11 @@ class ML:
     def queries(self):
         """Execute necessary queries."""
         pass
+
+    def decrease_weight(self, edge, node1, node2):
+	edge -= 0
+	return edge
+
+    def increase_weight(self, edge, node1, node2):
+	edge += 0
+	return edge
