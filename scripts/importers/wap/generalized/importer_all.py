@@ -21,8 +21,8 @@ failed_dir = prefix + "/failed"
 log_dir = prefix + "/logs"
 xref_dir = prefix + "/xref"
 
-DEBUG = True
-SEND = False
+DEBUG = False
+SEND = True
 
 unique_buildings = {}
 
