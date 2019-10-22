@@ -40,6 +40,8 @@ if ! /cevac/scripts/table_to_csv_append.sh "$table" ; then
   /cevac/scripts/log_error.sh "$error" "$table"
   exit 1
 fi
+
+cat /cevac/cache/$table.csv >> /cevac/cache/upload_queue/$table.csv
 echo "Uploading CSV to LASR Autoloader..."
 
 if [ "$reset" == "reset" ]; then
@@ -51,10 +53,13 @@ if [ "$reset" == "reset" ]; then
   fi
 else
   echo "Sending newest lines of $table.csv over rsync..."
-  if ! rsync -vh --progress /cevac/cache/$table.csv sas@wfic-sas-im-hd.clemson.edu:/opt/sasinside/sasconfig/Lev1/AppData/SASVisualAnalytics/VisualAnalyticsAdministrator/AutoLoad/Append/$dest_table.csv ; then
+  if ! rsync -vh --progress /cevac/cache/upload_queue/$table.csv sas@wfic-sas-im-hd.clemson.edu:/opt/sasinside/sasconfig/Lev1/AppData/SASVisualAnalytics/VisualAnalyticsAdministrator/AutoLoad/Append/$dest_table.csv ; then
     error="Cannot rsync cache to LASR"
     /cevac/scripts/log_error.sh "$error" "$table"
     exit 1
+  else
+    ## remove successfully uploaded cache files
+    rm -f /cevac/cache/upload_queue/$table.csv
   fi
 fi
 
