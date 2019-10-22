@@ -102,6 +102,7 @@ if __name__ == "__main__":
         machine_learning = ml.ML()
         if CHECK_ALERTS:
             machine_learning.add_nodes(all_alerts)
+	if SEND:
             machine_learning.send()
         machine_learning.queries()
         verbose_print(VERBOSE, "ML is True")
