@@ -207,11 +207,11 @@ SET @isCustom = 0;                 -- DEFAULT
 -- Grab AliasName, DateTimeName, and isCustom from HIST
 -------------------------------------------------------
 IF @Age != 'XREF' AND EXISTS (SELECT TOP 1 * FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age NOT LIKE '%XREF%') BEGIN
-	SET @DateTimeName = RTRIM((SELECT TOP 1 DateTimeName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age = 'HIST'));
-	SET @IDName = RTRIM((SELECT TOP 1 IDName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age = 'HIST'));
-	SET @AliasName = RTRIM((SELECT TOP 1 AliasName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age = 'HIST'));
-	SET @DataName = RTRIM((SELECT TOP 1 DataName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age = 'HIST'));
-	SET @isCustom = (SELECT TOP 1 isCustom FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age = 'HIST');
+	SET @DateTimeName = RTRIM((SELECT TOP 1 DateTimeName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age LIKE '%HIST%'));
+	SET @IDName = RTRIM((SELECT TOP 1 IDName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age LIKE '%HIST%'));
+	SET @AliasName = RTRIM((SELECT TOP 1 AliasName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age LIKE '%HIST%'));
+	SET @DataName = RTRIM((SELECT TOP 1 DataName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age LIKE '%HIST%'));
+	SET @isCustom = (SELECT TOP 1 isCustom FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age LIKE '%HIST%');
 
 	DECLARE @loop TABLE(VALUE NVARCHAR(200));
 	INSERT INTO @loop SELECT COLUMN_NAME FROM @CEVAC_TABLES_config;
@@ -232,7 +232,6 @@ SET @DateTimeName = ISNULL(@DateTimeName,@RemoteUTCName);   -- DEFAULT
 
 -- build view query
 DECLARE @Create_View nvarchar(MAX);
-
 
 --------------------------------
 -- Verify everything is in order
@@ -581,7 +580,7 @@ END -- end OLDEST
 -- CREATE_CUSTOM.sh must have
 -- been run at least once per table
 --------------------------------------
-IF EXISTS(SELECT * FROM CEVAC_TABLES WHERE TableName = @Table_name) AND @isCustom = 1 AND @Age = 'HIST' BEGIN
+IF EXISTS(SELECT * FROM CEVAC_TABLES WHERE TableName = @Table_name) AND @isCustom = 1 AND @Age LIKE '%HIST%' BEGIN
 	SELECT 'Custom' AS 'Custom';
 	SET @Dependencies_list = (SELECT TOP 1 Dependencies FROM CEVAC_TABLES WHERE TableName = @Table_name);
 	DECLARE @createTableName NVARCHAR(MAX);

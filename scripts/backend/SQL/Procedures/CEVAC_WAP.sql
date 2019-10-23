@@ -181,6 +181,7 @@ IF @execute = 1 BEGIN
     IF OBJECT_ID(@HIST_VIEW) IS NOT NULL BEGIN
         EXEC('DROP VIEW ' + @HIST_VIEW);
     END
+
     EXEC CEVAC_CUSTOM_HIST @BuildingSName = @BuildingSName, @Metric = @Metric;
     EXEC CEVAC_VIEW @Building = @BuildingSName, @Metric = @Metric, @Age = 'HIST';
     EXEC CEVAC_VIEW @Building = @BuildingSName, @Metric = @Metric, @Age = 'DAY';
