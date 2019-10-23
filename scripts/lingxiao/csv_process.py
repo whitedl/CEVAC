@@ -210,7 +210,7 @@ GO\n \
         sql_f.write(head_str)
             
         for i in range(len(df)):
-            insert_str = f"INSERT INTO CEVAC_WATT_WAP_XREF (WAP_ID,WAP_Name,Room,Floor,Alias) \
+            insert_str = f"INSERT INTO {df.name} (WAP_ID,WAP_Name,Room,Floor,Alias) \
 VALUES ({df.iloc[i]['WAP_ID']},'{str((df.iloc[i]['WAP_Name']))}','{str(df.iloc[i]['Room'])}', \
 '{str(df.iloc[i]['Floor'])}','{' '.join(str(df.iloc[i]['Alias']).split())}');\n \
 GO\n"
