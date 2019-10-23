@@ -5,7 +5,7 @@ Main script for CEVAC alert sytem.
 
 from tools import string_to_bool, verbose_print
 import alerts
-import email
+import email_handler
 import ml
 
 import datetime
@@ -78,15 +78,15 @@ if __name__ == "__main__":
         logging.info("\n---\nNEW JOB\n---")
     verbose_print(VERBOSE, f"logging: {logging}")
 
+    all_alerts = None
+    if CHECK_ALERTS:
+        all_alerts = alerts.Alerts(logging)
+        all_alerts.alert_system()
+        verbose_print(VERBOSE, "CHECK_ALERTS is True")
+
     if UPDATE_CACHE:
         alerts.update_cache()
         verbose_print(VERBOSE, "UPDATE_CACHE is True")
-
-    all_alerts = None
-    if CHECK_ALERTS:
-        all_alerts = alerts.Alerts()
-        all_alerts.alert_system()
-        verbose_print(VERBOSE, "CHECK_ALERTS is True")
 
     if SEND:
         if all_alerts is not None:
@@ -94,7 +94,7 @@ if __name__ == "__main__":
         verbose_print(VERBOSE, "SEND is True")
 
     if SEND_EMAIL:
-        email_setup = email.Email(hours=EMAIL_TIME, verbose=VERBOSE)
+        email_setup = email_handler.Email(hours=EMAIL_TIME, verbose=VERBOSE)
         email_setup.send()
         verbose_print(VERBOSE, "EMAIL is True")
 
@@ -102,7 +102,7 @@ if __name__ == "__main__":
         machine_learning = ml.ML()
         if CHECK_ALERTS:
             machine_learning.add_nodes(all_alerts)
-	if SEND:
+        if SEND:
             machine_learning.send()
         machine_learning.queries()
         verbose_print(VERBOSE, "ML is True")
