@@ -41,6 +41,10 @@ if ! /cevac/scripts/table_to_csv_append.sh "$table" ; then
   exit 1
 fi
 
+if [ -f /cevac/cache/upload_queue/$table.csv ]; then
+  ## remove columns from cached data
+  tail -n +2 /cevac/cache/$table.csv | sponge /cevac/cache/$table.csv
+fi
 cat /cevac/cache/$table.csv >> /cevac/cache/upload_queue/$table.csv
 echo "Uploading CSV to LASR Autoloader..."
 
@@ -57,12 +61,10 @@ else
     error="Cannot rsync cache to LASR"
     /cevac/scripts/log_error.sh "$error" "$table"
     exit 1
-  else
-    ## remove successfully uploaded cache files
-    rm -f /cevac/cache/upload_queue/$table.csv
   fi
 fi
-
+## remove successfully uploaded cache files
+rm -f /cevac/cache/upload_queue/$table.csv
 if [ "$runsas" == "runsas" ]; then
   echo "runsas detected. Executing LASR Autoload script..."
   /cevac/scripts/runsas.sh
