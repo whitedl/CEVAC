@@ -81,6 +81,11 @@
             <li><a href="#" name="building_info_button" id="building_info_button" onclick="building_info_button_click()">View Buildings</a></li>
             <li><a href="#" name="BuildingKey_search_button" id="BuildingKey_search_button" onclick="BuildingKey_search_button_click()">Search BuildingKeys</a></li>
           </ul>
+<!--          <h5>Alerts Actions</h5>
+          <ul id="alerts_list">
+            <li><a href="#" name="alerts_report_button" id="alerts_report_button" onclick="alerts_report_button_click()">Generate Alerts Report</a></li>
+          </ul>
+-->
 <!--          <button name="PXREF_button" id="PXREF_button" onclick="PXREF_button_click()">View PXREF</button><br> -->
 <!--          <button name="rebuild_PXREF_button" id="rebuild_PXREF_button" onclick="rebuild_PXREF_click()">Rebuild PXREF</button><br>
           <button name="upload_xref_button" id="upload_xref_button" onclick="upload_xref_button_click()">Upload XREF</button><br>
