@@ -90,9 +90,8 @@ def ingest_file(fname):
         next(reader)
 
         for row in reader:
-            # insert into CEVAC_ALL_CHW_RATE_HIST (BTU/sec)
+            # insert into CEVAC_ALL_CHW_RATE_HIST (BTUhr)
             try:
-                #test
                 today = custom_datestring_to_datetime(
                     row[0]).strftime('%Y-%m-%d %H:%M:%S')
                 today_utc = custom_datestring_utc(
@@ -111,7 +110,7 @@ def ingest_file(fname):
             if len(row) < 5:
                 continue
 
-            # insert into CEVAC_ALL_CHW_HIST (kWh)
+            # insert into CEVAC_ALL_CHW_HIST (kW)
             try:
                 today_utc = custom_datestring_to_datetime(
                     row[4]).strftime('%Y-%m-%d %H:%M:%S')
@@ -181,12 +180,12 @@ for fname in next(os.walk(import_dir))[2]:
             print("not moved")
 
 if SEND:
-    f = open("/home/bmeares/cache/insert_chw.sql", "w")
+    f = open("/cevac/cache/insert_chw.sql", "w")
     f.write(insert_sql_total.replace(';', '\nGO\n'))
     f.close()
-    os.system("/home/bmeares/scripts/exec_sql_script.sh "
-              "/home/bmeares/cache/insert_chw.sql")
-    os.remove("/home/bmeares/cache/insert_chw.sql")
+    os.system("/cevac/scripts/exec_sql_script.sh "
+              "/cevac/cache/insert_chw.sql")
+    os.remove("/cevac/cache/insert_chw.sql")
 else:
     print("DID NOT SEND")
     print(insert_sql_total.replace(';', '\nGO\n'))

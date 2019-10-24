@@ -44,7 +44,7 @@ fi
 for a in "${ages_array[@]}"; do
   echo "Creating CEVAC_$building""_$metric""_$a"
   if ! /cevac/scripts/CREATE_VIEW.sh $building $metric $a $keys_list $unitOfMeasureID ; then
-    error="Error encountered when creatiny $building""_$metric""_$a"
+    error="Error encountered when creating $building""_$metric""_$a"
     /cevac/scripts/log_error.sh "$error"
     exit 1
   fi

@@ -502,10 +502,11 @@
         "BLDG_NAME": "McFadden Building",
         "BLDG_NO": 1199,
         "Const_Year": 0,
-        "Short_Name": "McFadden",
+        "Short_Name": "MCFADDEN",
         "ADDRESS": " ",
         "Shape_Leng": 220.514510426,
-        "Shape_Area": 2406.50395903
+        "Shape_Area": 2406.50395903,
+        "Status": "Active"
       }
     },
     {
@@ -1279,7 +1280,7 @@
         "BLDG_NAME": "Littlejohn Coliseum",
         "BLDG_NO": 243,
         "Const_Year": 0,
-        "Short_Name": "LITTLEJOHN",
+        "Short_Name": "LJ",
         "ADDRESS": " ",
         "Shape_Leng": 993.354690863,
         "Shape_Area": 13248.3375774,
@@ -4193,10 +4194,11 @@
         "BLDG_NAME": "Brackett Hall",
         "BLDG_NO": 30,
         "Const_Year": 1951,
-        "Short_Name": "Brackett",
+        "Short_Name": "BRACK",
         "ADDRESS": "321 Calhoun Drive",
         "Shape_Leng": 256.351456088,
-        "Shape_Area": 3026.7051035
+        "Shape_Area": 3026.7051035,
+        "Status": "Active"
       }
     },
     {
@@ -5151,7 +5153,7 @@
         "BLDG_NAME": "McAdams Hall",
         "BLDG_NO": 38,
         "Const_Year": 1951,
-        "Short_Name": "McAdams",
+        "Short_Name": "MCADAMS",
         "ADDRESS": "821 McMillan Road",
         "Shape_Leng": 489.225569967,
         "Shape_Area": 5216.97031869
@@ -9213,10 +9215,11 @@
         "BLDG_NAME": "Barnett Hall",
         "BLDG_NO": 2009,
         "Const_Year": 1964,
-        "Short_Name": "Barnett",
+        "Short_Name": "BARNETT",
         "ADDRESS": "218 Bryan Circle",
         "Shape_Leng": 121.197119534,
-        "Shape_Area": 705.783505136
+        "Shape_Area": 705.783505136,
+        "Status": "Active"
       }
     },
     {
@@ -9535,7 +9538,7 @@
         "BLDG_NAME": "Hardin Hall",
         "BLDG_NO": 29,
         "Const_Year": 1890,
-        "Short_Name": "Hardin",
+        "Short_Name": "HARDIN",
         "ADDRESS": "403 Calhoun Drive",
         "Shape_Leng": 210.492849997,
         "Shape_Area": 1305.24873767
@@ -9747,10 +9750,11 @@
         "BLDG_NAME": "Manning Hall",
         "BLDG_NO": 2013,
         "Const_Year": 1967,
-        "Short_Name": "Manning",
+        "Short_Name": "MANN",
         "ADDRESS": "240 Bryan Circle",
         "Shape_Leng": 114.784991175,
-        "Shape_Area": 852.340064526
+        "Shape_Area": 852.340064526,
+        "Status": "Active"
       }
     },
     {
@@ -12574,10 +12578,11 @@
         "BLDG_NAME": "Core Campus",
         "BLDG_NO": 1284,
         "Const_Year": 0,
-        "Short_Name": " ",
+        "Short_Name": "CORE",
         "ADDRESS": " ",
         "Shape_Leng": 663.811975787,
-        "Shape_Area": 6502.43796891
+        "Shape_Area": 6502.43796891,
+        "Status": "Active"
       }
     },
     {
@@ -12720,10 +12725,11 @@
         "BLDG_NAME": "Douthit Hills",
         "BLDG_NO": 0,
         "Const_Year": 0,
-        "Short_Name": " ",
+        "Short_Name": "DOUTHIT",
         "ADDRESS": " ",
         "Shape_Leng": 282.820843272,
-        "Shape_Area": 2166.03610831
+        "Shape_Area": 2166.03610831,
+        "Status": "Active"
       }
     },
     {

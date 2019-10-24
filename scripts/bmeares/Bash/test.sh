@@ -1,4 +1,8 @@
-#! /bin/sh
+#! /bin/bash
 
-out=`if ! echo "test" ; then exit 1`
-echo "$out"
+echo "about to do a difficult task"
+if ! { /cevac/scripts/test1.sh & } ; then
+  echo "Error!!"
+fi
+wait
+echo "done sleeping"

@@ -20,7 +20,7 @@ export class MapdataService {
       propertyName: 'POWER',
       category: 'Utilities',
       unit: 'kW',
-      form: 'MAX',
+      form: 'max',
       display: true,
       active: true
     },
@@ -29,16 +29,16 @@ export class MapdataService {
       propertyName: 'TEMP_SPACE',
       category: 'IAQ',
       unit: 'F',
-      form: 'MAX',
+      form: 'max',
       display: true,
       active: true
     },
     {
       name: 'CO2',
-      propertyName: 'IAQ',
+      propertyName: 'CO2',
       category: 'IAQ',
       unit: 'ppm',
-      form: 'MAX',
+      form: 'max',
       display: true,
       active: true
     },
@@ -47,7 +47,7 @@ export class MapdataService {
       propertyName: 'CHW',
       category: 'Utilities',
       unit: 'KBTU',
-      form: 'MAX',
+      form: 'max',
       display: true,
       active: false
     },
@@ -56,7 +56,7 @@ export class MapdataService {
       propertyName: 'STEAM',
       category: 'Utilities',
       unit: 'lbs',
-      form: 'MAX',
+      form: 'max',
       display: true,
       active: false
     },
@@ -65,16 +65,15 @@ export class MapdataService {
       propertyName: 'HUM',
       category: 'IAQ',
       unit: '%',
-      form: 'MAX',
+      form: 'max',
       display: true,
       active: true
     }
   ];
   dataSet: Measurement = this.dataSets[0];
 
-  private dataUrl = 'http://wfic-cevac1/requests/stats.php';
-  private sasBaseURL =
-    'https://sas.clemson.edu:8343/SASVisualAnalytics/report?location=';
+  private dataUrl = 'http://wfic-cevac1:3000/api/stat';
+  private sasBaseURL = 'https://sas.clemson.edu:8343/';
   private map!: L.Map;
   private tracked!: L.GeoJSON;
   private untracked!: L.GeoJSON;
@@ -91,7 +90,7 @@ export class MapdataService {
     private router: Router
   ) {}
 
-  getMap = () => (!this.map ? this.initMap() : this.map);
+  getMap = () => this.initMap();
 
   getBuilding = (bName: string | null) => {
     let building!: { [index: string]: any };
@@ -197,11 +196,13 @@ export class MapdataService {
       style.fillOpacity = 1;
       style.color = this.colorService.getScaledColor(bclass);
       style.fillColor =
-        feature.properties && feature.properties[this.dataSet.propertyName]
+        feature.properties &&
+        feature.properties[this.dataSet.propertyName] &&
+        feature.properties[this.dataSet.propertyName].max
           ? this.colorService.getScaledColor(
               bclass,
               this.dataSet.propertyName,
-              feature.properties[this.dataSet.propertyName].MAX
+              feature.properties[this.dataSet.propertyName].max
             )
           : this.colorService.getScaledColor(
               bclass,
@@ -270,33 +271,28 @@ export class MapdataService {
     layer.on(opt);
     if (feature.properties.Status === 'Active') {
       this.http
+        .get<BuildingData>(
+          'http://wfic-cevac1/api/buildings/' + feature.properties.Short_Name
+        )
+        .subscribe(bdata => {
+          feature.properties = Object.assign(feature.properties, bdata);
+          if (feature.properties.reportlink) {
+            feature.properties.reportlink =
+              this.sasBaseURL + feature.properties.reportlink;
+          }
+        });
+      this.http
         .get<BuildingData[]>(
-          this.dataUrl + '?BuildingSName=' + feature.properties.Short_Name
+          this.dataUrl +
+            '?filter[where][buildingsname]=' +
+            feature.properties.Short_Name
         )
         .subscribe(bData => {
           bData.forEach((element: any) => {
-            feature.properties[element.Metric] = element;
+            feature.properties[element.metric] = element;
           });
           this.tracked.resetStyle(layer);
-
-          layer.bindPopup(
-            '<pre>' +
-              JSON.stringify(feature.properties, null, ' ').replace(
-                /[\{\}"]/g,
-                ''
-              ) +
-              '</pre>'
-          );
         });
-    } else {
-      layer.bindPopup(
-        '<pre>' +
-          JSON.stringify(feature.properties, null, ' ').replace(
-            /[\{\}"]/g,
-            ''
-          ) +
-          '</pre>'
-      );
     }
   };
 

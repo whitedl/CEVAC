@@ -1,7 +1,11 @@
 #! /bin/bash
+
+# ! /cevac/scripts/check_lock.sh && exit 1
+# /cevac/scripts/lock.sh
 if [ -z "$1" ]; then
   echo Error: Missing table name
   echo "Usage: $0 [TABLE] {reset}"
+  /cevac/scripts/unlock.sh
   exit 1
 fi
 error=""
@@ -95,7 +99,7 @@ SET NOCOUNT ON
 SELECT name FROM sys.columns WHERE object_id = OBJECT_ID('dbo.$table')"
 
 cevac_tables_query="
-IF EXISTS (SELECT TableName FROM CEVAC_TABLES WHERE TableName = '$table') BEGIN
+IF EXISTS (SELECT TableName FROM CEVAC_TABLES WHERE TableName = '$table') AND OBJECT_ID('$table_CSV') IS NOT NULL BEGIN
 	DECLARE @BuildingSName NVARCHAR(100);
 	DECLARE @Metric NVARCHAR(100);
 	DECLARE @Age NVARCHAR(100);
@@ -216,6 +220,7 @@ u='wficcm'
 db='WFIC-CEVAC'
 p='5wattcevacmaint$'
 
+hist=$(echo "$table" | grep HIST)
 latest=$(echo "$table" | grep LATEST)
 xref=$(echo "$table" | grep XREF)
 issues=$(echo "$table" | grep ISSUES)
@@ -228,6 +233,7 @@ if [ ! -z "$latest" ] || [ ! -z "$xref" ] || [ ! -z "$compare"  ] || [ ! -z "$is
   if ! /cevac/scripts/exec_sql.sh "IF OBJECT_ID('$table_CSV') IS NOT NULL DROP TABLE $table_CSV" ; then
     error="Cannot drop $table_CSV"
     /cevac/scripts/log_error.sh "$error" "$table_CSV"
+    exit 1
   fi
 fi
 
@@ -254,8 +260,8 @@ if [ ! -f /srv/csv/$table.csv ]; then
     /cevac/scripts/log_error.sh "$error" "$table"
     exit 1
   fi
-  if [ -z "$xref" ]; then
-    # create _CSV if not an XREF
+  if [ ! -z "$hist" ]; then
+    # create _CSV if a HIST table
     if ! /cevac/scripts/exec_sql.sh "$csv_utc_query"; then
       error="Failed to create $table_CSV"
       /cevac/scripts/log_error.sh "$error" "$table"
@@ -332,7 +338,8 @@ echo "$cevac_tables_query" > /cevac/cache/CEVAC_TABLES_$table_CSV.sql
 if ! /cevac/scripts/exec_sql_script.sh "/cevac/cache/CEVAC_TABLES_$table_CSV.sql" ; then
   error="Could not add $table_CSV to CEVAC_TABLES"
   /cevac/scripts/log_error.sh "$error" "$table_CSV"
-  exit 1
+  # exit 1
 fi
 
 echo "Finished updating /srv/csv/$table.csv"
+# /cevac/scripts/unlock.sh

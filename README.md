@@ -2,7 +2,7 @@
 Clemson Energy Visualization & Analytics Center developmental scripts
 and documentation.
 
-![Clemson Logo](https://www.clemson.edu/brand/resources/logos/wordmark/orange.png)
+![CEVAC Logo](pics/cevac_logo.PNG)
 
 ## Directories
 

@@ -11,7 +11,6 @@ from keras.callbacks import EarlyStopping
 # Helper libraries
 import os
 import numpy as np
-from numpy import array
 from sys import argv
 import requests
 import json
@@ -20,7 +19,6 @@ import datetime
 from datetime import date
 import numpy as np
 import pytz
-# import matplotlib as plt
 
 # fetch our weather forecast
 def fetch():
@@ -40,7 +38,8 @@ def fetch():
             'clouds' : []
             }
 
-    for i in range(12, 0, -1):
+    # fetch the past 12 hours of data starting with 12 hours ago
+    for i in range(35, 0, -1):
         requestURL = 'https://api.darksky.net/forecast/db6bb38a65d59c7677e8e97db002705b/33.662333,-79.830875,' + str(int(time.time() - 86400 * i))
         print(requestURL)
         r = requests.get(requestURL).json()
@@ -80,16 +79,19 @@ def generateInput(h, d, m, y):
         '12' : 31
     }
 
+    # the percent of progress through the month
     throughMonth = [float(d/numMonth[str(m)])]
 
+    # array of hours in the day with a 1 in the hour of the prediciton
     hour = [0 for i in range(0,24)]
     hour[h] = 1
 
+    # array of days of the week with a 1 in the day of the prediction
     d = date(y, m, d).weekday()
-
     day = [0 for i in range(0,7)]
     day[d -1] = 1
 
+    # array of months of the year with a 1 in the month of the prediction
     month = [0 for i in range(0,12)]
     month[m - 1] = 1
 
@@ -102,7 +104,7 @@ def createModel():
 	model = keras.Sequential()
 
 	# add layers
-	model.add(Dense(100, input_shape=(47,)))
+	model.add(Dense(100, input_shape=(46,)))
 	model.add(Activation('sigmoid'))
 
 	model.add(Dense(1))
@@ -112,12 +114,14 @@ def createModel():
 
 	return model
 
+# writes the predicitons for the next 48 hours
 def pred(model):
 
-
+    # list of predictions to be populated
     predictions = []
     hourly = fetch()
 
+    # retrieve prediction input for every hour that has data
     for i, hour in enumerate(hourly['hours']):
 
         day = hourly['days'][i]
@@ -129,10 +133,10 @@ def pred(model):
         humidity = [hourly['humidities'][i]]
         temperature = [hourly['temperatures'][i]]
         cloudCoverage = [hourly['clouds'][i]]
-        input = np.concatenate((hour, day, month, throughMonth, temperature, humidity, cloudCoverage), axis = -1)
+        input = np.concatenate((hour, day, month, temperature, humidity, cloudCoverage), axis = -1)
         model.load_weights('powerModel.h5')
 
-        prediction = model.predict(input.reshape(1,-1))[0][0] * 275
+        prediction = model.predict(input.reshape(1,-1))[0][0] * 400
         predictions.append(prediction)
 
 
@@ -156,8 +160,6 @@ def pred(model):
             datestring = ' '.join((weekdayName, monthName, str(day)))
 
             datestring = datestring + ' ' + hms + ' ' + str(Y)
-
-            # datestring = ' '.join((weekdayName, monthName, str(day), ':'.join((str(H), str(minute), str(second)), str(Y))))
 
             t = datetime.datetime.strptime(datestring, "%a %b %d %H:%M:%S %Y")
             ETDateTime = t.strftime("%Y-%m-%d %H:%M:%S")
@@ -188,8 +190,8 @@ def pred(model):
     f.close()
     os.system("/cevac/scripts/exec_sql_script.sh "
               "/cevac/cache/insert_predictions.sql")
-    # os.remove("/cevac/cache/insert_predictions.sql")
+    os.remove("/cevac/cache/insert_predictions.sql")
 
 if __name__ == '__main__':
     model = createModel()
-    predictions = pred(model)
+    pred(model)

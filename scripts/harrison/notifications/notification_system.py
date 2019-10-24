@@ -29,6 +29,7 @@ email_fpath = ("/cevac/DEV/scripts/harrison/notifications/"
 
 to_list = {
     "Harrison Hall": "hchall@g.clemson.edu",
+    "Drewboi": "abemery@clemson.edu",
 }
 
 
@@ -61,7 +62,7 @@ def ping_server(ip_address):
 
 def command_to_json_string(command):
     """Return a string of json from a sql command."""
-    os.system("/home/bmeares/scripts/exec_sql.sh \"" + command +
+    os.system("/cevac/scripts/exec_sql.sh \"" + command +
               "\" temp_csv.csv")
 
     json_string = ""
@@ -187,7 +188,7 @@ custom = {
         "Access Tables": {
             "fun": test_tables,
             "args": [["WATT", "COOPER", "LEE_III", "ASC"],
-                     ["IAQ", "TEMP", "POWER"]],
+                     ["CO2", "TEMP", "POWER"]],
         },
         "Custom Table check": {
             "fun": test_tables_custom,

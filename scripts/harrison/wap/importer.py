@@ -16,7 +16,8 @@ import safe_move
 # Config Variables
 ######################################
 
-prefix = "//130.127.219.170/Watt/Watt Staff/Building/WAP"
+#  prefix = "//130.127.219.170/Watt/Watt Staff/Building/WAP"
+prefix = "/mnt/bldg/WAP"
 import_dir = prefix + "/to_import"
 processed_dir = prefix + "/processed"
 failed_dir = prefix + "/failed"
@@ -268,7 +269,7 @@ def ingest_file_fail(fname, dbc):
                     total_duration = hours[hour][name][SSID]["time"]
                     unique_users = len(hours[hour][name][SSID]["users"].keys())
                     cursor.execute(insert_sql, [hour, name, SSID, int(
-                        total_duration), total_duration / 60, unique_users])
+                        total_duration), total_duration / 30, unique_users])
 
         # Commit insertions
         dbc.commit()
@@ -452,7 +453,7 @@ dbconfig_file = sys.argv[1]
 try:
     dbconfig = get_config(dbconfig_file)
     dbconfig2 = get_config(
-        "//130.127.219.170/Watt/Watt Staff/Building/WAP/config/dbconfig2.json")
+        "/mnt/bldg/WAP/config/dbconfig2.json")
 except IOError:
     logging.exception("Unable to locate database config file.")
     logging.shutdown()

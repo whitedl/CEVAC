@@ -1,0 +1,46 @@
+Traceback (most recent call last):
+  File "/home/drew/.local/share/virtualenvs/CEVAC-uADAUbmO/lib/python3.6/site-packages/requests/adapters.py", line 449, in send
+    timeout=timeout
+  File "/home/drew/.local/share/virtualenvs/CEVAC-uADAUbmO/lib/python3.6/site-packages/urllib3/connectionpool.py", line 641, in urlopen
+    _stacktrace=sys.exc_info()[2])
+  File "/home/drew/.local/share/virtualenvs/CEVAC-uADAUbmO/lib/python3.6/site-packages/urllib3/util/retry.py", line 399, in increment
+    raise MaxRetryError(_pool, url, error or ResponseError(cause))
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='api.darksky.net', port=443): Max retries exceeded with url: /forecast/db6bb38a65d59c7677e8e97db002705b/33.662333,
+-79.830875,1544464204 (Caused by NewConnectionError('<urllib3.connection.VerifiedHTTPSConnection object at 0x7f71321a5fd0>: Failed to establish a new connection: [Errno -2]
+Name or service not known',))
+
+MISSED DATES:
+2019-01-22 21
+2018-12-27 17
+2019-04-07 03
+2018-10-18 06
+2018-04-11 01
+2019-05-20 11
+2019-03-25 03
+2018-02-01 19
+2018-01-25 07
+2019-05-31 00
+2018-09-08 09
+2017-04-24 01
+2018-03-25 21
+2018-08-20 01
+2018-12-11 19
+2018-12-28 20
+2017-05-08 11
+2017-09-17 21
+2018-03-28 15
+2017-09-16 16
+2018-04-18 07
+2019-05-20 00
+2018-01-16 16
+2018-12-24 06
+
+##
+[0.         0.         0.         0.         0.         0.
+ 0.         0.         0.         0.         0.         0.
+ 0.         0.         0.         0.         0.         0.
+ 0.         0.         0.         0.         0.         1.
+ 0.         1.         0.         0.         0.         0.
+ 0.         0.         0.         0.         1.         0.
+ 0.         0.         0.         0.         0.         0.
+ 0.         0.45306667        nan 0.        ]
