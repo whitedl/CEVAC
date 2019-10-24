@@ -188,12 +188,12 @@ def pred(model):
                              f"'{str(prediction)}')\nGO\n")
 
     # Write to `CEVAC_WATT_POWER_SUMS_PRED_HIST`
-    # f = open("/cevac/cache/insert_predictions.sql", "w")
-    # f.write(insert_sql_total)
-    # f.close()
-    # os.system("/cevac/scripts/exec_sql_script.sh "
-    #           "/cevac/cache/insert_predictions.sql")
-    # os.remove("/cevac/cache/insert_predictions.sql")
+    f = open("/cevac/cache/insert_predictions.sql", "w")
+    f.write(insert_sql_total)
+    f.close()
+    os.system("/cevac/scripts/exec_sql_script.sh "
+             "/cevac/cache/insert_predictions.sql")
+    os.remove("/cevac/cache/insert_predictions.sql")
 
 if __name__ == '__main__':
     model = createModel()
