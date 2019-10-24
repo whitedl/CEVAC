@@ -5,7 +5,7 @@ if [ -z "$1" ]; then
   exit 1
 fi
 
-script=$1
+script="$1"
 h='130.127.218.11'
 u='wficcm'
 db='WFIC-CEVAC'
@@ -16,6 +16,9 @@ p='5wattcevacmaint$'
 
 echo $'Executing script:\n\n'$script
 
-raw=$(/opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -i "$script")
-echo "$raw"
+if ! /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -i "$script" ; then
+  error="Could not execute $script"
+  /cevac/scripts/log_error.sh "$error"
+  exit 1
+fi
 

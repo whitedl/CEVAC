@@ -5,7 +5,6 @@ table `CEVAC_ALL_ALERTS_HIST`.
 """
 
 import os
-import sys
 import csv
 import json
 import datetime
@@ -15,13 +14,12 @@ from copy import deepcopy
 from croniter import croniter
 
 
-CONDITIONS_FPATH = "/home/bmeares/cron/alerts/"
+CONDITIONS_FPATH = "/cevac/cron/alerts/"
 KNOWN_ISSUES_FPATH = "/cevac/DEV/known issues/Known Data Issues.csv"
 OCCUPANCY_FPATH = "/cevac/CEVAC/scripts/harrison/alerts/occupancy.csv"
-LOGGING_PATH = "/home/bmeares/cron/alerts/"
-PHONE_PATH = "/home/bmeares/cron/alerts/"
+LOGGING_PATH = "/cevac/cron/alerts/"
+PHONE_PATH = "/cevac/cron/alerts/"
 alert_fname = "/cevac/DEV/alerts/alert_parameters.csv"
-json_fname = "/cevac/cron/alert_log.json"
 json_oc = "/cevac/cron/alert_log_oc.json"
 json_unoc = "/cevac/cron/alert_log_unoc.json"
 
@@ -59,7 +57,6 @@ COLUMNS = {
     "message_id": 16,
 }
 
-
 # Time constants
 TIME = {
     "day": 1,
@@ -76,25 +73,11 @@ def sql_time_str(t):
     return t.strftime('%Y-%m-%d %H:%M:%S')
 
 
-def regex_to_numlist(regex_string):
-    """Return a num_list.
-
-    A list of numbers following expressions similar to "1-5 & 9-10" to
-    [1,2,3,4,5,9,10].
-    """
-    if regex_string == "*":
-        return [regex_string]
-    else:
-        rs = regex_string.replace(" ", "").split("&")
-        regex_list = [([int(y)] if len(
-                                y.split("-")) == 1 else list(range(
-                                    int(y.split("-")[0]),
-                                    int(y.split("-")[1]) + 1))) for y in rs]
-        return_list = []
-        for num_list in regex_list:
-            for num in num_list:
-                return_list.append(str(num))
-        return return_list
+def debug_print(message):
+    """Print message if in debug mode."""
+    if not CHECK_ALERTS or not SEND:
+        print(message)
+    return None
 
 
 def alias_to_list(regex_string):
@@ -102,34 +85,6 @@ def alias_to_list(regex_string):
     if regex_string == "*":
         return ["*"]
     return regex_string.split("-")
-
-
-def angle_brackets_replace(regex_string, alert):
-    """Return string with angle brackets replaced."""
-    lc_alert = {}
-    for key in alert:
-        lc_alert[key.lower()] = alert[key]
-    try:
-        regex_list = regex_string.replace(">", "<").split("<")
-        for i, regex in enumerate(regex_list):
-            if regex.lower() in lc_alert:
-                regex_list[i] = lc_alert[regex]
-        return "".join(regex_list)
-    except Exception:
-        return regex_string
-
-
-def angle_brackets_replace_single(regex_string, replacement):
-    """Return string with angle brackets replaced with replacement."""
-    try:
-        regex_list = regex_string.replace(
-            "<", "<&%").replace(">", "<").split("<")
-        for i, regex in enumerate(regex_list):
-            if "&%" in regex:
-                regex_list[i] = replacement
-        return "".join(regex_list)
-    except Exception:
-        return regex_string
 
 
 def angle_brackets_replace_specific(regex_string, key, replacement):
@@ -181,19 +136,24 @@ def import_conditions(fname, logger):
 
 
 def import_known_issues(fname):
-    """Return dict of buildingsname to list of blacklists."""
+    """Return dict of buildingsname to list of blacklist messages."""
     d = {}
     with open(fname, "r") as csvfile:
         csvfile = csv.reader(csvfile)
         next(csvfile)  # header
         for row in csvfile:
-            bldg = row[1]
-            message = row[0]
-            if "decomissioned" in message:
-                if bldg in d:
-                    d[bldg].append(message)
-                else:
-                    d[bldg] = [message]
+            try:
+                bldg = row[1]
+                message = row[0]
+                if "decommissioned" in message:
+                    # psid = bldg.replace(")", "(").split("(")[1]
+                    # debug_print("Found PSID as", psid)
+                    if bldg in d:
+                        d[bldg].append(message)
+                    else:
+                        d[bldg] = [message]
+            except Exception:
+                continue
     return d
 
 
@@ -202,7 +162,7 @@ def skip_alias(known_issues, bldg, alias):
     if bldg not in known_issues:
         return False
     for message in known_issues[bldg]:
-        if alias in message:
+        if f"{alias}" in message:
             return True
     return False
 
@@ -263,14 +223,14 @@ def rebuild_broken_cache(table):
     broken = "_BROKEN"
     command = f"EXEC CEVAC_CACHE_INIT @tables = '{table+broken}'"
     print(command)
-    os.system("/home/bmeares/scripts/exec_sql.sh \"" + command +
+    os.system("/cevac/scripts/exec_sql.sh \"" + command +
               "\" temp_csv.csv")
     return None
 
 
 def command_to_json_string(command):
     """Return a string of json from a sql command."""
-    os.system("/home/bmeares/scripts/exec_sql.sh \"" + command +
+    os.system("/cevac/scripts/exec_sql.sh \"" + command +
               "\" temp_csv.csv")
 
     json_string = ""
@@ -307,6 +267,7 @@ def command_to_list_multiple(command, num_args):
     """Return a list of lists.
 
     list of lists (with length up to num_args) of data from a query.
+    This can break if the SQL server is manipulating the data currently.
     """
     data = command_to_json_string(command)
     data_readable = data.replace("}{", "} {").replace("\'", "\"")
@@ -317,7 +278,7 @@ def command_to_list_multiple(command, num_args):
             d = d if d[0] == "{" else "{" + d
             d = d if d[-1] == "}" else d + "}"
             dict_list.append(json.loads(d))
-    except:
+    except Exception:
         print("issue, data:")
         print(data_list)
     data_list = []
@@ -328,7 +289,7 @@ def command_to_list_multiple(command, num_args):
                 dl.append(sd[k])
             data_list.append(dl)
         except Exception:
-            pass
+            print(Exception, data_list)
     return data_list
 
 
@@ -415,17 +376,18 @@ def get_psid_from_alias(alias, bldgsname, metric):
     try:
         command = (f"EXEC CEVAC_XREF_LOOKUP @BuildingSName = '{bldgsname}', "
                    f"@Metric = '{metric}', @Alias = '{alias}'")
-        os.system("/home/bmeares/scripts/exec_sql.sh \"" + command +
+        os.system("/cevac/scripts/exec_sql.sh \"" + command +
                   "\" temp_psid_csv.csv")
         f = open("/cevac/cache/temp_psid_csv.csv", "r")
         lines = f.readlines()
         try:
-            psids = [int(psid.replace("\n","")) for i, psid in enumerate(lines) if i > 0]
+            psids = [int(psid.replace("\n", "")) for i,
+                     psid in enumerate(lines) if i > 0]
             os.remove("/cevac/cache/temp_psid_csv.csv")
             return str(max(psids))
         except Exception:
             os.remove("/cevac/cache/temp_psid_csv.csv")
-            return str(int(lines[-1].replace("\n","")))
+            return str(int(lines[-1].replace("\n", "")))
     except Exception:
         print("could not get psid from alias")
         os.remove("/cevac/cache/temp_psid_csv.csv")
@@ -478,19 +440,22 @@ def check_numerical_alias(alias, alert, next_id, last_events, new_events,
         send_alert = (avg_data > alert["value"])
     elif alert["condition"] == "<":
         send_alert = (avg_data < alert["value"])
+    elif alert["condition"] == "=":
+        send_alert = (avg_data == alert["value"])
 
     alias = "Alias"
     if send_alert:
         a = deepcopy(alert)
         if get_psid:
-            a['message'] = angle_brackets_replace_specific(a["message"], "alias",
-                                        room
-                                        + "(" + get_psid_from_alias(room,
-                                                              alert["building"],
-                                                              alert["type"]) + ")")
+            a['message'] = (angle_brackets_replace_specific(
+                            a["message"], "alias", room
+                            + "(" + get_psid_from_alias(
+                                    room,
+                                    alert["building"],
+                                    alert["type"]) + ")"))
         else:
-            a['message'] = angle_brackets_replace_specific(a["message"], "alias",
-                                        room)
+            a['message'] = (angle_brackets_replace_specific(
+                            a["message"], "alias", room))
         event_id, next_id, new_events = assign_event_id(next_id,
                                                         last_events,
                                                         new_events,
@@ -507,13 +472,12 @@ def check_numerical_alias(alias, alert, next_id, last_events, new_events,
                f"'{alert['bldg_disp']}','{utcdatetimenow_str}',"
                f"'{alert['message_id']}', {alias}, '{event_id}',"
                f"'{alert['building']}')")
-    safe_log("Checked " + str(i + 1), "info")
     return (next_id, new_events, com + ";")
 
 
 def check_temp(room, alert, temps, known_issues, next_id, last_events,
                new_events, get_psid):
-    """Check temps."""
+    """Check relative temperature values."""
     if skip_alias(known_issues, alert["building"], room):
         print(room, " is decomissioned")
         return (next_id, new_events, "")
@@ -576,7 +540,8 @@ def check_temp(room, alert, temps, known_issues, next_id, last_events,
 
         if send_alert:
             a = deepcopy(alert)
-            add = get_psid_from_alias(room + " Temp",alert["building"],alert["type"]) if get_psid else ""
+            add = get_psid_from_alias(room + " Temp", alert["building"],
+                                      alert["type"]) if get_psid else ""
             a["message"] = angle_brackets_replace_specific(
                             a["message"], "alias",
                             room + " Temp (" + add + ")")
@@ -611,7 +576,6 @@ def check_temp(room, alert, temps, known_issues, next_id, last_events,
     except Exception:
         pass
 
-    safe_log("Checked " + str(i + 1), "info")
     return (next_id, new_events, "")
 
 
@@ -636,7 +600,8 @@ def check_time(data, alert, next_id, last_events, new_events, get_psid):
     # Add to alerts to send
     safe_log("An alert was sent for " + str(alert), "info")
     a = deepcopy(alert)
-    add = " (" +get_psid_from_alias(alias, alert["building"],alert["type"]) + ")" if get_psid else ""
+    add = (" (" + get_psid_from_alias(alias, alert["building"], alert["type"])
+           + ")" if get_psid else "")
     a["message"] = angle_brackets_replace_specific(
                         a["message"], "alias", alias + add)
     a["message"] = angle_brackets_replace_specific(
@@ -675,13 +640,12 @@ if __name__ == "__main__":
     known_issues = import_known_issues(KNOWN_ISSUES_FPATH)
     occupancy = import_occupancy()
 
-    # JSON
-    next_id, last_events = parse_json(json_fname, json_oc, json_unoc)
+    # Parse json files for event IDs
+    next_id, last_events = parse_json(json_oc, json_unoc)
     new_events = {}  # id: { "hash" : event_id }
 
     # Check alerts for conditions
-    insert_sql_total = ""
-    total_issues = 0
+    insert_sql_total = ""  # SQL to be inserted
     utcdatetimenow = datetime.datetime.utcnow()
     utcdatetimenow_str = sql_time_str(utcdatetimenow)
     for i, a in enumerate(alerts):
@@ -691,7 +655,6 @@ if __name__ == "__main__":
         try:
             # Check time conditional to make sure it is the correct time for
             # the alert
-            # TODO: change this for school year
             now = datetime.datetime.now()
             day = now.isoweekday()
             hour = now.hour
@@ -708,22 +671,22 @@ if __name__ == "__main__":
                 z = (f"SELECT DISTINCT "
                      f"{a_or_psid} "
                      f"FROM {alert['database']}")
-                z = command_to_list_multiple(z,2)
-                all_aliases = [b[0] for b in command_to_list_multiple(z, 2)]
+                z = command_to_list_multiple(z, 2)
+                all_aliases = [b[0] for b in z]
 
                 for alias in all_aliases:
                     try:
                         obj = check_numerical_alias(alias, alert,
                                                     next_id,
                                                     last_events,
-                                                    new_eventsm, get_psid)
+                                                    new_events, get_psid)
                         next_id = obj[0]
                         new_events = obj[1]
                         insert_sql_total += obj[2]
                     except Exception:
                         pass
 
-            # Check each alias for temperature
+            # Check each alias for relative temperature exceptions
             elif ("SP" in alert["value"]):
                 selection_command = (f"SELECT {a_or_psid}, {alert['column']} "
                                      f"FROM "
@@ -753,9 +716,9 @@ if __name__ == "__main__":
 
                 for room in temps:
                     obj = check_temp(room, alert, temps,
-                                                   known_issues,
-                                                   next_id, last_events,
-                                                   new_events, get_psid)
+                                     known_issues,
+                                     next_id, last_events,
+                                     new_events, get_psid)
                     next_id = obj[0]
                     new_events = obj[1]
                     insert_sql_total += obj[2]
@@ -775,7 +738,6 @@ if __name__ == "__main__":
                 try:
                     data_list = command_to_list_multiple(selection_command, 2)
                 except Exception:
-                    safe_log("Checked " + str(i + 1), "info")
                     continue
 
                 aliases = {}
@@ -803,9 +765,6 @@ if __name__ == "__main__":
                     next_id = obj[0]
                     new_events = obj[1]
                     insert_sql_total += obj[2]
-
-                safe_log("Checked " + str(i + 1), "info")
-
             else:
                 safe_log("Could not find valid condition/value for " +
                          str(alert), "info")
@@ -826,17 +785,16 @@ if __name__ == "__main__":
     if LOG:
         write_json_generic(new_events, next_id)
     if SEND:
-        f = open("/home/bmeares/cache/insert_alert_system.sql", "w")
+        f = open("/cevac/cache/insert_alert_system.sql", "w")
         f.write(insert_sql_total.replace(';', '\nGO\n'))
         f.close()
-        os.system("/home/bmeares/scripts/exec_sql_script.sh "
-                  "/home/bmeares/cache/insert_alert_system.sql")
+        os.system("/cevac/scripts/exec_sql_script.sh "
+                  "/cevac/cache/insert_alert_system.sql")
     else:
         print(insert_sql_total.replace(';', '\nGO\n'))
 
     if LOG:
-        logging.info(str(datetime.datetime.now()) +
-                     " TOTAL ISSUES: " + str(total_issues))
+        logging.info(str(datetime.datetime.now()))
         logging.shutdown()
 
 """

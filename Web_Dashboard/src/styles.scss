@@ -3,7 +3,7 @@
 @import '~bootstrap/scss/functions';
 @import '~bootstrap/scss/variables';
 @import '~bootstrap/scss/mixins';
-// Import Roboot (ensures consistency across browsers)
+// Import Reboot (ensures consistency across browsers)
 @import '~bootstrap/scss/reboot';
 
 //bring in our material theme for use on custom components
@@ -78,6 +78,10 @@ FLEX UTILITIES
   justify-content: stretch;
 }
 
+.flex-align-stretch {
+  align-items: stretch;
+}
+
 .flex-none {
   flex: none;
 }
@@ -104,13 +108,18 @@ FLEX UTILITIES
   width: 0px;
 }
 
-.routerFiller + * {
-  flex: 1 1 100%;
-}
-
 /******************************************************************************
 MATERIAL CUSTOMIZATION
 ******************************************************************************/
+
+//Globally set size of sidebars
+mat-sidenav {
+  width: 18rem;
+}
+
+.scrollContainer {
+  @include scrollcontainer;
+}
 
 // exactly what it says it is
 .scrollableExpansion {
@@ -127,15 +136,6 @@ MATERIAL CUSTOMIZATION
   flex: auto;
   min-height: 0;
   overflow-y: auto;
-}
-
-// for when you need a heading to overflow (badges, notifications, etc.)
-// originally written for alertbox. May or may not work well elsewhere.
-.mat-child-overflow > .mat-content {
-  overflow: visible;
-  .mat-badge-content {
-    margin-top: 2px;
-  }
 }
 
 // Sometimes expansion panel headers are wonky if you don't center content

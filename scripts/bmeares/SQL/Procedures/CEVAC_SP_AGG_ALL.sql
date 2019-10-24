@@ -103,7 +103,7 @@ INSERT INTO ' + @HIST_LASR_INT + '
 SELECT h.* FROM ' + @HIST + ' as h
 INNER JOIN ' + @XREF + ' AS xref ON xref.' + @IDName + ' = h.' + @IDName + '
 WHERE xref.ReadingType NOT LIKE ''%SP%''
-AND h.' + @DataName + ' BETWEEN @begin_UTC AND @now_UTC;
+AND h.' + @DateTimeName + ' BETWEEN @begin_UTC AND @now_UTC;
 ';
 PRINT @EXEC_SQL;
 IF @execute = 1 EXEC(@EXEC_SQL);

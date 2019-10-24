@@ -15,7 +15,7 @@ export class AlertService {
   private alerts!: Alert[];
   private alertsSubject!: BehaviorSubject<Alert[]>;
   private alerts$!: Observable<Alert[]>;
-  private alertsUrl = 'http://wfic-cevac1/requests/alerts.php';
+  private alertsUrl = 'http://wfic-cevac1/api/alerts';
 
   constructor(private http: HttpClient) {
     this.initialize();

@@ -69,7 +69,7 @@ export class ColorService {
     }
   };
   private scales: ScaleSet = {
-    POWER: new Scale([0, 200, 400, 600, 800, 1000]),
+    POWER: new Scale([0, 75, 150, 225, 300, 375]),
     TEMP_SPACE: new Scale([61, 68, 73, 80]),
     CO2: new Scale([0, 500, 800, 1000, 1200]),
     IAQ: new Scale([0, 500, 800, 1000, 1200]),
