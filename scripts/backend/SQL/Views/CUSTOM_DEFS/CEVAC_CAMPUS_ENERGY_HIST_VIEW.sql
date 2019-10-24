@@ -1,4 +1,3 @@
-set ansi_padding off;
 WITH aliases AS (
   SELECT DISTINCT Alias FROM CEVAC_CAMPUS_ENERGY_HIST_RAW
 ),
