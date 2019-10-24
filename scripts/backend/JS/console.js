@@ -171,3 +171,8 @@ function view_day_button_click(){
   reset_buttons(button);
   get_day_html();
 }
+function alerts_report_button_click(){
+  button = document.getElementById('alerts_report_button');
+
+  reset_buttons(button);
+}
