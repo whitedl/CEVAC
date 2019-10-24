@@ -23,6 +23,7 @@ function reset_PXREF(){
   pb = document.getElementById('PXREF_button');
   pb.innerHTML = view;
   document.getElementById('PXREF_div').style.display = 'none';
+  document.getElementById('download_button_div').style.display = 'none';
 }
 function PXREF_button_click(){
   pb = document.getElementById('PXREF_button');
