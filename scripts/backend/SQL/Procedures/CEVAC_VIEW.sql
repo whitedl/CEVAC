@@ -9,8 +9,6 @@ CREATE PROCEDURE CEVAC_VIEW
 	@keys_list NVARCHAR(500) = '',
 	@unitOfMeasureID int = NULL,
 	@execute BIT = 1
-	
-
 AS
 
 DECLARE @error NVARCHAR(MAX);
