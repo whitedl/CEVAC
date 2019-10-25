@@ -1,9 +1,7 @@
 """Parse alerts from CEVAC_ALL_ALERTS_HIST."""
 
 import os
-import bsql
 import datetime
-import time_handler
 import smtplib
 import ssl
 from jinja2 import Template
@@ -11,6 +9,9 @@ from email import message as msg
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 from time import sleep
+import csv
+import json
+from dateutil import tz
 
 import base64
 
@@ -19,17 +20,17 @@ email = "cevac5733@gmail.com"
 password = "cevacsteve5733"
 to_list = {
     "Harrison Hall": "hchall@g.clemson.edu",
-    "Bennett Meares": "bmeares@g.clemson.edu",
+#    "Bennett Meares": "bmeares@g.clemson.edu",
     #  "Inscribe boi": "bmeares@inscribe.productions",
-    "Zach Smith": "ztsmith@g.clemson.edu",
+#    "Zach Smith": "ztsmith@g.clemson.edu",
     # "Zach Klein": "ztklein@g.clemson.edu",
-    "Drewboi": "abemery@clemson.edu",
-    "Tim Howard": "timh@clemson.edu",
+#    "Drewboi": "abemery@clemson.edu",
+#    "Tim Howard": "timh@clemson.edu",
 }
 emergency_to_list = {
     "Harrison Hall": "hchall@g.clemson.edu",
-    "Bennett Meares": "bmeares@g.clemson.edu",
-    "Tim Howard": "timh@clemson.edu",
+#    "Bennett Meares": "bmeares@g.clemson.edu",
+#    "Tim Howard": "timh@clemson.edu",
 }
 
 alert_email_html_loc = "/cevac/CEVAC/alerts/alert_system/alert_email.html"
@@ -160,7 +161,7 @@ class Alert_Log:
             self.metric = metrics[alert[2].strip()]["key"]
         self.building = alert[4].strip()
         self.acknowledged = bool(int(alert[5]))
-        self.etc = time_handler.time_of_sql(alert[7])
+        self.etc = time_of_sql(alert[7])
         self.etc_str = self.etc.strftime("%m/%d/%y %I:%M %p")
         return None
 
@@ -277,6 +278,116 @@ def email_message(email, password, to_list, message, subject):
             server.sendmail(email, p_email, new_message)
 
 
+def sql_time_str(t):
+    """Return time in sql format."""
+    return t.strftime('%Y-%m-%d %H:%M:%S')
+
+
+def time_of_sql(time_str):
+    """Return datetime object of time string."""
+    t = datetime.datetime.strptime(time_str, '%Y-%m-%d %H:%M:%S.%f')
+    return t
+
+
+def est_to_utc(t):
+    """Convert est to utc."""
+    from_zone = tz.gettz('America/New_York')
+    to_zone = tz.gettz('UTC')
+
+    est = t.replace(tzinfo=from_zone)
+    utc = est.astimezone(to_zone)
+    return utc
+
+
+def utc_to_est(t):
+    """Convert utc to est."""
+    from_zone = tz.gettz('UTC')
+    to_zone = tz.gettz('America/New_York')
+
+    utc = t.replace(tzinfo=from_zone)
+    est = utc.astimezone(to_zone)
+    return est
+
+
+class Query:
+    """Turn a SELECT query into data."""
+
+    def __init__(self, sql_command):
+        """Turn a SELECT sql command into data."""
+        if "SELECT" in sql_command.upper():
+            self.command = sql_command
+            self.json_list = self.request_data(self.command)
+        else:
+            self.command = None
+            self.query = None
+            self.json_list = []
+
+    def request_data(self, command):
+        """Request data."""
+        os.system(f"/cevac/scripts/exec_sql.sh \"{command}\" "
+                  "temp1_csv.csv")
+        json_string = ""
+        headers = {}
+        with open("/cevac/cache/temp1_csv.csv", "r") as temp_csv:
+            csvfile = csv.reader(temp_csv)
+            for i, row in enumerate(csvfile):
+                if i == 0:
+                    for j, item in enumerate(row):
+                        headers[j] = item
+                else:
+                    temp_dict = {}
+                    try:
+                        for j, item in enumerate(row):
+                            temp_dict[headers[j]] = item
+                        json_string += str(temp_dict)
+                    except Exception:
+                        continue
+        data_readable = json_string.replace("\'", "\"")
+        data_list = data_readable.split("}{")
+        return self._data_list_to_dict_list(data_list)
+
+    def _data_list_to_dict_list(self, data_list):
+        dict_list = []
+        for i, d in enumerate(data_list):
+            d = d if d[0] == "{" else "{" + d
+            d = d if d[-1] == "}" else d + "}"
+            dict_list.append(json.loads(d))
+        data_list = []
+        for sd in dict_list:
+            try:
+                dl = []
+                for k in sd:
+                    dl.append(sd[k])
+                data_list.append(dl)
+            except Exception:
+                pass
+        return data_list
+
+    def as_dict(self, key=None):
+        """Return dictionary of data, keyed in as id or key."""
+        d = {}
+        # Validate key in every dict
+        if key is not None:
+            for data in self.json_list:
+                if key not in data.keys():
+                    key = None
+
+        # Make into dict
+        if key is None:
+            for i, data in enumerate(self.json_list):
+                d[i] = data
+        else:
+            for data in self.json_list:
+                d[data[key]] = data
+
+        return d
+
+    def as_json_dict(self):
+        """Return dictionary of data, with dicts instead of lists."""
+        d = {}
+        return d
+
+            
 def main():
     """Do main function."""
     # Get alerts from the past day
@@ -285,14 +396,14 @@ def main():
         now = datetime.datetime.utcnow()
         day = datetime.timedelta(1)
         yesterday = now - day
-        alerts = bsql.Query(f" DECLARE @yesterday DATETIME; SET @yesterday = "
-                            f"DATEADD(day,"
-                            f" -1, GETDATE()); SELECT"
-                            f" TOP 100 * FROM CEVAC_ALL_ALERTS_EVENTS_LATEST "
-                            f" WHERE ETDateTime >= @yesterday "
-                            f" ORDER BY ETDateTime DESC")
-        now_etc = time_handler.utc_to_est(now)
-        yesterday_etc = time_handler.utc_to_est(yesterday)
+        alerts = Query(f" DECLARE @yesterday DATETIME; SET @yesterday = "
+                       f"DATEADD(day,"
+                       f" -1, GETDATE()); SELECT"
+                       f" TOP 100 * FROM CEVAC_ALL_ALERTS_EVENTS_LATEST "
+                       f" WHERE ETDateTime >= @yesterday "
+                       f" ORDER BY ETDateTime DESC")
+        now_etc = utc_to_est(now)
+        yesterday_etc = utc_to_est(yesterday)
         now_etc_str = now_etc.strftime("%m/%d/%y %I:%M %p")
         yesterday_etc_str = yesterday_etc.strftime("%m/%d/%y %I:%M %p")
 
@@ -326,13 +437,17 @@ def main():
 
         subject = f"CEVAC alert log from {yesterday_etc_str} to {now_etc_str}"
         email_message(email, password, to_list, total_msg, subject)
-    except Exception:
-        f = open("/cevac/DEV/scripts/harrison/alerts/alert_emergency.html",
+    except Exception as e:
+        print(e)
+        f = open("/cevac/DEV/alerts/alert_system/alert_emergency.html",
                  "r")
         emergency_email = "".join(f.readlines())
         email_message(email, password, emergency_to_list,
                       emergency_email, "ISSUES WITH CEVAC ALERTS")
 
+if __name__ == "__main__":
+    main()
+    
 
 '''
     /##.*/
