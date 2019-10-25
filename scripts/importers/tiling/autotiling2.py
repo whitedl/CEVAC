@@ -12,6 +12,7 @@ from pywinauto import application
 from win32api import GetSystemMetrics
 from time import sleep
 import keyboard
+import win32gui #HOW DO I GET THIS TO SHOW UP
 
 startapps = pywinauto.findwindows.find_elements(title_re=".*Chrome")
 managed_window_handles = [child.handle for child in startapps]
@@ -25,236 +26,72 @@ for handle in managed_window_handles:
 # Starts from 0,0 in top-left
 screenx, screeny = (GetSystemMetrics(0), GetSystemMetrics(1))
 
-max_windows = 10
+max_windows = 8
+
+# Talked to Harrison -- Maybe do it as positions_a = { then 0:{} 1:{} and so on.
+# then just set positions equal to positions a because we always want
+# these windows set up}
+# WHAT TO DO WITH MORE THAN MAX.  How do I tile/account for position of7th building?
 
 # Moves new windows in the following shapes:
-'''
-***************
-*     *       *
-*  0  *   1   *
-*     *       *
-***************
-'''
-positions_a = {
-    0: {
-        "x": screenx * (0),
-        "y": screeny * (0),
-        "w": screenx * (1 / 2),
-        "h": screeny * (1),
-    },
-    1: {
-        "x": screenx * (1 / 2),
-        "y": screeny * (0),
-        "w": screenx * (1 / 2),
-        "h": screeny * (1),
-    },
-}
-
-'''
-***************
-*     *   1   *
-*  0  *********
-*     *   2   *
-***************
-'''
-positions_b = {
-    0: {
-        "x": screenx * (0),
-        "y": screeny * (0),
-        "w": screenx * (1 / 2),
-        "h": screeny * (1),
-    },
-    1: {
-        "x": screenx * (1 / 2),
-        "y": screeny * (0),
-        "w": screenx * (1 / 2),
-        "h": screeny * (1 / 2),
-    },
-    2: {
-        "x": screenx * (1 / 2),
-        "y": screeny * (1 / 2),
-        "w": screenx * (1 / 2),
-        "h": screeny * (1 / 2),
-    },
-}
-
-'''
-***************
-*     * 1 * 2 *
-*  0  *********
-*     * 3 * 4 *
-***************
-'''
-positions_c = {
-    0: {
-        "x": screenx * (0),
-        "y": screeny * (0),
-        "w": screenx * (1 / 2),
-        "h": screeny * (1),
-    },
-    1: {
-        "x": screenx * (1 / 2),
-        "y": screeny * (0),
-        "w": screenx * (1 / 4),
-        "h": screeny * (1 / 2),
-    },
-    2: {
-        "x": screenx * (3 / 4),
-        "y": screeny * (0),
-        "w": screenx * (1 / 4),
-        "h": screeny * (1 / 2),
-    },
-    3: {
-        "x": screenx * (1 / 2),
-        "y": screeny * (1 / 2),
-        "w": screenx * (1 / 4),
-        "h": screeny * (1 / 2),
-    },
-    4: {
-        "x": screenx * (3 / 4),
-        "y": screeny * (1 / 2),
-        "w": screenx * (1 / 4),
-        "h": screeny * (1 / 2),
-    },
-}
-
-'''
-***************
-* 1 *  0  * 2 *
-***************
-* 3 * 5*6 * 7 *
-***************
-'''
-positions_d = {
-    0: {
-        "x": screenx * (1 / 4),
-        "y": screeny * (0),
-        "w": screenx * (1 / 2),
-        "h": screeny * (1 / 2),
-    },
-    1: {
-        "x": screenx * (0),
-        "y": screeny * (0),
-        "w": screenx * (1 / 4),
-        "h": screeny * (1 / 2),
-    },
-    2: {
-        "x": screenx * (3 / 4),
-        "y": screeny * (0),
-        "w": screenx * (1 / 4),
-        "h": screeny * (1 / 2),
-    },
-    3: {
-        "x": screenx * (0),
-        "y": screeny * (1 / 2),
-        "w": screenx * (1 / 4),
-        "h": screeny * (1 / 2),
-    },
-    4: {
-        "x": screenx * (1 / 4),
-        "y": screeny * (1 / 2),
-        "w": screenx * (1 / 4),
-        "h": screeny * (1 / 2),
-    },
-    5: {
-        "x": screenx * (2 / 4),
-        "y": screeny * (1 / 2),
-        "w": screenx * (1 / 4),
-        "h": screeny * (1 / 2),
-    },
-    6: {
-        "x": screenx * (3 / 4),
-        "y": screeny * (1 / 2),
-        "w": screenx * (1 / 4),
-        "h": screeny * (1 / 2),
-    },
-}
-
-'''
-***************
-* 1 *  0  * 2 *
-***************
-*3*4*5*6*7*8*9*
-***************
-'''
-positions_e = {
-    0: {
-        "x": screenx * (1 / 4),
-        "y": screeny * (0),
-        "w": screenx * (1 / 2),
-        "h": screeny * (1 / 2),
-    },
-    1: {
-        "x": screenx * (0),
-        "y": screeny * (0),
-        "w": screenx * (1 / 4),
-        "h": screeny * (1 / 2),
-    },
-    2: {
-        "x": screenx * (3 / 4),
-        "y": screeny * (0),
-        "w": screenx * (1 / 4),
-        "h": screeny * (1 / 2),
-    },
-    3: {
-        "x": screenx * (0),
-        "y": screeny * (1 / 2),
-        "w": screenx * (1 / 7),
-        "h": screeny * (1 / 2),
-    },
-    4: {
-        "x": screenx * (1 / 7),
-        "y": screeny * (1 / 2),
-        "w": screenx * (1 / 7),
-        "h": screeny * (1 / 2),
-    },
-    5: {
-        "x": screenx * (2 / 7),
-        "y": screeny * (1 / 2),
-        "w": screenx * (1 / 7),
-        "h": screeny * (1 / 2),
-    },
-    6: {
-        "x": screenx * (3 / 7),
-        "y": screeny * (1 / 2),
-        "w": screenx * (1 / 7),
-        "h": screeny * (1 / 2),
-    },
-    7: {
-        "x": screenx * (4 / 7),
-        "y": screeny * (1 / 2),
-        "w": screenx * (1 / 7),
-        "h": screeny * (1 / 2),
-    },
-    8: {
-        "x": screenx * (5 / 7),
-        "y": screeny * (1 / 2),
-        "w": screenx * (1 / 7),
-        "h": screeny * (1 / 2),
-    },
-    9: {
-        "x": screenx * (6 / 7),
-        "y": screeny * (1 / 2),
-        "w": screenx * (1 / 7),
-        "h": screeny * (1 / 2),
-    },
-}
-
-# Dict of positions
 all_positions = {
-    0: positions_a,
-    1: positions_a,
-    2: positions_a,
-    3: positions_b,
-    4: positions_c,
-    5: positions_c,
-    6: positions_d,
-    7: positions_d,
-    8: positions_e,
-    9: positions_e,
-    10: positions_e,
-}
+    0:  {
+        "x": screenx * (0),
+        "y": screeny * (0),
+        "w": screenx * (1/4),
+        "h": screeny * (1/2),
+        },
 
+    1:  {
+        "x": screenx * (1/4),
+        "y": screeny * (0),
+        "w": screenx * (1/4),
+        "h": screeny * (1/2),
+        },
+
+    2:  {
+        "x": screenx * (1/2),
+        "y": screeny * (0),
+        "w": screenx * (1/4),
+        "h": screeny * (1/2),
+        },
+
+    3:  {
+        "x": screenx * (3/4),
+        "y": screeny * (0),
+        "w": screenx * (1/4),
+        "h": screeny * (1/2),
+        },
+
+    4:  {
+        "x": screenx * (0),
+        "y": screeny * (1/2),
+        "w": screenx * (1/4),
+        "h": screeny * (1/2),
+        },
+
+    5:  {
+        "x": screenx * (1/4),
+        "y": screeny * (1/2),
+        "w": screenx * (1/4),
+        "h": screeny * (1/2),
+        },
+
+    6:  {
+        "x": screenx * (1/2),
+        "y": screeny * (1/2),
+        "w": screenx * (1/4),
+        "h": screeny * (1/2),
+        },
+
+    7:  {
+        "x": screenx * (3/4),
+        "y": screeny * (1/2),
+        "w": screenx * (1/4),
+        "h": screeny * (1/2),
+        },
+    }
+# Dict of positions
 keep_running = True
 while keep_running:
     keyboard.start_recording()
@@ -267,26 +104,60 @@ while keep_running:
         except Exception:
             pass
 
-    # Remove old/gone Windows
-    while len(apps) > max_windows:
-        apps[1].window(handle=managed_window_handles[1]).close()
-        apps.remove(apps[1])
-        managed_window_handles.remove(managed_window_handles[1])
+    # # Cycle through Extra Windows
+    # while len(apps) > max_windows:
+    #     itr=0
+    #     while itr < len(apps)-max_windows:
+    #         print(type(apps[itr]), type(managed_window_handles[itr]))
+    #         #win32gui.SetForegroundWindow(apps[itr].window(handle=managed_window_handles[itr]))
+    #         apps[itr].window(handle=managed_window_handles[itr]).set_focus()
+    #         itr=itr+1
+    #     sleep(10)
+    #     while itr >=0:
+    #         apps[itr + max_windows].window(handle=managed_window_handles[itr + max_windows]).set_focus()
+    #         itr=itr-1
+    #     sleep(10)
 
-    for i, handle in enumerate(managed_window_handles):
-        if handle not in [spec.handle for spec in pywinauto.findwindows.find_elements(title_re=".*Chrome")]:
-            apps.remove(apps[i])
-            managed_window_handles.remove(managed_window_handles[i])
+    #Cycle Take 2
+    for i,app in enumerate(apps):
+        if i<max_windows:
+            apps[i].window(handle=managed_window_handles[i]).set_focus()
+    sleep(3)
+    print(apps)
+    for i,app in enumerate(apps):
+        if i>=max_windows:
+            apps[i],apps[i-max_windows]=(apps[i-max_windows],apps[i])
+    print(apps)
+    #sleep(1)
+
+#Need to find way to account for closing and opening a window, maybe? not priority
+
+        #Need to figure out how I could maybe keep the map.
+        #Would it work if I start with 1 instead of 0?
+
+        # #Code if wanted to remove handles and windows
+        # apps[1].window(handle=managed_window_handles[1]).close()
+        # apps.remove(apps[1])
+        # managed_window_handles.remove(managed_window_handles[1])
+    #
+    # for i, handle in enumerate(managed_window_handles):
+    #     if handle not in [spec.handle for spec in pywinauto.findwindows.find_elements(title_re=".*Chrome")]:
+    #         apps.remove(apps[i])
+    #         managed_window_handles.remove(managed_window_handles[i])
 
     # Tile windows correctly
     for i, (handle, app) in enumerate(zip(managed_window_handles, apps)):
         try:
-            positions = all_positions[len(apps)]
+            positions = all_positions   #[len(apps)]
+
+            if(i > max_windows):
+                i=i-max_windows
 
             xpos = int(positions[i]["x"])
             ypos = int(positions[i]["y"])
             width = int(positions[i]["w"])
             height = int(positions[i]["h"])
+
             app.window(handle=handle).move_window(
                 x=xpos, y=ypos, width=width, height=height)
         except Exception:
