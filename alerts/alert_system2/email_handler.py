@@ -2,7 +2,7 @@
 
 import os
 import datetime
-import pytz as tz
+from dateutil import tz
 import smtplib
 import ssl
 from jinja2 import Template
@@ -10,21 +10,21 @@ from email import message as msg
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 import pandas as pd
-import sys
-
+import pyodbc
 import base64
+import sys
 
 KNOWN_ISSUES_FPATH = "/cevac/CEVAC/known issues/Known Data Issues.csv"
 email = "cevac5733@gmail.com"
 password = "cevacsteve5733"
 to_list = {
     "Harrison Hall": "hchall@g.clemson.edu",
-    #"Bennett Meares": "bmeares@g.clemson.edu",
+    "Bennett Meares": "bmeares@g.clemson.edu",
     #  "Inscribe boi": "bmeares@inscribe.productions",
-    #"Zach Smith": "ztsmith@g.clemson.edu",
+    "Zach Smith": "ztsmith@g.clemson.edu",
     # "Zach Klein": "ztklein@g.clemson.edu",
-    #"Drewboi": "abemery@clemson.edu",
-    #"Tim Howard": "timh@clemson.edu",
+    "Drewboi": "abemery@clemson.edu",
+    "Tim Howard": "timh@clemson.edu",
 }
 emergency_to_list = {
     "Harrison Hall": "hchall@g.clemson.edu",
@@ -41,7 +41,7 @@ def encode64(image_fpath):
     return base64.b64encode(open(image_fpath, 'rb').read()).decode('utf-8')
 
 
-pic_path = "/cevac/DEV/scripts/harrison/alerts/pics/"
+pic_path = "pics/"
 metrics_a = {
     "TEMP": {
         "key": "<TEMP>",
@@ -150,11 +150,13 @@ metrics = {
 class Email:
     """OO manage email."""
 
-    def __init__(self, conn, hours=24, verbose=False):
+    def __init__(self, hours=24, verbose=False):
         """Object oriented version for emails."""
         self.hours = hours
         self.verbose = verbose
-        self.conn = conn
+        self.conn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};'
+                                   'SERVER=130.127.218.11;DATABASE=WFIC-CEVAC;'
+                                   'UID=wficcm;PWD=5wattcevacmaint$')
 
     def send(self):
         """Do main function."""
@@ -171,7 +173,7 @@ class Email:
                                        f" TOP 100 * "
                                        "FROM CEVAC_ALL_ALERTS_EVENTS_LATEST "
                                        f" WHERE ETDateTime >= @yesterday "
-                                       f" ORDER BY ETDateTime DESC")
+                                       f" ORDER BY ETDateTime DESC", self.conn)
             now_etc = self.utc_to_est(now)
             yesterday_etc = self.utc_to_est(yesterday)
             now_etc_str = now_etc.strftime("%m/%d/%y %I:%M %p")
@@ -205,7 +207,9 @@ class Email:
             subject = (f"CEVAC alert log from {yesterday_etc_str} to "
                        f"{now_etc_str}")
             self.email_message(email, password, to_list, total_msg, subject)
-        except Exception:
+        except Exception as e:
+            print(e)
+            sys.exit()
             f = open("html/alert_emergency.html", "r")
             emergency_email = "".join(f.readlines())
             self.email_message(email, password, emergency_to_list,
@@ -284,14 +288,14 @@ class Alert_Log:
 
     def __init__(self, alerts, i):
         """Init."""
-        self.type = alerts[i]["AlertType"].strip()
-        self.message = alerts[i]["AlertMessage"].strip()
+        self.type = alerts["AlertType"][i].strip()
+        self.message = alerts["AlertMessage"][i].strip()
         self.metric = metrics["UNKNOWN"]["key"]
-        if alerts[i]["Metric"].strip() in metrics:
-            self.metric = metrics[alerts[i]["Metric"].strip()]["key"]
-        self.building = alerts[i]["BuildingDName"].strip()
-        self.acknowledged = alerts[i]["Acknowledged"]
-        self.etc = alerts[i]["ETDateTime"]  # self.time_of_sql(alert[7])
+        if alerts["Metric"][i].strip() in metrics:
+            self.metric = metrics[alerts["Metric"][i].strip()]["key"]
+        self.building = alerts["BuildingDName"][i].strip()
+        self.acknowledged = alerts["Acknowledged"][i]
+        self.etc = alerts["ETDateTime"][i]  # self.time_of_sql(alert[7])
         self.etc_str = self.etc.strftime("%m/%d/%y %I:%M %p")
         return None
 
