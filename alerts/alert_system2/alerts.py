@@ -30,26 +30,23 @@ TIME = {
 }
 
 
-class Alert:
-    def __init__(self, verbose=False):
-        self.message = ""
-        self.verbose = verbose
-
-
 class Alerts:
     """Handler for all alerts."""
 
     def __init__(self, logging, verbose=False):
         """Initialize connection and other objects."""
         self.logging = logging
+        self.LOG = True
+        if logging is None:
+            self.LOG = False
+            
         self.conn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};'
                                    'SERVER=130.127.218.11;DATABASE=WFIC-CEVAC;'
                                    'UID=wficcm;PWD=5wattcevacmaint$')
         self.occ = Occupancy(self.conn)
-        self.par = Parameters(self.conn)
+        self.par = read_sql_query("SELECT * FROM CEVAC_ALERT_PARAMETERS" , self.conn)
         self.known_issues = Known_Issues(self.conn)
         self.verbose = verbose
-        self.all_alerts = []
         self.anomalies = []
 
     def alert_system(self):
@@ -57,20 +54,6 @@ class Alerts:
         print("Will run alert system.")
 
     def run(self):
-        # Initialize logging
-        if LOG:
-            FORMAT = '%(asctime)s %(levelname)s:%(message)s'
-            datestring = str(datetime.datetime.now().date())
-            log_file = os.path.join(LOGGING_PATH, datestring + '.log')
-            logging.basicConfig(filename=log_file, format=FORMAT,
-                                level=logging.INFO)
-            logging.info("NEW JOB\n---")
-
-        # Get alert conditions
-        alerts, unique_databases = import_conditions(alert_fname, logging)
-        known_issues = import_known_issues(KNOWN_ISSUES_FPATH)
-        occupancy = import_occupancy()
-
         # Parse json files for event IDs
         next_id, last_events = self.parse_json(json_oc, json_unoc)
         new_events = {}  # id: { "hash" : event_id }
@@ -89,7 +72,7 @@ class Alerts:
                 now = datetime.datetime.now()
                 day = now.isoweekday()
                 hour = now.hour
-                occupied = building_is_occupied(occupancy, alert["building"])
+                occupied = self.occ.building_is_occupied(alert["building"])
                 if (alert["time_dependent"]):
                     if ((alert["occupancy_status"] and (not occupied))
                             or (not alert["occupancy_status"] and (occupied))):
@@ -214,25 +197,18 @@ class Alerts:
 
     def send(self):
         """Send anomalies to sql."""
-        self.write_json_generic(new_events, next_id)
-        f = open("/cevac/cache/insert_alert_system.sql", "w")
-        f.write(insert_sql_total.replace(';', '\nGO\n'))
-        f.close()
-        os.system("/cevac/scripts/exec_sql_script.sh "
-                  "/cevac/cache/insert_alert_system.sql")
+        self.write_json_generic(new_events, next_id)  # Write event IDs
 
-        if LOG:
-            logging.info(str(datetime.datetime.now()))
-            logging.shutdown()
+        # Commit db changes TODO
 
-    def print_anomalies(self):
-        """Print anomalies."""
-        print(insert_sql_total.replace(';', '\nGO\n'))
+        if self.LOG:
+            self.logging.info(str(datetime.datetime.now()))
+            self.logging.shutdown()
 
     def write_json_generic(self, new_events, next_id):
         """Write json independent of time."""
         new_events["next_id"] = next_id
-        if is_occupied():
+        if self.occ.is_occupied():
             f = open(json_oc, "w")
         else:
             f = open(json_unoc, "w")
@@ -292,32 +268,31 @@ class Alerts:
     def get_alias_or_psid(self, table_name):
         """Return whether a table uses alias or point slice id."""
         request_str = f"EXEC CEVAC_ALIAS_OR_PSID @table = '{table_name}'"
-        r_dict = json.loads(command_to_json_string(request_str).replace("'", '"'))
-        for key in r_dict:
-            return r_dict[key]
+        sol = pd.read_sql_query(request_str, self.conn)
+        return sol[''][0]
 
     def get_psid_from_alias(self, alias, bldgsname, metric):
         """Return the (most recent) pointsliceid from an alias."""
-        print(f"get psid from alias: {alias} {bldgsname} {metric}")
-        try:
-            command = (f"EXEC CEVAC_XREF_LOOKUP @BuildingSName = '{bldgsname}', "
-                       f"@Metric = '{metric}', @Alias = '{alias}'")
-            os.system("/cevac/scripts/exec_sql.sh \"" + command +
-                      "\" temp_psid_csv.csv")
-            f = open("/cevac/cache/temp_psid_csv.csv", "r")
-            lines = f.readlines()
-            try:
-                psids = [int(psid.replace("\n", "")) for i,
-                         psid in enumerate(lines) if i > 0]
-                os.remove("/cevac/cache/temp_psid_csv.csv")
-                return str(max(psids))
-            except Exception:
-                os.remove("/cevac/cache/temp_psid_csv.csv")
-                return str(int(lines[-1].replace("\n", "")))
-        except Exception:
-            print("could not get psid from alias")
-            os.remove("/cevac/cache/temp_psid_csv.csv")
-            return ""
+
+        # TODO doesn't work
+        print(f"Get psid from alias: {alias} {bldgsname} {metric}")
+        command = (f"EXEC CEVAC_XREF_LOOKUP @BuildingSName = '{bldgsname}', "
+                   f"@Metric = '{metric}', @Alias = '{alias}'")
+        sol = pd.read_sql_query(command, self.conn)
+        psids = []
+        return str(max(psids))
+
+    def get_alias_from_psid(self, psid, bldgsname, metric):
+        """Return the (most recent) pointsliceid from an alias."""
+
+        # TODO doesnt' work
+        print(f"Get psid from alias: {alias} {bldgsname} {metric}")
+        command = (f"EXEC CEVAC_XREF_LOOKUP @BuildingSName = '{bldgsname}', "
+                   f"@Metric = '{metric}', @PointSliceID = {psid}")
+        sol = pd.read_sql_query(command, self.conn)
+        psids = []
+        return str(max(psids))
+
 
     def check_numerical_alias(self, alias, alert, next_id, last_events, new_events,
                               get_psid):
@@ -545,7 +520,10 @@ class Anomalie:
 
 
 class Occupancy:
-    """Simple singleton to maintain occupancy data."""
+    """Simple singleton to maintain occupancy data.
+    
+    Note: this is complete.
+    """
 
     def __init__(self, conn):
         """Initialize building_occupied map."""
@@ -566,7 +544,7 @@ class Occupancy:
                     self.building_occupied[
                         data["BuildingSName"][i]] = data['Occupied'][i]
 
-    def building_is_occupied(self, occupancy_dict, building):
+    def building_is_occupied(self, building):
         """Return True if in occupied time."""
         if building not in self.building_occupied:
             return self.building_occupied["*"]
