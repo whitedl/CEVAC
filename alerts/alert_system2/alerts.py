@@ -541,6 +541,7 @@ class Anomalie:
         self.psid = psid
         self.alert = alert
         self.actual_value = actual_value
+        self.alert_type = ""  # time, abs, tempsp...
 
 
 class Occupancy:
@@ -595,13 +596,37 @@ class Occupancy:
 
 
 class Parameters:
+    """Represents alert parameters."""
+    
     def __init__(self, conn):
-        pass
+        """Initialize parameters."""
+        data = pd.read_sql_query("SELECT * FROM CEVAC_ALERT_PARAMETERS", conn)
+        self.alert_parameters = []
+        for i, in range(len(data)):
+            self.alert_parameters.append({
+                "metric": data['Metric'][i],
+                "condition": data['Condition'][i],
+                "message": data['Message'][i],
+                "importance": data['Importance'][i],
+                "occupancy": data['Occupancy'][i],
+            })
+
 
 
 class Known_Issues:
+    """Represents known issues to ignore."""
+    
     def __init__(self, conn):
-        pass
+        """Initialize known issues."""
+        data = pd.read_sql_query("SELECT * FROM CEVAC_KNOWN_ISSUES", conn)
+        self.alias_psid = {}
+        for i in range(len(data)):
+            if 'decomissioned' in data['Code'][i].lower():
+                self.alias_psid[data['Alias-PSID']] = None
+
+    def check_aliaspsid(self, aliaspsid):
+        return (aliaspsid in self.alias_psid)
+        
 
 
 def rebuild_broken_cache(table):
@@ -627,8 +652,8 @@ def verbose_print(verbose, message):
 if __name__ == "__main__":
     print("DEBUG ALERT SYSTEM")
     all_alerts = Alerts(None, verbose=True)
+    
     print(all_alerts.occ.building_occupied)
-
     print("FINISHED")
 
 
