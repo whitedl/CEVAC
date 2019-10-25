@@ -1,16 +1,16 @@
 """Parse alerts from CEVAC_ALL_ALERTS_HIST."""
 
 import os
-import bsql
 import datetime
-import time_handler
+import pytz as tz
 import smtplib
 import ssl
 from jinja2 import Template
 from email import message as msg
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
-
+import pandas as pd
+import sys
 
 import base64
 
@@ -19,12 +19,12 @@ email = "cevac5733@gmail.com"
 password = "cevacsteve5733"
 to_list = {
     "Harrison Hall": "hchall@g.clemson.edu",
-    "Bennett Meares": "bmeares@g.clemson.edu",
+    #"Bennett Meares": "bmeares@g.clemson.edu",
     #  "Inscribe boi": "bmeares@inscribe.productions",
-    "Zach Smith": "ztsmith@g.clemson.edu",
+    #"Zach Smith": "ztsmith@g.clemson.edu",
     # "Zach Klein": "ztklein@g.clemson.edu",
-    "Drewboi": "abemery@clemson.edu",
-    "Tim Howard": "timh@clemson.edu",
+    #"Drewboi": "abemery@clemson.edu",
+    #"Tim Howard": "timh@clemson.edu",
 }
 emergency_to_list = {
     "Harrison Hall": "hchall@g.clemson.edu",
@@ -150,10 +150,11 @@ metrics = {
 class Email:
     """OO manage email."""
 
-    def __init__(self, hours=24, verbose=False):
+    def __init__(self, conn, hours=24, verbose=False):
         """Object oriented version for emails."""
         self.hours = hours
         self.verbose = verbose
+        self.conn = conn
 
     def send(self):
         """Do main function."""
@@ -163,26 +164,23 @@ class Email:
             now = datetime.datetime.utcnow()
             day = datetime.timedelta(1)
             yesterday = now - day
-            alerts = bsql.Query(f" DECLARE @yesterday DATETIME; SET "
-                                "@yesterday = "
-                                f"DATEADD(day,"
-                                f" -1, GETDATE()); SELECT"
-                                f" TOP 100 * "
-                                "FROM CEVAC_ALL_ALERTS_EVENTS_LATEST "
-                                f" WHERE ETDateTime >= @yesterday "
-                                f" ORDER BY ETDateTime DESC")
-            now_etc = time_handler.utc_to_est(now)
-            yesterday_etc = time_handler.utc_to_est(yesterday)
+            alerts = pd.read_sql_query(f" DECLARE @yesterday DATETIME; SET "
+                                       "@yesterday = "
+                                       f"DATEADD(day,"
+                                       f" -1, GETDATE()); SELECT"
+                                       f" TOP 100 * "
+                                       "FROM CEVAC_ALL_ALERTS_EVENTS_LATEST "
+                                       f" WHERE ETDateTime >= @yesterday "
+                                       f" ORDER BY ETDateTime DESC")
+            now_etc = self.utc_to_est(now)
+            yesterday_etc = self.utc_to_est(yesterday)
             now_etc_str = now_etc.strftime("%m/%d/%y %I:%M %p")
             yesterday_etc_str = yesterday_etc.strftime("%m/%d/%y %I:%M %p")
 
-            alert_dict = alerts.as_dict()
-
             total_msg = ""
             all_alerts = []
-            for i, key in enumerate(alert_dict):
-                alert = alert_dict[key]
-                all_alerts.append(Alert_Log(alert))
+            for i in range(len(alerts)):
+                all_alerts.append(Alert_Log(alerts, i))
 
             all_alerts = sorted(all_alerts)
             alert_gd = {}
@@ -259,25 +257,41 @@ class Email:
                 # Define the image's ID as referenced above
                 m_message.attach(a_msg)
 
-                new_message = replace_metric(m_message.as_string())
+                new_message = self.replace_metric(m_message.as_string())
                 if self.verbose:
                     print(new_message)
                 server.sendmail(email, p_email, new_message)
+
+    def replace_metric(self, rep_str):
+        """Replace metric str with character."""
+        for metric in metrics:
+            m = metrics[metric]
+            rep_str = rep_str.replace(m["key"], m["char"])
+        return rep_str
+
+    def utc_to_est(self, t):
+        """Convert utc to est."""
+        from_zone = tz.gettz('UTC')
+        to_zone = tz.gettz('America/New_York')
+
+        utc = t.replace(tzinfo=from_zone)
+        est = utc.astimezone(to_zone)
+        return est
 
 
 class Alert_Log:
     """Handles sorting alerts."""
 
-    def __init__(self, alert):
+    def __init__(self, alerts, i):
         """Init."""
-        self.type = alert[0].strip()
-        self.message = alert[1].strip()
+        self.type = alerts[i]["AlertType"].strip()
+        self.message = alerts[i]["AlertMessage"].strip()
         self.metric = metrics["UNKNOWN"]["key"]
-        if alert[2].strip() in metrics:
-            self.metric = metrics[alert[2].strip()]["key"]
-        self.building = alert[4].strip()
-        self.acknowledged = bool(int(alert[5]))
-        self.etc = time_handler.time_of_sql(alert[7])
+        if alerts[i]["Metric"].strip() in metrics:
+            self.metric = metrics[alerts[i]["Metric"].strip()]["key"]
+        self.building = alerts[i]["BuildingDName"].strip()
+        self.acknowledged = alerts[i]["Acknowledged"]
+        self.etc = alerts[i]["ETDateTime"]  # self.time_of_sql(alert[7])
         self.etc_str = self.etc.strftime("%m/%d/%y %I:%M %p")
         return None
 
@@ -336,13 +350,11 @@ class Alert_Log:
                 return True
         return False
 
+    def time_of_sql(time_str):
+        """Return datetime object of time string."""
+        t = datetime.datetime.strptime(time_str, '%Y-%m-%d %H:%M:%S.%f')
+        return t
 
-def replace_metric(rep_str):
-    """Replace metric str with character."""
-    for metric in metrics:
-        m = metrics[metric]
-        rep_str = rep_str.replace(m["key"], m["char"])
-    return rep_str
 
 
 '''
