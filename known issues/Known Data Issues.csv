@@ -1,70 +1,143 @@
-Event,Building Sname,Date,Power Effects,Temperature Effects,IAQ Effects,WAP Effects
-Partial Outage,WATT,9/10/2016,Monitors not in place,Many Sensors do not report,Many sensors do not report,Monitors not in place
-Outage Restored,WATT,9/13/2016,Monitors not in place,All sensors restored,All sensors restored,Monitors not in place
-Partial Outage,WATT,10/1/2016,Monitors not in place,Many Sensors do not report,Many sensors do not report,Monitors not in place
-Outage Restored,WATT,10/4/2016,Monitors not in place,All sensors restored,All sensors restored,Monitors not in place
-Metasys Outage,CAMPUS,5/27/2017,No Data collection,No Data Collection,No Data Collection,Monitors not in place
-Metasys Restored,CAMPUS,5/29/2017,Data collection restored,Data collection restored,Data collection restored,Monitors not in place
-Metasys Outage,CAMPUS,6/3/2017,No Data collection,No Data Collection,No Data Collection,Monitors not in place
-Metasys Restored,CAMPUS,6/6/2017,Data collection restored,Data collection restored,Data collection restored,Monitors not in place
-Metasys Outage,CAMPUS,6/9/2017,No Data collection,No Data Collection,No Data Collection,Monitors not in place
-Metasys Restored,CAMPUS,6/12/2017,Data collection restored,Data collection restored,Data collection restored,Monitors not in place
-Metasys Outage,CAMPUS,7/5/2017,No Data collection,No Data Collection,No Data Collection,Monitors not in place
-Metasys Restored,CAMPUS,7/26/2017,Data collection restored,Data collection restored,Data collection restored,Monitors not in place
-Metasys Outage,CAMPUS,10/2/2017,No Data collection,No Data Collection,No Data Collection,Monitors not in place
-Metasys Restored,CAMPUS,10/6/2017,Data collection restored,Data collection restored,Data collection restored,Monitors not in place
-Chilled Water Outage,WATT,12/16/2018,HVAC Power Consumption Increase,Temperature Increase,CO2 Decrease,Monitors not in place
-Chilled Water Restored,WATT,12/24/2018,Readings Normalized,Readings Normalized,Readings Normalized,Monitors not in place
-Power Outage ,WATT,2/19/2019,Non-emergency sensors do not report,Non-emergency sensors do not report,None,Monitors not in place
-Power Restored,WATT,2/21/2019,All sensors restored,All sensors restored,None,Monitors not in place
-Power Outage ,WATT,3/23/2019,Non-emergency sensors do not report,None,None,Monitors not in place
-Power Restored,WATT,3/23/2019,Normalization,None,None,Monitors not in place
-"WAP ""test"" users aggregated",WATT,5/25/2019,None,None,None,Guest Count Underestimated
-"WAP ""test"" users separated",WATT,6/12/2019,None,None,None,Guest Count Accuracy Improved
-RM 439A / Temp (31935) partial outage,WATT,11/17/2017,None,RM 439A / Temp reports 0 occasionally,None,None
-RM 439A / Temp (31935) restored,WATT,12/11/2017,None,RM 439A / Temp reports normally,None,None
-RM 439A / Temp (31935) total outage,WATT,3/20/2018,None,RM 439A / Temp reports only 0,None,None
-RM 439A / Temp (31935) restored,WATT,9/11/2018,None,RM 439A / Temp reports normally,None,None
-Several CO2 sensors offline,WATT,12/8/2015,None,None,"RM 205 / CO2, RM 207 / CO2, RM 209 / CO2, RM 211 / CO2, RM 333 / CO2, and Rm 344B / CO2 report 0",None
-RM 333 / CO2 (8907) online,WATT,5/27/2016,None,None,RM 333 / CO2 begins reporting,None
-RM 344B / CO2 (9191) online,WATT,12/28/2015,None,None,RM 344B / CO2 begins reporting,None
-RM 209 / CO2 (8843) online,WATT,12/9/2015,None,None,RM 209 / CO2 begins reporting,None
-RM 211 / CO2 (8837) online,WATT,12/9/2015,None,None,RM 211 / CO2 begins reporting,None
-RM 207 / CO2 (8849) online,WATT,12/9/2015,None,None,RM 207 / CO2 begins reporting,None
-RM 205 / CO2 (8855) online,WATT,12/9/2015,None,None,RM 205 / CO2 begins reporting,None
-RM 103 / Temp (8726) offline,WATT,5/9/2016,None,RM 103 / Temp (8726) does not report,None,None
-RM 103 / Temp (8726) restored,WATT,12/27/2017,None,RM 103 / Temp (8726) begins reporting,None,None
-RM 103 / Temp (8726) offline,WATT,2/11/2018,None,RM 103 / Temp (8726) does not report,None,None
-RM 103 / Temp (8726) restored,WATT,1/21/2019,None,RM 103 / Temp (8726) begins reporting,None,None
-RM 103 / Temp (8726) offline,WATT,3/25/2019,None ,RM 103 / Temp (8726) does not report,None,None
-RM 103 / Temp (8726) restored,WATT,6/24/2019,None,RM 103 / Temp (8726) begins reporting,None,None
-RM 433 / Temp (41435) offline,WATT,8/10/2018,None,RM 433 / Temp (41435) does not report,None,None
-RM 344A / Heating SP (8880) intentionally decommissioned,WATT,8/20/2016,None,RM 344A / Temp no longer reports,None,None
-RM 344A / Cooling SP (8879) intentionally decommissioned,WATT,8/20/2016,None,RM 344A / Temp no longer reports,None,None
-RM 344A / Temp (8884) intentionally decommissioned,WATT,8/20/2016,None,RM 344A / Temp no longer reports,None,None
-RM 214 / Temp (8572) offline,WATT,5/31/2018,None,RM 214 / Temp (8572) does not report,None,None
-RM 214 / Temp (8572) Restored,WATT,8/3/2018,None,RM 214 / Temp (8572) begins reporting,None,None
-RM 339A / Temp (8214) offline,WATT,2/6/2016,None,RM 339A / Temp (8214) does not report,None,None
-RM 339A / Temp (8214) restored,WATT,8/3/2016,None,RM 339A / Temp (8214) begins reporting,None,None
-RM 308 / Temp (9163) offline,WATT,8/9/2018,None,RM 308 / Temp (9163) does not report,None,None
-RM 433 / CO2 (41477) offline,WATT,8/9/2018,None,None,RM 433 / CO2 (41477) does not report,None
-RM 433 / CO2 (41477) restored,WATT,5/27/2019,None,None,RM 433 / CO2 (41477) begins reporting,None
-AHU1 Cooling Coil Discharge SP offline,WATT,5/27/2019,None,AHU1 Cooling Coil Discharge SP does not report,None,None
-RM 400N / Temp (41453) offline,WATT,8/9/2018,None,RM 400N / Temp (41453) does not report,None,None
-RM 305D / Temp (40422) Reports Very High,COOPER,6/27/2018,None,RM 305D / Temp (40422) reads values between 90 and 250,None,None
-RM 515 / Temp (3483) Reports Very High,COOPER,8/30/2016,None,RM 515 / Temp (3483) reads values between 90 and 130,None,None
-RM 515 / Temp (3483) Restored,COOPER,12/8/2016,None,RM 515 / Temp (3483) begins reporting normally,None,None
-Hourly WAP data now aggregated by half-hour,WATT,6/25/2018,None,None,None,WAP data now aggregated in 30 minute intervals
-Air Handler L1 Return Air CO2 (6636) Offline,ASC,10/5/2016,None,None,Air Handler L1 Return Air CO2 (6636) reports very low,None
-Air Handler L1 Return Air CO2 (6636) Restored,ASC,7/3/2019,None,None,Air Handler L1 Return Air CO2 (6636) reports normally,None
-Air Handler L1 Return Air CO2 1st Floor CO2 (6631) Offline,ASC,3/19/2018,None,None,Air Handler L1 Return Air CO2 1st Floor (6631) does not report,None
-Air Handler L1 Return Air CO2 3rd Floor CO2 (143) Offline,ASC,10/12/2018,None,None,Air Handler L1 Return Air 3rd Floor CO2 (143) reports low,None
-Air Handler R1 Return Air CO2 (6639) Offline,ASC,6/29/2016,None,None,Air Handler R1 Return Air CO2 (6639) reports very low,None
-Air Handler L1 Return Air 3rd Floor CO2 (6633) intentionally decommissioned,ASC,3/19/2018,None,None,Air Handler L1 Return Air 3rd Floor CO2 (6633) no longer reports,None
-Air Handler R1 Return Air 3rd Floor CO2 (6640) intentionally decommissioned,ASC,4/12/2018,None,None,Air Handler R1 Return Air 3rd Floor CO2 (6640) no longer reports,None
-Air Handler L1 Return Air 2nd Floor CO2 (6632) intentionally decommissioned,ASC,3/19/2018,None,None,Air Handler L1 Return Air 2nd Floor CO2 (6632) no longer reports,None
-Air Handler R1 Return Air 1st Floor CO2 (6629) intentionally decommissioned,ASC,4/12/2018,None,None,Air Handler R1 Return Air 1st Floor CO2 (6629) no longer reports,None
-Air Handler R1 Return Air 2nd Floor CO2 (6630) intentionally decommissioned,ASC,4/12/2018,None,None,Air Handler R1 Return Air 2nd Floor CO2 (6630) no longer reports,None
-Air Handler R1 Return Air 1st Floor CO2 (3) intentionally decommissioned,ASC,9/1/2014,None,None,Air Handler R1 Return Air 1st Floor CO2 (3) no longer reports,None
-Air Handler L1 Return Air CO2 (6636) Offline,ASC,9/22/2019,None,None,Air Handler L1 Return Air CO2 reports (6636) very low,None
-Air Handler L1 Return Air 2nd Floor CO2 (138) offline,ASC,8/5/2019,None,None,Air Handler L1 Return Air 2nd Floor CO2 (138) reports inconsistent and very low values,None
+<<<<<<< Updated upstream,,,,,,,
+Event,Building Sname,Date,Power Effects,Temperature Effects,IAQ Effects,WAP Effects,
+Partial Outage,WATT,9/10/2016,Monitors not in place,Many Sensors do not report,Many sensors do not report,Monitors not in place,
+Outage Restored,WATT,9/13/2016,Monitors not in place,All sensors restored,All sensors restored,Monitors not in place,
+Partial Outage,WATT,10/1/2016,Monitors not in place,Many Sensors do not report,Many sensors do not report,Monitors not in place,
+Outage Restored,WATT,10/4/2016,Monitors not in place,All sensors restored,All sensors restored,Monitors not in place,
+Metasys Outage,CAMPUS,5/27/2017,No Data collection,No Data Collection,No Data Collection,Monitors not in place,
+Metasys Restored,CAMPUS,5/29/2017,Data collection restored,Data collection restored,Data collection restored,Monitors not in place,
+Metasys Outage,CAMPUS,6/3/2017,No Data collection,No Data Collection,No Data Collection,Monitors not in place,
+Metasys Restored,CAMPUS,6/6/2017,Data collection restored,Data collection restored,Data collection restored,Monitors not in place,
+Metasys Outage,CAMPUS,6/9/2017,No Data collection,No Data Collection,No Data Collection,Monitors not in place,
+Metasys Restored,CAMPUS,6/12/2017,Data collection restored,Data collection restored,Data collection restored,Monitors not in place,
+Metasys Outage,CAMPUS,7/5/2017,No Data collection,No Data Collection,No Data Collection,Monitors not in place,
+Metasys Restored,CAMPUS,7/26/2017,Data collection restored,Data collection restored,Data collection restored,Monitors not in place,
+Metasys Outage,CAMPUS,10/2/2017,No Data collection,No Data Collection,No Data Collection,Monitors not in place,
+Metasys Restored,CAMPUS,10/6/2017,Data collection restored,Data collection restored,Data collection restored,Monitors not in place,
+Chilled Water Outage,WATT,12/16/2018,HVAC Power Consumption Increase,Temperature Increase,CO2 Decrease,Monitors not in place,
+Chilled Water Restored,WATT,12/24/2018,Readings Normalized,Readings Normalized,Readings Normalized,Monitors not in place,
+Power Outage ,WATT,2/19/2019,Non-emergency sensors do not report,Non-emergency sensors do not report,None,Monitors not in place,
+Power Restored,WATT,2/21/2019,All sensors restored,All sensors restored,None,Monitors not in place,
+Power Outage ,WATT,3/23/2019,Non-emergency sensors do not report,None,None,Monitors not in place,
+Power Restored,WATT,3/23/2019,Normalization,None,None,Monitors not in place,
+"WAP ""test"" users aggregated",WATT,5/25/2019,None,None,None,Guest Count Underestimated,
+"WAP ""test"" users separated",WATT,6/12/2019,None,None,None,Guest Count Accuracy Improved,
+439A Temp partial outage (filtered out),WATT,11/17/2017,None,439A reports 0 occasionally,None,None,
+439A Temp restored,WATT,12/11/2017,None,439A reports normally,None,None,
+439A Temp total outage (filtered out),WATT,3/20/2018,None,439A reports only 0,None,None,
+439A Temp restored,WATT,9/11/2018,None,439A reports normally,None,None,
+Several CO2 sensors offline (filtered out),WATT,12/8/2015,None,None,"205, 207, 209, 211, 333, and 344B report 0",None,
+333 CO2 online,WATT,5/27/2016,None,None,333 CO2 begins reporting,None,
+344B CO2 online,WATT,12/28/2015,None,None,344B CO2 begins reporting,None,
+209 CO2 online,WATT,12/9/2015,None,None,209 CO2 begins reporting,None,
+211 CO2 online,WATT,12/9/2015,None,None,211 CO2 begins reporting,None,
+207 CO2 online,WATT,12/9/2015,None,None,207 CO2 begins reporting,None,
+205 CO2 online,WATT,12/9/2015,None,None,205 CO2 begins reporting,None,
+103 Temp offline,WATT,5/9/2016,None,103 Temp does not report,None,None,
+103 Temp restored,WATT,12/27/2017,None,103 Temp begins reporting,None,None,
+103 Temp offline,WATT,2/11/2018,None,103 Temp does not report,None,None,
+103 Temp restored,WATT,1/21/2019,None,103 Temp begins reporting,None,None,
+103 Temp offline,WATT,3/25/2019,None ,103 Temp does not report,None,None,
+103 Temp restored,WATT,6/24/2019,None,103 Temp begins reporting,None,None,
+433 Temp offline,WATT,8/10/2018,None,433 Temp does not report,None,None,
+344A Heating SP (8880) intentionally decommissioned,WATT,8/20/2016,None,344A Temp no longer reports,None,None,
+344A Cooling SP (8879) intentionally decommissioned,WATT,8/20/2016,None,344A Temp no longer reports,None,None,
+344A Temp (8884) intentionally decommissioned,WATT,8/20/2016,None,344A Temp no longer reports,None,None,
+214 Temp offline,WATT,5/31/2018,None,214 Temp does not report,None,None,
+214 Temp Restored,WATT,8/3/2018,None,214 Temp begins reporting,None,None,
+339A Temp offline,WATT,2/6/2016,None,339A Temp does not report,None,None,
+339A Temp restored,WATT,8/3/2016,None,339A Temp begins reporting,None,None,
+308 Temp offline,WATT,8/9/2018,None,308 Temp does not report,None,None,
+433 CO2 offline,WATT,8/9/2018,None,None,433 CO2 does not report,None,
+433 CO2 restored,WATT,5/27/2019,None,None,433 CO2 begins reporting,None,
+AHU1 Cooling Coil Discharge SP offline,WATT,5/27/2019,None,AHU1 CCDSP does not report,None,None,
+400N Temp offline,WATT,8/9/2018,None,400N Temp does not report,None,None,
+305D Temp Reports Very High,COOPER,6/27/2018,None,305D Temp reads values between 90 and 250,None,None,
+515 Temp Reports Very High,COOPER,8/30/2016,None,515 Temp reads values between 90 and 130,None,None,
+515 Temp Restored,COOPER,12/8/2016,None,515 Temp begins reporting normally,None,None,
+Hourly WAP data now aggregated by half-hour,WATT,6/25/2018,None,None,None,WAP data now aggregated in 30 minute intervals,
+Air Handler L1 Return Air CO2 Offline,ASC,10/5/2016,None,None,Air Handler L1 Return Air CO2 reports very low,None,
+Air Handler L1 Return Air CO2 Restored,ASC,7/3/2019,None,None,Air Handler L1 Return Air CO2 reports normally,None,
+Air Handler L1 Return Air CO2 1st Floor CO2 Offline,ASC,3/19/2018,None,None,Air Handler L1 Return Air CO2 1st Floor does not report,None,
+Air Handler L1 Return Air CO2 3rd Floor CO2 Offline,ASC,10/12/2018,None,None,Air Handler L1 Return Air 3rd Floor CO2 reports very low\,None,
+Air Handler R1 Return Air CO2 Offline,ASC,6/29/2016,None,None,Air Handler R1 Return Air CO2 reports very low,None,
+Air Handler L1 Return Air 3rd Floor CO2 (6633) intentionally decommissioned,ASC,3/19/2018,None,None,PSID 6633 no longer reports,None,
+Air Handler R1 Return Air 3rd Floor CO2 (6640) intentionally decommissioned,ASC,4/12/2018,None,None,PSID 6640 no longer reports,None,
+Air Handler L1 Return Air 2nd Floor CO2 (6632) intentionally decommissioned,ASC,3/19/2018,None,None,PSID 6632 no longer reports,None,
+Air Handler R1 Return Air 1st Floor CO2 (6629) intentionally decommissioned,ASC,4/12/2018,None,None,PSID 6629 no longer reports,None,
+Air Handler R1 Return Air 2nd Floor CO2 (6630) intentionally decommissioned,ASC,4/12/2018,None,None,PSID 6630 no longer reports,None,
+Air Handler R1 Return Air 1st Floor CO2 (3) intentionally decommissioned,ASC,9/1/2014,None,None,PSID 3 no longer reports,None,
+=======,,,,,,,
+Event,Building Sname,Date,Power Effects,Temperature Effects,IAQ Effects,WAP Effects,Decommission
+Partial Outage,WATT,9/10/2016,Monitors not in place,Many Sensors do not report,Many sensors do not report,None,0
+Outage Restored,WATT,9/13/2016,Monitors not in place,All sensors restored,All sensors restored,None,0
+Partial Outage,WATT,10/1/2016,Monitors not in place,Many Sensors do not report,Many sensors do not report,None,0
+Outage Restored,WATT,10/4/2016,Monitors not in place,All sensors restored,All sensors restored,None,0
+Metasys Outage,CAMPUS,5/27/2017,No Data collection,No Data Collection,No Data Collection,None,0
+Metasys Restored,CAMPUS,5/29/2017,Data collection restored,Data collection restored,Data collection restored,None,0
+Metasys Outage,CAMPUS,6/3/2017,No Data collection,No Data Collection,No Data Collection,None,0
+Metasys Restored,CAMPUS,6/6/2017,Data collection restored,Data collection restored,Data collection restored,None,0
+Metasys Outage,CAMPUS,6/9/2017,No Data collection,No Data Collection,No Data Collection,None,0
+Metasys Restored,CAMPUS,6/12/2017,Data collection restored,Data collection restored,Data collection restored,None,0
+Metasys Outage,CAMPUS,7/5/2017,No Data collection,No Data Collection,No Data Collection,None,0
+Metasys Restored,CAMPUS,7/26/2017,Data collection restored,Data collection restored,Data collection restored,None,0
+Metasys Outage,CAMPUS,10/2/2017,No Data collection,No Data Collection,No Data Collection,None,0
+Metasys Restored,CAMPUS,10/6/2017,Data collection restored,Data collection restored,Data collection restored,None,0
+Chilled Water Outage,WATT,12/16/2018,HVAC Power Consumption Increase,Temperature Increase,CO2 Decrease,None,0
+Chilled Water Restored,WATT,12/24/2018,Readings Normalized,Readings Normalized,Readings Normalized,None,0
+Power Outage ,WATT,2/19/2019,Non-emergency sensors do not report,Non-emergency sensors do not report,None,None,0
+Power Restored,WATT,2/21/2019,All sensors restored,All sensors restored,None,None,0
+Power Outage ,WATT,3/23/2019,Non-emergency sensors do not report,None,None,None,0
+Power Restored,WATT,3/23/2019,Normalization,None,None,None,0
+"WAP ""test"" users aggregated",WATT,5/25/2019,None,None,None,Guest Count Underestimated,0
+"WAP ""test"" users separated",WATT,6/12/2019,None,None,None,Guest Count Accuracy Improved,0
+RM 439A / Temp (31935) partial outage,WATT,11/17/2017,None,RM 439A / Temp reports 0 occasionally,None,None,0
+RM 439A / Temp (31935) restored,WATT,12/11/2017,None,RM 439A / Temp reports normally,None,None,0
+RM 439A / Temp (31935) total outage,WATT,3/20/2018,None,RM 439A / Temp reports only 0,None,None,0
+RM 439A / Temp (31935) restored,WATT,9/11/2018,None,RM 439A / Temp reports normally,None,None,0
+Several CO2 sensors offline,WATT,12/8/2015,None,None,"RM 205 / CO2, RM 207 / CO2, RM 209 / CO2, RM 211 / CO2, RM 333 / CO2, and Rm 344B / CO2 report 0",None,0
+RM 333 / CO2 (8907) online,WATT,5/27/2016,None,None,RM 333 / CO2 begins reporting,None,0
+RM 344B / CO2 (9191) online,WATT,12/28/2015,None,None,RM 344B / CO2 begins reporting,None,0
+RM 209 / CO2 (8843) online,WATT,12/9/2015,None,None,RM 209 / CO2 begins reporting,None,0
+RM 211 / CO2 (8837) online,WATT,12/9/2015,None,None,RM 211 / CO2 begins reporting,None,0
+RM 207 / CO2 (8849) online,WATT,12/9/2015,None,None,RM 207 / CO2 begins reporting,None,0
+RM 205 / CO2 (8855) online,WATT,12/9/2015,None,None,RM 205 / CO2 begins reporting,None,0
+RM 103 / Temp (8726) offline,WATT,5/9/2016,None,RM 103 / Temp (8726) does not report,None,None,0
+RM 103 / Temp (8726) restored,WATT,12/27/2017,None,RM 103 / Temp (8726) begins reporting,None,None,0
+RM 103 / Temp (8726) offline,WATT,2/11/2018,None,RM 103 / Temp (8726) does not report,None,None,0
+RM 103 / Temp (8726) restored,WATT,1/21/2019,None,RM 103 / Temp (8726) begins reporting,None,None,0
+RM 103 / Temp (8726) offline,WATT,3/25/2019,None ,RM 103 / Temp (8726) does not report,None,None,0
+RM 103 / Temp (8726) restored,WATT,6/24/2019,None,RM 103 / Temp (8726) begins reporting,None,None,0
+RM 433 / Temp (41435) offline,WATT,8/10/2018,None,RM 433 / Temp (41435) does not report,None,None,0
+RM 344A / Heating SP (8880) intentionally decommissioned,WATT,8/20/2016,None,RM 344A / Temp no longer reports,None,None,1
+RM 344A / Cooling SP (8879) intentionally decommissioned,WATT,8/20/2016,None,RM 344A / Temp no longer reports,None,None,1
+RM 344A / Temp (8884) intentionally decommissioned,WATT,8/20/2016,None,RM 344A / Temp no longer reports,None,None,1
+RM 214 / Temp (8572) offline,WATT,5/31/2018,None,RM 214 / Temp (8572) does not report,None,None,0
+RM 214 / Temp (8572) Restored,WATT,8/3/2018,None,RM 214 / Temp (8572) begins reporting,None,None,0
+RM 339A / Temp (8214) offline,WATT,2/6/2016,None,RM 339A / Temp (8214) does not report,None,None,0
+RM 339A / Temp (8214) restored,WATT,8/3/2016,None,RM 339A / Temp (8214) begins reporting,None,None,0
+RM 308 / Temp (9163) offline,WATT,8/9/2018,None,RM 308 / Temp (9163) does not report,None,None,0
+RM 433 / CO2 (41477) offline,WATT,8/9/2018,None,None,RM 433 / CO2 (41477) does not report,None,0
+RM 433 / CO2 (41477) restored,WATT,5/27/2019,None,None,RM 433 / CO2 (41477) begins reporting,None,0
+AHU1 Cooling Coil Discharge SP offline,WATT,5/27/2019,None,AHU1 Cooling Coil Discharge SP does not report,None,None,0
+RM 400N / Temp (41453) offline,WATT,8/9/2018,None,RM 400N / Temp (41453) does not report,None,None,0
+RM 305D / Temp (40422) Reports Very High,COOPER,6/27/2018,None,RM 305D / Temp (40422) reads values between 90 and 250,None,None,0
+RM 515 / Temp (3483) Reports Very High,COOPER,8/30/2016,None,RM 515 / Temp (3483) reads values between 90 and 130,None,None,0
+RM 515 / Temp (3483) Restored,COOPER,12/8/2016,None,RM 515 / Temp (3483) begins reporting normally,None,None,0
+Hourly WAP data now aggregated by half-hour,WATT,6/25/2018,None,None,None,WAP data now aggregated in 30 minute intervals,0
+Air Handler L1 Return Air CO2 (6636) Offline,ASC,10/5/2016,None,None,Air Handler L1 Return Air CO2 (6636) reports very low,None,0
+Air Handler L1 Return Air CO2 (6636) Restored,ASC,7/3/2019,None,None,Air Handler L1 Return Air CO2 (6636) reports normally,None,0
+Air Handler L1 Return Air CO2 1st Floor CO2 (6631) Offline,ASC,3/19/2018,None,None,Air Handler L1 Return Air CO2 1st Floor (6631) does not report,None,0
+Air Handler L1 Return Air CO2 3rd Floor CO2 (143) Offline,ASC,10/12/2018,None,None,Air Handler L1 Return Air 3rd Floor CO2 (143) reports low,None,0
+Air Handler R1 Return Air CO2 (6639) Offline,ASC,6/29/2016,None,None,Air Handler R1 Return Air CO2 (6639) reports very low,None,0
+Air Handler L1 Return Air 3rd Floor CO2 (6633) intentionally decommissioned,ASC,3/19/2018,None,None,Air Handler L1 Return Air 3rd Floor CO2 (6633) no longer reports,None,1
+Air Handler R1 Return Air 3rd Floor CO2 (6640) intentionally decommissioned,ASC,4/12/2018,None,None,Air Handler R1 Return Air 3rd Floor CO2 (6640) no longer reports,None,1
+Air Handler L1 Return Air 2nd Floor CO2 (6632) intentionally decommissioned,ASC,3/19/2018,None,None,Air Handler L1 Return Air 2nd Floor CO2 (6632) no longer reports,None,1
+Air Handler R1 Return Air 1st Floor CO2 (6629) intentionally decommissioned,ASC,4/12/2018,None,None,Air Handler R1 Return Air 1st Floor CO2 (6629) no longer reports,None,1
+Air Handler R1 Return Air 2nd Floor CO2 (6630) intentionally decommissioned,ASC,4/12/2018,None,None,Air Handler R1 Return Air 2nd Floor CO2 (6630) no longer reports,None,1
+Air Handler R1 Return Air 1st Floor CO2 (3) intentionally decommissioned,ASC,9/1/2014,None,None,Air Handler R1 Return Air 1st Floor CO2 (3) no longer reports,None,1
+Air Handler L1 Return Air CO2 (6636) Offline,ASC,9/22/2019,None,None,Air Handler L1 Return Air CO2 reports (6636) very low,None,0
+Air Handler L1 Return Air 2nd Floor CO2 (138) offline,ASC,8/5/2019,None,None,Air Handler L1 Return Air 2nd Floor CO2 (138) reports inconsistent and very low values,None,0
+Air Handler 6 Return Air CO2 (46318) offline,FIKE,7/22/2019,None,None,Air Handler 6 Return Air CO2 (46318) reports very low and inconsistent values,None,0
+Air Handler Return Air CO2 (43270) offline,FLUOR,11/28/2018,None,None,Air Handler Return Air CO2 reports very low values,None,0
+>>>>>>> Stashed changes,,,,,,,
