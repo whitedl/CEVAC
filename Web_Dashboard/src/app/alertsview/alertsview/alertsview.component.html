@@ -35,6 +35,14 @@
         <li>Both</li>
         <li>Resolved</li>
       </ul>
+      <button
+        mat-raised-button
+        color="warn"
+        (click)="deleteSelected()"
+        [disabled]="selection.isEmpty()"
+      >
+        <mat-icon>delete</mat-icon>Delete Selected
+      </button>
     </mat-card>
   </mat-sidenav>
 
@@ -107,15 +115,6 @@
       <ng-container matColumnDef="Resolved">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Resolved</th>
         <td mat-cell *matCellDef="let row">{{ row.Resolved }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="Delete">
-        <th mat-header-cell *matHeaderCellDef></th>
-        <td mat-cell *matCellDef="let row">
-          <button mat-icon-button (click)="deleteRow(row.EventID)">
-            <mat-icon>delete</mat-icon>
-          </button>
-        </td>
       </ng-container>
 
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>

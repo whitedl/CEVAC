@@ -25,8 +25,7 @@ export class AlertsviewComponent implements AfterViewInit {
     'BuildingSName',
     'AlertMessage',
     'Acknowledged',
-    'Resolved',
-    'Delete'
+    'Resolved'
   ];
   selection = new SelectionModel<Alert>(true, []);
   alerts: Alert[] = [];
@@ -55,6 +54,10 @@ export class AlertsviewComponent implements AfterViewInit {
       .delete<any>(`${this.apiUrl}/${eid}`)
       .subscribe(() => this.getAlerts());
     this.table.renderRows();
+  deleteSelected = () => {
+    for (const alert of this.selection.selected) {
+      this.deleteRow(alert.EventID);
+    }
   };
 
   isAllSelected() {
