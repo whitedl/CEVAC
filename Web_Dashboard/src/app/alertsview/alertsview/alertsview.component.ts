@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { merge, Observable, of as observableOf } from 'rxjs';
+import { merge, Observable, BehaviorSubject, of as observableOf } from 'rxjs';
 import { catchError, map, startWith, switchMap } from 'rxjs/operators';
 
 import { Component, ViewChild, AfterViewInit } from '@angular/core';
@@ -41,6 +41,9 @@ export class AlertsviewComponent implements AfterViewInit {
   ackStatus = 0;
   resStatus = 0;
 
+  // Table needs to update
+  tableDirty = new BehaviorSubject<boolean>(false);
+
   apiUrl = 'http://wfic-cevac1/api/alerts';
 
   @ViewChild(MatTable, { static: false }) table!: MatTable<any>;
@@ -54,6 +57,9 @@ export class AlertsviewComponent implements AfterViewInit {
       .delete<any>(`${this.apiUrl}/${eid}`)
       .subscribe(() => this.getAlerts());
     this.table.renderRows();
+    this.resetTable();
+  };
+
   deleteSelected = () => {
     for (const alert of this.selection.selected) {
       this.deleteRow(alert.EventID);
@@ -101,7 +107,7 @@ export class AlertsviewComponent implements AfterViewInit {
   };
 
   resetTable = () => {
-    this.paginator.pageIndex = 0;
+    this.tableDirty.next(true);
   };
 
   getAlerts(): Observable<Alert[]> {
@@ -133,7 +139,7 @@ export class AlertsviewComponent implements AfterViewInit {
   ngAfterViewInit() {
     this.sort.sortChange.subscribe(() => (this.paginator.pageIndex = 0));
 
-    merge(this.sort.sortChange, this.paginator.page)
+    merge(this.sort.sortChange, this.paginator.page, this.tableDirty)
       .pipe(
         startWith({}),
         switchMap(() => {
