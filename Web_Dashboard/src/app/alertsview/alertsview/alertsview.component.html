@@ -16,6 +16,11 @@
         [step]="1"
         (change)="resetTable()"
       ></mat-slider>
+      <ul class="range-label">
+        <li>Unacknowledged</li>
+        <li>Both</li>
+        <li>Acknowledged</li>
+      </ul>
       <mat-slider
         [(value)]="resStatus"
         [displayWith]="resSlideThumb"
@@ -25,6 +30,11 @@
         [step]="1"
         (change)="resetTable()"
       ></mat-slider>
+      <ul class="range-label">
+        <li>Unresolved</li>
+        <li>Both</li>
+        <li>Resolved</li>
+      </ul>
     </mat-card>
   </mat-sidenav>
 
