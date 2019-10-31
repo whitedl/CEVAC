@@ -10,7 +10,7 @@ $script = '/cevac/scripts/CREATE_VIEW.sh';
 $config = "";
 $exec = "$script $BuildingSName $Metric PXREF";
 
-echo "$exec";
+echo "$exec\n";
 echo `$exec`;
 
 ?>

@@ -24,14 +24,70 @@ if [ -z "$BuildingSName" ] || [ -z "$Metric" ] || [ -z "$Age" ]; then exit 1; fi
 TableName="CEVAC_""$BuildingSName""_$Metric""_$Age"
 dest_TableName=`python3 /cevac/python/name_shortener.py $TableName`
 
-script="
+array=()
+array+=("
+/* Register Table Macro */
+%macro registertable( REPOSITORY=Foundation, REPOSID=, LIBRARY=, TABLE=, FOLDER=, TABLEID=, PREFIX= );
+
+/* Mask special characters */
+
+   %let REPOSITORY=%superq(REPOSITORY);
+   %let LIBRARY   =%superq(LIBRARY);
+   %let FOLDER    =%superq(FOLDER);
+   %let TABLE     =%superq(TABLE);
+
+   %let REPOSARG=%str(REPNAME=\"&REPOSITORY.\");
+   %if (\"&REPOSID.\" ne \"\") %THEN %LET REPOSARG=%str(REPID=\"&REPOSID.\");
+
+   %if (\"&TABLEID.\" ne \"\") %THEN %LET SELECTOBJ=%str(&TABLEID.);
+   %else                         %LET SELECTOBJ=&TABLE.;
+
+   %if (\"&FOLDER.\" ne \"\") %THEN
+      %PUT INFO: Registering &FOLDER./&SELECTOBJ. to &LIBRARY. library.;
+   %else
+      %PUT INFO: Registering &SELECTOBJ. to &LIBRARY. library.;
+
+    /* Create metadata macro variables */
+    %let IOMServer      = %nrquote(SASApp);
+    %let metaPort       = %nrquote(8561);
+    %let metaSmeta     = %nrquote(wfic-sas-meta.clemson.edu);
+
+
+   proc metalib;
+      omr (
+         library=\"&LIBRARY.\" 
+         %str(&REPOSARG.) 
+          ); 
+      %if (\"&TABLEID.\" eq \"\") %THEN %DO;
+         %if (\"&FOLDER.\" ne \"\") %THEN %DO;
+            folder=\"&FOLDER.\";
+         %end;
+      %end;
+      %if (\"&PREFIX.\" ne \"\") %THEN %DO;
+         prefix=\"&PREFIX.\";
+      %end;
+      select (\"&SELECTOBJ.\"); 
+   run; 
+   quit;
+
+%mend;
+/* Synchronize table registration */
+%registerTable(
+     LIBRARY=%nrstr(/Shared Data/SAS Visual Analytics/Public/Visual Analytics Public LASR)
+   , REPOSITORY=%nrstr(Foundation)
+   , TABLE=%nrstr($dest_TableName)
+   , FOLDER=%nrstr(/Shared Data/SAS Visual Analytics/Public/LASR)
+   );
+")
+
+array+=("
 /* Generate the process id for job  */ 
 %put Process ID: &SYSJOBID;
 
 /* General macro variables  */ 
 %let jobID = %quote(A5MJT3HI.BV0001NZ);
 %let etls_jobName = %nrquote(load);
-%let etls_userID = %nrquote(bmeares);
+%let etls_userID = %nrquote(sas);
 
 %global applName;
 data _null_;
@@ -80,7 +136,10 @@ run;
 %global etls_stepStartTime; 
 /* initialize syserr to 0 */ 
 data _null_; run;
+"
+)
 
+array+=("
 %macro rcSet(error); 
    %if (&error gt &trans_rc) %then 
       %let trans_rc = &error;
@@ -98,7 +157,7 @@ data _null_; run;
 /* Create metadata macro variables */
 %let IOMServer      = %nrquote(SASApp);
 %let metaPort       = %nrquote(8561);
-%let metaServer     = %nrquote(wfic-sas-meta.clemson.edu);
+%let metaSmeta     = %nrquote(wfic-sas-meta.clemson.edu);
 
 /* Setup for capturing job status  */ 
 %let etls_startTime = %sysfunc(datetime(),datetime.);
@@ -121,13 +180,18 @@ data _null_; run;
 %let etls_stepStartTime = %sysfunc(datetime(), datetime20.); 
 
 /* Access the data for SQL-CEVAC  */ 
-LIBNAME CEVACDB SQLSVR  Datasrc=WATTCEVAC  SCHEMA=dbo  AUTHDOMAIN=\"cevac_db_auth\" ;
+libname CEVACDB odbc user=wficcm password=\"5wattcevacmaint$\" datasrc=WATTCEVAC;
+/* LIBNAME CEVACDB SQLSVR  Datasrc=WATTCEVAC  SCHEMA=dbo  AUTHDOMAIN=\"cevac_db_auth\" ; */
 %rcSet(&syslibrc); 
 
 /* Access the data for Visual Analytics Public LASR  */ 
 LIBNAME LASRLIB SASIOLA  TAG=\"OPT.SASINSIDE.SASVA\"  PORT=10031 HOST=\"wfic-sas-im-hd\"  SIGNER=\"https://sas.clemson.edu:8343/SASLASRAuthorization\" ;
 %rcSet(&syslibrc); 
 
+
+")
+
+array+=("
 %let etls_recnt = 0;
 %macro etls_recordCheck; 
    %let etls_recCheckExist = %eval(%sysfunc(exist(CEVACDB.$TableName, DATA)) or 
@@ -181,8 +245,14 @@ data _null_;
       
 run;
 
-"
-echo "$script" > /cevac/cache/sas_scripts/$TableName.sas
-if ! rsync -vh --progress /cevac/cache/sas_scripts/$TableName.sas sas@wfic-sas-im-hd.clemson.edu:~/CEVAC/$TableName.sas; then
+")
+
+echo "" > /cevac/cache/sas_scripts/$TableName.sas
+
+for l in "${array[@]}"; do
+  echo "${l}" >> /cevac/cache/sas_scripts/$TableName.sas
+done
+# echo "$script" > /cevac/cache/sas_scripts/$TableName.sas
+if ! rsync -vh --progress /cevac/cache/sas_scripts/$TableName.sas CEVAC@wfic-sas-im-hd.clemson.edu:~/scripts/$TableName.sas; then
   echo "error"
 fi
