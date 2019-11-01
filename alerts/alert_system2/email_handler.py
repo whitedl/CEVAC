@@ -14,7 +14,7 @@ import pyodbc
 import base64
 import sys
 
-KNOWN_ISSUES_FPATH = "/cevac/CEVAC/known issues/Known Data Issues.csv"
+FILE_FPATH = "/cevac/cron/email/page/issues.html"
 email = "cevac5733@gmail.com"
 password = "cevacsteve5733"
 to_list = {
@@ -25,6 +25,7 @@ to_list = {
     # "Zach Klein": "ztklein@g.clemson.edu",
     "Drewboi": "abemery@clemson.edu",
     "Tim Howard": "timh@clemson.edu",
+    "FILE": FILE_FPATH,
 }
 emergency_to_list = {
     "Harrison Hall": "hchall@g.clemson.edu",
@@ -264,7 +265,11 @@ class Email:
                 new_message = self.replace_metric(m_message.as_string())
                 if self.verbose:
                     print(new_message)
-                server.sendmail(email, p_email, new_message)
+                if person == "FILE":
+                    html_file = open(p_email, "w")
+                    html_file.write(new_message)
+                else:
+                    server.sendmail(email, p_email, new_message)
 
     def replace_metric(self, rep_str):
         """Replace metric str with character."""
