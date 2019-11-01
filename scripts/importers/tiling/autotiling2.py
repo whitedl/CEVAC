@@ -14,7 +14,7 @@ from time import sleep
 import keyboard
 import win32gui
 
-startapps = pywinauto.findwindows.find_elements(title_re=".*Chrome")
+startapps = pywinauto.findwindows.find_elements(title_re=".*Dive")
 managed_window_handles = [child.handle for child in startapps]
 apps = []
 for handle in managed_window_handles:
@@ -26,68 +26,54 @@ for handle in managed_window_handles:
 # Starts from 0,0 in top-left
 screenx, screeny = (GetSystemMetrics(0), GetSystemMetrics(1))
 
-max_windows = 8
+max_windows = 6
 
 #TO DO LIST:
-# Get bash script from thumbdrive
-# Figure out how to keep it so that Map stays in POS 0 and campus overview in POS 4
-# Should be able to isolate dives when initializing 'apps' so I can individually tile maps and campus overview.
-# Need to figure out keyboard pausing maybe ~ not highest priority
+# Need to figure out keyboard pausing
 
 
 
 # Moves new windows in the following shapes:
 all_positions = {
+
+
     0:  {
-        "x": screenx * (0),
+        "x": screenx * (1/4),
         "y": screeny * (0),
         "w": screenx * (1/4),
         "h": screeny * (1/2),
         },
 
     1:  {
-        "x": screenx * (1/4),
+        "x": screenx * (1/2),
         "y": screeny * (0),
         "w": screenx * (1/4),
         "h": screeny * (1/2),
         },
 
     2:  {
-        "x": screenx * (1/2),
-        "y": screeny * (0),
-        "w": screenx * (1/4),
-        "h": screeny * (1/2),
-        },
-
-    3:  {
         "x": screenx * (3/4),
         "y": screeny * (0),
         "w": screenx * (1/4),
         "h": screeny * (1/2),
         },
 
-    4:  {
-        "x": screenx * (0),
-        "y": screeny * (1/2),
-        "w": screenx * (1/4),
-        "h": screeny * (1/2),
-        },
 
-    5:  {
+    3:  {
         "x": screenx * (1/4),
         "y": screeny * (1/2),
         "w": screenx * (1/4),
         "h": screeny * (1/2),
         },
 
-    6:  {
+    4:  {
         "x": screenx * (1/2),
         "y": screeny * (1/2),
         "w": screenx * (1/4),
         "h": screeny * (1/2),
         },
 
-    7:  {
+    5:  {
         "x": screenx * (3/4),
         "y": screeny * (1/2),
         "w": screenx * (1/4),
@@ -99,7 +85,9 @@ keep_running = True
 while keep_running:
     keyboard.start_recording()
 
-    all_windows = pywinauto.findwindows.find_elements(title_re=".*Chrome")
+
+
+    all_windows = pywinauto.findwindows.find_elements(title_re=".*Dive")
     for handle in list(set([spec.handle for spec in all_windows]) - set(managed_window_handles)):
         try:
             apps.append(application.Application().connect(handle=handle))
@@ -122,7 +110,7 @@ while keep_running:
     # Tile windows correctly
     for i, (handle, app) in enumerate(zip(managed_window_handles, apps)):
         try:
-            positions = all_positions   #[len(apps)]
+            positions = all_positions 
 
             if(i > max_windows):
                 i=i-max_windows
