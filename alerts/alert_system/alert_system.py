@@ -479,22 +479,28 @@ def check_numerical_alias(alias, alert, next_id, last_events, new_events,
 def check_temp(room, alert, temps, known_issues, next_id, last_events,
                new_events, get_psid):
     """Check relative temperature values."""
-    if skip_alias(known_issues, alert["building"], room, "TEMP"):
-        print(room, " is decomissioned")
-        return (next_id, new_events, "")
-    else:
-        pass
-
     try:
         Alias_Temp = "Temp"
         for key in temps[room].keys():
-            if (key != "Cooling SP" and key != "Heating SP"
-                    and "TEMP" in key):
+            if (key != "Cooling SP" and key != "Heating SP" and "Temp" in key):
                 Alias_Temp = key
             elif ("AHU" in key):
                 continue
+            elif ("Cooling SP" in key):
+                temps[room]["Cooling SP"] = temps[room][key]
+            elif ("Heating SP" in key):
+                temps[room]["Heating SP"] = temps[room][key]
             else:
                 continue
+
+        try:
+            if skip_alias(known_issues, alert["building"], Alias_Temp, "TEMP"):
+                print(room, " is decomissioned")
+                return (next_id, new_events, "")
+            else:
+                pass
+        except:
+            pass
 
         # Modify value
         room_vals = temps[room]
@@ -502,6 +508,7 @@ def check_temp(room, alert, temps, known_issues, next_id, last_events,
         try:
             if "+" in alert["value"]:
                 val_str = alert["value"].split()[-1]
+                print(val_str)
                 val = float(val_str[val_str.find("+") + 1:])
                 room_vals["Cooling SP"] += val
                 room_vals["Heating SP"] += val
@@ -704,14 +711,33 @@ if __name__ == "__main__":
                 ec = 0
                 for row in data_list:
                     try:
-                        room = row[0].split()[0]
+                        # room = row[0].split()[0]
+                        room = row[0].split(" ")[1]
+                        arbitrary_alias = row[0]
                         if room in temps:
+                            if "Cooling SP" in row[0]:
+                                temps[room]["Cooling SP"] = float(row[1])
+                            elif "Heating SP" in row[0]:
+                                temps[room]["Heating SP"] = float(row[1])
+                            else:
+                                temps[room][arbitrary_alias] = float(row[1])
+
+                            """
                             temps[room][row[0][row[0].find(
                                 " ") + 1:]] = float(row[1])
+                            """
                         else:
+                            if "Cooling SP" in row[0]:
+                                temps[room] = {"Cooling SP": float(row[1])}
+                            elif "Heating SP" in row[0]:
+                                temps[room] = {"Heating SP": float(row[1])}
+                            else:
+                                temps[room]  = {arbitrary_alias: float(row[1])}
+                            """
                             temps[room] = {
-                                row[0][row[0].find(" ") + 1:]: float(row[1])
+                                row[0][row[0].find(" ") + 1:]: float(row[1])  # data
                             }
+                            """
                     except Exception:
                         ec += 1
 
