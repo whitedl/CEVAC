@@ -40,160 +40,43 @@ class Alerts:
         if logging is None:
             self.LOG = False
             
-        self.conn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};'
-                                   'SERVER=130.127.218.11;DATABASE=WFIC-CEVAC;'
+        self.conn = pyodbc.connect('DRIVER='
+                                   '{ODBC Driver 17 for SQL Server};'
+                                   'SERVER=130.127.218.11;'
+                                   'DATABASE=WFIC-CEVAC;'
                                    'UID=wficcm;PWD=5wattcevacmaint$')
         self.occ = Occupancy(self.conn)
-        self.par = read_sql_query("SELECT * FROM CEVAC_ALERT_PARAMETERS" , self.conn)
-        self.known_issues = Known_Issues(self.conn)
+        #self.par = Parameters(self.conn)
+        #self.known_issues = Known_Issues(self.conn)
         self.verbose = verbose
         self.anomalies = []
 
     def alert_system(self):
         """Find and catalog all anomalies."""
-        print("Will run alert system.")
 
-    def run(self):
         # Parse json files for event IDs
-        next_id, last_events = self.parse_json(json_oc, json_unoc)
-        new_events = {}  # id: { "hash" : event_id }
-
-        # Check alerts for conditions
-        insert_sql_total = ""  # SQL to be inserted
-        utcdatetimenow = datetime.datetime.utcnow()
-        utcdatetimenow_str = sql_time_str(utcdatetimenow)
-        for i, a in enumerate(alerts):
-            alert = alerts[a]
-            a_or_psid = get_alias_or_psid(alert["database"])
-            get_psid = (a_or_psid == "Alias")
-            try:
-                # Check time conditional to make sure it is the correct time for
-                # the alert
-                now = datetime.datetime.now()
-                day = now.isoweekday()
-                hour = now.hour
-                occupied = self.occ.building_is_occupied(alert["building"])
-                if (alert["time_dependent"]):
-                    if ((alert["occupancy_status"] and (not occupied))
-                            or (not alert["occupancy_status"] and (occupied))):
-                        safe_log("Not time for alert #" + str(i + 1), "info")
+        self.parse_json(json_oc, json_unoc)
+        
+        # Go through each alert parameter
+        for i, alert in enumerate(self.par.alert_parameters):
+            if alert.aliaspsid is "":
+                pass  # TODO
+            else:
+                for building in self.building_s_list():
+                    if self.skip_building(building, alert):
                         continue
-
-                # Check basic value for basic alert
-                if str.isdigit(alert["value"]):
-                    alert["value"] = float(alert["value"])
-                    z = (f"SELECT DISTINCT "
-                         f"{a_or_psid} "
-                         f"FROM {alert['database']}")
-                    z = command_to_list_multiple(z, 2)
-                    all_aliases = [b[0] for b in z]
-
-                    for alias in all_aliases:
-                        try:
-                            obj = check_numerical_alias(alias, alert,
-                                                        next_id,
-                                                        last_events,
-                                                        new_events, get_psid)
-                            next_id = obj[0]
-                            new_events = obj[1]
-                            insert_sql_total += obj[2]
-                        except Exception:
-                            pass
-
-                # Check each alias for relative temperature exceptions
-                elif ("SP" in alert["value"]):
-                    selection_command = (f"SELECT {a_or_psid}, {alert['column']} "
-                                         f"FROM "
-                                         f"{alert['database']} ORDER BY "
-                                         f"{alert['sort_column']}")
-                    print(selection_command)
-
-                    if not CHECK_ALERTS:
-                        continue
-
-                    data_list = command_to_list_multiple(selection_command, 2)
-
-                    temps = {}
-                    ec = 0
-                    for row in data_list:
-                        try:
-                            room = row[0].split()[0]
-                            if room in temps:
-                                temps[room][row[0][row[0].find(
-                                    " ") + 1:]] = float(row[1])
-                            else:
-                                temps[room] = {
-                                    row[0][row[0].find(" ") + 1:]: float(row[1])
-                                }
-                        except Exception:
-                            ec += 1
-
-                    for room in temps:
-                        obj = check_temp(room, alert, temps,
-                                         known_issues,
-                                         next_id, last_events,
-                                         new_events, get_psid)
-                        next_id = obj[0]
-                        new_events = obj[1]
-                        insert_sql_total += obj[2]
-
-                # Check if aliases have reported within a given time
-                elif ("<now>" in alert["value"]):
-                    # Find all aliases
-                    selection_command = (f"SELECT {a_or_psid}, UTCDateTime FROM "
-                                         f"{alert['database']+'_BROKEN_CACHE'}")
-                    print(selection_command)
-                    if not CHECK_ALERTS:
-                        continue
-
-                    if UPDATE_CACHE:
-                        rebuild_broken_cache(alert["database"])
-
-                    try:
-                        data_list = command_to_list_multiple(selection_command, 2)
-                    except Exception:
-                        continue
-
-                    aliases = {}
-                    for data in data_list:
-                        aliases[data[0]] = data[1]
-
-                    # alert["value"] in format "<now> - # day/hr/min"
-                    dst = False
-                    local = pytz.timezone("America/New_York")
-                    naive = datetime.datetime.now()
-                    local_dt = local.localize(naive, is_dst=dst)
-                    utc_dt = local_dt.astimezone(pytz.utc)
-                    try:
-                        amount = int(alert["value"].split()[2])
-                        unit_str = alert["value"].split()[3]
-                        unit = TIME[unit_str]
-                    except Exception:
-                        amount = 1
-                        unit = TIME["hour"]
-                    minutes = amount * 24 * 60 / unit
-
-                    for data in aliases:
-                        obj = check_time(data, alert, next_id, last_events,
-                                         new_events, get_psid)
-                        next_id = obj[0]
-                        new_events = obj[1]
-                        insert_sql_total += obj[2]
-                else:
-                    safe_log("Could not find valid condition/value for " +
-                             str(alert), "info")
-                    print("invalid condition")
-
-            except Exception:
-                safe_log("Issue on alert " + str(i + 2) + " " + str(alert),
-                         "error")
-                print("issue on alert", str(i + 2))
-
-        if insert_sql_total == "":
-            insert_sql_total = ("INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType,"
-                                "AlertMessage,Metric,UTCDateTime,MessageID) "
-                                f"VALUES('All Clear','All Clear','N/A',"
-                                f"GETUTCDATE(),'0')")
+                    
+                    if "@actualvalue" in alert.condition.lower():
+                        self.check_numerical(alert, building)
+                    elif "@temp" in alert.condition.lower():
+                        self.check_temp(alert, building)
+                    elif "@time" in alert.condition.lower():
+                        self.check_time(alert, building)
+                    else:
+                        self.safe_log("Could not find valid "
+                                      f"condition/value for {alert}",
+                                      "error")
+                        print(f"ERROR: Invalid condition on row {i+1}")
 
     def send(self):
         """Send anomalies to sql."""
@@ -218,19 +101,19 @@ class Alerts:
 
     def parse_json(self, *filenames):
         """Parse json(s) for cron use."""
-        max_id = 0
-        new_json = {}
+        self.next_id = 0
+        self.old_json = {}
         for filename in filenames:
             try:
                 f = open(filename, "r")
                 line = f.readlines()[0]
-                new_json.update(json.loads(line))
-                next_id = new_json["next_id"]
-                max_id = max(max_id, next_id)
+                self.old_json.update(json.loads(line))
+                nid = new_json["next_id"]
+                self.next_id = max(nid, self.next_id)
                 f.close()
             except Exception:
                 continue
-        return (max_id, new_json)
+        return None
 
     def angle_brackets_replace_specific(self, regex_string, key, replacement):
         """Return string with angle brackets at key replaced with replacement."""
@@ -253,17 +136,18 @@ class Alerts:
                 return True
         return False
 
-    def assign_event_id(self, next_id, old_json, new_json, alert, alias):
+    def assign_event_id(self, alert, alias):
         """Assign event id."""
-        key = alias+alert["message_id"]
-        event_id = next_id
-        if key in old_json:
-            event_id = old_json[key]
-            new_json[key] = event_id
+        key = alias + alert.message_id
+        event_id = self.next_id
+        if key in self.old_json:
+            event_id = self.old_json[key]
+            self.new_json[key] = event_id
         else:
-            next_id += 1
-            new_json[key] = event_id
-        return event_id, next_id, new_json
+            self.next_id += 1
+            self.new_json[key] = event_id
+        
+        return event_id
 
     def get_alias_or_psid(self, table_name):
         """Return whether a table uses alias or point slice id."""
@@ -294,229 +178,200 @@ class Alerts:
         return str(max(psids))
 
 
-    def check_numerical_alias(self, alias, alert, next_id, last_events, new_events,
-                              get_psid):
+    def check_numerical(self, alert, building):
         """Check numerical alias alert."""
-        selection_command = (f"SELECT TOP {str(alert['num_entries'])} "
-                             f"{alert['column']} FROM "
-                             f"{str(alert['database'])}")
-        if alert["aliases"] == ["*"]:
-            selection_command += f" WHERE {a_or_psid} = '{alias}'"
-            selection_command += f" ORDER BY {alert['sort_column']} DESC"
-        else:
-            rem_a = str(alert['aliases']).replace('[', '').replace(']', '')
-            selection_command += (f" WHERE ALIAS IN "
-                                  f"({rem_a}) AND Alias = '{alias}'"
-                                  f" ORDER BY {alert['sort_column']} DESC")
+        selection_command = (f"SELECT * FROM "
+                             f"CEVAC_{alert.metric}_"
+                             f"{alert.bldg_s_name}_"
+                             f"{aggregation}")
 
-        print(selection_command)
-        if not CHECK_ALERTS:
-            return (next_id, new_events, "")
+        data = pd.read_sql_query(selection_command, self.conn)
+        id_column = "Alias" if "Alias" in data.columns else "PointSliceID"
 
-        data_list = command_to_list_single(selection_command)
-        data_list = [float(d) for d in data_list]
-        avg_data = sum(data_list) / len(data_list)
+        for i in range(len(data)):
+            value = data["ActualValue"][i]
+            compare_value = float(alert.condition.split()[-1])
 
-        send_alert = False
-        if alert["condition"] == ">":
-            send_alert = (avg_data > alert["value"])
-        elif alert["condition"] == "<":
-            send_alert = (avg_data < alert["value"])
-        elif alert["condition"] == "=":
-            send_alert = (avg_data == alert["value"])
+            if ">" in alert.condition:
+                send_alert = (value > compare_value)
+            elif alert["condition"] == "<":
+                send_alert = (value < compare_value)
+            elif alert["condition"] == "=":
+                send_alert = (value == compare_value)
 
-        alias = "Alias"
-        if send_alert:
-            a = deepcopy(alert)
-            if get_psid:
+            if send_alert:
+                message = angle_brackets_replace_specific()
                 a['message'] = (angle_brackets_replace_specific(
-                                a["message"], "alias", room
-                                + "(" + get_psid_from_alias(
+                    a["message"], "alias", room
+                                    + "(" + get_psid_from_alias(
                                         room,
                                         alert["building"],
                                         alert["type"]) + ")"))
-            else:
-                a['message'] = (angle_brackets_replace_specific(
-                                a["message"], "alias", room))
-            event_id, next_id, new_events = assign_event_id(next_id,
-                                                            last_events,
-                                                            new_events,
-                                                            alert,
-                                                            alias)
-            safe_log("An alert was sent for " + str(alert), "info")
-            com = (f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType, "
-                   f"AlertMessage, Metric, BuildingDName, UTCDateTime, "
-                   "MessageID, "
-                   "Alias, EventID, BuildingSName) "
-                   f"VALUES('{alert['operation']}',"
-                   f"'{a['message']}',"
-                   f"'{alert['type']}',"
-                   f"'{alert['bldg_disp']}','{utcdatetimenow_str}',"
-                   f"'{alert['message_id']}', {alias}, '{event_id}',"
-                   f"'{alert['building']}')")
-        return (next_id, new_events, com + ";")
+                
+                event_id = assign_event_id(new_events, alert,
+                                           data[id_column][i])
+                self.anomalies.append(Anomaly(alert.type,)) # TODO
+        return None
 
 
-    def check_temp(self, room, alert, temps, known_issues, next_id, last_events,
-                   new_events, get_psid):
+    def check_temp(self, alert, building):
         """Check relative temperature values."""
-        if skip_alias(known_issues, alert["building"], room, "TEMP"):
-            print(room, " is decomissioned")
-            return (next_id, new_events, "")
-        else:
-            pass
+        selection_command = (f"SELECT * FROM "
+                             f"CEVAC_{building}_TEMP_"
+                             f"{alert.aggregation}")
+        data = pd.read_sql_query(selection_command, self.conn)
 
-        try:
-            Alias_Temp = "Temp"
-            for key in temps[room].keys():
-                if (key != "Cooling SP" and key != "Heating SP"
-                        and "TEMP" in key):
-                    Alias_Temp = key
-                elif ("AHU" in key):
-                    continue
+        # Combine set points and rooms
+        temps = {}
+        for i in range(len(data)):
+            alias = data["Alias"][i]
+            value = data["ActualValue"][i]
+            room = alias.split()[1]
+            if room in temps:
+                if "Cooling SP" in alias:
+                    temps[room]["Cooling SP"] = value
+                elif "Heating SP" in alias:
+                    temps[room]["Heating SP"] = value
                 else:
+                    temps[room]["Room"] = alias
+                    temps[room][alias] = value
+            else:
+                if "Cooling SP" in alias:
+                    temps[room] = {"Cooling SP": value}
+                elif "Heating SP" in alias:
+                    temps[room] = {"Heating SP": value}
+                else:
+                    temps[room] = {"Room": alias}
+                    temps[room][alias] = value
+                        
+        for room in temps:
+            for val in ["Room"]:
+                if val not in temps[room]:
                     continue
 
             # Modify value
             room_vals = temps[room]
-            val = 0
+            val = float(room_vals.split()[-1])
             try:
-                if "+" in alert["value"]:
-                    val_str = alert["value"].split()[-1]
-                    val = float(val_str[val_str.find("+") + 1:])
+                if "+" in alert.condition:
                     room_vals["Cooling SP"] += val
                     room_vals["Heating SP"] += val
-                elif "-" in alert["value"].split():
-                    val_str = alert["value"].split()[-1]
-                    val = float(val_str[val_str.find("-") + 1:])
+                elif "-" in alert.condition.split():
                     room_vals["Cooling SP"] -= val
                     room_vals["Heating SP"] -= val
-            except Exception:
-                return (next_id, new_events, "")
 
             # Check value
             send_alert = False
 
-            if ">" in alert["condition"]:
-                if "Cooling SP" in alert["value"]:
+            if ">" in alert.condition:
+                if "@CoolingSP" in alert.condition:
                     if "Cooling SP" in room_vals:
                         send_alert = (
                             room_vals["Cooling SP"] <
-                            room_vals[Alias_Temp])
-                if "Heating SP" in alert["value"]:
+                            room_vals[room_vals["Room"]])
+                if "@HeatingSP" in alert.condition:
                     if "Heating SP" in room_vals:
                         send_alert = (
                             room_vals["Heating SP"] <
-                            room_vals[Alias_Temp])
-            elif "<" in alert["condition"]:
-                if "Cooling SP" in alert["value"]:
+                            room_vals[room_vals["Room"]])
+            elif "<" in alert.condition:
+                if "@CoolingSP" in alert.condition:
                     if "Cooling SP" in room_vals:
                         send_alert = (
                             room_vals["Cooling SP"] >
-                            room_vals[Alias_Temp])
-                if "Heating SP" in alert["value"]:
+                            room_vals[room_vals["Room"]])
+                if "@HeatingSP" in alert.condition:
                     if "Heating SP" in room_vals:
                         send_alert = (
                             room_vals["Heating SP"] >
-                            room_vals[Alias_Temp])
+                            room_vals[room_vals["Room"]])
 
             if send_alert:
-                a = deepcopy(alert)
-                add = get_psid_from_alias(room + " Temp", alert["building"],
-                                          alert["type"]) if get_psid else ""
-                a["message"] = angle_brackets_replace_specific(
-                                a["message"], "alias",
-                                room + " Temp (" + add + ")")
-                a["message"] = angle_brackets_replace_specific(
-                                a["message"], "Cooling SP",
-                                f"{(room_vals['Cooling SP']-val):.1f}")
-                a["message"] = angle_brackets_replace_specific(
-                                a["message"], "Heating SP",
-                                f"{(room_vals['Heating SP']+val):.1f}")
-                a["message"] = angle_brackets_replace_specific(
-                                a["message"], "ActualValue",
-                                f"{room_vals[Alias_Temp]:.1f}")
+                message = angle_brackets_replace_specific()
+                            
+                event_id = assign_event_id(new_events, alert,
+                                           data[id_column][i])
+                self.anomalies.append(Anomaly(alert.type,)) # TODO
+        return None
 
-                event_id, next_id, new_events = assign_event_id(
-                                                    next_id,
-                                                    last_events,
-                                                    new_events,
-                                                    alert, room)
-
-                com = (f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW("
-                       f"AlertType,"
-                       f" AlertMessage, Metric,BuildingDName,"
-                       "UTCDateTime,"
-                       f"MessageID, Alias, EventID, BuildingSName)"
-                       f" VALUES('{a['operation']}','{a['message']}',"
-                       f"'{a['type']}','{a['bldg_disp']}',"
-                       f"'{utcdatetimenow_str}',"
-                       f"'{alert['message_id']}', '{room}', "
-                       f"'{event_id}', '{alert['building']}')")
-                safe_log("An alert was sent for " + str(a), "info")
-                return (next_id, new_events, com + ";")
-        except Exception:
-            pass
-
-        return (next_id, new_events, "")
-
-
-    def check_time(self, data, alert, next_id, last_events, new_events, get_psid):
+    def check_time(self, alert, building):
         """Check time off since last report."""
-        alias = data
-        if skip_alias(known_issues, alert["building"], alias, alert["type"]):
-            print(alias, " is decomissioned")
-            return (next_id, new_events, "")
+        selection_command = ("Select Alias, ActualValue FROM "
+                             f"CEVAC_{building}_{alert.metric}_"
+                             f"{Aggregation}_BROKEN_CACHE")
+        data = pd.read_sql_query(data, self.conn)
+
+        for i in range(len(data)):
+            alias = data["Alias"][i]
+            days_since = data["ActualValue"][i]
+
+            assign_event_id()  # TODO
+            self.anomalies.append(Anomaly())  # TODO
+
+        return None
+
+    def table_exists(self, metric, bldg_s_name, aggregation):
+        """True if table exists.
+        
+        TODO: Debug this.
+        """
+        if aggregation is not "":
+            aggregation = f"_{aggregation}"
+        comm = ("SELECT COUNT(*) FROM "
+                "information_schema.tables WHERE"
+                "TABLE_NAME = "
+                f"'CEVAC_{metric}_{bldg_s_name}{aggregation}'")
+        x = pd.read_sql_query(comm, self.conn)
+        if x[0] == 1:
+            return True
+        return False
+
+    def building_s_list(self):
+        """Return list of buildings (s names)."""
+        comm = "SELECT BuildingSName FROM CEVAC_BUILDING_INFO"
+        data = pd.read_sql_query(comm, self.conn)
+        return data['BuildingSName']
+
+    def skip_building(self, building, alert):
+        occupied = self.occ.building_is_occupied(bulding)
+        if alert.occupancy.lower() == "true" and not occupied:
+            return True
+        elif alert.occupancy.lower() == "false" and occupied:
+            return True
         else:
-            pass
-        t = aliases[alias]
+            return False
 
-        datetime_object = datetime.datetime.strptime(
-            t, '%Y-%m-%d %H:%M:%S.%f')
-        now_aware = pytz.utc.localize(datetime_object)
-        today = datetime.datetime.now()
-        today = pytz.utc.localize(today)
-        time_diff = (today - now_aware)
-        days_since = time_diff.days + 1  # ceil
-
-        # Add to alerts to send
-        safe_log("An alert was sent for " + str(alert), "info")
-        a = deepcopy(alert)
-        add = (" (" + get_psid_from_alias(alias, alert["building"], alert["type"])
-               + ")" if get_psid else "")
-        a["message"] = angle_brackets_replace_specific(
-                            a["message"], "alias", alias + add)
-        a["message"] = angle_brackets_replace_specific(
-                            a["message"], "days", days_since)
-        event_id, next_id, new_events = assign_event_id(
-                                            next_id,
-                                            last_events,
-                                            new_events,
-                                            alert,
-                                            alias)
-        print(a["message"])
-
-        com = (f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType, "
-               f"AlertMessage, Metric,BuildingDName,UTCDateTime, "
-               f"MessageID, Alias, EventID, BuildingSName)"
-               f" VALUES('{a['operation']}','{a['message']}',"
-               f"'{a['type']}','{a['bldg_disp']}',"
-               f"'{utcdatetimenow_str}',"
-               f"'{alert['message_id']}', '{alias}',"
-               f" '{event_id}', '{alert['building']}')")
-        return (next_id, new_events, com + "; ")
+    def safe_log(self, message, condition):
+        if self.LOG:
+            if "error" in condition.lower():
+                self.logging.error(message)
+            else:
+                self.logging.info(message)
 
     def __del__(self):
         """Deconstructor."""
         self.conn.close()
 
 
-class Anomalie:
-    def __init__(self, actual_value, alert, psid):
-        self.psid = psid
-        self.alert = alert
-        self.actual_value = actual_value
+class Anomaly:
+    """All issues become anomalie objects."""
+    def __init__(self, alert_type, alert_message, metric, bldg_d_name, datetime, message_id, alias, event_id, bldg_s_name):
         self.alert_type = ""  # time, abs, tempsp...
+        self.alert_message = alert_message
+        self.metric = metric
+        self.UTCDateTime = datetime
+        self.message_id = message_id
+        self.alias = alias
+        self.event_id = event_id
+        self.bldg_d_name = bldg_d_name
+        self.bldg_s_name = bldg_s_name
+
+    def insert(self, cursor):
+        cursor.execute("insert into CEVAC_ALL_ALERTS_HIST_RAW (AlertType, "
+                       "AlertMessage, Metric, BuildingDName, UTCDateTime, "
+                       "MessageID, Alias, EventID, BuildingSName), "
+                       "(?,?,?,?,?,?,?,?,?)",
+                       [()])
 
 
 class Occupancy:
@@ -582,11 +437,12 @@ class Parameters:
         self.alert_parameters = []
         for i, in range(len(data)):
             self.alert_parameters.append({
-                "metric": data['Metric'][i],
-                "condition": data['Condition'][i],
-                "message": data['Message'][i],
-                "importance": data['Importance'][i],
-                "occupancy": data['Occupancy'][i],
+                "metric": data['Metric'][i].strip(),
+                "condition": data['Condition'][i].strip(),
+                "message": data['Message'][i].strip(),
+                "importance": data['Importance'][i].strip(),
+                "occupancy": data['Occupancy'][i].strip(),
+                "alis-psid": data['alias-psid'][i].strip(),
             })
 
 
@@ -621,15 +477,21 @@ def rebuild_broken_cache(table):
 
 
 def verbose_print(verbose, message):
-    """Print message if verbose is True."""
+    """Print message if verbose is True.
+    
+    Returns whether or not the message printed.
+    """
     if verbose:
         print(message)
+        return True
+    return False
 
 
 # For debugging
 if __name__ == "__main__":
     print("DEBUG ALERT SYSTEM")
     all_alerts = Alerts(None, verbose=True)
+    all_alerts.alert_system()
     
     print(all_alerts.occ.building_occupied)
     print("FINISHED")
