@@ -117,10 +117,10 @@ function download_XREF_click(){
     url : 'console/download_XREF.php',
     type : 'GET',
     data: $('form').serialize(),
-    // success : success_PXREF_csv
-    success : function(data){
-      alert(data);
-    }
+    success : success_PXREF_csv
+    // success : function(data){
+      // alert(data);
+    // }
   });
 }
 function download_PXREF_click(){
