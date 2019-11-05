@@ -146,7 +146,6 @@ for fname in next(os.walk(import_dir))[2]:
         logging.error("Failed to read %s as a csv file.", fpath)
     except Exception:
         logging.error("Unexpected error while processing file '%s'", fpath)
-        raise
 
     if success and SEND:
         try:
