@@ -10,6 +10,8 @@
         Report Link
       </a>
     </div>
-    <div>{{ bdata }}</div>
+    <ng-container *ngFor="let obj of building$ | keyvalue">
+      <div>{{ obj.key }}: {{ obj.value }}</div>
+    </ng-container>
   </ng-template>
 </mat-expansion-panel>
