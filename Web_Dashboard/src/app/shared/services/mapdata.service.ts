@@ -72,7 +72,7 @@ export class MapdataService {
   ];
   dataSet: Measurement = this.dataSets[0];
 
-  private dataUrl = 'http://wfic-cevac1:3000/api/stat';
+  private dataUrl = 'http://wfic-cevac1/api/stat';
   private sasBaseURL = 'https://sas.clemson.edu:8343/';
   private map!: L.Map;
   private tracked!: L.GeoJSON;
