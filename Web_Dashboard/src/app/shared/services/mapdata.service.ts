@@ -3,6 +3,7 @@ import { ColorService } from '@services/color.service';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import * as L from 'leaflet';
+import { Observable, of } from 'rxjs';
 
 import { Legend } from '@shared/leaflet-extensions/L.Control.Legend';
 
@@ -93,16 +94,16 @@ export class MapdataService {
   getMap = () => this.initMap();
 
   getBuilding = (bName: string | null) => {
-    let building!: { [index: string]: any };
+    let building!: Observable<BuildingData>;
     this.map.eachLayer(layer => {
       const l = layer as L.Polygon;
       if (!building && l.feature && l.feature.properties.Short_Name === bName) {
-        building = l.feature.properties;
+        building = of(l.feature.properties);
         return;
       }
     });
     if (!building || bName === ' ' || bName === null) {
-      building = { Short_Name: 'Building not found' };
+      building = of({ Short_Name: 'Building not found' });
     }
     return building;
   };
