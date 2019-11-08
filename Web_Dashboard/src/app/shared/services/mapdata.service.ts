@@ -98,7 +98,7 @@ export class MapdataService {
       const l = layer as L.Polygon;
       if (!building && l.feature && l.feature.properties.Short_Name === bName) {
         building = l.feature.properties;
-        return building;
+        return;
       }
     });
     if (!building || bName === ' ' || bName === null) {
@@ -142,6 +142,7 @@ export class MapdataService {
         this.categories.add(bclass);
         this.colorService.registerCategory(bclass);
       }
+      feature.properties.metrics = [];
     }
     this.map = L.map('map', this.mapOptions).setView([34.678, -82.838], 17);
     const mapbox = this.getTileLayerMapboxLight().addTo(this.map);
@@ -197,12 +198,12 @@ export class MapdataService {
       style.color = this.colorService.getScaledColor(bclass);
       style.fillColor =
         feature.properties &&
-        feature.properties[this.dataSet.propertyName] &&
-        feature.properties[this.dataSet.propertyName].max
+        feature.properties.metrics[this.dataSet.propertyName] &&
+        feature.properties.metrics[this.dataSet.propertyName].max
           ? this.colorService.getScaledColor(
               bclass,
               this.dataSet.propertyName,
-              feature.properties[this.dataSet.propertyName].max
+              feature.properties.metrics[this.dataSet.propertyName].max
             )
           : this.colorService.getScaledColor(
               bclass,
@@ -289,7 +290,7 @@ export class MapdataService {
         )
         .subscribe(bData => {
           bData.forEach((element: any) => {
-            feature.properties[element.metric] = element;
+            feature.properties.metrics[element.metric] = element;
           });
           this.tracked.resetStyle(layer);
         });
