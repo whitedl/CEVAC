@@ -1,6 +1,6 @@
 import { Measurement } from './measurement';
 
 export interface BuildingData {
-  metrics: Measurement[];
+  metrics?: Measurement[];
   [index: string]: any;
 }

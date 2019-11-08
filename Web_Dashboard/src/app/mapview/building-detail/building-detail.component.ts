@@ -19,7 +19,9 @@ export class BuildingDetailComponent implements OnInit {
 
   ngOnInit() {
     this.route.paramMap.subscribe((params: ParamMap) => {
-      this.building$ = this.mapdataService.getBuilding(params.get('bldg'));
+      this.mapdataService
+        .getBuilding(params.get('bldg'))
+        .subscribe(value => (this.building$ = value));
     });
   }
 }
