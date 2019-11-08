@@ -6,7 +6,8 @@
 /cevac/scripts/seperator.sh
 
 hist_views_query="
-SELECT RTRIM(TableName) FROM CEVAC_TABLES
+SELECT RTRIM(BuildingSName), RTRIM(Metric), RTRIM(Age)
+FROM CEVAC_TABLES
 WHERE autoCACHE = 1
 "
 /cevac/scripts/exec_sql.sh "$hist_views_query" "hist_views.csv"
@@ -19,19 +20,31 @@ readarray tables_array < /cevac/cache/hist_views.csv
 
 for t in "${tables_array[@]}"; do
   t=`echo "$t" | tr -d '\n'`
-  [ -z "$t" ] && continue
-  echo "$t"
-  compare=$(echo "$t" | grep "COMPARE")
-  pred=$(echo "$t" | grep "PRED")
-  if [ ! -z "$compare" ] || [ ! -z "$pred" ]; then # always recache COMPARE and PRED tables
-    sql="EXEC CEVAC_CACHE_INIT @tables = '"$t"'"
-  else sql="EXEC CEVAC_CACHE_APPEND @tables = '$t'"
+  if [ -z "$t" ]; then
+    continue
   fi
+  t=`echo "$t" | sed 's/,/\n/g'`
+  B=`echo "$t" | sed '1!d'`
+  M=`echo "$t" | sed '2!d'`
+  A=`echo "$t" | sed '3!d'`
+
+  TableName="CEVAC_$B""_$M""_$A"
+  DAY="CEVAC_$B""_$M""_DAY"
+  DAY_VIEW="CEVAC_$B""_$M""_DAY_VIEW"
+  HIST="CEVAC_$B""_$M""_HIST"
+  HIST_VIEW="CEVAC_$B""_$M""_HIST_VIEW"
+  compare=$(echo "$TableName" | grep "COMPARE")
+  pred=$(echo "$TableName" | grep "PRED")
+  if [ ! -z "$compare" ] || [ ! -z "$pred" ]; then # always recache COMPARE and PRED tables
+    sql="EXEC CEVAC_CACHE_INIT @tables = '"$HIST_VIEW"'; EXEC CEVAC_CACHE_INIT @tables = '$DAY_VIEW'"
+  else sql="EXEC CEVAC_CACHE_APPEND @tables = '$HIST_VIEW'; EXEC CEVAC_CACHE_INIT @tables = '$DAY_VIEW'"
+  fi
+  echo "$sql"
   if ! /cevac/scripts/exec_sql.sh "$sql" ; then
     echo "Error. Aborting append"
     /cevac/scripts/log_error.sh "Error executing CEVAC_CACHE_APPEND" "$t"
     # exit 1
-  fi
+  fi 
 done
 
 

@@ -23,9 +23,11 @@ function reset_PXREF(){
   pb = document.getElementById('PXREF_button');
   pb.innerHTML = view;
   document.getElementById('PXREF_div').style.display = 'none';
+  document.getElementById('download_button_div').style.display = 'none';
 }
 function PXREF_button_click(){
   pb = document.getElementById('PXREF_button');
+  document.getElementById('Age_text').value = 'PXREF';
   view = "View PXREF";
   update = "Update PXREF";
   if(pb.innerHTML == view){
@@ -115,10 +117,10 @@ function download_XREF_click(){
     url : 'console/download_XREF.php',
     type : 'GET',
     data: $('form').serialize(),
-    // success : success_PXREF_csv
-    success : function(data){
-      alert(data);
-    }
+    success : success_PXREF_csv
+    // success : function(data){
+      // alert(data);
+    // }
   });
 }
 function download_PXREF_click(){
@@ -138,8 +140,39 @@ function download_BuildingKeySearch_click(){
     success : success_BuildingKeySearch_csv
   });
 }
+function download_button_click(){
+  $.ajax({
+    url : 'console/download_table.php',
+    type : 'GET',
+    data: $('form').serialize(),
+    success : success_table_csv
+  });
+}
 function BuildingKey_search_button_click(){
   button = document.getElementById('BuildingKey_search_button');
   document.getElementById('BuildingKey_search_div').style.display = 'block';
+  document.getElementById('output').innerHTML = "";
+  document.getElementById('sql_output').innerHTML = "";
+  reset_buttons(button);
+}
+function view_latest_button_click(){
+  button = document.getElementById('view_latest_button');
+  document.getElementById('download_button').innerHTML = 'Download LATEST';
+  document.getElementById('download_button_div').style.display = 'block';
+  document.getElementById('Age_text').value = 'LATEST';
+  reset_buttons(button);
+  get_latest_html();
+}
+function view_day_button_click(){
+  button = document.getElementById('view_day_button');
+  document.getElementById('download_button').innerHTML = 'Download DAY';
+  document.getElementById('download_button_div').style.display = 'block';
+  document.getElementById('Age_text').value = 'DAY';
+  reset_buttons(button);
+  get_day_html();
+}
+function alerts_report_button_click(){
+  button = document.getElementById('alerts_report_button');
+
   reset_buttons(button);
 }

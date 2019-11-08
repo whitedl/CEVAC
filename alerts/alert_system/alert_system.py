@@ -15,11 +15,11 @@ from croniter import croniter
 
 
 CONDITIONS_FPATH = "/cevac/cron/alerts/"
-KNOWN_ISSUES_FPATH = "/cevac/DEV/known issues/Known Data Issues.csv"
-OCCUPANCY_FPATH = "/cevac/CEVAC/scripts/harrison/alerts/occupancy.csv"
+KNOWN_ISSUES_FPATH = "/cevac/CEVAC/known_issues/Known Data Issues.csv"
+OCCUPANCY_FPATH = "/cevac/CEVAC/alerts/alert_system/occupancy.csv"
 LOGGING_PATH = "/cevac/cron/alerts/"
 PHONE_PATH = "/cevac/cron/alerts/"
-alert_fname = "/cevac/DEV/alerts/alert_parameters.csv"
+alert_fname = "/cevac/CEVAC/alerts/alert_parameters.csv"
 json_oc = "/cevac/cron/alert_log_oc.json"
 json_unoc = "/cevac/cron/alert_log_unoc.json"
 
@@ -31,10 +31,10 @@ LOG = True
 CHECK_ALERTS = True
 
 # Determines whether or not to insert the found alerts into the alert databse
-SEND = False
+SEND = True
 
 # Determines whether or not to update the cache alerts are checked against
-UPDATE_CACHE = False
+UPDATE_CACHE = True
 
 # The positions for columns in the csv
 COLUMNS = {
@@ -479,22 +479,28 @@ def check_numerical_alias(alias, alert, next_id, last_events, new_events,
 def check_temp(room, alert, temps, known_issues, next_id, last_events,
                new_events, get_psid):
     """Check relative temperature values."""
-    if skip_alias(known_issues, alert["building"], room, "TEMP"):
-        print(room, " is decomissioned")
-        return (next_id, new_events, "")
-    else:
-        pass
-
     try:
         Alias_Temp = "Temp"
         for key in temps[room].keys():
-            if (key != "Cooling SP" and key != "Heating SP"
-                    and "TEMP" in key):
+            if (key != "Cooling SP" and key != "Heating SP" and "Temp" in key):
                 Alias_Temp = key
             elif ("AHU" in key):
                 continue
+            elif ("Cooling SP" in key):
+                temps[room]["Cooling SP"] = temps[room][key]
+            elif ("Heating SP" in key):
+                temps[room]["Heating SP"] = temps[room][key]
             else:
                 continue
+
+        try:
+            if skip_alias(known_issues, alert["building"], Alias_Temp, "TEMP"):
+                print(room, " is decomissioned")
+                return (next_id, new_events, "")
+            else:
+                pass
+        except:
+            pass
 
         # Modify value
         room_vals = temps[room]
@@ -502,6 +508,7 @@ def check_temp(room, alert, temps, known_issues, next_id, last_events,
         try:
             if "+" in alert["value"]:
                 val_str = alert["value"].split()[-1]
+                print(val_str)
                 val = float(val_str[val_str.find("+") + 1:])
                 room_vals["Cooling SP"] += val
                 room_vals["Heating SP"] += val
@@ -704,14 +711,33 @@ if __name__ == "__main__":
                 ec = 0
                 for row in data_list:
                     try:
-                        room = row[0].split()[0]
+                        # room = row[0].split()[0]
+                        room = row[0].split(" ")[1]
+                        arbitrary_alias = row[0]
                         if room in temps:
+                            if "Cooling SP" in row[0]:
+                                temps[room]["Cooling SP"] = float(row[1])
+                            elif "Heating SP" in row[0]:
+                                temps[room]["Heating SP"] = float(row[1])
+                            else:
+                                temps[room][arbitrary_alias] = float(row[1])
+
+                            """
                             temps[room][row[0][row[0].find(
                                 " ") + 1:]] = float(row[1])
+                            """
                         else:
+                            if "Cooling SP" in row[0]:
+                                temps[room] = {"Cooling SP": float(row[1])}
+                            elif "Heating SP" in row[0]:
+                                temps[room] = {"Heating SP": float(row[1])}
+                            else:
+                                temps[room]  = {arbitrary_alias: float(row[1])}
+                            """
                             temps[room] = {
-                                row[0][row[0].find(" ") + 1:]: float(row[1])
+                                row[0][row[0].find(" ") + 1:]: float(row[1])  # data
                             }
+                            """
                     except Exception:
                         ec += 1
 

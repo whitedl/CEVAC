@@ -42,6 +42,10 @@ button {
 button:disabled {
   color: #555555;
 }
+a.disabled{
+  color: #555555;
+  pointer-events: none;
+}
 button:hover:enabled{
   border: 2px solid #aaaaaa;
   color: #50fa7b;
@@ -56,10 +60,15 @@ select {
   font-size: 20px;
 }
 table {
-    border-spacing: 10px;
-    border-collapse: separate;
+  border-spacing: 10px;
+  border-collapse: separate;
 }
 td {
   color: #ffb45b;
 }
-
+li:not(:last-child) {
+  margin-bottom: 10px;
+}
+ul{
+  list-style-type:none;
+}

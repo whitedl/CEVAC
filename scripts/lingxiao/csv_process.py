@@ -23,7 +23,7 @@ dlg.SetOFNInitialDir("D:\ ")
 dlg.DoModal()
 filename = dlg.GetPathName()
 '''
-def sql_creat(filename):
+def PSID_xref(filename):
     df = pd.read_csv(filename, header=0)
     df = df.dropna(axis=0, how='all')
     #df = df.astype(str)
@@ -131,6 +131,94 @@ def sql_creat(filename):
         
         print(len(df), "lines have been written in: ", new_filename)
         return new_filename
+    
+def WAP_xref(filename):
+    df = pd.read_csv(filename, header=0)
+    df = df.dropna(axis=0, how='all')
+    print(df.columns)
+    
+    core_df = ['WAP_Name','Room','Floor','Alias']
+    
+    if (len(df.columns)==4):
+        df.columns = core_df
+    else:
+        print('unexpected columns')
+        sys.exit()
+    
+    print(df.columns)
+    
+    null_df = pd.DataFrame(columns = core_df)
+    df = pd.concat([df,null_df],ignore_index=True,sort=False)
+    
+    df.name = filename.split('/')[-1][:-4].upper()
+    build_name = (df.name).split('_')[1]
+    metric_name = (df.name).split('_')[2]
+
+    error_rows = df[df.isnull().values==True]
+    
+    if(len(error_rows)):
+        #print('Null value in row: ',[i+1 for i in error_rows])
+        print('Null value in row: ')
+        print(error_rows)
+        sys.exit()
+        
+    if(len(df[df.duplicated('WAP_Name')])):
+        print('duplicated value in WAP_Name: ')
+        print(df[df.duplicated('WAP_Name')])
+        sys.exit()
+    
+    check_query_building = "SELECT DISTINCT BuildingSName FROM CEVAC_WAP_IDS; "
+    query_res_b = bsql.Query(check_query_building).json_list
+    building_list = np.reshape(query_res_b, len(query_res_b))
+    
+    if build_name not in building_list:
+        sys.exit('Error in Building name, this building name is not included in CEVAC_WAP_IDS, please check. ')
+
+    
+    check_query_names = "SELECT WAP_Name FROM CEVAC_WAP_IDS; "
+    check_query_data = "SELECT WAP_ID, BuildingSName FROM CEVAC_WAP_IDS; "
+    query_res_n = bsql.Query(check_query_names)
+    query_res_d = bsql.Query(check_query_data)
+    
+    total_wap_name = query_res_n.json_list
+    wap_name_list = np.reshape(total_wap_name, len(total_wap_name))
+    total_data = query_res_d.json_list
+    
+    for i in range(len(wap_name_list)):
+        wap_name_list[i] = ''.join((wap_name_list[i].split()))
+    
+    WAP_IDS_dict = dict(zip(wap_name_list, total_data))
+    
+    df['WAP_ID'] = None   
+    for i in range(len(df)):
+        temp_wap_name = df['WAP_Name'][i]
+        temp_wap_id = WAP_IDS_dict[temp_wap_name][0]
+        df['WAP_ID'][i] = temp_wap_id
+    
+    head_str = f"IF OBJECT_ID('{df.name}') IS NOT NULL DROP TABLE {df.name};\n \
+GO\n \
+USE [WFIC-CEVAC]\n CREATE TABLE [dbo].[{df.name}](\n \
+[WAP_ID] INT PRIMARY KEY, [WAP_Name] NVARCHAR (100) NOT NULL, [Room] NVARCHAR (50) NOT NULL, \
+[Floor] NVARCHAR (50) NOT NULL, [Alias] NVARCHAR (50) NOT NULL \
+)\n \
+GO\n \
+"
+
+    new_file_path = "/cevac/cache/"    
+    new_filename = new_file_path + ('create_'+df.name).upper()+'.sql'
+    with open(new_filename,'w') as sql_f:
+        sql_f.write(head_str)
+            
+        for i in range(len(df)):
+            insert_str = f"INSERT INTO {df.name} (WAP_ID,WAP_Name,Room,Floor,Alias) \
+VALUES ({df.iloc[i]['WAP_ID']},'{str((df.iloc[i]['WAP_Name']))}','{str(df.iloc[i]['Room'])}', \
+'{str(df.iloc[i]['Floor'])}','{' '.join(str(df.iloc[i]['Alias']).split())}');\n \
+GO\n"
+            sql_f.write(insert_str)
+        sql_f.close()
+        
+        print(len(df), "lines have been written in: ", new_filename)
+        return new_filename
         
 def rename_raw_csv(filename):
     file_path = "/cevac/xref/"
@@ -146,8 +234,14 @@ if __name__ == '__main__':
     filename = str(sys.argv[1])
     #filename = file_path + filename
     #filename = input("filename: ")   
-    
-    new_sql = sql_creat(filename)
+    metric = (filename.split('/')[-1][:-4].upper()).split('_')[2]
+    if (metric == 'WAP'):
+        print('Dealing with WAP_xref\n')
+        new_sql = WAP_xref(filename)
+    else:
+        print('Dealing with PSID_xref\n')
+        new_sql = PSID_xref(filename)
+        
     if(new_sql):
         new_csv_filename = rename_raw_csv(filename)
         if(new_csv_filename):

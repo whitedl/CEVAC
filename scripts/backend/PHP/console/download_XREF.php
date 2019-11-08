@@ -10,7 +10,7 @@ $script = "sudo -u cevac /cevac/scripts/table_to_csv_append.sh";
 $config = "\"$XREF\" \"reset\"";
 // Create CSV file
 $output = `$script $config`;
-echo "$output";
+// echo "$output";
 
 echo "csv/$XREF.csv";
 ?>

@@ -1,5 +1,5 @@
 .advanced {
-  visibility: hidden;
+  /* visibility: hidden; */
   /* display: none; */
 }
 #body_left {
@@ -7,7 +7,7 @@
   height: 95%;
   float: left;
   margin: auto;
-  border: 2px solid green;
+  /* border: 2px solid green; */
 }
 #body_right {
   width: 63%;
@@ -20,20 +20,21 @@
 }
 #advanced_div {
   width: 55%;
-  border: 2px solid red;
+  /* border: 2px solid red; */
   display: block;
   float: right;
 }
 #buttons_div {
-  width: 30%;
-  border: 2px solid white;
+  padding-top: 50px;
+  width: 40%;
+  /* border: 2px solid white; */
   display: block;
   float: left;
 }
 #buttons_parent_div {
   width: 100%;
   /* height: 100px; */
-  border: 2px solid blue;
+  /* border: 2px solid blue; */
   display: block;
   float: right;
   /* margin-left: auto; */
@@ -42,18 +43,22 @@
 #delete_button{
   background-color: #cc0000;
   color: #FFFFFF;
+  float: right;
+}
+#bootstrap_button{
+  float: left;
 }
 #PXREF_button{
-  float: left;
-  display: block;
-  vertical-align: top;
+  /* float: left; */
+  /* display: block; */
+  /* vertical-align: top; */
 }
 #rebuild_PXREF_button{
-  float: left;
-  vertical-align: top;
+  /* float: left; */
+  /* vertical-align: top; */
 }
 #advanced_right{
-  border: 2px solid green;
+  /* border: 2px solid green; */
   width: 50%;
   float: right;
 }
@@ -61,7 +66,7 @@
   width: 35%;
 }
 #toggles_div{
-  border: 2px solid orange;
+  /* border: 2px solid orange; */
   width: 30%;
 }
 #autoLASR_div{
@@ -92,5 +97,24 @@
   display: none;
 }
 #BuildingKey_search_div{
+  display: none;
+}
+#metrics{
+  float: right;
+  display: inline;
+  width: 50%;
+}
+#buildings{
+  float: left;
+  display: inline;
+  width: 50%;
+}
+#select_options_div{
+  display: block;
+}
+#download_button_div{
+  display: none;
+}
+#Age_text{
   display: none;
 }
