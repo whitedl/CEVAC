@@ -16,7 +16,7 @@ import win32gui
 import sys
 
 #Build Array 'apps' of windows and handles for all windows labeled "Dive"
-startapps = pywinauto.findwindows.find_elements(title_re=".*SAS")
+startapps = pywinauto.findwindows.find_elements(title_re=".*Dive")
 managed_window_handles = [child.handle for child in startapps]
 apps = []
 for handle in managed_window_handles:
@@ -87,7 +87,7 @@ while keep_running:
 
 
     # Find "Dive" windows and add to apps and managed_window_handles
-    all_windows = pywinauto.findwindows.find_elements(title_re=".*SAS")
+    all_windows = pywinauto.findwindows.find_elements(title_re=".*Dive")
     for handle in list(set([spec.handle for spec in all_windows]) - set(managed_window_handles)):
         try:
             apps.append(application.Application().connect(handle=handle))
@@ -110,7 +110,7 @@ while keep_running:
 
     # Remove old windows
     for i, handle in enumerate(managed_window_handles):
-        if handle not in [spec.handle for spec in pywinauto.findwindows.find_elements(title_re=".*SAS")]:
+        if handle not in [spec.handle for spec in pywinauto.findwindows.find_elements(title_re=".*Dive")]:
             apps.remove(apps[i])
             managed_window_handles.remove(managed_window_handles[i])
 
