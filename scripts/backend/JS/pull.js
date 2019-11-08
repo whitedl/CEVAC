@@ -139,3 +139,22 @@ function get_day_html(){
     }
   );
 }
+function websocket(){
+  // helper function: log message to screen
+  function log(msg) {
+    document.getElementById('output').textContent += msg + '\n';
+  }
+
+  // setup websocket with callbacks
+  var ws = new WebSocket('ws://wfic-cevac1:8080/');
+  ws.onopen = function() {
+    log('CONNECT');
+  };
+  ws.onclose = function() {
+    log('DISCONNECT');
+    kill_websocket();
+  };
+  ws.onmessage = function(event) {
+    log('MESSAGE: ' + event.data);
+  };
+}

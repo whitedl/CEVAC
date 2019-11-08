@@ -176,3 +176,18 @@ function alerts_report_button_click(){
 
   reset_buttons(button);
 }
+function test_button_click(){
+  console.log('test');
+  // form_request('start_socket.php');
+  $.ajax({
+  type: 'POST',
+  url: 'console/start_socket.php',
+  data: $('form').serialize(),
+  success: function(data){
+    console.log(data);
+    websocket();
+    // success_output(data);
+    // document.getElementById('output').innerHTML = data;
+    }
+  });
+}

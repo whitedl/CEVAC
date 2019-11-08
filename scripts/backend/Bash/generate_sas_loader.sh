@@ -26,13 +26,23 @@ dest_TableName=`python3 /cevac/python/name_shortener.py $TableName`
 
 array=()
 array+=("
+
+/* Create metadata macro variables */
+%let IOMServer      = %nrquote(SASApp);
+%let metaPort       = %nrquote(8561);
+%let metaSmeta     = %nrquote(wfic-sas-meta.clemson.edu);
+
+LIBNAME LASRLIB SASIOLA  TAG=\"OPT.SASINSIDE.SASVA\"  PORT=10031 HOST=\"wfic-sas-im-hd\"  SIGNER=\"https://sas.clemson.edu:8343/SASLASRAuthorization\" ;
+%LET AL_META_LASRLIB=Visual Analytics Public LASR;
+
 /* Register Table Macro */
-%macro registertable( REPOSITORY=Foundation, REPOSID=, LIBRARY=, TABLE=, FOLDER=, TABLEID=, PREFIX= );
+%macro registertable( REPOSITORY=, REPOSID=, LIBRARY=, TABLE=, FOLDER=, TABLEID=, PREFIX= );
 
 /* Mask special characters */
 
    %let REPOSITORY=%superq(REPOSITORY);
    %let LIBRARY   =%superq(LIBRARY);
+
    %let FOLDER    =%superq(FOLDER);
    %let TABLE     =%superq(TABLE);
 
@@ -46,12 +56,6 @@ array+=("
       %PUT INFO: Registering &FOLDER./&SELECTOBJ. to &LIBRARY. library.;
    %else
       %PUT INFO: Registering &SELECTOBJ. to &LIBRARY. library.;
-
-    /* Create metadata macro variables */
-    %let IOMServer      = %nrquote(SASApp);
-    %let metaPort       = %nrquote(8561);
-    %let metaSmeta     = %nrquote(wfic-sas-meta.clemson.edu);
-
 
    proc metalib;
       omr (
@@ -72,12 +76,15 @@ array+=("
 
 %mend;
 /* Synchronize table registration */
+/* %global AL_METAREPOSITORY; */
+/* %let AL_METAREPOSITORY=%SYSFUNC(getoption(METAREPOSITORY)); */
 %registerTable(
      LIBRARY=%nrstr(/Shared Data/SAS Visual Analytics/Public/Visual Analytics Public LASR)
-   , REPOSITORY=%nrstr(Foundation)
+     , REPOSITORY=%nrbquote(%SYSFUNC(getoption(METAREPOSITORY)))
    , TABLE=%nrstr($dest_TableName)
    , FOLDER=%nrstr(/Shared Data/SAS Visual Analytics/Public/LASR)
    );
+
 ")
 
 array+=("
@@ -253,6 +260,8 @@ for l in "${array[@]}"; do
   echo "${l}" >> /cevac/cache/sas_scripts/$TableName.sas
 done
 # echo "$script" > /cevac/cache/sas_scripts/$TableName.sas
-if ! rsync -vh --progress /cevac/cache/sas_scripts/$TableName.sas CEVAC@wfic-sas-im-hd.clemson.edu:~/scripts/$TableName.sas; then
+# if ! rsync -vh --progress /cevac/cache/sas_scripts/$TableName.sas CEVAC@wfic-sas-im-hd.clemson.edu:~/scripts/$TableName.sas; then
+if ! rsync -vh --progress /cevac/cache/sas_scripts/$TableName.sas sas@wfic-sas-im-hd.clemson.edu:~/CEVAC/$TableName.sas; then
+# if ! rsync -vh --progress /cevac/cache/sas_scripts/$TableName.sas CEVAC@wfic-sas-meta.clemson.edu:~/scripts/$TableName.sas; then
   echo "error"
 fi

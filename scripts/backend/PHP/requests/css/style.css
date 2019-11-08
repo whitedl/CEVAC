@@ -1,0 +1,261 @@
+.container{
+  margin: 30px;
+}
+li{
+  font-size: 75%;
+}
+.table {
+  display: table;   /* Allow the centering to work */
+	margin: 0 auto;
+}
+
+ul#horizontal-list {
+	/* min-width: 696px; */
+	list-style: none;
+	/* padding-top: 20px; */
+}
+ul#horizontal-list li {
+		display: inline;
+}
+
+hr{
+  border-color: transparent;
+  box-shadow: 2px 2px 2px #888888;
+}
+
+input[type="file"] {
+    /* display: none; */
+}
+.custom-file-upload {
+    /* border: 1px solid #ccc; */
+    /* display: inline-block; */
+    /* padding: 6px 12px; */
+    cursor: pointer;
+}
+
+.card-text{
+  color: black;
+}
+.card-body{
+  padding: 20px;
+  text-align: left;
+}
+.card-subtitle{
+  color: black;
+  /* float: left; */
+}
+.card-title{
+  color: black;
+}
+.preview_div{
+  padding: 25px;
+  /* padding: 1%; */
+  display: table-cell;
+  /* width: 10%; */
+}
+
+div.card {
+  width: 250px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  text-align: center;
+}
+
+.comment_date{
+  font-size: 70%;
+  color: #888888;
+}
+.horiz {
+  display: table;
+  margin: 0 auto;
+}
+.clear_textarea{
+  border: 0;
+  background: transparent;
+  color: white;
+}
+
+.show_hide{
+  font-size: 80%;
+  color: #BBBBBB;
+}
+
+img {
+    display: inline;
+    margin: 0 auto;
+    height: 100%;
+    width: auto;
+}
+
+.btn {
+  background: #888888;
+  border: 3px solid #333333;
+}
+.btn.active{
+  background: #555555;
+  border: 3px solid #222222;
+}
+.btn:focus{
+  background: #888888;
+  border: 3px solid #AAAAAA;
+}
+.btn:hover{
+  background: #AAAAAA;
+  border: 3px solid #DDDDDD;
+}
+.btn.active:hover{
+  background: #777777;
+  border: 3px solid #222222;
+}
+.btn.active:focus{
+  background: #555555;
+  border: 3px solid #222222;
+}
+
+.watch{
+  margin: 0 auto;
+  width: 70%;
+  padding: 15px;
+}
+.center_full{
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  /* display: block; */
+  margin: 0 auto;
+  width: 100%;
+}
+.center{
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  margin: 0 auto;
+  width: 40%;
+  padding: 10px;
+}
+.right{
+  float: right;
+}
+.left{
+  float: left;
+}
+
+label {
+  color: white;
+  font-family: arial;
+  font-size: 100%;
+}
+h3 {
+  color: white;
+  font-family: arial;
+  font-size: 100%;
+  /* padding-left: 10px; */
+  /* padding-top: 30px; */
+  /* margin-top: 30px; */
+}
+h1 {
+  color: white;
+  font-family: arial;
+}
+h2 {
+  color: white;
+}
+
+td {
+  color: white;
+  font-family: arial;
+  font-size 100%;
+  /* padding: 10px; */
+}
+
+p {
+  color: white;
+  font-family: arial;
+  /* font-size 30px; */
+  /* padding: 10px; */
+}
+/* .nav-center { */
+    /* display: inline-block; */
+    /* margin:0; */
+    /* float:none; */
+    /* left: 0; */
+    /* right: 0; */
+    /* text-align:center; */
+		/* width:70%; */
+/* } */
+/* .nav.nav-center li,.nav.nav-center li  a{display:inline;float:none;line-height:40px;}av li { */
+    /* display: inline-block; */
+    /* list-style-type: none; */
+/* } */
+
+.navbar {
+  /* max-height: 70px; */
+  z-index:1;
+  overflow: hidden;
+  background-color: #CA1414;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  /* height: 30px; */
+  padding: 0px;
+}
+/* Link */
+.navbar-default .navbar-nav > li > a {
+  /* color: pink; */
+}
+.navbar-default .navbar-nav > li > a:hover,
+.navbar-default .navbar-nav > li > a:focus {
+  /* color: pink; */
+}
+.nav-link .nav-item {
+  /* float: left; */
+  /* display: block; */
+  /* color: pink; */
+  /* text-align: center; */
+  /* height: 10px; */
+  /* font-size: 50%; */
+  /* padding: 14px 16px; */
+  /* text-decoration: none; */
+  /* font-family: arial; */
+}
+
+.nav-link a:hover{
+  /* color: pink; */
+  /* background: #CCCCCC; */
+  /* font-size: 50%; */
+  /* text-shadow: 2px 2px 4px #000000; */
+  /* background: #a01010; */
+  /* color: black; */
+}
+
+body {
+  background-color: #333333;
+  /* margin-top: 70px; */
+  margin: 0;
+  padding-top: 70px;
+  font-size: 20px;
+}
+
+html {
+  margin:0;
+  padding:0;
+}
+
+.main {
+  margin-top: 30px;
+  /* width: 100%; */
+  /* height: 100%; */
+}
+
+/* input[type=submit]{ */
+  /* color: black; */
+/* } */
+/* input[type=reset]{ */
+  /* color: black; */
+/* } */
+input{
+  font-size 300%;
+  /* color: black; */
+}
+table{
+  color: white;
+}
