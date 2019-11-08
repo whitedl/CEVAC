@@ -5,13 +5,27 @@
     </mat-panel-title>
   </mat-expansion-panel-header>
   <ng-template matExpansionPanelContent>
-    <div *ngIf="building$.reportlink">
-      <a href="{{ building$.reportlink }}" target="_blank">
-        Report Link
-      </a>
-    </div>
-    <ng-container *ngFor="let obj of building$ | keyvalue">
-      <div>{{ obj.key }}: {{ obj.value }}</div>
-    </ng-container>
+    <mat-tab-group dynamicHeight>
+      <mat-tab label="General">
+        <a
+          *ngIf="building$.reportlink"
+          href="{{ building$.reportlink }}"
+          target="_blank"
+        >
+          Report Link
+        </a>
+        <div *ngFor="let obj of building$ | keyvalue">
+          {{ obj.key }}: {{ obj.value }}
+        </div>
+      </mat-tab>
+      <mat-tab
+        *ngFor="let tab of building$.metrics | keyvalue"
+        [label]="tab.key"
+      >
+        <ng-container *ngFor="let obj of tab.value | keyvalue">
+          <div>{{ obj.key }}: {{ obj.value }}</div>
+        </ng-container>
+      </mat-tab>
+    </mat-tab-group>
   </ng-template>
 </mat-expansion-panel>
