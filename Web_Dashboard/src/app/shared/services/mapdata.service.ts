@@ -103,7 +103,10 @@ export class MapdataService {
       }
     });
     if (!building || bName === ' ' || bName === null) {
-      building = of({ Short_Name: 'Building not found' });
+      building = of({
+        Short_Name: 'Building not found',
+        metrics: []
+      });
     }
     return building;
   };
