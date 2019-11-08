@@ -74,7 +74,7 @@ WHILE (EXISTS(SELECT 1 FROM @cevac_params) AND @i > 0) BEGIN
 		SET @name_CACHE = REPLACE(@name, '_VIEW', '');
 		SET @name_CACHE = @name_CACHE + '_CACHE';
 	END
-	SELECT @name_CACHE AS 'CACHE Table name';
+	PRINT @name_CACHE;
 
 	EXEC CEVAC_ALIAS_OR_PSID_OUTPUT @table = @name, @Alias_or_PSID_out = @Alias_or_PSID OUTPUT;
 	SET @DateTimeName = ISNULL((SELECT TOP 1 RTRIM(DateTimeName) FROM CEVAC_TABLES WHERE TableName = @name), 'UTCDateTime');
@@ -164,9 +164,9 @@ WHILE (EXISTS(SELECT 1 FROM @cevac_params) AND @i > 0) BEGIN
 		EXEC(@select_query);
 		-- insert into CEVAC_TABLES
 		IF EXISTS (SELECT TableName FROM CEVAC_TABLES WHERE TableName = @name) BEGIN
-			DECLARE @BuildingSName NVARCHAR(100);
-			DECLARE @Metric NVARCHAR(100);
-			DECLARE @Age NVARCHAR(100);
+			DECLARE @BuildingSName NVARCHAR(MAX);
+			DECLARE @Metric NVARCHAR(MAX);
+			DECLARE @Age NVARCHAR(MAX);
 			DECLARE @isCustom BIT;
 			DECLARE @customLASR BIT;
 
@@ -175,6 +175,7 @@ WHILE (EXISTS(SELECT 1 FROM @cevac_params) AND @i > 0) BEGIN
 			SET @Age = (SELECT Age FROM CEVAC_TABLES WHERE TableName = @name);
 			SET @isCustom = (SELECT isCustom FROM CEVAC_TABLES WHERE TableName = @name);
 			SET @customLASR = (SELECT customLASR FROM CEVAC_TABLES WHERE TableName = @name);
+			IF @name_CACHE LIKE '%CACHE%' SET @Age = @Age + '_CACHE';
 
 			IF @BuildingSName IS NULL BEGIN
 				SET @error = 'BuildingSName is NULL';
@@ -208,7 +209,7 @@ WHILE (EXISTS(SELECT 1 FROM @cevac_params) AND @i > 0) BEGIN
 			END
 
 			IF NOT EXISTS(SELECT TOP 1 * FROM CEVAC_TABLES WHERE TableName = @name_CACHE) BEGIN
-				INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, isCustom, Dependencies, customLASR)
+				INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, isCustom, Dependencies, customLASR, autoCACHE,autoLASR)
 					VALUES (
 						@BuildingSName,
 						@Metric,
@@ -220,7 +221,9 @@ WHILE (EXISTS(SELECT 1 FROM @cevac_params) AND @i > 0) BEGIN
 						@DataName,
 						@isCustom,
 						@name,
-						@customLASR
+						@customLASR,
+						0,
+						0
 					)
 			END -- END of insert
 		END
@@ -256,19 +259,19 @@ WHILE (EXISTS(SELECT 1 FROM @cevac_params) AND @i > 0) BEGIN
 
 
 	-- rebuild _HIST API
-	IF @name_CACHE LIKE '%HIST_CACHE%' AND @custom = 0 BEGIN
+	IF (@name_CACHE LIKE '%HIST_CACHE%' OR @name_CACHE LIKE '%DAY_CACHE%') AND @custom = 0 BEGIN
 		IF OBJECT_ID(REPLACE(@name_CACHE, '_CACHE', ''), 'V') IS NOT NULL BEGIN
 		DECLARE @drop_HIST NVARCHAR(MAX);
 		SET @drop_HIST = 'DROP VIEW ' + REPLACE(@name_CACHE, '_CACHE', '');
 		
-		SELECT @drop_HIST AS 'Drop _HIST';
+		PRINT @drop_HIST;
 		IF @execute = 1 EXEC(@drop_HIST);
 		END
 		DECLARE @Create_view NVARCHAR(MAX);
 		SET @Create_view = '
 		CREATE VIEW ' + REPLACE(@name_CACHE, '_CACHE', '') + '
 		AS SELECT * FROM ' + @name_CACHE;
-		SELECT @Create_view AS 'Rebuild _HIST API';
+		PRINT @Create_view;
 		IF @execute = 1 EXEC(@Create_view);
 
 	END
@@ -276,4 +279,3 @@ WHILE (EXISTS(SELECT 1 FROM @cevac_params) AND @i > 0) BEGIN
 	SET @name = NULL;
 	SET @name_CACHE = NULL;
 END
-

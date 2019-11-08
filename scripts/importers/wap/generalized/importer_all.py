@@ -8,6 +8,7 @@ import time
 import pytz
 import csv
 import logging
+import pyodbc
 
 ######################################
 # Config Variables
@@ -177,6 +178,15 @@ def ingest_file_wap(fname):
                 for SSID in hours[hour][name]:
                     total_duration = hours[hour][name][SSID]["time"]
                     unique_users = len(hours[hour][name][SSID]["users"].keys())
+
+                    if name not in cevac_wap_ids:
+                        insert_sql_total += (f"IF '{name}' NOT IN (SELECT "
+                                             "WAP_Name FROM CEVAC_WAP_IDS) "
+                                             "INSERT INTO CEVAC_WAP_IDS "
+                                             "(WAP_Name, BuildingSName) VALUES"
+                                             f" ('{name}', "
+                                             f"'{building_file_name}');")
+
                     insert_sql_total += (f"INSERT INTO CEVAC_{building_file_name}_WAP_HIST_RAW "
                                          "(time, name, ssid, total_duration, "
                                          "predicted_occupancy, unique_users) "
@@ -284,6 +294,7 @@ def ingest_file_floor(fname):
                     clemson += len(hours[hour][floor]["eduroam"]["users"])
                 if "clemsonguest" in hours[hour][floor]:
                     guest += len(hours[hour][floor]["clemsonguest"]["users"])
+
                 insert_sql_total += (f"INSERT INTO  CEVAC_{building_file_name}_WAP_FLOOR_HIST_RAW "
                                      "(UTCDateTime, floor, guest_count, clemson_count) "
                                      f"VALUES ('{hour.strftime('%Y-%m-%d %H:%M:%S')}',"
@@ -333,7 +344,9 @@ def ensure_tables_procedure():
                               f"EXEC CEVAC_WAP @BuildingSName = '{building}',"
                               f" @Metric = 'WAP_FLOOR'\nGO\n"
                               f"EXEC CEVAC_WAP @BuildingSName = '{building}',"
-                              f" @Metric = 'WAP_DAILY'\nGO\n")
+                              f" @Metric = 'WAP_DAILY'\nGO\n"
+                              f"EXEC CEVAC_WAP @BuildingSName = '{building}',"
+                              f" @Metric = 'WAP_FLOOR_SUMS'\nGO\n")
     print(ensure_tables_str)
     if SEND:
         f = open("/cevac/cache/ensure_wap_tables.sql", "w")
@@ -368,6 +381,22 @@ FORMAT = '%(asctime)s %(levelname)s:%(message)s'
 datestring = str(datetime.datetime.now().date())
 log_file = os.path.join(log_dir, datestring + '.log')
 logging.basicConfig(filename=log_file, format=FORMAT, level=logging.INFO)
+
+
+# Get a list of all tuples from cevac wap ids
+conn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};'
+                      'SERVER=130.127.218.11;DATABASE=WFIC-CEVAC;'
+                      'UID=wficcm;PWD=5wattcevacmaint$')
+cursor = conn.cursor()
+cursor.execute("SELECT * FROM CEVAC_WAP_IDS")
+data = cursor.fetchall()
+
+cevac_wap_ids = {}
+for row in data:
+    cevac_wap_ids[row[1].strip()] = None
+
+cursor.close()
+conn.close()
 
 
 # Process each file

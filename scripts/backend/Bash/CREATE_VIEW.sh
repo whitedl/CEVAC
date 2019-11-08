@@ -24,7 +24,7 @@ if [ -z "$unitOfMeasureID" ] || [ "$unitOfMeasureID" = "NULL" ]; then
 if [ -z "$keys_list" ] || [ "$keys_list" = "NULL" ]; then keys_list=""; fi
 
 query="EXEC CEVAC_VIEW @Building = '$building', @Metric = '$metric', @Age = '$age', @keys_list = '$keys_list', @unitOfMeasureID = $unitOfMeasureID"
-
+# echo "$query"
 if ! /cevac/scripts/exec_sql.sh "$query" ; then
   error="Could not create $building""_$metric""_$age"
   /cevac/scripts/log_error.sh "$error"

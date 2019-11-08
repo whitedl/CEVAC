@@ -42,47 +42,47 @@ Alias=`/cevac/scripts/sql_value.sh "SET NOCOUNT ON; SELECT TOP 1 RTRIM(AliasName
 IDName=`/cevac/scripts/sql_value.sh "SET NOCOUNT ON; SELECT TOP 1 RTRIM(IDName) FROM CEVAC_TABLES WHERE TableName = '$table'"`
 DataName=`/cevac/scripts/sql_value.sh "SET NOCOUNT ON; SELECT TOP 1 RTRIM(DataName) FROM CEVAC_TABLES WHERE TableName = '$table'"`
 if [ -z "$UTCDateTime" ] || [ -z "$Alias" ] || [ -z "$DataName" ] || [ -z "$IDName" ]; then
-  echo "Error: Missing DateTimeName, AliasName, or DataName for $table"
-  echo "Enter the information below and rerun the script."
-  echo "BuildingSName:"
-  read BuildingSName
-  echo "Metric:"
-  read Metric
-  echo "Age:"
-  read Age
-  echo "DateTimeName:"
-  read DateTimeName
-  echo "IDName:"
-  read IDName
-  echo "AliasName:"
-  read AliasName
-  echo "DataName:"
-  read DataName
+  # echo "Error: Missing DateTimeName, AliasName, or DataName for $table"
+  # echo "Enter the information below and rerun the script."
+  # echo "BuildingSName:"
+  # read BuildingSName
+  # echo "Metric:"
+  # read Metric
+  # echo "Age:"
+  # read Age
+  # echo "DateTimeName:"
+  # read DateTimeName
+  # echo "IDName:"
+  # read IDName
+  # echo "AliasName:"
+  # read AliasName
+  # echo "DataName:"
+  # read DataName
 
-  failure_query="
-  DECLARE @isCustom BIT;
-  DECLARE @customLASR BIT;
-  DECLARE @Definition NVARCHAR(MAX);
-  SET @Definition = (SELECT TOP 1 Definition FROM CEVAC_TABLES WHERE TableName = '$table');
-  SET @isCustom = ISNULL((SELECT TOP 1 isCustom FROM CEVAC_TABLES WHERE TableName = '$table'),0);
-  SET @customLASR = ISNULL((SELECT TOP 1 customLASR FROM CEVAC_TABLES WHERE TableName = '$table'),0);
-	INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, isCustom, Definition, customLASR)
-		VALUES (
-			'$BuildingSName',
-			'$Metric',
-			'$Age',
-			'$table',
-      '$DateTimeName',
-      '$IDName',
-      '$AliasName',
-      '$DataName',
-      @isCustom,
-      @Definition,
-      @customLASR
-		)
-  "
-  /cevac/scripts/exec_sql.sh "$failure_query"
-  echo "Inserted $table into CEVAC_TABLES"
+  # failure_query="
+  # DECLARE @isCustom BIT;
+  # DECLARE @customLASR BIT;
+  # DECLARE @Definition NVARCHAR(MAX);
+  # SET @Definition = (SELECT TOP 1 Definition FROM CEVAC_TABLES WHERE TableName = '$table');
+  # SET @isCustom = ISNULL((SELECT TOP 1 isCustom FROM CEVAC_TABLES WHERE TableName = '$table'),0);
+  # SET @customLASR = ISNULL((SELECT TOP 1 customLASR FROM CEVAC_TABLES WHERE TableName = '$table'),0);
+	# INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, isCustom, Definition, customLASR)
+		# VALUES 
+			# '$BuildingSName',
+			# '$Metric',
+			# '$Age',
+			# '$table',
+      # '$DateTimeName',
+      # '$IDName',
+      # '$AliasName',
+      # '$DataName',
+      # @isCustom,
+      # @Definition,
+      # @customLASR
+		# )
+  # "
+  # /cevac/scripts/exec_sql.sh "$failure_query"
+  # echo "Inserted $table into CEVAC_TABLES"
   
   error="Tried to create $table_CSV without $table existing in CEVAC_TABLES"
   /cevac/scripts/log_error.sh "$error" "$table"

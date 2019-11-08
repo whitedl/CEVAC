@@ -14,6 +14,7 @@ metric="$2"
 age="$3"
 table="CEVAC_""$building""_""$metric""_""$age"
 table_CSV="$table""_CSV"
+/cevac/scripts/log_activity.sh -t "$table_CSV"
 error=""
 [ "$4" == "runsas" ] && runsas="runsas"
 
@@ -39,6 +40,12 @@ if ! /cevac/scripts/table_to_csv_append.sh "$table" ; then
   /cevac/scripts/log_error.sh "$error" "$table"
   exit 1
 fi
+
+if [ -f /cevac/cache/upload_queue/$table.csv ]; then
+  ## remove columns from cached data
+  tail -n +2 /cevac/cache/$table.csv | sponge /cevac/cache/$table.csv
+fi
+cat /cevac/cache/$table.csv >> /cevac/cache/upload_queue/$table.csv
 echo "Uploading CSV to LASR Autoloader..."
 
 if [ "$reset" == "reset" ]; then
@@ -50,13 +57,14 @@ if [ "$reset" == "reset" ]; then
   fi
 else
   echo "Sending newest lines of $table.csv over rsync..."
-  if ! rsync -vh --progress /cevac/cache/$table.csv sas@wfic-sas-im-hd.clemson.edu:/opt/sasinside/sasconfig/Lev1/AppData/SASVisualAnalytics/VisualAnalyticsAdministrator/AutoLoad/Append/$dest_table.csv ; then
+  if ! rsync -vh --progress /cevac/cache/upload_queue/$table.csv sas@wfic-sas-im-hd.clemson.edu:/opt/sasinside/sasconfig/Lev1/AppData/SASVisualAnalytics/VisualAnalyticsAdministrator/AutoLoad/Append/$dest_table.csv ; then
     error="Cannot rsync cache to LASR"
     /cevac/scripts/log_error.sh "$error" "$table"
     exit 1
   fi
 fi
-
+## remove successfully uploaded cache files
+rm -f /cevac/cache/upload_queue/$table.csv
 if [ "$runsas" == "runsas" ]; then
   echo "runsas detected. Executing LASR Autoload script..."
   /cevac/scripts/runsas.sh

@@ -1,50 +1,64 @@
-#! /bin/sh
-error=""
-Building="$1"
-Metric="$2"
-yes="$3"
-if [ -z "$1" ] || [ -z "$2" ]; then
-  echo "Usage: $0 [BLDG] [METRIC]"
-  echo $'Enter the following information.\n'
-  echo $'BuildingSName  (e.g. WATT): '; read Building
-  echo $'Metric         (e.g. TEMP): '; read Metric
-fi
+#! /bin/bash
+usage="Usage:
+  -b BuildingSName
+  -m Metric
+  -e Excluded Ages (comma-delimited; XREF and RAW always true)
 
-LATEST="CEVAC_$Building""_$Metric""_LATEST"
-HIST_VIEW="CEVAC_$Building""_$Metric""_HIST_VIEW"
-HIST_CACHE="CEVAC_$Building""_$Metric""_HIST_CACHE"
-HIST="CEVAC_$Building""_$Metric""_HIST"
-HIST_LASR="CEVAC_$Building""_$Metric""_HIST_LASR"
+  -h help
+  -y run without asking
+"
+while getopts b:m:e:hy option; do
+  case "${option}"
+    in
+    b) BuildingSName=${OPTARG};;
+    m) Metric=${OPTARG};;
+		e) exclude_string=${OPTARG};;
+    h) echo "$usage" && exit 1 ;;
+    y) yes="yes";;
+  esac
+done
+
+IFS=',' # comma is set as delimiter
+read -ra exclude_array <<< "$exclude_string" # str is read into an array as tokens separated by IFS
+IFS=' ' # reset to default value after usage
+
+error=""
+[ -z "$BuildingSName" ] && echo "BuildingSName  (e.g. WATT): " && read BuildingSName
+[ -z "$Metric" ] && echo "Metric  (e.g. TEMP): " && read Metric
+if [ -z "$BuildingSName" ] || [ -z "$Metric" ]; then exit 1; fi
+LATEST="CEVAC_$BuildingSName""_$Metric""_LATEST"
+HIST_VIEW="CEVAC_$BuildingSName""_$Metric""_HIST_VIEW"
+HIST_CACHE="CEVAC_$BuildingSName""_$Metric""_HIST_CACHE"
+HIST="CEVAC_$BuildingSName""_$Metric""_HIST"
+HIST_LASR="CEVAC_$BuildingSName""_$Metric""_HIST_LASR"
 echo "Warning: This will completely remove all traces of a BuildingSName/Metric"
-echo "To recreate the tables, run bootstrap.sh (THIS MAY TAKE > 1 HOUR)"
-echo "Custom tables MUST be reconfigured with CREATE_CUSTOM.sh if recreated."
+echo "To recreate the tables, run bootstrap.sh (THIS MAY TAKE 1 HOUR)"
 echo ""
-echo "You are deleting all $Building""_$Metric tables (_RAW and _XREF will be ignored)"
+echo "You are deleting all $BuildingSName""_$Metric tables (_RAW and _XREF will be ignored)"
 echo "THIS CANNOT BE UNDONE. "
 echo "Continue? (Y/n)"
-if [ "$yes" != "-y" ]; then
+if [ "$yes" != "yes" ]; then
   read cont
 fi
-if [ "$cont" == "y" ] || [ "$cont" == "Y" ] || [ -z "$cont" ]; then
-  continue
-else
+if [ "$cont" != "y" ] && [ "$cont" != "Y" ] && [ ! -z "$cont" ]; then
   exit 1
 fi
+
+/cevac/scripts/log_activity.sh -t "$HIST"
 isCustom=`/cevac/scripts/sql_value.sh "SELECT isCustom FROM CEVAC_TABLES WHERE TableName = '$HIST_VIEW'"`
-exclude_array=("RAW" "XREF")
+exclude_array+=("RAW" "XREF")
 exclude_query=""
-[ "$isCustom" == "1" ] && exclude_array+=('HIST_VIEW')
-for t in "${exclude_array[@]}"; do
+# [ "$isCustom" == "1" ] && exclude_array+=('HIST_VIEW')
+for a in "${exclude_array[@]}"; do
   exclude_query="$exclude_query
-  AND TableName NOT LIKE '%$t%'"
+  AND Age NOT LIKE '%$a%'"
 done
 
 tables_query="
 SELECT RTRIM(TableName) FROM CEVAC_TABLES
-WHERE BuildingSName = '$Building' AND Metric = '$Metric' "$exclude_query"
+WHERE BuildingSName = '$BuildingSName' AND Metric = '$Metric' "$exclude_query"
 "
 echo "$tables_query"
-
 /cevac/scripts/exec_sql.sh "$tables_query" "tables_temp.csv"
 
 # Remove header from csv
@@ -82,8 +96,8 @@ if ! /cevac/scripts/exec_sql.sh "$sql"; then
 fi
 
 # Delete all from CEVAC_TABLES
-if ! /cevac/scripts/exec_sql.sh "DELETE FROM CEVAC_TABLES WHERE BuildingSName = '$Building' AND Metric = '$Metric'""$exclude_query" ; then
-  error="Error: Could not delete $Building"_$Metric" from CEVAC_TABLES"
+if ! /cevac/scripts/exec_sql.sh "DELETE FROM CEVAC_TABLES WHERE BuildingSName = '$BuildingSName' AND Metric = '$Metric'""$exclude_query" ; then
+  error="Error: Could not delete $BuildingSName"_$Metric" from CEVAC_TABLES"
   /cevac/scripts/log_error.sh "$error"
   exit 1
 fi
@@ -93,12 +107,11 @@ rm -f /srv/csv/$HIST.csv
 rm -f /srv/csv/$HIST_LASR.csv
 rm -f /srv/csv/$LATEST.csv
 
-sql="DELETE FROM CEVAC_ALL_LATEST_STATS WHERE BuildingSName = '$Building' AND Metric = '$Metric'"
+sql="DELETE FROM CEVAC_ALL_LATEST_STATS WHERE BuildingSName = '$BuildingSName' AND Metric = '$Metric'"
 if ! /cevac/scripts/exec_sql.sh "$sql" ; then
   error="Could not delete from CEVAC_ALL_LATEST_STATS"
   /cevac/scripts/exec_sql.sh "$error" "CEVAC_ALL_LATEST_STATS"
   exit 1
 fi
 
-
-echo "All $Building""_$Metric tables have been deleted."
+echo "All $BuildingSName""_$Metric tables have been deleted."

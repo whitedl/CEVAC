@@ -8,7 +8,7 @@ $TableName = $_POST['TableName'];
 $value = $_POST['value'];
 $script = '/cevac/scripts/delete.sh';
 $config = "";
-$exec = $script." ".$BuildingSName." ".$Metric." -y";
+$exec = $script." -b ".$BuildingSName." -m ".$Metric." -y";
 
 if(!isset($_POST['BuildingSName']) || !isset($_POST['Metric'])) die('missing params');
 

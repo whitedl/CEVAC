@@ -98,26 +98,36 @@ WHILE EXISTS(SELECT 1 FROM @agg_names) AND @i > 0 BEGIN
 	
 
 	INSERT INTO @types SELECT DISTINCT ' + @agg_name + ' FROM ' + @XREF + ';
-
+	DECLARE @PSIDCount INT;
 	SET @i = 10000;
 	WHILE EXISTS(SELECT 1 FROM @types) AND @i > 0 BEGIN
 		SET @type = (SELECT TOP 1 Type FROM @types);
 		DELETE TOP(1) FROM @types;
+		SET @PSIDCount = (SELECT COUNT(*) FROM ' + @XREF + ' WHERE ' + @agg_name + ' = @type AND ' + @IDName + ' < 0);
+		IF @PSIDCount > 1 CONTINUE;
+
 		SET @artificial_PSID = (SELECT TOP 1 PointSliceID FROM ' + @XREF + ' WHERE ' + @agg_name + ' = @type AND ' + @IDName + ' < 0);
 		SET @i = @i - 1;
 		
-
 		DELETE FROM @oldest_times_type WHERE 1 = 1;
-		INSERT INTO @oldest_times_type 
-		SELECT o.' + @DateTimeName + ' FROM ' + @OLDEST_CACHE + ' AS o
-		INNER JOIN ' + @XREF + ' AS x ON x.' + @IDName + ' = o.' + @IDName + '
-		WHERE x.' + @agg_name + ' = @type
-		ORDER BY o.' + @DateTimeName + ' DESC;
 
+		INSERT INTO @oldest_times_type 
+			SELECT o.' + @DateTimeName + ' FROM ' + @OLDEST_CACHE + ' AS o
+			INNER JOIN ' + @XREF + ' AS x ON x.' + @IDName + ' = o.' + @IDName + '
+			WHERE x.' + @agg_name + ' = @type
+			ORDER BY o.' + @DateTimeName + ' DESC;
+--		SELECT @type AS ''type'';
+--		SELECT * FROM @oldest_times_type;
+
+		-----------------------
+		-- Loop through all datetimes in OLDEST by type, ordered by datetime
+		-- Set begin to first and end to second
+		-- Last one will be NULL
+		-----------------------
 		SET @j = 10000;
 		WHILE EXISTS(SELECT TOP 1 * FROM @oldest_times_type) AND @j > 0 BEGIN
-	   		SET @begin = (SELECT TOP 1 ' + @DateTimeName + ' FROM @oldest_times_type);
-			DELETE TOP(1) FROM @oldest_times_type;
+	   		SET @begin = (SELECT TOP 1 ' + @DateTimeName + ' FROM @oldest_times_type ORDER BY ' + @DateTimeName + ' ASC);
+			DELETE TOP(1) FROM @oldest_times_type WHERE ' + @DateTimeName + ' = @begin;
 			SET @end = (SELECT TOP 1 ' + @DateTimeName + ' FROM @oldest_times_type WHERE ' + @DateTimeName + ' > @begin ORDER BY ' + @DateTimeName + ' ASC);
 			SET @j = @j - 1;
 		

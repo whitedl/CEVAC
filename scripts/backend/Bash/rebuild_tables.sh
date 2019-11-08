@@ -9,27 +9,27 @@ usage="Usage:
   -h help
   -y run without asking
 "
-while getopts b:m:k:u:a:hycl option; do
+BuildingSName="%"
+Metric="%"
+Age="%"
+while getopts b:m:a:hy option; do
   case "${option}"
     in
     b) BuildingSName=${OPTARG};;
     m) Metric=${OPTARG};;
     a) Age=${OPTARG};;
-    k) keys_list=${OPTARG};;
-    u) unitOfMeasureID=${OPTARG};;
     h) echo "$usage" && exit 1 ;;
     y) yes="yes";;
-    l) autoLASR="true";;
-    c) autoCACHE="true";;
   esac
 done
 
 hist_views_query="
-SELECT BuildingSName, Metric, Age
+SELECT DISTINCT BuildingSName, Metric, 'PXREF' AS Age
 FROM CEVAC_TABLES
-WHERE Age = '$Age'
+WHERE Age LIKE '$Age'
+AND BuildingSName LIKE '$BuildingSName'
+AND Metric LIKE '$Metric'
 AND TableName NOT LIKE '%CSV%'
-AND isCustom = 0
 "
 /cevac/scripts/exec_sql.sh "$hist_views_query" "hist_views.csv"
 
