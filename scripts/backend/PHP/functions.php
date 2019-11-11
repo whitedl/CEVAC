@@ -1,7 +1,7 @@
 <?php
-include "config.php";
-include "functions/sql.php";
-include "functions/login.php";
-include "functions/formatting.php";
-include "functions/misc.php";
+include_once "config.php";
+include_once "functions/sql.php";
+include_once "functions/login.php";
+include_once "functions/formatting.php";
+include_once "functions/misc.php";
 ?>

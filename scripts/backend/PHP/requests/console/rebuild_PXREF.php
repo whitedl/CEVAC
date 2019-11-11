@@ -1,5 +1,7 @@
 <?php
-include "../../functions.php";
+include "/cevac/PHP/functions.php";
+session_start();
+enforce_login();
 
 $BuildingSName = clean($_POST['BuildingSName']);
 $Metric = clean($_POST['Metric']);

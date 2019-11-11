@@ -1,8 +1,10 @@
 <?php
 include "/cevac/PHP/functions.php";
+session_start();
+enforce_login();
 $new_BuildingSName = clean($_POST['new_BuildingSName']);
 $new_BuildingDName = clean($_POST['new_BuildingDName'],['\s']);
-$new_BuildingKey = clean($_POST['new_BuildingKey']);
+$new_BuildingKey = clean($_POST['new_BuildingKey'],[':','%','[',']']);
 
 $script = 'sudo -u cevac /cevac/scripts/add_building.sh';
 $config = "-b $BuildingSName -d $BuildingDName -k $BuildingKey";

@@ -1,5 +1,7 @@
 <?php
 include '../../functions.php';
+session_start();
+enforce_login();
 if(!isset($_GET['column'])) die('missing column');
 $column = clean($_GET['column']);
 if(!isset($_GET['BuildingSName'])) die('missing BuildingSName');

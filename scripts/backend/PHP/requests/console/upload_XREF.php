@@ -1,5 +1,7 @@
 <?php
-include "../../functions.php";
+include "/cevac/PHP/functions.php";
+session_start();
+enforce_login();
 
 $tmp_name = $_FILES['file']['tmp_name'];
 $name = strtoupper($_FILES['file']['name']);

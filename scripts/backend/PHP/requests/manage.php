@@ -1,5 +1,7 @@
 <?php
-  include "../functions.php";
+  include "/cevac/PHP/functions.php";
+  session_start();
+  enforce_login();
 ?>
 <!DOCTYPE html>
 <html>
@@ -97,7 +99,8 @@
           <div id="buttons_div_left" style="float: left;">
             <button class="action_button" name="bootstrap_button" id="bootstrap_button" onclick="bootstrap()">Build Pipeline</button>
             <button class="action_button" name="push_to_lasr_button" id="push_to_lasr_button" onclick="push_to_lasr()">Push to LASR</button>
-            <button class="action_button" name="websocket_button" id="websocket_button" onclick="test_button_click()">Websocket</button>
+<!--            <button class="action_button" name="websocket_button" id="websocket_button" onclick="test_button_click()">Websocket</button>
+-->
           </div>
           <div id="buttons_div_right" style="float: right;">
             <button class="action_button" name="delete_button" id="delete_button" onclick="del()">Delete</button>

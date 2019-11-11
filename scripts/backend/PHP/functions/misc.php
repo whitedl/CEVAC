@@ -75,7 +75,5 @@ function start_websocket($command){
   $pid = shell_exec($command);
   return $pid;
 }
-function login(){
 
-}
 ?>
