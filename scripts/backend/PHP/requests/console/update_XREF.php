@@ -1,5 +1,7 @@
 <?php
-include "../../functions.php";
+include "/cevac/PHP/functions.php";
+session_start();
+enforce_login();
 foreach($_POST['fd'] as $i){
   $i = clean($i);
   if($i['name'] == "BuildingSName") $BuildingSName = $i['value'];

@@ -1,5 +1,8 @@
 <?php
 include "../../functions.php";
+session_start();
+enforce_login();
+
 // var_dump($_POST);
 
 $BuildingKey = clean($_GET['BuildingKey']);

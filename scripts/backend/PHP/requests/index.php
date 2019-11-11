@@ -19,7 +19,7 @@ if(isset($_POST['submit'])) {
         $_SESSION['U_ID'] = get_U_ID($_SESSION['username']);
         login($_SESSION['U_ID']);
         $login_error = "U_ID is ".$_SESSION['U_ID'];
-        header('Location: browse.php');
+        header('Location: manage.php');
         die();
       }		
     }

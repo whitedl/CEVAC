@@ -1,9 +1,11 @@
 <?php
 include "../../functions.php";
+session_start();
+enforce_login();
 // var_dump($_POST);
 $BuildingSName = clean($_GET['BuildingSName']);
 $Metric = clean($_GET['Metric']);
-$BuildingKey = clean($_GET['BuildingKey']);
+$BuildingKey = clean($_GET['BuildingKey'],[':','%','[',']']);
 $PXREF = "CEVAC_$BuildingSName"."_$Metric"."_PXREF";
 $XREF = "CEVAC_$BuildingSName"."_$Metric"."_XREF";
 if(!isset($_GET['BuildingSName']) || !isset($_GET['Metric'])

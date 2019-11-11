@@ -1,5 +1,7 @@
 <?php
-include "../../functions.php";
+include "/cevac/PHP/functions.php";
+session_start();
+enforce_login();
 // var_dump($_POST);
 $column = clean($_POST['column']);
 $BuildingSName = clean($_POST['BuildingSName']);

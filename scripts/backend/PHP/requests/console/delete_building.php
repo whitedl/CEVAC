@@ -1,5 +1,7 @@
 <?php
 include "../../functions.php";
+session_start();
+enforce_login();
 // var_dump($_POST);
 $BuildingSName = clean($_POST['BuildingSName']);
 $script = '/cevac/scripts/delete.sh';
