@@ -16,11 +16,6 @@ import sys
 from tools import verbose_print
 
 
-# JSON files
-json_oc = "/cevac/cron/alert_log_oc.json"
-json_unoc = "/cevac/cron/alert_log_unoc.json"
-
-
 class Alerts:
     """Handler for all alerts."""
 
@@ -207,21 +202,14 @@ class Alerts:
 
     def parse_json(self):
         """Parse json(s) for cron use."""
-
-        max_id = 0
         new_json = {}
         for filename in self.json_files:
-            try:
-                f = open(filename, "r")
-                line = f.readlines()[0]
-                self.old_json.update(json.loads(line))
-                nid = new_json["next_id"]
-                self.next_id = max(nid, self.next_id)
-                f.close()
-            except Exception:
-                continue
-
-        self.max_id = max_id
+            f = open(filename, "r")
+            line = f.readlines()[0]
+            new_json.update(json.loads(line))
+            nid = new_json["next_id"]
+            self.max_id = max(nid, self.max_id)
+            f.close()
         self.old_events = new_json
         return None
 
@@ -701,7 +689,7 @@ if __name__ == "__main__":
         print(str(a))
     print(f"\n\n{len(all_alerts.anomalies)} anomalies")
     
-    do_commit = input("Commit to DB?").lower()
+    do_commit = input("Commit to DB? ").lower()
     
     if "y" in do_commit and "n" not in do_commit:
         all_alerts.send()
