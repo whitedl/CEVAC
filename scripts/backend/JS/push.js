@@ -72,3 +72,36 @@ function add_building_click(){
   });
   // form_request('add_building.php');
 }
+function push_to_lasr(){
+  button = document.getElementById('push_to_lasr_button');
+  button.disabled = true;
+  reset_buttons(button);
+  if(button.disabled){
+    console.log('disabled');
+    console.log(button);
+  }
+  $.ajax({
+    type: 'POST',
+    url: 'console/push_to_lasr.php',
+    data: $('form').serialize(),
+    success: function(data){
+      button = document.getElementById('push_to_lasr_button');
+      success_output(data);
+      // document.getElementById('output').innerHTML = data;
+      // reset_buttons(button);
+      button.disabled = false;
+      console.log(data);
+    }
+  });
+  // form_request('push_to_lasr.php');
+}
+function kill_websocket(){
+   $.ajax({
+    type: 'POST',
+    url: 'console/kill_websocket.php',
+    data: $('form').serialize(),
+    success: function(data){
+      console.log(data);
+    }
+  });
+}

@@ -48,12 +48,16 @@ IF OBJECT_ID(@XREF) IS NULL BEGIN
 
 END
 
+DECLARE @output_table TABLE (o NVARCHAR(MAX));
+DECLARE @output_name NVARCHAR(MAX);
 DECLARE @EXEC_SQL NVARCHAR(MAX);
 IF @Alias IS NULL BEGIN
 	SET @EXEC_SQL = 'SELECT Alias FROM ' + @XREF_source + ' WHERE ' + @RemotePSIDName + ' = ' + CAST(@PointSliceID AS NVARCHAR(MAX));
+	SET @output_name = 'Alias';
 END
 IF @PointSliceID IS NULL BEGIN
 	SET @EXEC_SQL = 'SELECT ' + @RemotePSIDName + ' FROM ' + @XREF_source + ' WHERE Alias = ''' + @Alias + '''';
+	SET @output_name = @RemotePSIDName;
 END
-
-EXEC(@EXEC_SQL);
+INSERT INTO @output_table EXEC(@EXEC_SQL);
+SELECT o AS output FROM @output_table;

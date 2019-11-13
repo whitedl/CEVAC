@@ -98,11 +98,14 @@ WHILE EXISTS(SELECT 1 FROM @agg_names) AND @i > 0 BEGIN
 	
 
 	INSERT INTO @types SELECT DISTINCT ' + @agg_name + ' FROM ' + @XREF + ';
-
+	DECLARE @PSIDCount INT;
 	SET @i = 10000;
 	WHILE EXISTS(SELECT 1 FROM @types) AND @i > 0 BEGIN
 		SET @type = (SELECT TOP 1 Type FROM @types);
 		DELETE TOP(1) FROM @types;
+		SET @PSIDCount = (SELECT COUNT(*) FROM ' + @XREF + ' WHERE ' + @agg_name + ' = @type AND ' + @IDName + ' < 0);
+		IF @PSIDCount > 1 CONTINUE;
+
 		SET @artificial_PSID = (SELECT TOP 1 PointSliceID FROM ' + @XREF + ' WHERE ' + @agg_name + ' = @type AND ' + @IDName + ' < 0);
 		SET @i = @i - 1;
 		

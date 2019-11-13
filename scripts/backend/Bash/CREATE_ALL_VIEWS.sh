@@ -41,6 +41,15 @@ else
   ages_array=("PXREF" "HIST" "DAY" "LATEST" "LATEST_FULL" "LATEST_BROKEN" "OLDEST")
 fi
 
+if [ "$metric" == "WAP" ]; then
+  sql="EXEC CEVAC_WAP @BuildingSName = '$building', @Metric = '$metric'" 
+  if ! /cevac/scripts/exec_sql.sh "$sql" ; then
+    error="Error encountered when creating $building""_$metric tables"
+    /cevac/scripts/log_error.sh "$error"
+    exit 1
+  fi
+fi
+
 for a in "${ages_array[@]}"; do
   echo "Creating CEVAC_$building""_$metric""_$a"
   if ! /cevac/scripts/CREATE_VIEW.sh $building $metric $a $keys_list $unitOfMeasureID ; then
@@ -49,5 +58,4 @@ for a in "${ages_array[@]}"; do
     exit 1
   fi
 done
-
 

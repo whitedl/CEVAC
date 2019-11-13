@@ -32,6 +32,7 @@ class Alerts:
         if logging is None:
             self.LOG = False
             
+
         self.conn = pyodbc.connect(
             'DRIVER={ODBC Driver 17 for SQL Server};'
             'SERVER=130.127.218.11;DATABASE=WFIC-CEVAC;'
@@ -40,6 +41,7 @@ class Alerts:
         self.occ = Occupancy(self.conn)
         self.par = Parameters(self.conn)  
         self.known_issues = Known_Issues(self.conn)
+
         self.verbose = verbose
         self.anomalies = []
         self.query_to_data = {}  # For efficiency, only make each query once
@@ -156,6 +158,7 @@ class Alerts:
                                 f"VALUES('All Clear','All Clear','N/A',"
                                 f"GETUTCDATE(),'0')")
 
+
     def send(self):
         """Send anomalies to sql."""
         
@@ -204,18 +207,20 @@ class Alerts:
 
     def parse_json(self):
         """Parse json(s) for cron use."""
+
         max_id = 0
         new_json = {}
         for filename in self.json_files:
             try:
                 f = open(filename, "r")
                 line = f.readlines()[0]
-                new_json.update(json.loads(line))
-                next_id = new_json["next_id"]
-                max_id = max(max_id, next_id)
+                self.old_json.update(json.loads(line))
+                nid = new_json["next_id"]
+                self.next_id = max(nid, self.next_id)
                 f.close()
             except Exception:
                 continue
+
         self.max_id = max_id
         self.old_events = new_json
         return None
@@ -273,7 +278,6 @@ class Alerts:
                 return False
         return False
         
-
     def assign_event_id(self, alert, alias, psid):
         """Assign event id."""
         key = f"{alias} {psid} {alert['type']}"
@@ -461,7 +465,6 @@ class Alerts:
             )
 
         return None
-
 
     def check_time(self, data, alert, building):
         """Check time off since last report."""

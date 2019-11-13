@@ -1,0 +1,298 @@
+<?php
+  include_once "cats.php";
+function html_head($title){
+  $head  = "<!DOCTYPE html>";
+  $head .= '<html lang="en">';
+  $head .= "<head>";
+  $head .= '<meta charset="utf-8">';
+  $head .= "<title>$title</title>";
+  // <!-- Latest compiled and minified CSS -->
+  $head .= '<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">';
+  //  <!-- jQuery library -->
+  $head .= '<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>';
+  //  <!-- Latest compiled JavaScript -->
+  $head .= '<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>';
+  
+  $head .= '<script src="js/format.js"></script>';
+  // $head .= '  <!-- jQuery CDN - Slim version (=without AJAX) -->';
+  // $head .= '  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>';
+  // $head .= '  <!-- Popper.JS -->';
+  // $head .= '  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>';
+  // $head .= '  <!-- Bootstrap JS -->';
+  // $head .= '  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>';
+
+
+  // include custom css
+  $head .= '<link rel="stylesheet" type="text/css" href="css/style.css" />';
+  $head .= '</head>';
+  return $head;
+}
+
+function make_link($text, $link){
+  return "<a href='$link'>".$text."</a>";
+}
+
+function show_hide($id, $type, $show_text, $hide_text){
+  $show_id = $id."show_hide";
+  $out = "";
+  // $out = "<p>";
+  $out .= "<$type class='show_hide' href = 'javascript:void(0)' id = '$show_id' onclick=\"toggleVisibility('$id'); toggleInnerText('$show_id', '$show_text', '$hide_text');\">$show_text</$type>";
+  // $out .= "</p>";
+  return $out;
+}
+
+
+function html_search(){
+  $out = '';
+  $out .=         '<div class="search">';
+  $out .= '        <form action="browse.php" method="get">';
+  $out .= '           <div style="display: inline; float: left; width: 10%">';
+  $out .= show_hide("advanced_search", "a", "Show", "Hide").'</div>';
+  $out .= '          <div style="width: 5%; padding-top: 0px; float: right;"><button class="btn btn-primary " type="submit"><span class="glyphicon glyphicon-search" ></span></button></div>';
+  $out .= '          <div style="width: 85%; padding-right: 10px; padding-top: 0px; float: right;"><input class="form-control input-sm" type="text" placeholder="Search" name="s" ></div>';
+
+  $out .='<div>';
+  $out .='  <div id="advanced_search" style="display: none">';
+
+
+  include "cats.php";
+
+  // $out .='    <div style="width: 95%; padding-right: 10px; padding-top: 3px; float: left;"><input class="form-control input-sm" type="text" placeholder="Category" name="c" ></div>';
+  $out .='    <div style="width: 95%; padding-right: 10px; padding-top: 3px; float: left;">';
+  $out .= '     <div id="video_check_div" style="float: left; width: 70px; display: inline-block">';
+  $out .= '<input style="float: left;" class="form-check-input" id="video_checkbox" type="checkbox" placeholder="Type" name="t_v" value="video" checked>';
+  $out .= '<label style="float: left;" class="form-check-label" for="video_checkbox"> Video </label>';
+  $out .= '     </div>';
+  $out .= '     <div id="image_check_div" style="float: left; width: 70px; display: inline-block">';
+  $out .= '<input style="float: left" class="form-check-input" id="image_checkbox" type="checkbox" placeholder="Type" name="t_i" value="image" checked>';
+  $out .= '<label style="float: left" class="form-check-label" for="image_checkbox"> Image </label>';
+  $out .= '     </div>';
+  $out .= '</div>';
+  $out .='    <div style="width: 95%; padding-right: 10px; padding-top: 3px; float: left;"><input class="form-control input-sm" type="text" placeholder="User" name="u" ></div>';
+  $out .= html_categories_select($vid_cats, "", "c");
+  $out .='    <div style="display: none; width: 85%; padding-right: 10px; padding-top: 3px; float: left;"><input class="form-control input-sm" type="text" placeholder="" name="o" ></div>';
+  $out .='  </div>';
+  $out .='</div>';
+
+  $out .= '        </form>';
+  $out .= '      </div>';
+  return $out;
+}
+
+function html_navbar($active){
+  $out = "";  
+  
+  $out .= '<nav class="navbar navbar-inverse">';
+  $out .= '  <div style="text-align: center" class="container-fluid">';
+  // $out .= '    <div class="navbar-header">';
+  // $out .= '     <a class="navbar-brand" href="#">TODO: add logo</a>';
+  // $out .= '    </div>';
+
+  $out .= '    <ul class="nav navbar-nav navbar-left" style="">';
+  $out .= '      <li class="nav-item'.($active == 'home' ? ' active' : '').'"><a class="nav-link" href="browse.php"><span class="glyphicon glyphicon-home"></span>Subscriptions</a></li>';
+  $out .= '      <li class="nav-item'.($active == 'library' ? ' active' : '').'"><a class="nav-link" href="browse.php?s=&t_v=video&t_i=image&u='.get_U_name($_SESSION['U_ID']).'&c=&o="><span class="glyphicon glyphicon-home"></span>My Videos</a></li>';
+  $out .= '      <li class="nav-item'.($active == 'upload' ? ' active' : '').'"><a class="nav-link" href="upload_page.php"><span class="glyphicon glyphicon-facetime-video"></span>Upload</a></li>';
+  $out .= '      <li class="nav-item'.($active == 'playlist' ? ' active' : '').'"><a class="nav-link" href="playlist_select.php"><span class="glyphicon glyphicon-th-list"></span>Playlists</a></li>';
+  $out .= '      <li class="nav-item'.($active == 'wordcloud' ? ' active' : '').'"><a class="nav-link" href="wordcloud_page.php"><span class="glyphicon glyphicon-cloud"></span>Word Cloud</a></li>';
+  $out .= '      <li class="nav-item" style=" text-align: center; float: right;">';
+  $out .= '      </li>';
+  $out .= '    </ul>';
+
+  $out .= '    <ul class="nav navbar-nav navbar-right" style="">';
+  $out .= '      <li style="float: right" class="nav-item'.($active == 'profile' ? ' active' : '').'"><a class="nav-link" href="profile.php"><span class="glyphicon glyphicon-user"></span>'.$_SESSION['username'].'</a></li>';
+  $out .= '      <li style="float: right" class="nav-item'.($active == 'logout' ? ' active' : '').'"><a class="nav-link" href="?logout=1"><span class="glyphicon glyphicon-log-out"></span>Logout</a></li>';
+  $out .= '      <li style="float: right" class="nav-item'.($active == 'groups' ? ' active' : '').'"><a class="nav-link" href="group_select.php"><span class="glyphicon glyphicon-comment"></span>Groups</a></li>';
+  $out .= '      <li style="float: right" class="nav-item'.($active == 'contacts' ? ' active' : '').'"><a class="nav-link" href="contacts_page.php"><span class="glyphicon glyphicon-list-alt"></span>Contacts</a></li>';
+  $out .= '      <li style="float: right" class="nav-item'.($active == 'message' ? ' active' : '').'"><a class="nav-link" href="send_message.php"><span class="glyphicon glyphicon-envelope"></span>Messages</a></li>';
+  $out .= '    </ul>  ';
+  $out .= '<ul style="display: inline-block; width: 25%; height: 100%; float: none" class="nav navbar-nav navbar-center">';
+  $out .= '<li class="nav-item" style="width: 100%; height: 100%;">';
+  $out .= html_search();
+  $out .= '</li>';
+	$out .= '</ul>';
+
+  $out .= '  </div>';
+  $out .= '</nav>';
+  return $out;
+}
+
+function html_user_link($U_ID){
+  $out = "";
+  $out = "<div class='link_div'>";
+  $out .= make_link(get_U_name($U_ID), "browse.php?s=&t_v=&t_i=&u=".get_U_name($U_ID));
+  $out .= "</div>";
+  return $out;
+}
+
+function html_user_icon($U_ID){
+  $img = '  <img class="rounded" src="'.get_attribute($U_ID, "U_Icon").'">';
+  $out = "";
+  
+  $out .= '<div class="image_cropper">';
+  $out .= make_link($img, "browse.php?s=&t_v=&t_i=&u=".get_U_name($U_ID));
+  $out .= '</div>';
+  return $out;
+}
+
+function html_user($U_ID){
+  $out = '';
+  $out .= '<div class="user">';
+  $out .= html_user_icon($U_ID).html_user_link($U_ID);
+  $out .= '</div>';
+  return $out;
+}
+
+function html_comment($U_ID, $comment, $date){
+  $time = strtotime($date);
+  $date_format = 'Posted '.date("M d, Y ", $time).' at '.date("g:i A", $time);
+
+  $out = '';
+  $out .= '<div id="comment_container" class="container center" style="width: 100%; display: inline-block;">';
+  $out .= '<div class="fixed" style="width: 40px; display: inline-block;">';
+  $out .= html_user($U_ID);
+  $out .= ' </div>';
+  $out .= ' <div id="comment_box_div" style="width: 100%; text-align: left; float: right;">';
+  $out .= '   <p>'.$comment.'</p>';
+  $out .= '<p class="comment_date">'.$date_format.'</p>';
+  $out .= ' </div>';
+  $out .= '</div>';
+  return $out;
+}
+
+function html_get_group_comments($G_ID, $num){
+  $out = "";
+  $result = show_groups_comment($G_ID);
+  for($i = 0; ($c_array = mysqli_fetch_assoc($result)) && ($i < $num); $i++){
+    $comment = $c_array['G_comment'];
+    $c_u_id = $c_array['U_ID'];
+    $date = $c_array['Comment_date'];
+    $out .= html_comment($c_u_id, $comment, $date);
+    $out .= "<hr style='box-shadow: 2px 2px 2px #888888;'>";
+    // echo $i;
+  }
+  // echo "Out: ".$out;
+  return $out;
+}
+
+function html_get_comments($M_ID, $num){
+  $out = "";
+  $result = show_comment($M_ID);
+  for($i = 0; ($c_array = mysqli_fetch_assoc($result)) && ($i < $num); $i++){
+    $comment = $c_array['M_comment'];
+    $c_u_id = $c_array['U_ID'];
+    $date = $c_array['Comment_date'];
+    $out .= html_comment($c_u_id, $comment, $date);
+    $out .= "<hr style='box-shadow: 2px 2px 2px #888888;'>";
+    // echo $i;
+  }
+  // echo "Out: ".$out;
+  return $out;
+}
+function html_get_group_msgs($G_ID, $num){
+  $out = "";
+  $result = show_groups_comment($G_ID);
+  for($i = 0; ($c_array = mysqli_fetch_assoc($result)) && ($i < $num); $i++){
+    $comment = $c_array['G_comment'];
+    $c_u_id = $c_array['U_ID'];
+    $date = $c_array['Comment_date'];
+    $out .= html_comment($c_u_id, $comment, $date);
+    $out .= "<hr style='box-shadow: 2px 2px 2px #888888;'>";
+    // echo $i;
+  }
+  // echo "Out: ".$out;
+  return $out;
+}
+function html_video_thumb($M_ID){
+  $url = "watch.php?v=$M_ID";
+  $thumb = get_M_attribute($M_ID, "Thumbnail");
+  $M_type = get_M_attribute($M_ID, "M_type");
+  $alt = get_M_attribute($M_ID, "M_name");
+  $title = get_M_attribute($M_ID, "M_name");
+  $U_ID = get_M_attribute($M_ID, "Owner_ID");
+  $Path = get_M_attribute($M_ID, "Path");
+  
+  $out = "";
+
+  $out .= '<div class="preview_div">';
+  $out .= '<div class="video_thumb">';
+  $out .= '<a href="'.$url.'">';
+  if($M_type == "image") $out .= '<img class="thumb" src="'.$Path.'" alt="'.$alt.'">';
+  else $out .= '<img class="thumb" src="'.$thumb.'" alt="'.$alt.'">';
+  $out .= '</a>';
+  $out .= '</div>';
+  $out .= '<a class="video_link" href="'.$url.'">'.$title.'</a><br>';
+  $out .= html_user($U_ID);
+  $out .= '</div>';
+  return $out; 
+}
+function html_video_grid(&$videos_array, $rowlen){
+  $out = "";
+  // $rowlen = 5;
+  $len = count($videos_array);
+  $videos_array = array_reverse($videos_array);
+  if($len == 0) return $out;
+  $rows = (int)($len / $rowlen);
+  $remainder = $len % $rowlen;
+  $out .= '<div class="videos_grid" style="padding: 0px;">';
+  $index = 0;
+  for($i = 0; $i < $rows; $i++){
+    $out .= html_video_row($videos_array, $index, 0, $rowlen);
+    $index = $rowlen + ($i * $rowlen);
+  }
+  if($remainder)  $out .= html_video_row($videos_array, $index, $remainder, $rowlen);
+
+  $out .= '</div>';
+
+  return $out;
+}
+function html_video_row(&$array, $start, $remainder, $rowlen){
+  $out = '';
+  // $rowlen = 5;
+  $out .= '<div class="videos_row">';
+  if($remainder) $n = $remainder;
+  else $n = $rowlen;
+
+  for($i = 0; $i < $n; $i++){
+    $index = $i + $start;
+    $out .= html_video_thumb($array[($i + $start)]['M_ID']); 
+  }
+  $out .= '</div>';
+  return $out;
+}
+
+function html_categories_select($options, $val, $name){
+  $len = count($options);
+  $out ="";
+  $out .='<select id="category_select" class="form-control form-control-sm" name="'.$name.'">';
+  $out .= '<option label=" "></option>';
+  for($i = 0; $i < $len; $i++){
+    $out .='<option'.($options[$i] == $val ? ' selected' : '').'>'.$options[$i].'</option>';
+  }
+  $out .= '</option>';
+  $out .='</select>';
+  return $out;
+}
+
+function html_subscribers($U_ID){
+  $out = "";
+  $subs = show_sublist($U_ID);
+  while($row = mysqli_fetch_assoc($subs)){
+    $out .= html_user($row['S_U_ID']);
+  }
+  return $out;
+}
+
+function html_subcribe_button($U_ID, $M_ID){
+
+  $subbed = is_sub($U_ID, get_M_attribute($M_ID, 'Owner_ID'));
+
+
+  $out = "<button id='sub_button' class='btn btn-lg btn-primary ".(($subbed) ? 'active' : 'inactive')."'";
+  $out .= ' onclick="subscribe('.$U_ID.','.get_M_attribute($M_ID,'Owner_ID').')"';
+  $out .= ' style="background: #cc0e0e" data-toggle="button">';
+  $out .= (($subbed) ? 'Unsubscribe' : 'Subscribe');
+  $out .= '</button>';
+  return $out;
+}
+
+?>

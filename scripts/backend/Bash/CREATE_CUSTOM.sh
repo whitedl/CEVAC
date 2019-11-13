@@ -26,16 +26,20 @@ if [ ! -f "$def_file" ]; then
 fi
 
 if [ -z "$3" ]; then
-  echo $'DateTimeName (e.g. UTCDateTime):'; read DateTimeName
+  echo $'DateTimeName (def. UTCDateTime):'; read DateTimeName
+  [ -z "$DateTimeName" ] && DateTimeName="UTCDateTime"
 fi
 if [ -z "$4" ]; then
-  echo $'IDName      (e.g. PointSliceID):'; read IDName
+  echo $'IDName      (def. PointSliceID):'; read IDName
+  [ -z "$IDName" ] && IDName="PointSliceID"
 fi
 if [ -z "$5" ]; then
-  echo $'AliasName          (e.g. Alias):'; read AliasName
+  echo $'AliasName          (def. Alias):'; read AliasName
+  [ -z "$AliasName" ] && AliaseName="Alias"
 fi
 if [ -z "$6" ]; then
-  echo $'DataName     (e.g. ActualValue):'; read DataName
+  echo $'DataName     (def. ActualValue):'; read DataName
+  [ -z "$DataName" ] && DataName="ActualValue"
 fi
 if [ -z "$7" ]; then
   echo $'Dependencies   (comma-separated):'; read Dependencies
