@@ -13,29 +13,35 @@ import argparse
 import os
 
 # Parse arguments
-parser = argparse.ArgumentParser(description='Parse ')
+parser = argparse.ArgumentParser(
+    description=(
+        "Alert System v2. "
+        "This alert system is heavily modular, allowing options to be passed "
+        "via the command line, as opposed to being burried in scripts."
+    )
+)
 parser.add_argument("--log", "-L", "-l", default=True, action="store",
-                    help="Set log to True or False")
+                    help="set log to True or False")
 parser.add_argument("--alerts", "-a", "-A", default=False, action="store_true",
-                    help="Check alerts currently.")
+                    help="check alerts currently")
 parser.add_argument("--times", "-t", "-T", default=0, action="store",
-                    help=("If set, checks alerts for different time periods "
+                    help=("if set, checks alerts for different time periods "
                           "where possible"))
 parser.add_argument("--send", "-s", "-S", default=False, action="store_true",
-                    help="Send anomalies to our database.")
+                    help="send anomalies to our database")
 parser.add_argument("--email", "-e", "-E", default=False, action="store_true",
-                    help="Send email of anomalies.")
+                    help="send email of anomalies")
 parser.add_argument("--emailtime", "-et", "-ET", default=24, action="store",
-                    help=("Set hours of anomalies to send via email. "
+                    help=("set hours of anomalies to send via email"
                           "[Default=24]"))
 parser.add_argument("--cache", "-c", "-C", default=False, action="store_true",
-                    help="Update the cache before checking alerts.")
+                    help="update the cache before checking alerts")
 parser.add_argument("--machinelearning", "-ml", "-ML", default=False,
                     action="store_true",
-                    help=("Run machine learning algorithm after checking "
-                          "alerts."))
+                    help=("run machine learning algorithm after checking "
+                          "alerts"))
 parser.add_argument("--verbose", "-v", "-V", default=False,
-                    action="store_true", help="Determines printing.")
+                    action="store_true", help="printing")
 
 
 parsed_args = parser.parse_args()
@@ -80,13 +86,13 @@ if __name__ == "__main__":
 
     all_alerts = None
     if CHECK_ALERTS:
-        all_alerts = alerts.Alerts(logging)
+        all_alerts = alerts.Alerts(logging, UPDATE_CACHE, verbose=VERBOSE)
         all_alerts.alert_system()
         verbose_print(VERBOSE, "CHECK_ALERTS is True")
-
-    if UPDATE_CACHE:
-        alerts.update_cache()
-        verbose_print(VERBOSE, "UPDATE_CACHE is True")
+        verbose_print(VERBOSE,(
+            f"Anomalies: {len(all_alerts.anomalies)}\n"
+            f"{all_alerts.num_decom_anomalies()} anomalies are decommissioned"
+        ))
 
     if SEND:
         if all_alerts is not None:
