@@ -19,6 +19,7 @@ function reset_buttons(active_button = ""){
   BuildingKey_search_button = document.getElementById('BuildingKey_search_button');
   download_button = document.getElementById('download_button');
   view_latest_button = document.getElementById('view_latest_button');
+  view_stats_button = document.getElementById('view_stats_button');
   view_day_button = document.getElementById('view_day_button');
   document.getElementById('output').innerHTML = '';
   // console.log('reset');
