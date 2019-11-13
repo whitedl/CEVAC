@@ -375,14 +375,24 @@ IF @Age LIKE '%PXREF%' BEGIN
 		SET @DataName = NULL;
 		SET @isCustom = 1;
 		SET @PXREF_query = '
-		SELECT DISTINCT name AS WAP_name, name AS Alias, name AS PointName, 0 AS ''in_xref''
+		SELECT DISTINCT WAP_ID, WAP_name AS WAP_name, WAP_name AS Alias, 0 AS ''in_xref''
 		INTO ' + @PXREF + '
-		FROM ' + @HIST_RAW + '
+		FROM CEVAC_WAP_IDS
+		WHERE BuildingSName = ''' + @Building + '''
+		';
+		SET @UPDATE_PXREF = '
+		IF OBJECT_ID(''' + @XREF + ''') IS NOT NULL BEGIN
+			UPDATE ' + @PXREF + ' 
+			SET in_xref = 1, ' + 'Alias = x.Alias
+			FROM ' + @PXREF + ' AS p
+			INNER JOIN ' + @XREF + ' AS x ON x.WAP_ID = p.WAP_ID
+		END
 		';
 	END
 
 	PRINT @DROP_PXREF;
 	PRINT @PXREF_query;
+	PRINT @UPDATE_PXREF;
 	IF @execute = 1 BEGIN
 		EXEC(@DROP_PXREF);
 		EXEC(@PXREF_query);

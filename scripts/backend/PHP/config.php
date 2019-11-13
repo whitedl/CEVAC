@@ -15,9 +15,14 @@ if( $db ) {
        die( print_r( sqlsrv_errors(), true));
 }
 
-function clean($string) {
-  $string = str_replace(' ', '', $string); // Replaces all spaces with hyphens.
-  return preg_replace('/[^A-Za-z0-9.\-]/', '', $string); // Removes special chars.
+function clean($string, $exclude_array = []) {
+  // $string = str_replace(' ', '', $string); // Replaces all spaces with hyphens.
+  $array = ['A-Z','a-z','0-9','-', '_'];
+  $array = array_merge($array, $exclude_array);
+  $r = '/[^';
+  foreach($array as &$w){ $r .= $w; }
+  $r .= ']/';
+  return preg_replace($r, '', $string); // Removes special chars.
 }
 
 
