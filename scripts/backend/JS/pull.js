@@ -8,12 +8,13 @@ function get_attributes_html(){
 
   attributes = ['autoCACHE', 'autoLASR'];
   attributes.forEach(function(item, index, array){
-    $.get('console/bin_value.php', { BuildingSName: b, Metric: m, column: item}, function(data){
-      document.getElementById(item + "_div").style.display = 'block';
-      if(data == '1'){
-        document.getElementById(item).checked = true;
-      }
-      else document.getElementById(item).checked = false;
+  get_stats_html();
+  $.get('console/bin_value.php', { BuildingSName: b, Metric: m, column: item}, function(data){
+    document.getElementById(item + "_div").style.display = 'block';
+    if(data == '1'){
+      document.getElementById(item).checked = true;
+    }
+    else document.getElementById(item).checked = false;
     });
   });
 }
@@ -157,4 +158,13 @@ function websocket(){
   ws.onmessage = function(event) {
     log('MESSAGE: ' + event.data);
   };
+}
+function get_stats_html(){
+  $.get('console/stats_html.php',
+    $('form').serialize(),
+    function(data){
+      console.log(data);
+      document.getElementById('sql_output').innerHTML = data;
+    }
+  );
 }

@@ -41,6 +41,27 @@ function metrics_html($BuildingSName, $filter){
   $out .= "\n</select>";
   return $out;
 }
-
+function stats_html($BuildingSName, $Metric){
+  $query = "
+  SELECT TOP 1 DataName, AVG, SUM, MIN, MAX, last_ETDateTime, update_ETDateTime
+  FROM CEVAC_ALL_LATEST_STATS
+  WHERE BuildingSName = '$BuildingSName' AND Metric = '$Metric';
+  ";
+  $LATEST = "CEVAC_$BuildingSName"."_$Metric"."_LATEST";
+  $result = exec_sql($query);
+  // $out = "<table>\n  <tr>";
+  $out = "<th>Statistic</th>\n<th>Value</th>\n";
+  $out .= "  </tr>\n";
+  $row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC);
+  if(count($row) == 0) return "No statistics found for $LATEST";
+  foreach ($row as $c => $val){
+    $out .= "  <tr>";
+    $out .= "    <td>$c</td>";
+    $out .= "    <td>$val</td>";
+    $out .= "  </tr>";
+  }
+  // $out .= "\n</table>";
+  return $out;
+}
 
 ?>
