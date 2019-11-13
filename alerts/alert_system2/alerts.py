@@ -13,6 +13,7 @@ from croniter import croniter
 import pyodbc
 import pandas as pd
 import sys
+from tools import verbose_print
 
 
 # JSON files
@@ -23,9 +24,10 @@ json_unoc = "/cevac/cron/alert_log_unoc.json"
 class Alerts:
     """Handler for all alerts."""
 
-    def __init__(self, logging, verbose=False):
+    def __init__(self, logging, UPDATE_CACHE, verbose=False):
         """Initialize connection and other objects."""
         self.logging = logging
+        self.UPDATE_CACHE = UPDATE_CACHE
         self.LOG = True
         if logging is None:
             self.LOG = False
@@ -60,7 +62,7 @@ class Alerts:
             # Check time conditional to make sure it is the correct time for
             # the alert
 
-            print(f"\nChecking Alert {i}: {alert}\n")
+            verbose_print(self.verbose, f"\nChecking Alert {i}: {alert}\n")
 
             # Check basic value for basic alert
             if "numerical" in alert["type"]:
@@ -72,9 +74,9 @@ class Alerts:
                         continue
                     table = f"CEVAC_{building}_{metric}_{aggregation}"
                     query = (f"SELECT * FROM {table}")
-                    print(f"QUERY: {query}")
+                    verbose_print(self.verbose, f"QUERY: {query}")
                     if not self.table_exists(table):
-                        print(f"{table} does not exist")
+                        verbose_print(self.verbose, f"{table} does not exist")
                         continue
                     query += self.add_specific_aliases(alert)
                     data = self.safe_data(query)
@@ -91,9 +93,9 @@ class Alerts:
                         continue
                     table = f"CEVAC_{building}_{metric}_{aggregation}"
                     query = (f"SELECT * FROM {table}")
-                    print(f"QUERY: {query}")
+                    verbose_print(self.verbose, f"QUERY: {query}")
                     if not self.table_exists(table):
-                        print(f"{table} does not exist")
+                        verbose_print(self.verbose, f"{table} does not exist")
                         continue
                     query += self.add_specific_aliases(alert)
                     data = self.safe_data(query)
@@ -130,10 +132,6 @@ class Alerts:
 
             # Check if aliases have reported within a given time
             elif "time" in alert["type"]:
-                """ TODO
-                if UPDATE_CACHE:
-                    rebuild_broken_cache(alert["database"])
-                """
                 metric = alert['metric']
                 aggregation = alert['aggregation']
                 buildings = self.par.metric_to_bldgs[metric] if "*" in alert["building"] else [alert["building"]]
@@ -141,10 +139,12 @@ class Alerts:
                     if self.skip_unoccupied(building, alert):
                         continue
                     table = f"CEVAC_{building}_{metric}_{aggregation}"
+                    if self.UPDATE_CACHE:
+                        rebuild_broken_cache(table, self.conn)
                     query = (f"SELECT * FROM {table}_BROKEN_CACHE")
-                    print(f"QUERY: {query}")
+                    verbose_print(self.verbose, f"QUERY: {query}")
                     if not self.table_exists(table+"_BROKEN_CACHE"):
-                        print(f"{table} does not exist")
+                        verbose_print(self.verbose, f"{table} does not exist")
                         continue
                     query += self.add_specific_aliases(alert)
                     data = self.safe_data(query)
@@ -185,7 +185,6 @@ class Alerts:
 
     def table_exists(self, table):
         cursor = self.conn.cursor()
-        print(table)
         if cursor.tables(table=table).fetchone():
             cursor.close()
             return True
@@ -312,7 +311,7 @@ class Alerts:
             if "Total_Usage" in data.columns:
                 actualvalue = "Total_Usage"
             else:
-                print("NO VALID COLUMN")
+                verbose_print(self.verbose, "NO VALID COLUMN")
                 return None
 
         value = data[actualvalue][i]
@@ -357,7 +356,8 @@ class Alerts:
                     building,
                     eventid,
                     f"{alert['priority']}",
-                    f"{data['Alias'][i]} ({psid})"
+                    f"{data['Alias'][i]} ({psid})",
+                    alert["alert_name"],
                 )
             )
         return None
@@ -384,7 +384,9 @@ class Alerts:
     def check_temp(self, temps, room, alert, building):
         """Check relative temperature values."""
         Alias_Temp = "Temp"
-        if "Temp" not in temps[room]:
+        if ("Temp" not in temps[room] or
+            "CoolingSP" not in temps[room] or
+            "HeatingSP" not in temps[room]):
             return None
 
         # Modify value
@@ -432,33 +434,31 @@ class Alerts:
                         room_vals[Alias_Temp])
 
         if send_alert:
-            try:
-                psid = self.get_psid_from_alias(room_vals["name"],
-                                                building,
-                                                alert['metric'])
-                message = self.replace_generic(
-                    alert['message'],
-                    alert,
-                    {
-                        "Alias": room_vals["name"],
-                        "ActualValue": "{0:.2f}".format(room_vals["Temp"]),
-                        "CoolingSP": room_vals["CoolingSP"],
-                        "HeatingSP": room_vals["HeatingSP"],
-                    }
+            psid = self.get_psid_from_alias(room_vals["name"],
+                                            building,
+                                            alert['metric'])
+            message = self.replace_generic(
+                alert['message'],
+                alert,
+                {
+                    "Alias": room_vals["name"],
+                    "ActualValue": "{0:.2f}".format(room_vals["Temp"]),
+                    "CoolingSP": "{0:.2f}".format(room_vals["CoolingSP"]),
+                    "HeatingSP": "{0:.2f}".format(room_vals["HeatingSP"]),
+                }
+            )
+            eventid = self.assign_event_id(alert, room_vals["name"], psid)
+            self.anomalies.append(
+                Anomaly(
+                    message,
+                    alert['metric'],
+                    building,
+                    eventid,
+                    alert['priority'],
+                    f"{room_vals['name']} ({psid})",
+                    alert["alert_name"],
                 )
-                eventid = self.assign_event_id(alert, room_vals["name"], psid)
-                self.anomalies.append(
-                    Anomaly(
-                        message,
-                        alert['metric'],
-                        building,
-                        eventid,
-                        alert['priority'],
-                        f"{room_vals['name']} ({psid})"
-                    )
-                )
-            except:
-                pass
+            )
 
         return None
 
@@ -466,7 +466,6 @@ class Alerts:
     def check_time(self, data, alert, building):
         """Check time off since last report."""
         for i in range(len(data)):
-            # print(f"{data['Alias'][i]} {data['UTCDateTime'][i]}")
             psid = self.get_psid_from_alias(
                 data['Alias'][i],
                 building,
@@ -491,9 +490,17 @@ class Alerts:
                     eventid,
                     alert['priority'],
                     f"{data['Alias'][i]} ({psid})",
+                    alert["alert_name"],
                 )
             )
         return None
+
+    def num_decom_anomalies(self):
+        num = 0
+        for anomaly in self.anomalies:
+            if anomaly.aliaspsid in self.known_issues.alias_psid:
+                num += 1
+        return num
 
     def __del__(self):
         """Deconstructor."""
@@ -501,7 +508,7 @@ class Alerts:
 
 
 class Anomaly:
-    def __init__(self, message, metric, building, eventid, priority, aliaspsid):
+    def __init__(self, message, metric, building, eventid, priority, aliaspsid, alert_name):
         self.message = message
         self.metric = metric
         self.building = building
@@ -509,6 +516,7 @@ class Anomaly:
         self.priority = str(priority)
         self.aliaspsid = aliaspsid
         self.time = datetime.datetime.utcnow()
+        self.alert_name = alert_name
 
     def send(self, cursor):
         stat = (
@@ -657,47 +665,44 @@ class Known_Issues:
         return (aliaspsid in self.alias_psid)
 
 
-def rebuild_broken_cache(table):
+def rebuild_broken_cache(table, conn):
     """Rebuild a broken cache."""
-    if "LATEST" not in table:
-        print("LATEST NOT IN TABLE NAME")
-        return None
-    broken = "_BROKEN"
-    command = f"EXEC CEVAC_CACHE_INIT @tables = '{table+broken}'"
-    print(command)
-    os.system("/cevac/scripts/exec_sql.sh \"" + command +
-              "\" temp_csv.csv")
+    cursor = conn.cursor()
+    cursor.execute("EXEC CEVAC_CACHE_INIT @tables = '{table}_BROKEN'")
+    cursor.commit()
+    conn.commit()
+    cursor.close()
     return None
-
-
-def verbose_print(verbose, message):
-    """Print message if verbose is True."""
-    if verbose:
-        print(message)
 
 
 # For debugging
 if __name__ == "__main__":
     print("DEBUG ALERT SYSTEM")
-    all_alerts = Alerts(None, verbose=True)    
+    
+    all_alerts = Alerts(None, False, verbose=True)
+    
     print(f"OCCUPIED BUILDINGS: {all_alerts.occ.building_occupied}\n")
     print(f"ALERT PARAMETERS: {all_alerts.par.alert_parameters}\n")
     print(f"METRIC TO BLDGS: {all_alerts.par.metric_to_bldgs}\n")
     print(f"DECOMMISSIONED: {all_alerts.known_issues.alias_psid}\n")
     print(f"MAX EVENT ID: {all_alerts.max_id}")
     print(f"LATEST EVENTS: {all_alerts.old_events}")
+    
     input("PAUSE -- PRESS ENTER TO RUN ALERT SYSTEM -- PAUSE")
+    
     all_alerts.alert_system()
+    
     for a in all_alerts.anomalies:
         if a.aliaspsid in all_alerts.known_issues.alias_psid:
-            #print(f"DECOM: {a.aliaspsid}")
             continue
-        else:
-            print(str(a))
+        print(str(a))
     print(f"\n\n{len(all_alerts.anomalies)} anomalies")
+    
     do_commit = input("Commit to DB?").lower()
+    
     if "y" in do_commit and "n" not in do_commit:
         all_alerts.send()
+        
     print("FINISHED")
 
 
