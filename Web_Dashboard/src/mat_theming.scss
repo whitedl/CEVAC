@@ -16,13 +16,17 @@ $clemson-accent: mat-palette($mat-deep-orange);
 $clemson-warn: mat-palette($mat-red);
 
 // Create the theme object (a Sass map containing all of the palettes).
-$clemson-theme: mat-dark-theme(
-  $clemson-primary,
-  $clemson-accent,
-  $clemson-warn
-);
+$theme: mat-dark-theme($clemson-primary, $clemson-accent, $clemson-warn);
 
 // Include theme styles for core and each component used in your app.
 // Alternatively, you can import and @include the theme mixins for each component
 // that you are using.
-@include angular-material-theme($clemson-theme);
+@include angular-material-theme($theme);
+.light-theme {
+  $light-primary: mat-palette($mat-deep-purple);
+  $light-accent: mat-palette($mat-deep-orange);
+  $light-warn: mat-palette($mat-red);
+  $light-theme: mat-light-theme($light-primary, $light-accent, $light-warn);
+
+  @include angular-material-theme($light-theme);
+}
