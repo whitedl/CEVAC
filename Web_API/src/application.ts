@@ -17,6 +17,7 @@ export class CevacApiApplication extends BootMixin(
     options: ApplicationConfig = {
       rest: {
         basePath: '/api',
+	cors: {origin:false}
       },
     },
   ) {
