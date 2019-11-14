@@ -3,6 +3,7 @@ import { ColorService } from '@services/color.service';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import * as L from 'leaflet';
+import { Observable, of } from 'rxjs';
 
 import { Legend } from '@shared/leaflet-extensions/L.Control.Legend';
 
@@ -72,7 +73,7 @@ export class MapdataService {
   ];
   dataSet: Measurement = this.dataSets[0];
 
-  private dataUrl = 'http://wfic-cevac1:3000/api/stat';
+  private dataUrl = 'http://wfic-cevac1/api/stat';
   private sasBaseURL = 'https://sas.clemson.edu:8343/';
   private map!: L.Map;
   private tracked!: L.GeoJSON;
@@ -93,16 +94,19 @@ export class MapdataService {
   getMap = () => this.initMap();
 
   getBuilding = (bName: string | null) => {
-    let building!: { [index: string]: any };
+    let building!: Observable<BuildingData>;
     this.map.eachLayer(layer => {
       const l = layer as L.Polygon;
       if (!building && l.feature && l.feature.properties.Short_Name === bName) {
-        building = l.feature.properties;
-        return building;
+        building = of(l.feature.properties);
+        return;
       }
     });
     if (!building || bName === ' ' || bName === null) {
-      building = { Short_Name: 'Building not found' };
+      building = of({
+        Short_Name: 'Building not found',
+        metrics: []
+      });
     }
     return building;
   };
@@ -142,6 +146,7 @@ export class MapdataService {
         this.categories.add(bclass);
         this.colorService.registerCategory(bclass);
       }
+      feature.properties.metrics = [];
     }
     this.map = L.map('map', this.mapOptions).setView([34.678, -82.838], 17);
     const mapbox = this.getTileLayerMapboxLight().addTo(this.map);
@@ -197,12 +202,12 @@ export class MapdataService {
       style.color = this.colorService.getScaledColor(bclass);
       style.fillColor =
         feature.properties &&
-        feature.properties[this.dataSet.propertyName] &&
-        feature.properties[this.dataSet.propertyName].max
+        feature.properties.metrics[this.dataSet.propertyName] &&
+        feature.properties.metrics[this.dataSet.propertyName].max
           ? this.colorService.getScaledColor(
               bclass,
               this.dataSet.propertyName,
-              feature.properties[this.dataSet.propertyName].max
+              feature.properties.metrics[this.dataSet.propertyName].max
             )
           : this.colorService.getScaledColor(
               bclass,
@@ -289,7 +294,7 @@ export class MapdataService {
         )
         .subscribe(bData => {
           bData.forEach((element: any) => {
-            feature.properties[element.metric] = element;
+            feature.properties.metrics[element.metric] = element;
           });
           this.tracked.resetStyle(layer);
         });

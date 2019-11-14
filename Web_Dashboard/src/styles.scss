@@ -44,6 +44,12 @@ body {
     darken(map-get(map-get($clemson-theme, background), background), 10%);
 }
 
+//Fix issue with tabs not shrinking in small spaces on large screens
+.mat-tab-label[role^='tab'] {
+  min-width: 72px;
+  font-size: 12px;
+}
+
 /******************************************************************************
 FLEX UTILITIES
 ******************************************************************************/
