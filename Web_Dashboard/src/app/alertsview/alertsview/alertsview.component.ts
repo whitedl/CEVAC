@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { merge, Observable, of as observableOf } from 'rxjs';
+import { merge, Observable, BehaviorSubject, of as observableOf } from 'rxjs';
 import { catchError, map, startWith, switchMap } from 'rxjs/operators';
 
 import { Component, ViewChild, AfterViewInit } from '@angular/core';
@@ -25,8 +25,7 @@ export class AlertsviewComponent implements AfterViewInit {
     'BuildingSName',
     'AlertMessage',
     'Acknowledged',
-    'Resolved',
-    'Delete'
+    'Resolved'
   ];
   selection = new SelectionModel<Alert>(true, []);
   alerts: Alert[] = [];
@@ -39,8 +38,11 @@ export class AlertsviewComponent implements AfterViewInit {
   eventIDs: string[] = [];
   startDate: Date = new Date();
   endDate: Date = new Date();
-  ackStatus = false;
-  resStatus = false;
+  ackStatus = 0;
+  resStatus = 0;
+
+  // Table needs to update
+  tableDirty = new BehaviorSubject<boolean>(false);
 
   apiUrl = 'http://wfic-cevac1/api/alerts';
 
@@ -55,6 +57,13 @@ export class AlertsviewComponent implements AfterViewInit {
       .delete<any>(`${this.apiUrl}/${eid}`)
       .subscribe(() => this.getAlerts());
     this.table.renderRows();
+    this.resetTable();
+  };
+
+  deleteSelected = () => {
+    for (const alert of this.selection.selected) {
+      this.deleteRow(alert.EventID);
+    }
   };
 
   isAllSelected() {
@@ -69,19 +78,57 @@ export class AlertsviewComponent implements AfterViewInit {
       : this.alerts.forEach(row => this.selection.select(row));
   }
 
+  ackSlideThumb = (val: number) => {
+    switch (val) {
+      case 0:
+        return 'unack';
+      case 1:
+        return 'both';
+      case 2:
+        return 'ack';
+      default:
+        console.log('How did you set the slider to that?');
+        return 'something broke';
+    }
+  };
+
+  resSlideThumb = (val: number) => {
+    switch (val) {
+      case 0:
+        return 'unres';
+      case 1:
+        return 'both';
+      case 2:
+        return 'res';
+      default:
+        console.log('How did you set the slider to that?');
+        return 'something broke';
+    }
+  };
+
+  resetTable = () => {
+    this.tableDirty.next(true);
+  };
+
   getAlerts(): Observable<Alert[]> {
     let requestUrl = `${this.apiUrl}?`;
     let countUrl = `${this.apiUrl}/count?`;
     if (this.sort.direction) {
       requestUrl += `filter[order]=${this.sort.active} ${this.sort.direction}&`;
     }
-    if (!this.ackStatus) {
+    if (this.ackStatus === 0) {
       requestUrl += `filter[where][Acknowledged]=false&`;
-      countUrl += `filter[where][Acknowledged]=false&`;
+      countUrl += `where[Acknowledged]=false&`;
+    } else if (this.ackStatus === 2) {
+      requestUrl += `filter[where][Acknowledged]=true&`;
+      countUrl += `where[Acknowledged]=true&`;
     }
-    if (!this.resStatus) {
+    if (this.resStatus === 0) {
       requestUrl += `filter[where][Resolved]=false&`;
-      countUrl += `filter[where][Resolved]=false&`;
+      countUrl += `where[Resolved]=false&`;
+    } else if (this.resStatus === 2) {
+      requestUrl += `filter[where][Resolved]=true&`;
+      countUrl += `where[Resolved]=true&`;
     }
     requestUrl += `filter[limit]=${this.paginator.pageSize}&filter[skip]=${this
       .paginator.pageIndex * this.paginator.pageSize}`;
@@ -92,7 +139,7 @@ export class AlertsviewComponent implements AfterViewInit {
   ngAfterViewInit() {
     this.sort.sortChange.subscribe(() => (this.paginator.pageIndex = 0));
 
-    merge(this.sort.sortChange, this.paginator.page)
+    merge(this.sort.sortChange, this.paginator.page, this.tableDirty)
       .pipe(
         startWith({}),
         switchMap(() => {
