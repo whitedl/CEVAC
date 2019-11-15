@@ -19,7 +19,8 @@ from tools import verbose_print
 class Alerts:
     """Handler for all alerts."""
 
-    def __init__(self, logging, UPDATE_CACHE, verbose=False):
+    def __init__(self, logging, UPDATE_CACHE, verbose=False,
+                 conn=None):
         """Initialize connection and other objects."""
         self.logging = logging
         self.UPDATE_CACHE = UPDATE_CACHE
@@ -27,12 +28,13 @@ class Alerts:
         if logging is None:
             self.LOG = False
             
-
-        self.conn = pyodbc.connect(
-            'DRIVER={ODBC Driver 17 for SQL Server};'
-            'SERVER=130.127.218.11;DATABASE=WFIC-CEVAC;'
-            'UID=wficcm;PWD=5wattcevacmaint$'
-        )
+        self.conn = conn
+        if conn is None:
+            self.conn = pyodbc.connect(
+                'DRIVER={ODBC Driver 17 for SQL Server};'
+                'SERVER=130.127.218.11;DATABASE=WFIC-CEVAC;'
+                'UID=wficcm;PWD=5wattcevacmaint$'
+            )
         self.occ = Occupancy(self.conn)
         self.par = Parameters(self.conn)  
         self.known_issues = Known_Issues(self.conn)
@@ -51,21 +53,26 @@ class Alerts:
         self.old_events = {}
         self.parse_json()
 
+        self.sname_to_dname = self.get_sname_to_dname()
+
     def alert_system(self):
         """Find and catalog all anomalies."""
 
         # Check alerts for conditions
         for i, alert in enumerate(self.par.alert_parameters):
-            # Check time conditional to make sure it is the correct time for
-            # the alert
+            # Check time conditional to make sure it is the correct
+            # time for the alert
 
-            verbose_print(self.verbose, f"\nChecking Alert {i}: {alert}\n")
+            verbose_print(
+                self.verbose, f"\nChecking Alert {i}: {alert}\n")
 
             # Check basic value for basic alert
             if "numerical" in alert["type"]:
                 metric = alert['metric']
                 aggregation = alert['aggregation']
-                buildings = self.par.metric_to_bldgs[metric] if "*" in alert["building"] else [alert["building"]]
+                buildings = self.par.metric_to_bldgs[metric]
+                if "*" not in alert["building"]:
+                    buildings = [alert["building"]]
                 for building in buildings:
                     if self.skip_unoccupied(building, alert):
                         continue
@@ -73,18 +80,25 @@ class Alerts:
                     query = (f"SELECT * FROM {table}")
                     verbose_print(self.verbose, f"QUERY: {query}")
                     if not self.table_exists(table):
-                        verbose_print(self.verbose, f"{table} does not exist")
+                        verbose_print(
+                            self.verbose,
+                            f"{table} does not exist"
+                        )
                         continue
                     query += self.add_specific_aliases(alert)
                     data = self.safe_data(query)
                     for i in range(len(data)):
-                        self.check_numerical_alias(data, i, alert, building)
+                        self.check_numerical_alias(
+                            data, i, alert, building
+                        )
 
             # Check each alias for relative temperature exceptions
             elif "temp" in alert["type"]:
                 metric = alert['metric']
                 aggregation = alert['aggregation']
-                buildings = self.par.metric_to_bldgs[metric] if "*" in alert["building"] else [alert["building"]]
+                buildings = self.par.metric_to_bldgs[metric]
+                if "*" not in alert["building"]:
+                    buildings = [alert["building"]]
                 for building in buildings:
                     if self.skip_unoccupied(building, alert):
                         continue
@@ -92,7 +106,10 @@ class Alerts:
                     query = (f"SELECT * FROM {table}")
                     verbose_print(self.verbose, f"QUERY: {query}")
                     if not self.table_exists(table):
-                        verbose_print(self.verbose, f"{table} does not exist")
+                        verbose_print(
+                            self.verbose,
+                            f"{table} does not exist"
+                        )
                         continue
                     query += self.add_specific_aliases(alert)
                     data = self.safe_data(query)
@@ -131,7 +148,9 @@ class Alerts:
             elif "time" in alert["type"]:
                 metric = alert['metric']
                 aggregation = alert['aggregation']
-                buildings = self.par.metric_to_bldgs[metric] if "*" in alert["building"] else [alert["building"]]
+                buildings = self.par.metric_to_bldgs[metric]
+                if "*" not in alert["building"]:
+                    buildings = [alert["building"]]
                 for building in buildings:
                     if self.skip_unoccupied(building, alert):
                         continue
@@ -148,10 +167,12 @@ class Alerts:
                     self.check_time(data, alert, building)
 
             # TODO all clear
-            insert_sql_total = ("INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType,"
-                                "AlertMessage,Metric,UTCDateTime,MessageID) "
-                                f"VALUES('All Clear','All Clear','N/A',"
-                                f"GETUTCDATE(),'0')")
+            insert_sql_total = (
+                f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType,"
+                f"AlertMessage,Metric,UTCDateTime,MessageID) "
+                f"VALUES('All Clear','All Clear','N/A',"
+                f"GETUTCDATE(),'0')"
+            )
 
 
     def send(self):
@@ -248,7 +269,10 @@ class Alerts:
         return " ".join(regex_list)
                 
     def skip_unoccupied(self, building, alert):
-        """Return whether or not to skip the building based on occupancy."""
+        """
+        Return whether or not to skip the building based on 
+        occupancy.
+        """
         building_occupied = False
         if building in self.occ.building_occupied:
             building_occupied = self.occ.building_occupied[building]
@@ -280,7 +304,9 @@ class Alerts:
 
     def get_alias_or_psid(self, table_name):
         """Return whether a table uses alias or point slice id."""
-        request_str = f"EXEC CEVAC_ALIAS_OR_PSID @table = '{table_name}'"
+        request_str = (
+            f"EXEC CEVAC_ALIAS_OR_PSID @table = '{table_name}'"
+        )
         sol = pd.read_sql_query(request_str, self.conn)
         return sol[''][0]
 
@@ -288,9 +314,11 @@ class Alerts:
         """Return the (most recent) pointsliceid from an alias."""
         xref = f"CEVAC_{bldgsname}_{metric}_XREF"
         if self.table_exists(xref):
-            data = pd.read_sql_query(f"SELECT PointSliceID FROM {xref} "
-                                     f"WHERE ALIAS = '{alias}'",
-                                     self.conn)
+            data = pd.read_sql_query(
+                f"SELECT PointSliceID FROM {xref} "
+                f"WHERE ALIAS = '{alias}'",
+                self.conn
+            )
             return data["PointSliceID"][0]
         return "?"
 
@@ -336,11 +364,13 @@ class Alerts:
                 alert['message'],
                 alert,
                 {
-                    "alias": data["Alias"][i],
+                    "alias": f"{data['Alias'][i]} ({psid})",
                     "actualvalue": value,
                 }
             )
-            eventid = self.assign_event_id(alert, data["Alias"][i], psid)
+            eventid = self.assign_event_id(
+                alert, data["Alias"][i], psid
+            )
             self.anomalies.append(
                 Anomaly(
                     message,
@@ -350,6 +380,7 @@ class Alerts:
                     f"{alert['priority']}",
                     f"{data['Alias'][i]} ({psid})",
                     alert["alert_name"],
+                    self.get_buildingdname(building),
                 )
             )
         return None
@@ -426,20 +457,28 @@ class Alerts:
                         room_vals[Alias_Temp])
 
         if send_alert:
-            psid = self.get_psid_from_alias(room_vals["name"],
-                                            building,
-                                            alert['metric'])
+            psid = self.get_psid_from_alias(
+                room_vals["name"], building, alert['metric']
+            )
             message = self.replace_generic(
                 alert['message'],
                 alert,
                 {
-                    "Alias": room_vals["name"],
-                    "ActualValue": "{0:.2f}".format(room_vals["Temp"]),
-                    "CoolingSP": "{0:.2f}".format(room_vals["CoolingSP"]),
-                    "HeatingSP": "{0:.2f}".format(room_vals["HeatingSP"]),
+                    "Alias": f"{room_vals['name']} ({psid})",
+                    "ActualValue": "{0:.2f}".format(
+                        room_vals["Temp"]
+                    ),
+                    "CoolingSP": "{0:.2f}".format(
+                        room_vals["CoolingSP"]
+                    ),
+                    "HeatingSP": "{0:.2f}".format(
+                        room_vals["HeatingSP"]
+                    ),
                 }
             )
-            eventid = self.assign_event_id(alert, room_vals["name"], psid)
+            eventid = self.assign_event_id(
+                alert, room_vals["name"], psid
+            )
             self.anomalies.append(
                 Anomaly(
                     message,
@@ -449,6 +488,7 @@ class Alerts:
                     alert['priority'],
                     f"{room_vals['name']} ({psid})",
                     alert["alert_name"],
+                    self.get_buildingdname(building),
                 )
             )
 
@@ -468,11 +508,13 @@ class Alerts:
                 alert['message'],
                 alert,
                 {
-                    "Alias": data["Alias"][i],
+                    "Alias": f"{data['Alias'][i]} ({psid})",
                     "days": days_since,
                 }
             )
-            eventid = self.assign_event_id(alert, data["Alias"][i], psid)
+            eventid = self.assign_event_id(
+                alert, data["Alias"][i], psid
+            )
             self.anomalies.append(
                 Anomaly(
                     message,
@@ -482,6 +524,7 @@ class Alerts:
                     alert['priority'],
                     f"{data['Alias'][i]} ({psid})",
                     alert["alert_name"],
+                    self.get_buildingdname(building),
                 )
             )
         return None
@@ -493,13 +536,30 @@ class Alerts:
                 num += 1
         return num
 
+    def get_sname_to_dname(self):
+        """Get map of sname to dname."""
+        data = pd.read_sql_query(
+            "SELECT BuildingSName, BuildingDName "
+            "FROM CEVAC_BUILDING_INFO",
+            self.conn
+        )
+        a2b = {}
+        for i in range(len(data)):
+            a2b[data["BuildingSName"][i]] = data["BuildingDName"][i]
+        return a2b
+
+    def get_buildingdname(self, buildingsname):
+        """Get building D name from building S name."""
+        return self.sname_to_dname.get(buildingsname, buildingsname)
+
     def __del__(self):
         """Deconstructor."""
         self.conn.close()
 
 
 class Anomaly:
-    def __init__(self, message, metric, building, eventid, priority, aliaspsid, alert_name):
+    def __init__(self, message, metric, building, eventid,
+                 priority, aliaspsid, alert_name, buildingdname):
         self.message = message
         self.metric = metric
         self.building = building
@@ -508,13 +568,14 @@ class Anomaly:
         self.aliaspsid = aliaspsid
         self.time = datetime.datetime.utcnow()
         self.alert_name = alert_name
+        self.buildingdname = buildingdname
 
     def send(self, cursor):
         stat = (
             f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW "
             f"(AlertType, AlertMessage, Metric, BuildingSName, "
-            f"UTCDateTime, Alias, EventID) VALUES "
-            f"(?, ?, ?, ?, ?, ?, ?);"
+            f"UTCDateTime, Alias, EventID, BuildingDName) VALUES "
+            f"(?, ?, ?, ?, ?, ?, ?, ?);"
         )
         cursor.execute(stat, [
             self.priority,
@@ -524,6 +585,7 @@ class Anomaly:
             self.time,
             self.aliaspsid,
             self.eventid,
+            self.buildingdname,
         ])
         cursor.commit()
         
@@ -533,10 +595,11 @@ class Anomaly:
         sstr = (
             f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW"
             f"(AlertType, AlertMessage, Metric, BuildingSName, "
-            f"UTCDateTime, Alias, EventID) "
-            f"VALUES('{self.priority}', '{self.message}', '{self.metric}', "
+            f"UTCDateTime, Alias, EventID, BuildingDName) "
+            f"VALUES('{self.priority}', '{self.message}', "
+            f"'{self.metric}', "
             f"'{self.building}', '{self.time}', '{self.aliaspsid}', "
-            f"'{self.eventid}')"
+            f"'{self.eventid}', '{self.buildingdname}')"
         )
         return sstr
 
@@ -552,16 +615,18 @@ class Occupancy:
             crontab = (f"{data['Minutes'][i]} {data['Hour'][i]} "
                        f"{data['Day_month'][i]} "
                        f"{data['Month'][i]} {data['Day_week'][i]}")
+            bsn = "BuildingSName"
+            occstr = "Occupied"
             if data['Cron_Occupancy'][i]:
                 if not self.cron_is_now(crontab):
                     continue
-                if "*" in data["BuildingSName"][i]:
+                if "*" in data[bsn][i]:
                     for item in self.building_occupied:
-                        self.building_occupied[item] = data['Occupied'][i]
-                    self.building_occupied["*"] = data['Occupied'][i]
+                        self.building_occupied[item] = data[occstr][i]
+                    self.building_occupied["*"] = data[occstr][i]
                 else:
                     self.building_occupied[
-                        data["BuildingSName"][i]] = data['Occupied'][i]
+                        data[bsn][i]] = data[occstr][i]
 
     def building_is_occupied(self, building):
         """Return True if in occupied time."""
@@ -597,7 +662,10 @@ class Parameters:
     
     def __init__(self, conn):
         """Initialize parameters."""
-        data = pd.read_sql_query("SELECT * FROM CEVAC_ALERT_PARAMETERS", conn)
+        data = pd.read_sql_query(
+            "SELECT * FROM CEVAC_ALERT_PARAMETERS",
+            conn
+        )
         self.alert_parameters = []
         for i in range(len(data)):
             self.alert_parameters.append({
@@ -610,7 +678,9 @@ class Parameters:
                 "aggregation": data['aggregation'][i],
                 "priority": data['Priority'][i],
                 "aliaspsid": data["Alias_PSID"][i],
-                "type": self.type_from_condition(data['Condition'][i]),
+                "type": self.type_from_condition(
+                    data['Condition'][i]
+                ),
             })
         self.metric_to_bldgs = self.get_active_buildings(conn)
 
@@ -628,9 +698,12 @@ class Parameters:
             return ["*"]
 
     def get_active_buildings(self, conn):
-        data = pd.read_sql_query("SELECT DISTINCT BUILDINGSNAME, METRIC "
-                                 "FROM CEVAC_TABLES WHERE TABLENAME "
-                                 "LIKE '%HIST_VIEW%'", conn)
+        data = pd.read_sql_query(
+            "SELECT DISTINCT BUILDINGSNAME, METRIC "
+            "FROM CEVAC_TABLES WHERE TABLENAME "
+            "LIKE '%HIST_VIEW%'",
+            conn
+        )
         metric_to_bldgs = {}
         for i in range(len(data)):
             metric = data["METRIC"][i]
@@ -646,7 +719,10 @@ class Known_Issues:
     
     def __init__(self, conn):
         """Initialize known issues."""
-        data = pd.read_sql_query("SELECT * FROM CEVAC_KNOWN_ISSUES", conn)
+        data = pd.read_sql_query(
+            "SELECT * FROM CEVAC_KNOWN_ISSUES",
+            conn
+        )
         self.alias_psid = {}
         for i in range(len(data)):
             if 'decomissioned' in data['Code'][i].lower():
@@ -678,16 +754,20 @@ if __name__ == "__main__":
     print(f"DECOMMISSIONED: {all_alerts.known_issues.alias_psid}\n")
     print(f"MAX EVENT ID: {all_alerts.max_id}")
     print(f"LATEST EVENTS: {all_alerts.old_events}")
+    print(f"SNAME TO DNAME: {all_alerts.sname_to_dname}")
     
     input("PAUSE -- PRESS ENTER TO RUN ALERT SYSTEM -- PAUSE")
     
     all_alerts.alert_system()
-    
+
     for a in all_alerts.anomalies:
         if a.aliaspsid in all_alerts.known_issues.alias_psid:
             continue
         print(str(a))
-    print(f"\n\n{len(all_alerts.anomalies)} anomalies")
+    print(
+        f"\n\n{len(all_alerts.anomalies)} anomalies"
+        f"\n{len(all_alerts.num_decom_anomalies())} decommissioned"
+    )
     
     do_commit = input("Commit to DB? ").lower()
     

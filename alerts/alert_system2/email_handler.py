@@ -13,18 +13,19 @@ import pandas as pd
 import pyodbc
 import base64
 import sys
+from tools import verbose_print
 
 FILE_FPATH = "/cevac/cron/email/page/issues.html"
 email = "cevac5733@gmail.com"
 password = "cevacsteve5733"
 to_list = {
     "Harrison Hall": "hchall@g.clemson.edu",
-    "Bennett Meares": "bmeares@g.clemson.edu",
+    #"Bennett Meares": "bmeares@g.clemson.edu",
     #  "Inscribe boi": "bmeares@inscribe.productions",
-    "Zach Smith": "ztsmith@g.clemson.edu",
+    #"Zach Smith": "ztsmith@g.clemson.edu",
     # "Zach Klein": "ztklein@g.clemson.edu",
-    "Drewboi": "abemery@clemson.edu",
-    "Tim Howard": "timh@clemson.edu",
+    #"Drewboi": "abemery@clemson.edu",
+    #"Tim Howard": "timh@clemson.edu",
     "FILE": FILE_FPATH,
 }
 emergency_to_list = {
@@ -39,102 +40,47 @@ page = Template("".join(f.readlines()))
 
 def encode64(image_fpath):
     """Base64 encode image."""
-    return base64.b64encode(open(image_fpath, 'rb').read()).decode('utf-8')
+    return base64.b64encode(
+        open(
+            image_fpath, 'rb'
+        ).read()
+    ).decode('utf-8')
 
 
 pic_path = "pics/"
-metrics_a = {
-    "TEMP": {
-        "key": "<TEMP>",
-        "char": "🌡",
-    },
-    "POWER": {
-        "key": "<POWER>",
-        "char": "⚡",
-    },
-    "IAQ": {
-        "key": "<IAQ>",
-        "char": "🌫",
-    },
-    "CHW": {
-        "key": "<CHW>",
-        "char": "❄",
-    },
-    "STEAM": {
-        "key": "<STEAM>",
-        "char": "⛅",
-    },
-    "CO2": {
-        "key": "<CO2>",
-        "char": "🌫",
-    },
-
-    "UNKNOWN": {
-        "key": "<UNKNOWN>",
-        "char": "📏",
-    }
-}
-metrics_b = {
-    "TEMP": {
-        "key": "<TEMP>",
-        "char": (f"<img src=\"https://i.imgur.com/7idtl34.png\""
-                 f" width=\"50\" height=\"50\">"),
-    },
-    "POWER": {
-        "key": "<POWER>",
-        "char": (f"<img src=\"https://i.imgur.com/8dxzfpX.png\""
-                 f" width=\"50\" height=\"50\">"),
-    },
-    "IAQ": {
-        "key": "<IAQ>",
-        "char": (f"<img src=\"https://i.imgur.com/vkFWgSf.png\""
-                 f" width=\"50\" height=\"50\">"),
-    },
-    "CHW": {
-        "key": "<CHW>",
-        "char": (f"<img src=\"https://i.imgur.com/OtTAHcl.png\""
-                 f" width=\"50\" height=\"50\">"),
-    },
-    "STEAM": {
-        "key": "<STEAM>",
-        "char": (f"<img src=\"https://i.imgur.com/GdXwxMy.png\""
-                 f" width=\"50\" height=\"50\">"),
-    },
-
-    "UNKNOWN": {
-        "key": "<UNKNOWN>",
-        "char": "📏",
-    }
-}
-
 metrics = {
     "TEMP": {
         "key": "<TEMP>",
-        "char": (f"<img src=\"cid:image1\"  width=\"50\" height=\"50\">"),
+        "char": (f"<img src=\"cid:image1\" "
+                 " width=\"50\" height=\"50\">"),
         "fpath": pic_path + "TEMP.png",
         "cid": "image1",
     },
     "POWER": {
         "key": "<POWER>",
-        "char": (f"<img src=\"cid:image2\"  width=\"50\" height=\"50\">"),
+        "char": (f"<img src=\"cid:image2\"  "
+                 "width=\"50\" height=\"50\">"),
         "fpath": pic_path + "POWER.png",
         "cid": "image2",
     },
     "CO2": {
         "key": "<CO2>",
-        "char": (f"<img src=\"cid:image3\"  width=\"50\" height=\"50\">"),
+        "char": (f"<img src=\"cid:image3\" "
+                 "width=\"50\" height=\"50\">"),
         "fpath": pic_path + "CO2.png",
         "cid": "image3",
     },
     "CHW": {
         "key": "<CHW>",
-        "char": (f"<img src=\"cid:image4\"  width=\"50\" height=\"50\">"),
+        "char": (f"<img src=\"cid:image4\"  "
+                 "width=\"50\" height=\"50\">"),
         "fpath": pic_path + "CHW.png",
         "cid": "image4",
     },
     "STEAM": {
         "key": "<STEAM>",
-        "char": (f"<img src=\"cid:image5\"  width=\"50\" height=\"50\">"),
+        "char": (f"<img src=\"cid:image5\"  "
+                 "width=\"50\" height=\"50\">"),
         "fpath": pic_path + "STEAM.png",
         "cid": "image5",
     },
@@ -151,79 +97,86 @@ metrics = {
 class Email:
     """OO manage email."""
 
-    def __init__(self, hours=24, verbose=False):
+    def __init__(self, hours=24, verbose=False, conn=None):
         """Object oriented version for emails."""
         self.hours = hours
         self.verbose = verbose
-        self.conn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};'
-                                   'SERVER=130.127.218.11;DATABASE=WFIC-CEVAC;'
-                                   'UID=wficcm;PWD=5wattcevacmaint$')
+        self.conn = conn
+        if conn is None:
+            self.conn = pyodbc.connect(
+                'DRIVER={ODBC Driver 17 for SQL Server};'
+                'SERVER=130.127.218.11;DATABASE=WFIC-CEVAC;'
+                'UID=wficcm;PWD=5wattcevacmaint$'
+            )
 
     def send(self):
         """Do main function."""
         # Get alerts from the past day
-        self.rebuild_events()
-        try:
-            now = datetime.datetime.utcnow()
-            day = datetime.timedelta(1)
-            yesterday = now - day
-            alerts = pd.read_sql_query(f" DECLARE @yesterday DATETIME; SET "
-                                       "@yesterday = "
-                                       f"DATEADD(day,"
-                                       f" -1, GETDATE()); SELECT"
-                                       f" TOP 100 * "
-                                       "FROM CEVAC_ALL_ALERTS_EVENTS_LATEST "
-                                       f" WHERE ETDateTime >= @yesterday "
-                                       f" ORDER BY ETDateTime DESC", self.conn)
-            now_etc = self.utc_to_est(now)
-            yesterday_etc = self.utc_to_est(yesterday)
-            now_etc_str = now_etc.strftime("%m/%d/%y %I:%M %p")
-            yesterday_etc_str = yesterday_etc.strftime("%m/%d/%y %I:%M %p")
+        # self.rebuild_events() TODO?
+        query = (
+            "DECLARE @yesterday DATETIME; "
+            "SET @yesterday = DATEADD("
+            "day, -1, GETDATE()); "
+            "SELECT TOP 100 * FROM "
+            "CEVAC_ALL_ALERTS_EVENTS_LATEST "
+            "WHERE ETDateTime >= @yesterday "
+            "ORDER BY ETDateTime DESC"
+        )
+        alerts = pd.read_sql_query(
+            query,
+            self.conn
+        )
+        now_etc = self.utc_to_est(datetime.datetime.utcnow())
+        yesterday_etc = self.utc_to_est(
+            datetime.datetime.utcnow()-datetime.timedelta(1)
+        )
+        now_etc_str = now_etc.strftime(
+            "%m/%d/%y %I:%M %p"
+        )
+        yesterday_etc_str = yesterday_etc.strftime(
+            "%m/%d/%y %I:%M %p"
+        )
 
-            total_msg = ""
-            all_alerts = []
-            for i in range(len(alerts)):
-                all_alerts.append(Alert_Log(alerts, i))
+        total_msg = ""
+        all_alerts = []
+        for i in range(len(alerts)):
+            all_alerts.append(Alert_Log(alerts, i))
+            
+        all_alerts = sorted(all_alerts)
+        alert_gd = {}
+        for al in all_alerts:
+            al.insert_into_dict(alert_gd)
 
-            all_alerts = sorted(all_alerts)
-            alert_gd = {}
-            for al in all_alerts:
-                al.insert_into_dict(alert_gd)
+        total_msg = ""
+        for key in alert_gd:
+            total_msg += f'<h2 class=\"split\">{key.upper()}</h2>'
+            for building in alert_gd[key]:
+                total_msg += f"<h4>{building}</h4><table>"
+                for al in alert_gd[key][building]:
+                    total_msg += "<tr>"
+                    if al.acknowledged:
+                        continue
+                    e_msg = (f"<td width=\"20%\">{al.etc_str}</td>"
+                             f"<td width=\"10%\">{al.metric}</td>"
+                             f"<td width=\"70%\">{al.message}</td>")
+                    total_msg += e_msg + "</tr>"
+                total_msg += "</table>"
 
-            total_msg = ""
-            for key in alert_gd:
-                total_msg += f'<h2 class=\"split\">{key.upper()}</h2>'
-                for building in alert_gd[key]:
-                    total_msg += f"<h4>{building}</h4><table>"
-                    for al in alert_gd[key][building]:
-                        total_msg += "<tr>"
-                        if al.acknowledged:
-                            continue
-                        e_msg = (f"<td width=\"20%\">{al.etc_str}</td>"
-                                 f"<td width=\"10%\">{al.metric}</td>"
-                                 f"<td width=\"70%\">{al.message}</td>")
-                        total_msg += e_msg + "</tr>"
-                    total_msg += "</table>"
-
-            subject = (f"CEVAC alert log from {yesterday_etc_str} to "
-                       f"{now_etc_str}")
-            self.email_message(email, password, to_list, total_msg, subject)
-        except Exception as e:
-            print(e)
-            sys.exit()
-            f = open("html/alert_emergency.html", "r")
-            emergency_email = "".join(f.readlines())
-            self.email_message(email, password, emergency_to_list,
-                               emergency_email, "ISSUES WITH CEVAC ALERTS")
+        subject = (f"CEVAC alert log from {yesterday_etc_str} to "
+                   f"{now_etc_str}")
+        self.email_message(email, password, to_list,
+                           total_msg, subject)
 
     def rebuild_events(self):
         """Rebuild a broken cache."""
+        cursor = self.conn.cursor()
         command = (f"EXEC CEVAC_CACHE_INIT @tables = "
                    "'CEVAC_ALL_ALERTS_EVENTS_HIST_VIEW'")
-        if self.verbose:
-            print(command)
-        os.system("/cevac/scripts/exec_sql.sh \"" + command +
-                  "\" temp_csv.csv")
+        cursor.execute(command)
+        cursor.commit()
+        self.conn.commit()
+        cursor.close()
+        verbose_print(self.verbose, command)
         return None
 
     def email_message(self, email, password, to_list, message, subject):
@@ -239,8 +192,10 @@ class Email:
             server.login(email, password)
             for person in to_list:
                 p_email = to_list[person]
-                p_page = page.render(Name=person, message=message,
-                                     subject=subject, metrics=metrics)
+                p_page = page.render(
+                    Name=person, message=message,
+                    subject=subject, metrics=metrics
+                )
 
                 m_message = MIMEMultipart()
 
