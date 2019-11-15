@@ -69,6 +69,7 @@
         <div id='advanced_div' class="advanced">
           <h5>Table Actions</h5>
           <ul id="table_actions_list">
+            <li><a href="#" id="view_stats_button" onclick="view_stats_button_click()">View Latest Statistics</a></li>
             <li><a href="#" id="view_latest_button" onclick="view_latest_button_click()">View Latest</a></li>
             <li><a href="#" id="view_day_button" onclick="view_day_button_click()">View Last 24 Hours</a></li>
           </ul>
