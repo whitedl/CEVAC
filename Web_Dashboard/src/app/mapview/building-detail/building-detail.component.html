@@ -22,8 +22,8 @@
         *ngFor="let tab of building$.metrics | keyvalue"
         [label]="tab.key"
       >
-        <ng-container *ngFor="let obj of tab.value | keyvalue">
-          <div>{{ obj.key }}: {{ obj.value }}</div>
+        <ng-container *ngFor="let key of measureFields">
+          <div>{{ key }}: {{ tab.value[key] }}</div>
         </ng-container>
       </mat-tab>
     </mat-tab-group>

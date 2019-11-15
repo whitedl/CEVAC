@@ -14,6 +14,15 @@ import { FormControl } from '@angular/forms';
 export class BuildingDetailComponent implements OnInit {
   building$!: { [index: string]: any };
   bdata!: string;
+  measureFields = [
+    'lastEtdatetime',
+    'updateEtdatetime',
+    'minNz',
+    'min',
+    'max',
+    'sum',
+    'avg'
+  ];
   displayFields = ['BLDG_Class'];
 
   constructor(
