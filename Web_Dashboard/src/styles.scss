@@ -32,22 +32,42 @@ body {
   }
   &::-webkit-scrollbar-track {
     background-color: darken(
-      map-get(map-get($clemson-theme, background), background),
+      map-get(map-get($theme, background), background),
       10%
     );
   }
   &::-webkit-scrollbar-thumb {
-    background-color: mat-color(map-get($clemson-theme, accent));
+    background-color: mat-color(map-get($theme, accent));
   }
   scrollbar-width: thin;
   scrollbar-color: mat-color($clemson-accent)
-    darken(map-get(map-get($clemson-theme, background), background), 10%);
+    darken(map-get(map-get($theme, background), background), 10%);
 }
 
 //Fix issue with tabs not shrinking in small spaces on large screens
 .mat-tab-label[role^='tab'] {
   min-width: 72px;
   font-size: 12px;
+  opacity: 1;
+}
+
+.mat-tab-header-pagination {
+  display: none !important;
+}
+.mat-tab-header {
+  @include scrollcontainer;
+  overflow: auto !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 20;
+  background-color: map-get(map-get($theme, background), card) !important;
+}
+.mat-tab-label-container {
+  overflow: initial !important;
+}
+
+.mat-tab-label-content {
+  user-select: none;
 }
 
 /******************************************************************************
