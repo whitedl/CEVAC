@@ -11,6 +11,7 @@ import ml
 import datetime
 import argparse
 import os
+import pyodbc
 
 # Parse arguments
 parser = argparse.ArgumentParser(
@@ -71,7 +72,10 @@ RUN_ML = parsed_args.machinelearning
 VERBOSE = parsed_args.verbose
 
 if __name__ == "__main__":
-    verbose_print(VERBOSE, f"Job Started: {datetime.datetime.now()} ET")
+    verbose_print(
+        VERBOSE,
+        f"Job Started: {datetime.datetime.now()} ET"
+    )
 
     logging = None
     if LOG:
@@ -84,14 +88,26 @@ if __name__ == "__main__":
         logging.info("\n---\nNEW JOB\n---")
     verbose_print(VERBOSE, f"logging: {logging}")
 
+    conn = None
+    if CHECK_ALERTS or SEND_EMAIL or RUN_ML:
+        conn = pyodbc.connect(
+            "DRIVER={ODBC Driver 17 for SQL Server};"
+            "SERVER=130.127.218.11;"
+            "DATABASE=WFIC-CEVAC;"
+            "UID=wficcm;"
+            "PWD=5wattcevacmaint$"
+        )
+
     all_alerts = None
     if CHECK_ALERTS:
-        all_alerts = alerts.Alerts(logging, UPDATE_CACHE, verbose=VERBOSE)
+        all_alerts = alerts.Alerts(logging, UPDATE_CACHE,
+                                   verbose=VERBOSE, conn=conn)
         all_alerts.alert_system()
         verbose_print(VERBOSE, "CHECK_ALERTS is True")
         verbose_print(VERBOSE,(
             f"Anomalies: {len(all_alerts.anomalies)}\n"
-            f"{all_alerts.num_decom_anomalies()} anomalies are decommissioned"
+            f"{all_alerts.num_decom_anomalies()} "
+            "anomalies are decommissioned"
         ))
 
     if SEND:
@@ -100,7 +116,9 @@ if __name__ == "__main__":
         verbose_print(VERBOSE, "SEND is True")
 
     if SEND_EMAIL:
-        email_setup = email_handler.Email(hours=EMAIL_TIME, verbose=VERBOSE)
+        email_setup = email_handler.Email(hours=EMAIL_TIME,
+                                          verbose=VERBOSE,
+                                          conn=conn)
         email_setup.send()
         verbose_print(VERBOSE, "EMAIL is True")
 
@@ -115,4 +133,7 @@ if __name__ == "__main__":
 
     # Finish system
     print("Ran successfully.")
-    verbose_print(VERBOSE, f"Job Completed: {datetime.datetime.now()} ET")
+    verbose_print(
+        VERBOSE,
+        f"Job Completed: {datetime.datetime.now()} ET"
+    )
