@@ -1,74 +1,119 @@
 """Machine learning algorithm."""
 import pyodbc
-from pandas import DataFrame
+import pandas as pd
 
 
 class ML:
     """ML suite for connected issues and finding root causes."""
 
-    def __init__(self):
+    def __init__(self, anomalies, conn=None):
         """Initialize data and connections."""
-        self.start_weight = 0.5
-        self.conn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=130.127.218.11;DATABASE=WFIC-CEVAC;UID=wficcm;PWD=5wattcevacmaint$')
-        self.cursor = self.conn.cursor()
-        self.cursor.execute("SELECT * FROM test")
-        data = cursor.fetchall() # List of tuples
-        readable_data = DataFrame(data)
+        self.conn = conn
+        if conn is None:
+            self.conn = pyodbc.connect(
+                'DRIVER={ODBC Driver 17 for SQL Server};'
+                'SERVER=130.127.218.11;'
+                'DATABASE=WFIC-CEVAC;'
+                'UID=wficcm;'
+                'PWD=5wattcevacmaint$'
+            )
 
-        self.nodes = [l.psid for l in []]  # TODO
-        self.edges = {}  # Map from psid1 to Map of psid2 to edge value
+        self.anomalies = {}
+        for anomaly in anomalies:
+            self.anomalies[anomaly.aliaspsid + ' ' + anomaly.alert_name] = anomaly
 
-    def add_nodes(self, alerts):
+        """
+        data = pd.read_sql_query("SELECT * FROM CEVAC_ML_EDGES")
+        self.edges_to_update = {}
+        for i in range(len(data)):
+            if (data["Node1"][i] in self.anomalies or
+                data["Node2"][i] in self.anomalies):
+                
+                combined_aliaspsid1 = (
+                    data["Node1"][i] + data["Node2"][i]
+                )
+                combined_aliaspsid2 = (
+                    data["Node2"][i] + data["Node1"][i]
+                )
+                e = Edge(i, data)
+                self.edges_to_update[combined_aliaspsid1] = e
+                self.edges_to_update[combined_aliaspsid2] = e
+        """
+        
+
+    def do_ml(self):
+        """Run main ML process."""
+        self.add_new_edges()
+        self.adjust_weights()
+
+    def add_new_edges(self):
         """Manage new nodes from alerts.
 
         Add new nodes if alert is not a node.
         Manage edge weights for current alerts.
         """
-        new_nodes = [Node(alert) for alert in alerts]
-
         # Connect new nodes
-        for i, node1 in enumerate(new_nodes):
-            for j, node2 in enumerate(new_nodes):
+        for i, node1name in enumerate(self.anomalies):
+            for j, node2name in enumerate(self.anomalies):
+                node1 = self.anomalies[node1name]
+                node2 = self.anomalies[node2name]
 
-                # Ensures you only connect to that which you haven't
-                met_me = False
-                if (node1.psid == node2.psid):
-                    met_me = True
-                elif not met_me:
+                # Don't add edges if aliaspsid_alertnames are the same
+                if node1 == node2:
                     continue
 
-                if node1 in self.edges:
-                    if node2 in self.edges[node1]:
-                        continue
-                    else:
-                        self.edges[node1][node2] = self.start_weight
-                        if node2 in self.edges:
-                            self.edges[node2][node1] = self.start_weight
-                        else:
-                            self.edges[node2] = {node1: self.start_weight}
-                else:
-                    self.edges[node1] = {node2: self.start_weight}
-                    if node2 in self.edges:
-                        self.edges[node2][node1] = self.start_weight
-                    else:
-                        self.edges[node2] = {node1: self.start_weight}
+                # If edge exists, skip
+                combined_name1 = (
+                    self.get_node_name(node1) +
+                    ' ' +
+                    self.get_node_name(node2)
+                )
+                combined_name2 = (
+                    self.get_node_name(node2) +
+                    ' ' +
+                    self.get_node_name(node1)
+                )
+                
+                if combined_name1 in self.edges:
+                    continue
 
+                e = Edge(0, None, anomaly1=node1, anomaly2=node2)
+                self.edges_to_update[combined_name1] = e
+                self.edges_to_update[combined_name2] = e
+        return None
 
-        for i, node in enumerate(new_nodes):
-            if node.psid in nodes:
-                for edge in edges:
-                    pass
+    def adjust_weights(self):
+        for edge in self.edges_to_update:
+            if (edge.node1 in self.anomalies and
+                edge.node2 in self.anomalies):
+                edge.times_together += 1
             else:
-                pass
+                edge.times_apart += 1
+            
+            edge.weight = (
+                0.5 * (
+                    1 + (
+                        (edge.times_together - edge.times_apart) /
+                        (edge.times_together + edge.times_apart)
+                    )
+                )
+            )
+
         return None
 
     def send(self):
         """Send nodes and edges back to database."""
-        pass
+        for edge in self.edges_to_update:
+            pass
+        return None
 
     def queries(self):
         """Execute necessary queries."""
-        pass
+        return None
+
+    def set_new_weights(self):
+        for edge in self.edges:
+            pass
 
     def decrease_weight(self, edge, node1, node2):
         """Decrease edge weight."""
@@ -80,22 +125,41 @@ class ML:
         edge += 0
         return edge
 
-    def __del__(self):
-        """Deconstruct ML."""
-        self.conn.close()
-
-
-class Node:
-    """Node for ML."""
-
-    def __init__(self, node_row):
-        """Init node."""
-        pass
+    def get_node_name(self, node):
+        return node.aliaspsid + ' ' + node.alert_name
+        
 
 
 class Edge:
     """Edge for ML."""
 
-    def __init__(self, edge_row):
+    def __init__(self, i, data, anomaly1=None, anomaly2=None):
         """Init edge."""
-        pass
+        if anomaly1 is None and anomaly2 is None:
+            self.node1 = data["Node1"][i]
+            self.node2 = data["Node2"][i]
+            self.weight = data["Weight"][i]
+
+            self.times_together = data["Times_Together"][i]
+            self.times_apart = data["Times_Apart"][i]
+            self.anomaly1 = None
+            self.anomaly2 = None
+        else:
+            self.anomaly1 = anomaly1
+            self.anomaly2 = anomaly2
+
+            self.node1 = (
+                anomaly1.aliaspsid + " " + anomaly1.alert_name
+            )
+            self.node2 = (
+                anomaly2.aliaspsid + " " + anomaly2.alert_name
+            )
+            
+            self.times_together = 1
+            self.times_apart = 0
+            self.weight = self.init_weight()
+            
+
+    def init_weight(self):
+        return 0.5
+        
