@@ -191,3 +191,11 @@ function test_button_click(){
     }
   });
 }
+function view_stats_button_click(){
+  button = document.getElementById('view_stats_button');
+  // document.getElementById('download_button').innerHTML = 'Download LATEST';
+  // document.getElementById('download_button_div').style.display = 'block';
+  // document.getElementById('Age_text').value = 'LATEST';
+  reset_buttons(button);
+  get_stats_html();
+}
