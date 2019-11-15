@@ -194,7 +194,9 @@ export class MapdataService {
   private style = (feature?: GeoJSON.Feature<GeoJSON.GeometryObject, any>) => {
     const style: L.PathOptions = {};
     if (feature) {
-      const bclass: string = feature.properties.BLDG_Class;
+      const bclass: string = feature.properties.bldgClass
+        ? feature.properties.bldgClass
+        : undefined;
       style.fill = true;
       style.weight = 1;
       style.opacity = 1;
@@ -212,7 +214,7 @@ export class MapdataService {
           : this.colorService.getScaledColor(
               bclass,
               this.dataSet.propertyName,
-              0
+              1
             );
     }
     return style;
