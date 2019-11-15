@@ -24,7 +24,8 @@ to_list = {
     #  "Inscribe boi": "bmeares@inscribe.productions",
     "Zach Smith": "ztsmith@g.clemson.edu",
     # "Zach Klein": "ztklein@g.clemson.edu",
-    "Drewboi": "abemery@clemson.edu",
+    "Drewboi": "abemery@g.clemson.edu",
+    "Tyler Piel": "tpiel@g.clemson.edu",
     "Tim Howard": "timh@clemson.edu",
     "FILE": FILE_FPATH,
 }

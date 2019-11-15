@@ -17,32 +17,66 @@ import pyodbc
 parser = argparse.ArgumentParser(
     description=(
         "Alert System v2. "
-        "This alert system is heavily modular, allowing options to be passed "
-        "via the command line, as opposed to being burried in scripts."
+        "This alert system is heavily modular, "
+        "allowing options to be passed "
+        "via the command line, as opposed to being "
+        "burried in scripts."
     )
 )
-parser.add_argument("--log", "-L", "-l", default=True, action="store",
-                    help="set log to True or False")
-parser.add_argument("--alerts", "-a", "-A", default=False, action="store_true",
-                    help="check alerts currently")
-parser.add_argument("--times", "-t", "-T", default=0, action="store",
-                    help=("if set, checks alerts for different time periods "
-                          "where possible"))
-parser.add_argument("--send", "-s", "-S", default=False, action="store_true",
-                    help="send anomalies to our database")
-parser.add_argument("--email", "-e", "-E", default=False, action="store_true",
-                    help="send email of anomalies")
-parser.add_argument("--emailtime", "-et", "-ET", default=24, action="store",
-                    help=("set hours of anomalies to send via email"
-                          "[Default=24]"))
-parser.add_argument("--cache", "-c", "-C", default=False, action="store_true",
-                    help="update the cache before checking alerts")
-parser.add_argument("--machinelearning", "-ml", "-ML", default=False,
-                    action="store_true",
-                    help=("run machine learning algorithm after checking "
-                          "alerts"))
-parser.add_argument("--verbose", "-v", "-V", default=False,
-                    action="store_true", help="printing")
+parser.add_argument(
+    "--log", "-L", "-l",
+    default=True, action="store",
+    help="set log to True or False"
+)
+parser.add_argument(
+    "--alerts", "-a", "-A",
+    default=False, action="store_true",
+    help="check alerts currently"
+)
+parser.add_argument(
+    "--times", "-t", "-T",
+    default=0, action="store",
+    help=(
+        "if set, checks alerts for different "
+        "time periods where possible"
+    )
+)
+parser.add_argument(
+    "--send", "-s", "-S",
+    default=False, action="store_true",
+    help="send anomalies to our database"
+)
+parser.add_argument(
+    "--email", "-e", "-E",
+    default=False, action="store_true",
+    help="send email of anomalies"
+)
+parser.add_argument(
+    "--emailtime", "-et", "-ET",
+    default=24, action="store",
+    help=(
+        "set hours of anomalies to send via email"
+        "[Default=24]"
+    )
+)
+parser.add_argument(
+    "--cache", "-c", "-C",
+    default=False, action="store_true",
+    help="update the cache before checking alerts"
+)
+parser.add_argument(
+    "--machinelearning", "-ml", "-ML",
+    default=False, action="store_true",
+    help=(
+        "run machine learning algorithm after "
+        "checking alerts"
+    )
+)
+parser.add_argument(
+    "--verbose", "-v", "-V",
+    default=False,
+    action="store_true", help="printing"
+)
 
 
 parsed_args = parser.parse_args()
@@ -123,12 +157,16 @@ if __name__ == "__main__":
         verbose_print(VERBOSE, "EMAIL is True")
 
     if RUN_ML:
-        machine_learning = ml.ML()
         if CHECK_ALERTS:
-            machine_learning.add_nodes(all_alerts)
-        if SEND:
-            machine_learning.send()
-        machine_learning.queries()
+            machine_learning = ml.ML(
+                all_alerts.anomalies,
+                conn=conn
+            )
+            machine_learning.do_ml()
+            if SEND:
+                machine_learning.send()
+        else:
+            print("CHECK_ALERTS REQUIRED FOR ML")
         verbose_print(VERBOSE, "ML is True")
 
     # Finish system
