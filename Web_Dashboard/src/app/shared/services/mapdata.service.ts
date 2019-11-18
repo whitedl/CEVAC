@@ -73,7 +73,7 @@ export class MapdataService {
   ];
   dataSet: Measurement = this.dataSets[0];
 
-  private dataUrl = 'http://wfic-cevac1/api/stat';
+  private dataUrl = '//wfic-cevac1/api/stat';
   private sasBaseURL = 'https://sas.clemson.edu:8343/';
   private map!: L.Map;
   private tracked!: L.GeoJSON;
@@ -177,7 +177,7 @@ export class MapdataService {
       {
         attribution:
           // tslint:disable-next-line: max-line-length
-          '<a href="http://mapbox.com/about/maps" class="mapbox-wordmark" target="_blank"></a>© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank">Improve this map</a></strong>',
+          '<a href="https://mapbox.com/about/maps" class="mapbox-wordmark" target="_blank"></a>© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank">Improve this map</a></strong>',
         id: 'mapbox.light',
         // Currently my personal token, should change to university token
         access_token:
@@ -279,7 +279,7 @@ export class MapdataService {
     if (feature.properties.Status === 'Active') {
       this.http
         .get<BuildingData>(
-          'http://wfic-cevac1/api/buildings/' + feature.properties.Short_Name
+          '//wfic-cevac1/api/buildings/' + feature.properties.Short_Name
         )
         .subscribe(bdata => {
           feature.properties = Object.assign(feature.properties, bdata);
