@@ -257,7 +257,7 @@ def get_attr(filename):
             building_name = '_'.join(meta_list[1:i])
             break
     '''
-    #use command line to do the double check
+    #we can use command line to do the double check
     xref_index = meta_list.index('XREF')
     
     for i in range(1,xref_index):
@@ -273,10 +273,11 @@ def get_attr(filename):
         print("Wrong building name in file: ", building_name)
         sys.exit()
     
-    return {'metric': metric, 'buidling_name': building_name}
+    return {'metric': metric, 'building_name': building_name}
 
 
 def check_attr(filename, metric_web, building_web):
+    print("Start checking attributes ...")
     check_dict = get_attr(filename)
     if (metric_web != check_dict['metric']):
         print("The metric you choose doesn't match your filename, please check.")
@@ -310,6 +311,9 @@ def main(argv):
         elif (opt in ('-a', 'age')):
             age = arg.upper()
     
+    print("filename: ", filename)
+    print("metric: ", metric)
+    print("buiding: ", building)
     #filename = str(sys.argv[1])
     #metric = (filename.split('/')[-1][:-4].upper()).split('_')[2]
     if(check_attr(filename, metric, building)):
