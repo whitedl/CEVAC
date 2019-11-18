@@ -30,7 +30,7 @@ export class MapdataService {
       propertyName: 'TEMP',
       category: 'IAQ',
       unit: 'F',
-      form: 'max',
+      form: 'avg',
       display: true,
       active: true
     },
@@ -205,11 +205,13 @@ export class MapdataService {
       style.fillColor =
         feature.properties &&
         feature.properties.metrics[this.dataSet.propertyName] &&
-        feature.properties.metrics[this.dataSet.propertyName].max
+        feature.properties.metrics[this.dataSet.propertyName][this.dataSet.form]
           ? this.colorService.getScaledColor(
               bclass,
               this.dataSet.propertyName,
-              feature.properties.metrics[this.dataSet.propertyName].max
+              feature.properties.metrics[this.dataSet.propertyName][
+                this.dataSet.form
+              ]
             )
           : this.colorService.getScaledColor(
               bclass,
