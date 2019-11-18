@@ -27,7 +27,7 @@ export class MapdataService {
     },
     {
       name: 'Temperature',
-      propertyName: 'TEMP_SPACE',
+      propertyName: 'TEMP',
       category: 'IAQ',
       unit: 'F',
       form: 'max',
