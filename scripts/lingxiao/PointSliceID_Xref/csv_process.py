@@ -317,7 +317,7 @@ def main(argv):
     #filename = str(sys.argv[1])
     #metric = (filename.split('/')[-1][:-4].upper()).split('_')[2]
     if(check_attr(filename, metric, building)):
-        print("Metric $ Builiding check pass")
+        print("Metric & Builiding check pass")
 
     if (metric == 'WAP'):
         print('Dealing with WAP_xref\n')
