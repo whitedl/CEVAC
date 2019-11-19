@@ -6,7 +6,8 @@ CREATE PROCEDURE CEVAC_XREF_LOOKUP
 	@BuildingSName NVARCHAR(100),
 	@Metric NVARCHAR(100),
 	@Alias NVARCHAR(200) = NULL,
-	@PointSliceID INT = NULL
+	@PointSliceID INT = NULL,
+	@execute BIT = 1
 AS
 DECLARE @error NVARCHAR(MAX);
 DECLARE @ProcessName NVARCHAR(MAX);
@@ -59,5 +60,9 @@ IF @PointSliceID IS NULL BEGIN
 	SET @EXEC_SQL = 'SELECT ' + @RemotePSIDName + ' FROM ' + @XREF_source + ' WHERE Alias = ''' + @Alias + '''';
 	SET @output_name = @RemotePSIDName;
 END
-INSERT INTO @output_table EXEC(@EXEC_SQL);
-SELECT o AS output FROM @output_table;
+IF @execute = 1 BEGIN
+	INSERT INTO @output_table EXEC(@EXEC_SQL);
+	SELECT o AS output FROM @output_table;
+END ELSE BEGIN
+	SELECT @EXEC_SQL AS exec_sql;
+END
