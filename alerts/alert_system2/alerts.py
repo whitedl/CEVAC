@@ -1,6 +1,16 @@
 """CEVAC alert managment, object oriented.
 
-This CEVAC alert system script populates the table `CEVAC_ALL_ALERTS_HIST`.
+This CEVAC alert system script populates the table 
+`CEVAC_ALL_ALERTS_HIST` with data anomalies.
+
+Anomalies are determined by comparing recent data from tables 
+defined by the table `CEVAC_ALERT_PARAMETERS`. Anomalies are
+stored in the table `CEVAC_ALL_ALERTS_HIST_RAW`. Anomalies are 
+grouped by the EventID in order to remove the storage of
+multiple anomalies in the events table. Anomalies that are
+known and accounted for (but still occur for whatever reason)
+are cited as a known issue and are located in 
+`CEVAC_KNOWN_ISSUES`.
 """
 
 import os
@@ -57,6 +67,10 @@ class Alerts:
 
     def alert_system(self):
         """Find and catalog all anomalies."""
+        if self.LOG:
+            logging.info(
+                f"ALERT SYSTEM RUNNING"
+            )
 
         # Check alerts for conditions
         for i, alert in enumerate(self.par.alert_parameters):
@@ -64,7 +78,9 @@ class Alerts:
             # time for the alert
 
             verbose_print(
-                self.verbose, f"\nChecking Alert {i}: {alert}\n")
+                self.verbose,
+                f"\nChecking Alert {i}: {alert}\n"
+            )
 
             # Check basic value for basic alert
             if "numerical" in alert["type"]:
@@ -167,11 +183,15 @@ class Alerts:
                     self.check_time(data, alert, building)
 
             # TODO all clear
-            insert_sql_total = (
-                f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType,"
-                f"AlertMessage,Metric,UTCDateTime,MessageID) "
-                f"VALUES('All Clear','All Clear','N/A',"
-                f"GETUTCDATE(),'0')"
+        insert_sql_total = (
+            f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType,"
+            f"AlertMessage,Metric,UTCDateTime,MessageID) "
+            f"VALUES('All Clear','All Clear','N/A',"
+            f"GETUTCDATE(),'0')"
+        )
+        if self.LOG:
+            logging.info(
+                f"ALERT SYSTEM FINISHED"
             )
 
 
@@ -190,7 +210,9 @@ class Alerts:
         cursor.close()
 
         if self.LOG:
-            self.logging.info(str(datetime.datetime.now()))
+            self.logging.info(
+                f"ANOMALIES SENT"
+            )
             self.logging.shutdown()
 
     def safe_data(self, query):
@@ -497,11 +519,7 @@ class Alerts:
     def check_time(self, data, alert, building):
         """Check time off since last report."""
         for i in range(len(data)):
-            psid = self.get_psid_from_alias(
-                data['Alias'][i],
-                building,
-                alert['metric'],
-            )
+            psid = data["PointSliceID"][i]
             now = datetime.datetime.utcnow()
             days_since = (now - data["UTCDateTime"][i]).days + 1
             message = self.replace_generic(

@@ -98,7 +98,7 @@ metrics = {
 class Email:
     """OO manage email."""
 
-    def __init__(self, hours=24, verbose=False, conn=None):
+    def __init__(self, hours=24, verbose=False, conn=None, logging=None):
         """Object oriented version for emails."""
         self.hours = hours
         self.verbose = verbose
@@ -109,6 +109,12 @@ class Email:
                 'SERVER=130.127.218.11;DATABASE=WFIC-CEVAC;'
                 'UID=wficcm;PWD=5wattcevacmaint$'
             )
+        if logging is None:
+            self.LOG = False
+            self.logging = None
+        else:
+            self.LOG = True
+            self.logging = logging
 
     def send(self):
         """Do main function."""
