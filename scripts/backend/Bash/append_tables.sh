@@ -42,7 +42,7 @@ for t in "${tables_array[@]}"; do
   echo "$sql"
   if ! /cevac/scripts/exec_sql.sh "$sql" ; then
     echo "Error. Aborting append"
-    /cevac/scripts/log_error.sh "Error executing CEVAC_CACHE_APPEND" "$t"
+    /cevac/scripts/log_error.sh "Error executing CEVAC_CACHE_APPEND" "$TableName"
     # exit 1
   fi 
 done
