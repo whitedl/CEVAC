@@ -160,7 +160,8 @@ if __name__ == "__main__":
         if CHECK_ALERTS:
             machine_learning = ml.ML(
                 all_alerts.anomalies,
-                conn=conn
+                conn=conn,
+                verbose=VERBOSE
             )
             machine_learning.do_ml()
             if SEND:

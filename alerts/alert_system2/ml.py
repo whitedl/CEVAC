@@ -1,13 +1,16 @@
 """Machine learning algorithm."""
 import pyodbc
 import pandas as pd
+from tools import verbose_print
 
 
 class ML:
     """ML suite for connected issues and finding root causes."""
 
-    def __init__(self, anomalies, conn=None):
+    def __init__(self, anomalies, conn=None, verbose=False,
+                 logging=None):
         """Initialize data and connections."""
+        self.verbose = verbose
         self.conn = conn
         if conn is None:
             self.conn = pyodbc.connect(
@@ -18,12 +21,23 @@ class ML:
                 'PWD=5wattcevacmaint$'
             )
 
+        self.logging = logging
+        self.LOG = True
+        if logging is None:
+            self.LOG = False
+
         self.anomalies = {}
         for anomaly in anomalies:
-            self.anomalies[anomaly.aliaspsid + ' ' + anomaly.alert_name] = anomaly
+            n = f"{anomaly.aliaspsid} {anomaly.alert_name}"
+            self.anomalies[n] = anomaly
 
-        """
-        data = pd.read_sql_query("SELECT * FROM CEVAC_ML_EDGES")
+        if self.LOG:
+            loggin.info("Starting ML Edges")
+        data = pd.read_sql_query(
+            "SELECT * FROM CEVAC_ALERTS_EDGES",
+            self.conn
+        )
+        verbose_print(self.verbose, data.columns)
         self.edges_to_update = {}
         for i in range(len(data)):
             if (data["Node1"][i] in self.anomalies or
@@ -38,13 +52,22 @@ class ML:
                 e = Edge(i, data)
                 self.edges_to_update[combined_aliaspsid1] = e
                 self.edges_to_update[combined_aliaspsid2] = e
-        """
+        verbose_print(
+            self.verbose,
+            f"NUM EDGES TO UPDATE (SQL): "
+            f"{len(self.edges_to_update)}"
+        )
         
 
     def do_ml(self):
         """Run main ML process."""
         self.add_new_edges()
         self.adjust_weights()
+        verbose_print(
+            self.verbose,
+            f"EDGES TO UPDATE (TOT): "
+            f"{len(self.edges_to_update)}"
+        )
 
     def add_new_edges(self):
         """Manage new nodes from alerts.
@@ -55,6 +78,10 @@ class ML:
         # Connect new nodes
         for i, node1name in enumerate(self.anomalies):
             for j, node2name in enumerate(self.anomalies):
+                if j <= i:
+                    print("asd;klfjas;dlkfj")
+                    continue
+
                 node1 = self.anomalies[node1name]
                 node2 = self.anomalies[node2name]
 
@@ -74,7 +101,7 @@ class ML:
                     self.get_node_name(node1)
                 )
                 
-                if combined_name1 in self.edges:
+                if combined_name1 in self.edges_to_update:
                     continue
 
                 e = Edge(0, None, anomaly1=node1, anomaly2=node2)
@@ -83,7 +110,8 @@ class ML:
         return None
 
     def adjust_weights(self):
-        for edge in self.edges_to_update:
+        for edge_name in self.edges_to_update:
+            edge = self.edges_to_update[edge_name]
             if (edge.node1 in self.anomalies and
                 edge.node2 in self.anomalies):
                 edge.times_together += 1
