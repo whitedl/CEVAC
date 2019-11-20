@@ -3428,6 +3428,8 @@
         "Const_Year": 1969,
         "Short_Name": "Rhodes",
         "ADDRESS": "118 Engineering Service Drive",
+        "Status": "Active",
+        "BLDG_Class": "E_G",
         "Shape_Leng": 156.298280137,
         "Shape_Area": 972.397740916
       }
@@ -5631,8 +5633,10 @@
         "BLDG_NAME": "Robert Howell Brooks Center",
         "BLDG_NO": 1143,
         "Const_Year": 1993,
-        "Short_Name": "Brooks Center",
+        "Short_Name": "BROOKS",
         "ADDRESS": "141 Jersey Lane",
+        "Status": "Active",
+        "BLDG_Class": "E_G",
         "Shape_Leng": 475.484066852,
         "Shape_Area": 4400.26019931
       }
@@ -9299,10 +9303,12 @@
         "BLDG_NAME": "Robert Cook Edwards Hall",
         "BLDG_NO": 309,
         "Const_Year": 1977,
-        "Short_Name": "Edwards",
+        "Short_Name": "EDWARDS",
         "ADDRESS": "201 Epsilon Zeta Drive",
         "Shape_Leng": 209.013533359,
-        "Shape_Area": 1498.51842292
+        "Shape_Area": 1498.51842292,
+        "Status": "Active",
+        "BLDG_Class": "E_G"
       }
     },
     {
@@ -9540,6 +9546,8 @@
         "Const_Year": 1890,
         "Short_Name": "HARDIN",
         "ADDRESS": "403 Calhoun Drive",
+        "Status": "Active",
+        "BLDG_Class": "E_G",
         "Shape_Leng": 210.492849997,
         "Shape_Area": 1305.24873767
       }
@@ -9583,10 +9591,12 @@
         "BLDG_NAME": "Martin Hall",
         "BLDG_NO": 36,
         "Const_Year": 1962,
-        "Short_Name": "Martin",
+        "Short_Name": "MARTIN",
         "ADDRESS": "220 Parkway Drive",
         "Shape_Leng": 299.700962661,
-        "Shape_Area": 1957.59191122
+        "Shape_Area": 1957.59191122,
+        "Status": "Active",
+        "BLDG_Class": "E_G"
       }
     },
     {
@@ -9754,7 +9764,8 @@
         "ADDRESS": "240 Bryan Circle",
         "Shape_Leng": 114.784991175,
         "Shape_Area": 852.340064526,
-        "Status": "Active"
+        "Status": "Active",
+        "BLDG_Class": "HOUSING"
       }
     },
     {
@@ -9859,9 +9870,10 @@
         "BLDG_NAME": "Hendrix Student Center",
         "BLDG_NO": 1227,
         "Const_Year": 1999,
-        "Short_Name": "Hendrix",
+        "Short_Name": "HENDRIX",
         "ADDRESS": "720 McMillan Road",
         "Status": "Active",
+        "BLDG_Class": "HOUSING",
         "Shape_Leng": 381.789788336,
         "Shape_Area": 4632.97482262
       }
@@ -9942,8 +9954,10 @@
         "BLDG_NAME": "Robert F. Poole Agricultural Center",
         "BLDG_NO": 130,
         "Const_Year": 1955,
-        "Short_Name": "P&A",
+        "Short_Name": "POOLE",
         "ADDRESS": "130 McGinty Court",
+        "Status": "Active",
+        "BLDG_Class": "E_G",
         "Shape_Leng": 341.225632728,
         "Shape_Area": 6365.65994316
       }
