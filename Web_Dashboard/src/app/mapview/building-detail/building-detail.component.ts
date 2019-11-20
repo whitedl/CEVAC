@@ -35,8 +35,19 @@ export class BuildingDetailComponent implements OnInit {
   ngOnInit() {
     this.route.paramMap.subscribe((params: ParamMap) => {
       this.mapdataService.getBuilding(params.get('bldg')).subscribe(value => {
-        for (const met of value.metrics) {
-          console.log(met.propertyName);
+        for (const met in value.metrics) {
+          if (value.metrics.hasOwnProperty(met)) {
+            for (const measure in value.metrics[met]) {
+              if (
+                value.metrics[met].hasOwnProperty(measure) &&
+                typeof value.metrics[met][measure] === 'number'
+              ) {
+                value.metrics[met][measure] = value.metrics[met][
+                  measure
+                ].toFixed(2);
+              }
+            }
+          }
         }
         this.building$ = value;
       });
