@@ -17,6 +17,7 @@
     <script src="console/JS/pull.js"></script>
     <script src="console/JS/push.js"></script>
     <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.4.1.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
 	</head>
 	<body onload="get_Metrics_html(); enable_BuildingKeySearch()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
     <h2>CEVAC Administrative Console</h2>
@@ -71,6 +72,7 @@
           <ul id="table_actions_list">
             <li><a href="#" id="view_stats_button" onclick="view_stats_button_click()">View Latest Statistics</a></li>
             <li><a href="#" id="view_latest_button" onclick="view_latest_button_click()">View Latest</a></li>
+            <li><a href="#" id="plot_latest_button" onclick="plot_latest_button_click()">Plot Latest (DEBUG)</a></li>
             <li><a href="#" id="view_day_button" onclick="view_day_button_click()">View Last 24 Hours</a></li>
           </ul>
           <h5>XREF Actions</h5>
@@ -133,6 +135,9 @@
       <pre id="output"></pre>
       <div id="sql_output_div">
         <table id="sql_output"></table>
+      </div>
+      <div id="canvas_div">
+        <canvas id="canvas" width="200" height="200"></canvas>
       </div>
     </div>
 	</body>
