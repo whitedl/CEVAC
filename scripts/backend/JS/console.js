@@ -81,7 +81,8 @@ function upload_xref_button_click(){
       confirm_message = "Are you sure you want to upload " + filename + "?";
       if(confirm(confirm_message)){
         e.preventDefault();
-        var formData = new FormData();
+        // var formData = new FormData();
+        var formData = new FormData(document.getElementById('toggle'));
         formData.append('file', $('#upload_xref')[0].files[0]);
 
         $.ajax({
