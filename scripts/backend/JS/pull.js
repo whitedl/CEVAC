@@ -163,8 +163,15 @@ function get_stats_html(){
   $.get('console/stats_html.php',
     $('form').serialize(),
     function(data){
-      console.log(data);
       document.getElementById('sql_output').innerHTML = data;
+    }
+  );
+}
+function get_table_json(){
+   $.get('console/table_json.php',
+    $('form').serialize(),
+    function(data){
+       plot(data);
     }
   );
 }
