@@ -157,9 +157,10 @@ class Edge:
             
             self.times_together = 1
             self.times_apart = 0
-            self.weight = self.init_weight()
+            self.weight = self.init_weight(anomaly1, anomaly2)
             
 
-    def init_weight(self):
+    def init_weight(self, anomaly1, anomaly2):
+        """Initialize weight between nodes."""
         return 0.5
         
