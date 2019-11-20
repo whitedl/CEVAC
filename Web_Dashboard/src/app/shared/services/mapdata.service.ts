@@ -289,6 +289,7 @@ export class MapdataService {
             feature.properties.reportlink =
               this.sasBaseURL + feature.properties.reportlink;
           }
+          this.tracked.resetStyle(layer);
         });
       this.http
         .get<BuildingData[]>(
