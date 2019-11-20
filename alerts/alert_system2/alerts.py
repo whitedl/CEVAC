@@ -51,7 +51,10 @@ class Alerts:
 
         self.verbose = verbose
         self.anomalies = []
-        self.query_to_data = {}  # For efficiency, only make each query once
+        
+        # For efficiency, only make each query once
+        self.query_to_data = {}
+        
         self.json_oc = "/cevac/cron/alert_log_oc.json"
         self.json_unoc = "/cevac/cron/alert_log_unoc.json"
         self.json_files = [
