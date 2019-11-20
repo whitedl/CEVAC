@@ -35,7 +35,7 @@ if [ -z "$4" ]; then
 fi
 if [ -z "$5" ]; then
   echo $'AliasName          (def. Alias):'; read AliasName
-  [ -z "$AliasName" ] && AliaseName="Alias"
+  [ -z "$AliasName" ] && AliasName="Alias"
 fi
 if [ -z "$6" ]; then
   echo $'DataName     (def. ActualValue):'; read DataName

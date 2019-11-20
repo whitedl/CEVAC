@@ -200,3 +200,8 @@ function view_stats_button_click(){
   reset_buttons(button);
   get_stats_html();
 }
+function plot_latest_button_click(){
+  button = document.getElementById('plot_latest_button');
+  document.getElementById('Age_text').value = "LATEST";
+  get_table_json();
+}

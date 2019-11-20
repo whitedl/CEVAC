@@ -1,8 +1,6 @@
 <?php
 include "../../functions.php";
 // var_dump($_POST);
-session_start();
-enforce_login();
 $BuildingSName = clean($_GET['BuildingSName']);
 $Metric = clean($_GET['Metric']);
 $Age = clean($_GET['Age']);
@@ -18,30 +16,24 @@ $AliasName = CEVAC_TABLES_value($TableName, 'AliasName');
 $DateTimeName = CEVAC_TABLES_value($TableName, 'DateTimeName');
 $DataName = CEVAC_TABLES_value($TableName, 'DataName');
 
-$result = get_columns($TableName);
-$cols = "";
-$output = "<tr>";
-while($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_NUMERIC)){
-  $cols .= $row[0].", ";
-  $output .= "<th>".$row[0]."</th>\n";
-}
-$output .= "</tr>";
-$cols = substr($cols, 0, strlen($cols) - 2);
+// $result = get_columns($TableName);
+$j_array = [];
+// while($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)){
+  // $j_array[] = $row;
+// }
+// $output .= "</tr>";
+// $cols = substr($cols, 0, strlen($cols) - 2);
 
 $query = "
-  SELECT $cols
+  SELECT *
   FROM $TableName
   ORDER BY $DateTimeName DESC
 ";
 // die($query);
 $result = exec_sql($query);
 
-while($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_NUMERIC)){
-  $output .= "<tr>";
-  foreach($row as &$c){
-    $output .= "<td>$c</td>";
-  }
-  $output .= "</tr>\n";
+while($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)){
+  $j_array[] = $row;
 }
-echo $output;
+echo json_encode($j_array);
 ?>

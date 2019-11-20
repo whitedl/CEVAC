@@ -106,6 +106,15 @@ fi
 rm -f /srv/csv/$HIST.csv
 rm -f /srv/csv/$HIST_LASR.csv
 rm -f /srv/csv/$LATEST.csv
+dest_HIST=`python3 /cevac/CEVAC/scripts/importers/name_shortener.py $HIST`
+dest_LATEST=`python3 /cevac/CEVAC/scripts/importers/name_shortener.py $HIST`
+dest_HIST_LASR=`python3 /cevac/CEVAC/scripts/importers/name_shortener.py $HIST`
+unload_command="[ -f ~/CEVAC/Autoload/$dest_HIST.csv ] && mv ~/CEVAC/Autoload/Unload/ ]"
+ssh sas@wfic-sas-im-hd.clemson.edu "$unload_command"
+unload_command="[ -f ~/CEVAC/Autoload/$dest_LATEST.csv ] && mv ~/CEVAC/Autoload/Unload/ ]"
+ssh sas@wfic-sas-im-hd.clemson.edu "$unload_command"
+unload_command="[ -f ~/CEVAC/Autoload/$dest_HIST_LASR.csv ] && mv ~/CEVAC/Autoload/Unload/ ]"
+ssh sas@wfic-sas-im-hd.clemson.edu "$unload_command"
 
 sql="DELETE FROM CEVAC_ALL_LATEST_STATS WHERE BuildingSName = '$BuildingSName' AND Metric = '$Metric'"
 if ! /cevac/scripts/exec_sql.sh "$sql" ; then
