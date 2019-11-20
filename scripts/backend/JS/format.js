@@ -22,6 +22,7 @@ function reset_buttons(active_button = ""){
   view_stats_button = document.getElementById('view_stats_button');
   view_day_button = document.getElementById('view_day_button');
   document.getElementById('output').innerHTML = '';
+  document.getElementById('canvas_div').style.display = "hidden";
   // console.log('reset');
 
   if(PXREF_button != active_button){
@@ -57,3 +58,56 @@ function enable_BuildingKeySearch(){
     dbutton.disabled = true;
   }
 }
+
+function plot(data){
+  document.getElementById('canvas_div').style.display = 'block';
+  let jsonfile = JSON.parse(data);
+  var labels = jsonfile.map(function(e) {
+     return e.Alias;
+  });
+  var data = jsonfile.map(function(e) {
+     return e.ActualValue;
+  });;
+
+  var BuildingSName = document.getElementById('buildings').value;
+  var Metric = document.getElementById('metrics').value;
+  var Age = document.getElementById('Age_text').value;
+  var TableName = 'CEVAC_' + BuildingSName + '_' + Metric + '_' + Age;
+  var ctx = canvas.getContext('2d');
+  ctx.fillStyle = 'black';
+  var config = {
+     type: 'bar',
+     data: {
+        labels: labels,
+        datasets: [{
+           label: TableName,
+           data: data,
+           backgroundColor: 'rgba(0, 119, 204, 0.3)'
+        }]
+     },
+    options: {
+      legend: {
+        labels: {
+          fontColor: "#FFFFFF"
+        }
+      },
+      scales: {
+        // fontColor: "#FFFFFF"
+        yAxes: [{
+          ticks: {
+            fontColor: "#FFFFFF"
+          }
+        }],
+        xAxes: [{
+          ticks: {
+            fontColor: "#FFFFFF"
+          }
+        }]
+      }
+    }
+  };
+
+  var chart = new Chart(ctx, config);
+  console.log('wut');
+}
+
