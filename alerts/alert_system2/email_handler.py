@@ -98,7 +98,7 @@ metrics = {
 class Email:
     """OO manage email."""
 
-    def __init__(self, hours=24, verbose=False, conn=None):
+    def __init__(self, hours=24, verbose=False, conn=None, logging=None):
         """Object oriented version for emails."""
         self.hours = hours
         self.verbose = verbose
@@ -109,6 +109,15 @@ class Email:
                 'SERVER=130.127.218.11;DATABASE=WFIC-CEVAC;'
                 'UID=wficcm;PWD=5wattcevacmaint$'
             )
+        if logging is None:
+            self.LOG = False
+            self.logging = None
+        else:
+            self.LOG = True
+            self.logging = logging
+
+    def write_to_file(self):
+        return None
 
     def send(self):
         """Do main function."""
@@ -319,6 +328,15 @@ class Alert_Log:
         """Return datetime object of time string."""
         t = datetime.datetime.strptime(time_str, '%Y-%m-%d %H:%M:%S.%f')
         return t
+
+
+if __name__ == "__main__":
+    todo = input("email [a]ll, [u]pdate webpage: ").lower()
+    email_setup = Email(verbose=True)
+    if 'a' in todo:
+        email_setup.send()
+    if 'u' in todo:
+        email_setup.write_to_file()
 
 
 
