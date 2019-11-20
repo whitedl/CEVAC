@@ -278,31 +278,36 @@ export class MapdataService {
       mouseout: this.resetHighlight
     };
     layer.on(opt);
-    if (feature.properties.Status === 'Active') {
+    if (feature.properties.Short_Name) {
       this.http
         .get<BuildingData>(
           '//wfic-cevac1/api/buildings/' + feature.properties.Short_Name
         )
-        .subscribe(bdata => {
-          feature.properties = Object.assign(feature.properties, bdata);
-          if (feature.properties.reportlink) {
-            feature.properties.reportlink =
-              this.sasBaseURL + feature.properties.reportlink;
-          }
-          this.tracked.resetStyle(layer);
-        });
-      this.http
-        .get<BuildingData[]>(
-          this.dataUrl +
-            '?filter[where][buildingsname]=' +
-            feature.properties.Short_Name
-        )
-        .subscribe(bData => {
-          bData.forEach((element: any) => {
-            feature.properties.metrics[element.metric] = element;
-          });
-          this.tracked.resetStyle(layer);
-        });
+        .subscribe(
+          bdata => {
+            feature.properties = Object.assign(feature.properties, bdata);
+            if (feature.properties.reportlink) {
+              feature.properties.reportlink =
+                this.sasBaseURL + feature.properties.reportlink;
+            }
+            this.tracked.resetStyle(layer);
+            if (feature.properties.buildingstatus === 'ACTIVE') {
+              this.http
+                .get<BuildingData[]>(
+                  this.dataUrl +
+                    '?filter[where][buildingsname]=' +
+                    feature.properties.Short_Name
+                )
+                .subscribe(bData => {
+                  bData.forEach((element: any) => {
+                    feature.properties.metrics[element.metric] = element;
+                  });
+                  this.tracked.resetStyle(layer);
+                });
+            }
+          },
+          error => {}
+        );
     }
   };
 
