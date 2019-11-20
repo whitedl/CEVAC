@@ -79,6 +79,8 @@ def ingest_file(fname):
                 for i, col in enumerate(row):
                     try:
                         kWh = float(row[i])
+                        if header[i].strip().isdigit():
+                            continue
                         com = ("INSERT INTO  CEVAC_CAMPUS_ENERGY_HIST_RAW " +
                                "(ETDateTime, Alias, ActualValue) VALUES ('" +
                                today + "','" + header[i] + "','" + str(kWh)

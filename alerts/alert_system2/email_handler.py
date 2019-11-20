@@ -116,6 +116,9 @@ class Email:
             self.LOG = True
             self.logging = logging
 
+    def write_to_file(self):
+        return None
+
     def send(self):
         """Do main function."""
         # Get alerts from the past day
@@ -325,6 +328,15 @@ class Alert_Log:
         """Return datetime object of time string."""
         t = datetime.datetime.strptime(time_str, '%Y-%m-%d %H:%M:%S.%f')
         return t
+
+
+if __name__ == "__main__":
+    todo = input("email [a]ll, [u]pdate webpage: ").lower()
+    email_setup = Email(verbose=True)
+    if 'a' in todo:
+        email_setup.send()
+    if 'u' in todo:
+        email_setup.write_to_file()
 
 
 
