@@ -10,7 +10,8 @@ interface PaletteSet {
   [index: string]: Palette;
 }
 
-// Using a class for Scale makes life easier. You can't define a generic getter/setter for interfaces.
+// Using a class for Scale makes life easier. You can't define a generic
+// getter/setter for interfaces.
 class Scale {
   domain: number[];
   get min() {
