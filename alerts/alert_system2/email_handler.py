@@ -49,6 +49,7 @@ def encode64(image_fpath):
 
 
 pic_path = "pics/"
+hard_html_pic_path = "/cevac_alerts/pics/"
 metrics = {
     "TEMP": {
         "key": "<TEMP>",
@@ -56,6 +57,7 @@ metrics = {
                  " width=\"50\" height=\"50\">"),
         "fpath": pic_path + "TEMP.png",
         "cid": "image1",
+        "htmlpath": hard_html_pic_path + "TEMP.png",
     },
     "POWER": {
         "key": "<POWER>",
@@ -63,6 +65,7 @@ metrics = {
                  "width=\"50\" height=\"50\">"),
         "fpath": pic_path + "POWER.png",
         "cid": "image2",
+        "htmlpath": hard_html_pic_path + "POWER.png",
     },
     "CO2": {
         "key": "<CO2>",
@@ -70,6 +73,7 @@ metrics = {
                  "width=\"50\" height=\"50\">"),
         "fpath": pic_path + "CO2.png",
         "cid": "image3",
+        "htmlpath": hard_html_pic_path + "CO2.png",
     },
     "CHW": {
         "key": "<CHW>",
@@ -77,6 +81,7 @@ metrics = {
                  "width=\"50\" height=\"50\">"),
         "fpath": pic_path + "CHW.png",
         "cid": "image4",
+        "htmlpath": hard_html_pic_path + "CHW.png",
     },
     "STEAM": {
         "key": "<STEAM>",
@@ -84,6 +89,14 @@ metrics = {
                  "width=\"50\" height=\"50\">"),
         "fpath": pic_path + "STEAM.png",
         "cid": "image5",
+        "htmlpath": hard_html_pic_path + "STEAM.png",
+    },
+    "HUM": {
+        "key": "<HUM>",
+        "char": (f"<p>%</p>"),
+        "fpath": pic_path + "TEMP.png",
+        "cid": "image6",
+        "htmlpath": hard_html_pic_path + "TEMP.png",
     },
 
     "UNKNOWN": {
@@ -91,6 +104,7 @@ metrics = {
         "char": (f"<p>?</p>"),
         "fpath": pic_path + "TEMP.png",
         "cid": "image6",
+        "htmlpath": hard_html_pic_path + "TEMP.png",
     }
 }
 
@@ -122,7 +136,7 @@ class Email:
             "DECLARE @yesterday DATETIME; "
             "SET @yesterday = DATEADD("
             "day, -1, GETDATE()); "
-            "SELECT TOP 100 * FROM "
+            "SELECT TOP 300 * FROM "
             "CEVAC_ALL_ALERTS_EVENTS_LATEST "
             "WHERE ETDateTime >= @yesterday "
             "ORDER BY ETDateTime DESC"
@@ -183,25 +197,37 @@ class Email:
 
         for i, metric in enumerate(metrics):
             m = metrics[metric]
-            fp = open(m["fpath"], 'rb')
-            msgImage = MIMEImage(fp.read())
-            fp.close()
+            #fp = open(m["htmlpath"], 'rb')
+            #msgImage = MIMEImage(fp.read())
+            #fp.close()
+            """
             if self.verbose:
                 print(f"<{m['cid']}>")
+            """
                 
-            msgImage.add_header('Content-ID', f"<{m['cid']}>")
-            m_message.attach(msgImage)
+            #msgImage.add_header('Content-ID', f"<{m['cid']}>")
+            #m_message.attach(msgImage)
 
         # Define the image's ID as referenced above
         m_message.attach(a_msg)
             
-        new_message = self.replace_metric(m_message.as_string())
+        new_message = self.replace_metric(
+            m_message.as_string(),
+            html=True
+        )
+        
         if self.verbose:
             print(new_message)
             
         f_name = to_list["FILE"]
         html_file = open(f_name, "w")
-        html_file.write(new_message)
+        real_html = new_message[new_message.find("<html>"):]
+        real_html = real_html[:(
+            real_html.find("<h2 class=\"split\">Symbol")
+            -1
+        )]
+        real_html += "</div></body></html>"
+        html_file.write(real_html)
         
 
 
@@ -319,17 +345,27 @@ class Email:
                 if self.verbose:
                     print(new_message)
                 if person == "FILE":
-                    html_file = open(p_email, "w")
-                    html_file.write(new_message)
+                    pass
+                    #html_file = open(p_email, "w")
+                    #html_file.write(new_message)
                 else:
                     server.sendmail(email, p_email, new_message)
 
-    def replace_metric(self, rep_str):
+    def replace_metric(self, rep_str, html=False):
         """Replace metric str with character."""
-        for metric in metrics:
-            m = metrics[metric]
-            rep_str = rep_str.replace(m["key"], m["char"])
-        return rep_str
+        if not html:
+            for metric in metrics:
+                m = metrics[metric]
+                rep_str = rep_str.replace(m["key"], m["char"])
+            return rep_str
+        else:
+            for metric in metrics:
+                m = metrics[metric]
+                rep_str = rep_str.replace(
+                    m["key"],
+                    f"<img width=\"50%\" src=\"{m['htmlpath']}\">",
+                )
+            return rep_str
 
     def utc_to_est(self, t):
         """Convert utc to est."""

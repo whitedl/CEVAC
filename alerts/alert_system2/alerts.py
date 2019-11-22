@@ -177,9 +177,9 @@ class Alerts:
                     if self.UPDATE_CACHE:
                         rebuild_broken_cache(table, self.conn)
                     query = (f"SELECT * FROM {table}_BROKEN_CACHE")
-                    verbose_print(self.verbose, f"QUERY: {query}")
+                    verbose_print(self.verbose, f"QUERY: {query}_BROKEN_CACHE")
                     if not self.table_exists(table+"_BROKEN_CACHE"):
-                        verbose_print(self.verbose, f"{table} does not exist")
+                        verbose_print(self.verbose, f"{table}_BROKEN_CACHE does not exist")
                         continue
                     query += self.add_specific_aliases(alert)
                     data = self.safe_data(query)
@@ -787,7 +787,7 @@ if __name__ == "__main__":
         print(str(a))
     print(
         f"\n\n{len(all_alerts.anomalies)} anomalies"
-        f"\n{len(all_alerts.num_decom_anomalies())} decommissioned"
+        f"\n{all_alerts.num_decom_anomalies()} decommissioned"
     )
     
     do_commit = input("Commit to DB? ").lower()
