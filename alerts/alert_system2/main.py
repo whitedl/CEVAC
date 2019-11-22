@@ -52,6 +52,14 @@ parser.add_argument(
     help="send email of anomalies"
 )
 parser.add_argument(
+    "--web", "-w", "-W",
+    default=False, action="store_true",
+    help=(
+        "update email as web page "
+        "(wfic-cevac1/cevac_alerts/alerts.html)"
+    )
+)
+parser.add_argument(
     "--emailtime", "-et", "-ET",
     default=24, action="store",
     help=(
@@ -98,6 +106,9 @@ UPDATE_CACHE = parsed_args.cache
 # Determines whether or not to send emails
 SEND_EMAIL = parsed_args.email
 EMAIL_TIME = parsed_args.emailtime
+
+# Determines whether or not to update the html page
+UPDATE_WEB = parsed_args.web
 
 # Determines whether or not to run the ML algorithm
 RUN_ML = parsed_args.machinelearning
@@ -149,18 +160,24 @@ if __name__ == "__main__":
             all_alerts.send()
         verbose_print(VERBOSE, "SEND is True")
 
-    if SEND_EMAIL:
-        email_setup = email_handler.Email(hours=EMAIL_TIME,
-                                          verbose=VERBOSE,
-                                          conn=conn)
-        email_setup.send()
+    if SEND_EMAIL or UPDATE_WEB:
+        email_setup = email_handler.Email(
+            hours=EMAIL_TIME,
+            verbose=VERBOSE,
+            conn=conn
+        )
+        if SEND_EMAIL:
+            email_setup.send()
+        if UPDATE_WEB:
+            email_setup.write_to_file()
         verbose_print(VERBOSE, "EMAIL is True")
 
     if RUN_ML:
         if CHECK_ALERTS:
             machine_learning = ml.ML(
                 all_alerts.anomalies,
-                conn=conn
+                conn=conn,
+                verbose=VERBOSE
             )
             machine_learning.do_ml()
             if SEND:
@@ -175,3 +192,14 @@ if __name__ == "__main__":
         VERBOSE,
         f"Job Completed: {datetime.datetime.now()} ET"
     )
+
+"""
+      /##.*/
+     /#%&&%#/
+    ./%%%&%%#
+    %%%%&%&%%#
+   %&&  %%%&%%.
+   %&%  &%%&%%*
+   *%&@&@%&%%(
+     %%%%%%%%
+"""
