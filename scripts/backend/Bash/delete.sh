@@ -109,11 +109,11 @@ rm -f /srv/csv/$LATEST.csv
 dest_HIST=`python3 /cevac/CEVAC/scripts/importers/name_shortener.py $HIST`
 dest_LATEST=`python3 /cevac/CEVAC/scripts/importers/name_shortener.py $HIST`
 dest_HIST_LASR=`python3 /cevac/CEVAC/scripts/importers/name_shortener.py $HIST`
-unload_command="[ -f ~/CEVAC/Autoload/$dest_HIST.csv ] && mv ~/CEVAC/Autoload/Unload/ ]"
+unload_command="[ -f ~/CEVAC/Autoload/$dest_HIST.csv ] && mv ~/CEVAC/Autoload/$dest_HIST.csv ~/CEVAC/Autoload/Unload/$dest_HIST.csv"
 ssh sas@wfic-sas-im-hd.clemson.edu "$unload_command"
-unload_command="[ -f ~/CEVAC/Autoload/$dest_LATEST.csv ] && mv ~/CEVAC/Autoload/Unload/ ]"
+unload_command="[ -f ~/CEVAC/Autoload/$dest_LATEST.csv ] && mv ~/CEVAC/Autoload/$dest_LATEST.csv ~/CEVAC/Autoload/Unload/$dest_LATEST.csv"
 ssh sas@wfic-sas-im-hd.clemson.edu "$unload_command"
-unload_command="[ -f ~/CEVAC/Autoload/$dest_HIST_LASR.csv ] && mv ~/CEVAC/Autoload/Unload/ ]"
+unload_command="[ -f ~/CEVAC/Autoload/$dest_HIST_LASR.csv ] && mv ~/CEVAC/Autoload/$dest_HIST_LASR ~/CEVAC/Autoload/Unload/$dest_HIST_LASR.csv"
 ssh sas@wfic-sas-im-hd.clemson.edu "$unload_command"
 
 sql="DELETE FROM CEVAC_ALL_LATEST_STATS WHERE BuildingSName = '$BuildingSName' AND Metric = '$Metric'"
