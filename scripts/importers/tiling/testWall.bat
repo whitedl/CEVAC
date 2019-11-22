@@ -49,3 +49,15 @@ TIMEOUT 15
 set CHROME_EXE=c:\Program Files (x86)\Google\Chrome\Application\chrome.exe
 set CHROME_SETTINGS=%CHROME_SETTINGS% --app="data:text/html,<html><body><script>window.moveTo(1920,0);window.resizeTo(1920,1080);window.location='https://sas.clemson.edu:8343/SASVisualAnalytics/report?location=/Shared Data/CEVAC/Fike Dive&type=Report.BI&section=vi473253';</script></body></html>"
 start "" "%CHROME_EXE%" %CHROME_SETTINGS%
+
+TIMEOUT 15
+
+set CHROME_EXE=c:\Program Files (x86)\Google\Chrome\Application\chrome.exe
+set CHROME_SETTINGS=%CHROME_SETTINGS% --app="data:text/html,<html><body><script>window.moveTo(3840,0);window.resizeTo(1920,1080);window.location='https://sas.clemson.edu:8343/SASVisualAnalytics/report?location=/Shared Data/CEVAC/Littlejohn Dive&type=Report.BI&section=vi144';</script></body></html>"
+start "" "%CHROME_EXE%" %CHROME_SETTINGS%
+
+TIMEOUT 15
+
+set CHROME_EXE=c:\Program Files (x86)\Google\Chrome\Application\chrome.exe
+set CHROME_SETTINGS=%CHROME_SETTINGS% --app="data:text/html,<html><body><script>window.moveTo(5760,0);window.resizeTo(1920,1080);window.location='https://sas.clemson.edu:8343/SASVisualAnalytics/report?location=/Shared Data/CEVAC/Hendrix Dive&type=Report.BI&section=vi157';</script></body></html>"
+start "" "%CHROME_EXE%" %CHROME_SETTINGS%
