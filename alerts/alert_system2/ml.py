@@ -42,7 +42,7 @@ class ML:
         for i in range(len(data)):
             if (data["Node1"][i] in self.anomalies or
                 data["Node2"][i] in self.anomalies):
-                
+
                 combined_aliaspsid1 = (
                     data["Node1"][i] + data["Node2"][i]
                 )
@@ -57,7 +57,7 @@ class ML:
             f"NUM EDGES TO UPDATE (SQL): "
             f"{len(self.edges_to_update)}"
         )
-        
+
 
     def do_ml(self):
         """Run main ML process."""
@@ -79,7 +79,6 @@ class ML:
         for i, node1name in enumerate(self.anomalies):
             for j, node2name in enumerate(self.anomalies):
                 if j <= i:
-                    print("asd;klfjas;dlkfj")
                     continue
 
                 node1 = self.anomalies[node1name]
@@ -100,7 +99,7 @@ class ML:
                     ' ' +
                     self.get_node_name(node1)
                 )
-                
+
                 if combined_name1 in self.edges_to_update:
                     continue
 
@@ -117,7 +116,7 @@ class ML:
                 edge.times_together += 1
             else:
                 edge.times_apart += 1
-            
+
             edge.weight = (
                 0.5 * (
                     1 + (
@@ -155,7 +154,7 @@ class ML:
 
     def get_node_name(self, node):
         return node.aliaspsid + ' ' + node.alert_name
-        
+
 
 
 class Edge:
@@ -182,13 +181,12 @@ class Edge:
             self.node2 = (
                 anomaly2.aliaspsid + " " + anomaly2.alert_name
             )
-            
+
             self.times_together = 1
             self.times_apart = 0
             self.weight = self.init_weight(anomaly1, anomaly2)
-            
+
 
     def init_weight(self, anomaly1, anomaly2):
         """Initialize weight between nodes."""
         return 0.5
-        
