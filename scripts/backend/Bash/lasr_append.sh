@@ -40,7 +40,11 @@ if ! /cevac/scripts/table_to_csv_append.sh "$table" ; then
   /cevac/scripts/log_error.sh "$error" "$table"
   exit 1
 fi
-
+linecount=`wc -l /cevac/cache/$table.csv`
+if [ "$linecount" -eq "1" ]; then
+  echo "No new data. Canceling..."
+  exit 0
+fi
 if [ -f /cevac/cache/upload_queue/$table.csv ]; then
   ## remove columns from cached data
   tail -n +2 /cevac/cache/$table.csv | sponge /cevac/cache/$table.csv
