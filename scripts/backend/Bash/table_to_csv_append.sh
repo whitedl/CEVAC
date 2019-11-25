@@ -8,6 +8,7 @@ if [ -z "$1" ]; then
   /cevac/scripts/unlock.sh
   exit 1
 fi
+source /cevac/scripts/sql_env.sh
 error=""
 table="$1"
 table_CSV="$table"_CSV
@@ -41,49 +42,8 @@ UTCDateTime=`/cevac/scripts/sql_value.sh "SET NOCOUNT ON; SELECT TOP 1 RTRIM(Dat
 Alias=`/cevac/scripts/sql_value.sh "SET NOCOUNT ON; SELECT TOP 1 RTRIM(AliasName) FROM CEVAC_TABLES WHERE TableName = '$table'"`
 IDName=`/cevac/scripts/sql_value.sh "SET NOCOUNT ON; SELECT TOP 1 RTRIM(IDName) FROM CEVAC_TABLES WHERE TableName = '$table'"`
 DataName=`/cevac/scripts/sql_value.sh "SET NOCOUNT ON; SELECT TOP 1 RTRIM(DataName) FROM CEVAC_TABLES WHERE TableName = '$table'"`
-if [ -z "$UTCDateTime" ] || [ -z "$Alias" ] || [ -z "$DataName" ] || [ -z "$IDName" ]; then
-  # echo "Error: Missing DateTimeName, AliasName, or DataName for $table"
-  # echo "Enter the information below and rerun the script."
-  # echo "BuildingSName:"
-  # read BuildingSName
-  # echo "Metric:"
-  # read Metric
-  # echo "Age:"
-  # read Age
-  # echo "DateTimeName:"
-  # read DateTimeName
-  # echo "IDName:"
-  # read IDName
-  # echo "AliasName:"
-  # read AliasName
-  # echo "DataName:"
-  # read DataName
 
-  # failure_query="
-  # DECLARE @isCustom BIT;
-  # DECLARE @customLASR BIT;
-  # DECLARE @Definition NVARCHAR(MAX);
-  # SET @Definition = (SELECT TOP 1 Definition FROM CEVAC_TABLES WHERE TableName = '$table');
-  # SET @isCustom = ISNULL((SELECT TOP 1 isCustom FROM CEVAC_TABLES WHERE TableName = '$table'),0);
-  # SET @customLASR = ISNULL((SELECT TOP 1 customLASR FROM CEVAC_TABLES WHERE TableName = '$table'),0);
-	# INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, isCustom, Definition, customLASR)
-		# VALUES 
-			# '$BuildingSName',
-			# '$Metric',
-			# '$Age',
-			# '$table',
-      # '$DateTimeName',
-      # '$IDName',
-      # '$AliasName',
-      # '$DataName',
-      # @isCustom,
-      # @Definition,
-      # @customLASR
-		# )
-  # "
-  # /cevac/scripts/exec_sql.sh "$failure_query"
-  # echo "Inserted $table into CEVAC_TABLES"
-  
+if [ -z "$UTCDateTime" ] || [ -z "$Alias" ] || [ -z "$DataName" ] || [ -z "$IDName" ]; then
   error="Tried to create $table_CSV without $table existing in CEVAC_TABLES"
   /cevac/scripts/log_error.sh "$error" "$table"
   exit 1
@@ -215,17 +175,17 @@ SELECT *
 FROM $table AS original
 ORDER BY LEN(original.$Alias) DESC
 "
-h='130.127.218.11'
-u='wficcm'
-db='WFIC-CEVAC'
-p='5wattcevacmaint$'
+h="$SQL_HOST"
+u="$SQL_USER"
+db="$SQL_DB"
+p="$SQL_PASS"
 
-hist=$(echo "$table" | grep HIST)
-latest=$(echo "$table" | grep LATEST)
-xref=$(echo "$table" | grep XREF)
-issues=$(echo "$table" | grep ISSUES)
-compare=$(echo "$table" | grep COMPARE)
-lasr=$(echo "$table" | grep LASR)
+hist=$(echo "$table" | grep "HIST")
+latest=$(echo "$table" | grep "LATEST")
+xref=$(echo "$table" | grep "XREF")
+issues=$(echo "$table" | grep "ISSUES")
+compare=$(echo "$table" | grep "COMPARE")
+lasr=$(echo "$table" | grep "LASR")
 if [ ! -z "$latest" ] || [ ! -z "$xref" ] || [ ! -z "$compare"  ] || [ ! -z "$issues" ]; then
   echo LATEST, XREF, COMPARE, or ISSUES detected. Will overwrite $table.csv
   rm -f /srv/csv/$table.csv

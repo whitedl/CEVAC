@@ -81,7 +81,8 @@ function upload_xref_button_click(){
       confirm_message = "Are you sure you want to upload " + filename + "?";
       if(confirm(confirm_message)){
         e.preventDefault();
-        var formData = new FormData();
+        // var formData = new FormData();
+        var formData = new FormData(document.getElementById('toggle'));
         formData.append('file', $('#upload_xref')[0].files[0]);
 
         $.ajax({
@@ -190,4 +191,17 @@ function test_button_click(){
     // document.getElementById('output').innerHTML = data;
     }
   });
+}
+function view_stats_button_click(){
+  button = document.getElementById('view_stats_button');
+  // document.getElementById('download_button').innerHTML = 'Download LATEST';
+  // document.getElementById('download_button_div').style.display = 'block';
+  // document.getElementById('Age_text').value = 'LATEST';
+  reset_buttons(button);
+  get_stats_html();
+}
+function plot_latest_button_click(){
+  button = document.getElementById('plot_latest_button');
+  document.getElementById('Age_text').value = "LATEST";
+  get_table_json();
 }

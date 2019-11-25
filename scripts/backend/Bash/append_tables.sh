@@ -33,16 +33,20 @@ for t in "${tables_array[@]}"; do
   DAY_VIEW="CEVAC_$B""_$M""_DAY_VIEW"
   HIST="CEVAC_$B""_$M""_HIST"
   HIST_VIEW="CEVAC_$B""_$M""_HIST_VIEW"
+  LATEST_FULL="CEVAC_$B""_$M""_LATEST_FULL"
+  LATEST_BROKEN="CEVAC_$B""_$M""_LATEST_BROKEN"
+  LATEST="CEVAC_$B""_$M""_LATEST"
   compare=$(echo "$TableName" | grep "COMPARE")
   pred=$(echo "$TableName" | grep "PRED")
   if [ ! -z "$compare" ] || [ ! -z "$pred" ]; then # always recache COMPARE and PRED tables
-    sql="EXEC CEVAC_CACHE_INIT @tables = '"$HIST_VIEW"'; EXEC CEVAC_CACHE_INIT @tables = '$DAY_VIEW'"
-  else sql="EXEC CEVAC_CACHE_APPEND @tables = '$HIST_VIEW'; EXEC CEVAC_CACHE_INIT @tables = '$DAY_VIEW'"
+    # sql="EXEC CEVAC_CACHE_INIT @tables = '"$HIST_VIEW"'; EXEC CEVAC_CACHE_INIT @tables = '$DAY_VIEW'"
+    sql="EXEC CEVAC_CACHE_INIT @tables = '$HIST_VIEW,$DAY_VIEW,$LATEST_FULL,$LATEST,$LATEST_BROKEN'"
+  else sql="EXEC CEVAC_CACHE_APPEND @tables = '$HIST_VIEW,$DAY_VIEW,$LATEST_FULL,$LATEST,$LATEST_BROKEN'"
   fi
   echo "$sql"
   if ! /cevac/scripts/exec_sql.sh "$sql" ; then
     echo "Error. Aborting append"
-    /cevac/scripts/log_error.sh "Error executing CEVAC_CACHE_APPEND" "$t"
+    /cevac/scripts/log_error.sh "Error executing CEVAC_CACHE_APPEND" "$TableName"
     # exit 1
   fi 
 done
