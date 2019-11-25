@@ -11,37 +11,80 @@ import ml
 import datetime
 import argparse
 import os
+import pyodbc
 
 # Parse arguments
 parser = argparse.ArgumentParser(
     description=(
         "Alert System v2. "
-        "This alert system is heavily modular, allowing options to be passed "
-        "via the command line, as opposed to being burried in scripts."
+        "This alert system is heavily modular, "
+        "allowing options to be passed "
+        "via the command line, as opposed to being "
+        "burried in scripts."
     )
 )
-parser.add_argument("--log", "-L", "-l", default=True, action="store",
-                    help="set log to True or False")
-parser.add_argument("--alerts", "-a", "-A", default=False, action="store_true",
-                    help="check alerts currently")
-parser.add_argument("--times", "-t", "-T", default=0, action="store",
-                    help=("if set, checks alerts for different time periods "
-                          "where possible"))
-parser.add_argument("--send", "-s", "-S", default=False, action="store_true",
-                    help="send anomalies to our database")
-parser.add_argument("--email", "-e", "-E", default=False, action="store_true",
-                    help="send email of anomalies")
-parser.add_argument("--emailtime", "-et", "-ET", default=24, action="store",
-                    help=("set hours of anomalies to send via email"
-                          "[Default=24]"))
-parser.add_argument("--cache", "-c", "-C", default=False, action="store_true",
-                    help="update the cache before checking alerts")
-parser.add_argument("--machinelearning", "-ml", "-ML", default=False,
-                    action="store_true",
-                    help=("run machine learning algorithm after checking "
-                          "alerts"))
-parser.add_argument("--verbose", "-v", "-V", default=False,
-                    action="store_true", help="printing")
+parser.add_argument(
+    "--log", "-L", "-l",
+    default=True, action="store",
+    help="set log to True or False"
+)
+parser.add_argument(
+    "--alerts", "-a", "-A",
+    default=False, action="store_true",
+    help="check alerts currently"
+)
+parser.add_argument(
+    "--times", "-t", "-T",
+    default=0, action="store",
+    help=(
+        "if set, checks alerts for different "
+        "time periods where possible"
+    )
+)
+parser.add_argument(
+    "--send", "-s", "-S",
+    default=False, action="store_true",
+    help="send anomalies to our database"
+)
+parser.add_argument(
+    "--email", "-e", "-E",
+    default=False, action="store_true",
+    help="send email of anomalies"
+)
+parser.add_argument(
+    "--web", "-w", "-W",
+    default=False, action="store_true",
+    help=(
+        "update email as web page "
+        "(wfic-cevac1/cevac_alerts/alerts.html)"
+    )
+)
+parser.add_argument(
+    "--emailtime", "-et", "-ET",
+    default=24, action="store",
+    help=(
+        "set hours of anomalies to send via email"
+        "[Default=24]"
+    )
+)
+parser.add_argument(
+    "--cache", "-c", "-C",
+    default=False, action="store_true",
+    help="update the cache before checking alerts"
+)
+parser.add_argument(
+    "--machinelearning", "-ml", "-ML",
+    default=False, action="store_true",
+    help=(
+        "run machine learning algorithm after "
+        "checking alerts"
+    )
+)
+parser.add_argument(
+    "--verbose", "-v", "-V",
+    default=False,
+    action="store_true", help="printing"
+)
 
 
 parsed_args = parser.parse_args()
@@ -64,6 +107,9 @@ UPDATE_CACHE = parsed_args.cache
 SEND_EMAIL = parsed_args.email
 EMAIL_TIME = parsed_args.emailtime
 
+# Determines whether or not to update the html page
+UPDATE_WEB = parsed_args.web
+
 # Determines whether or not to run the ML algorithm
 RUN_ML = parsed_args.machinelearning
 
@@ -71,7 +117,10 @@ RUN_ML = parsed_args.machinelearning
 VERBOSE = parsed_args.verbose
 
 if __name__ == "__main__":
-    verbose_print(VERBOSE, f"Job Started: {datetime.datetime.now()} ET")
+    verbose_print(
+        VERBOSE,
+        f"Job Started: {datetime.datetime.now()} ET"
+    )
 
     logging = None
     if LOG:
@@ -84,14 +133,26 @@ if __name__ == "__main__":
         logging.info("\n---\nNEW JOB\n---")
     verbose_print(VERBOSE, f"logging: {logging}")
 
+    conn = None
+    if CHECK_ALERTS or SEND_EMAIL or RUN_ML:
+        conn = pyodbc.connect(
+            "DRIVER={ODBC Driver 17 for SQL Server};"
+            "SERVER=130.127.218.11;"
+            "DATABASE=WFIC-CEVAC;"
+            "UID=wficcm;"
+            "PWD=5wattcevacmaint$"
+        )
+
     all_alerts = None
     if CHECK_ALERTS:
-        all_alerts = alerts.Alerts(logging, UPDATE_CACHE, verbose=VERBOSE)
+        all_alerts = alerts.Alerts(logging, UPDATE_CACHE,
+                                   verbose=VERBOSE, conn=conn)
         all_alerts.alert_system()
         verbose_print(VERBOSE, "CHECK_ALERTS is True")
         verbose_print(VERBOSE,(
             f"Anomalies: {len(all_alerts.anomalies)}\n"
-            f"{all_alerts.num_decom_anomalies()} anomalies are decommissioned"
+            f"{all_alerts.num_decom_anomalies()} "
+            "anomalies are decommissioned"
         ))
 
     if SEND:
@@ -99,20 +160,46 @@ if __name__ == "__main__":
             all_alerts.send()
         verbose_print(VERBOSE, "SEND is True")
 
-    if SEND_EMAIL:
-        email_setup = email_handler.Email(hours=EMAIL_TIME, verbose=VERBOSE)
-        email_setup.send()
+    if SEND_EMAIL or UPDATE_WEB:
+        email_setup = email_handler.Email(
+            hours=EMAIL_TIME,
+            verbose=VERBOSE,
+            conn=conn
+        )
+        if SEND_EMAIL:
+            email_setup.send()
+        if UPDATE_WEB:
+            email_setup.write_to_file()
         verbose_print(VERBOSE, "EMAIL is True")
 
     if RUN_ML:
-        machine_learning = ml.ML()
         if CHECK_ALERTS:
-            machine_learning.add_nodes(all_alerts)
-        if SEND:
-            machine_learning.send()
-        machine_learning.queries()
+            machine_learning = ml.ML(
+                all_alerts.anomalies,
+                conn=conn,
+                verbose=VERBOSE
+            )
+            machine_learning.do_ml()
+            if SEND:
+                machine_learning.send()
+        else:
+            print("CHECK_ALERTS REQUIRED FOR ML")
         verbose_print(VERBOSE, "ML is True")
 
     # Finish system
     print("Ran successfully.")
-    verbose_print(VERBOSE, f"Job Completed: {datetime.datetime.now()} ET")
+    verbose_print(
+        VERBOSE,
+        f"Job Completed: {datetime.datetime.now()} ET"
+    )
+
+"""
+      /##.*/
+     /#%&&%#/
+    ./%%%&%%#
+    %%%%&%&%%#
+   %&&  %%%&%%.
+   %&%  &%%&%%*
+   *%&@&@%&%%(
+     %%%%%%%%
+"""

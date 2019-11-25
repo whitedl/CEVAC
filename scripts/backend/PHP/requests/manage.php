@@ -17,6 +17,7 @@
     <script src="console/JS/pull.js"></script>
     <script src="console/JS/push.js"></script>
     <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.4.1.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
 	</head>
 	<body onload="get_Metrics_html(); enable_BuildingKeySearch()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
     <h2>CEVAC Administrative Console</h2>
@@ -69,7 +70,9 @@
         <div id='advanced_div' class="advanced">
           <h5>Table Actions</h5>
           <ul id="table_actions_list">
+            <li><a href="#" id="view_stats_button" onclick="view_stats_button_click()">View Latest Statistics</a></li>
             <li><a href="#" id="view_latest_button" onclick="view_latest_button_click()">View Latest</a></li>
+            <li><a href="#" id="plot_latest_button" onclick="plot_latest_button_click()">Plot Latest (DEBUG)</a></li>
             <li><a href="#" id="view_day_button" onclick="view_day_button_click()">View Last 24 Hours</a></li>
           </ul>
           <h5>XREF Actions</h5>
@@ -83,11 +86,11 @@
             <li><a href="#" name="building_info_button" id="building_info_button" onclick="building_info_button_click()">View Buildings</a></li>
             <li><a href="#" name="BuildingKey_search_button" id="BuildingKey_search_button" onclick="BuildingKey_search_button_click()">Search BuildingKeys</a></li>
           </ul>
-<!--          <h5>Alerts Actions</h5>
-          <ul id="alerts_list">
+          <h5>Alerts Actions</h5>
+           <ul id="alerts_list">
             <li><a href="#" name="alerts_report_button" id="alerts_report_button" onclick="alerts_report_button_click()">Generate Alerts Report</a></li>
-          </ul>
--->
+           </ul>
+
 <!--          <button name="PXREF_button" id="PXREF_button" onclick="PXREF_button_click()">View PXREF</button><br> -->
 <!--          <button name="rebuild_PXREF_button" id="rebuild_PXREF_button" onclick="rebuild_PXREF_click()">Rebuild PXREF</button><br>
           <button name="upload_xref_button" id="upload_xref_button" onclick="upload_xref_button_click()">Upload XREF</button><br>
@@ -130,8 +133,14 @@
         <button id="add_building_button" onclick="add_building_click()">Add Building</button>
       </div>
       <pre id="output"></pre>
+      <div id="iframe_div">
+        <iframe id="iframe_output" src="/cevac_alerts/alerts.html" frameborder="0"></iframe>
+      </div>
       <div id="sql_output_div">
         <table id="sql_output"></table>
+      </div>
+      <div id="canvas_div">
+        <canvas id="canvas" width="200" height="200"></canvas>
       </div>
     </div>
 	</body>
