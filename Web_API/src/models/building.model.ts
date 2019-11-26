@@ -193,6 +193,12 @@ export class Building extends Entity {
   })
   reportlink?: String;
 
+  @property({
+    type: Object,
+    required: false,
+  })
+  geometry?: Object;
+
   @hasMany(() => Statistic, {keyTo: 'buildingsname'})
   statistics: Statistic[];
   // Indexer property to allow additional data
