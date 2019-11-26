@@ -57,7 +57,7 @@ export class Building extends Entity {
 
   @property({
     type: String,
-    required: true,
+    required: false,
     length: 50,
     mssql: {
       columnName: 'BuildingKey',
@@ -65,10 +65,10 @@ export class Building extends Entity {
       dataLength: 50,
       dataPrecision: null,
       dataScale: null,
-      nullable: 'NO',
+      nullable: 'YES',
     },
   })
-  buildingkey: String;
+  buildingkey?: String;
 
   @property({
     type: Number,
