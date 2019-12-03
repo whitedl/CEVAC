@@ -60,6 +60,7 @@ function enable_BuildingKeySearch(){
 }
 
 function plot(data){
+  document.getElementById('canvas_div').innerHTML = "<canvas id='canvas'></canvas>";
   document.getElementById('canvas_div').style.display = 'block';
   let jsonfile = JSON.parse(data);
   var labels = jsonfile.map(function(e) {
@@ -108,6 +109,5 @@ function plot(data){
   };
 
   var chart = new Chart(ctx, config);
-  console.log('wut');
 }
 
