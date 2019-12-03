@@ -344,12 +344,12 @@ class Alerts:
         xref = f"CEVAC_{bldgsname}_{metric}_XREF"
         if self.table_exists(xref):
             data = pd.read_sql_query(
-                f"SELECT PointSliceID FROM {xref} "
+                f"SELECT PointSliceID, Floor FROM {xref} "
                 f"WHERE ALIAS = '{alias}'",
                 self.conn
             )
-            return data["PointSliceID"][0]
-        return "?"
+            return (data["PointSliceID"][0], data["Floor"][0])
+        return "?", ""
 
     def check_numerical_alias(self, data, i, alert, building):
         """Check numerical alias alert."""
@@ -384,7 +384,7 @@ class Alerts:
             send_alert = (value == compare_value)
 
         if send_alert:
-            psid = self.get_psid_from_alias(
+            psid, floor = self.get_psid_from_alias(
                 data["Alias"][i],
                 building,
                 alert["metric"]
@@ -410,6 +410,7 @@ class Alerts:
                     f"{data['Alias'][i]} ({psid})",
                     alert["alert_name"],
                     self.get_buildingdname(building),
+                    floor=floor,
                 )
             )
         return None
@@ -486,7 +487,7 @@ class Alerts:
                         room_vals[Alias_Temp])
 
         if send_alert:
-            psid = self.get_psid_from_alias(
+            psid, floor = self.get_psid_from_alias(
                 room_vals["name"], building, alert['metric']
             )
             message = self.replace_generic(
@@ -518,6 +519,7 @@ class Alerts:
                     f"{room_vals['name']} ({psid})",
                     alert["alert_name"],
                     self.get_buildingdname(building),
+                    floor=floor,
                 )
             )
 
@@ -584,7 +586,8 @@ class Alerts:
 
 class Anomaly:
     def __init__(self, message, metric, building, eventid,
-                 priority, aliaspsid, alert_name, buildingdname):
+                 priority, aliaspsid, alert_name, buildingdname,
+                 floor=""):
         self.message = message
         self.metric = metric
         self.building = building
@@ -594,6 +597,9 @@ class Anomaly:
         self.time = datetime.datetime.utcnow()
         self.alert_name = alert_name
         self.buildingdname = buildingdname
+
+        # Optional, not always available
+        self.floor = floor
 
     def send(self, cursor):
         stat = (
