@@ -185,6 +185,10 @@ class Alerts:
                     data = self.safe_data(query)
                     self.check_time(data, alert, building)
 
+            elif "energy_num_buildings" in alert["type"]:
+                pass
+                        
+
             # TODO all clear
         insert_sql_total = (
             f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType,"
@@ -706,12 +710,14 @@ class Parameters:
         self.metric_to_bldgs = self.get_active_buildings(conn)
 
     def type_from_condition(self, condition):
-        if "Time" in condition:
+        if "time" in condition.lower():
             return "time"
-        if "CoolingSP" in condition:
+        if "coolingsp" in condition.lower():
             return "temp"
-        if "HeatingSP" in condition:
+        if "heatingsp" in condition.lower():
             return "temp"
+        if "energy_num_buildings" in condition.lower():
+            return "energy_num_buildings"
         return "numerical"
 
     def get_aliases(self, parameter):

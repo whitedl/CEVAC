@@ -136,7 +136,7 @@ class Email:
             "DECLARE @yesterday DATETIME; "
             "SET @yesterday = DATEADD("
             "day, -1, GETDATE()); "
-            "SELECT TOP 300 * FROM "
+            "SELECT * FROM "
             "CEVAC_ALL_ALERTS_EVENTS_LATEST "
             "WHERE ETDateTime >= @yesterday "
             "ORDER BY ETDateTime DESC"
