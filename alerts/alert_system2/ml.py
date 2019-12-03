@@ -117,14 +117,15 @@ class ML:
             else:
                 edge.times_apart += 1
 
+            alpha = edge.findAlpha()
+            beta=1-alpha
             edge.weight = (
-                0.5 * (
-                    1 + (
+                alpha + beta*(
                         (edge.times_together - edge.times_apart) /
                         (edge.times_together + edge.times_apart)
-                    )
                 )
             )
+
 
         return None
 
@@ -171,6 +172,9 @@ class Edge:
             self.times_apart = data["Times_Apart"][i]
             self.anomaly1 = None
             self.anomaly2 = None
+            # self.BuildingSimilarity = data["BuildingSimilarity"][i]
+            # self.FloorSimilarity = data["FloorSimilarity"][i]
+            # self.MetricSimilarity = data["MetricSimilarity"][i]
         else:
             self.anomaly1 = anomaly1
             self.anomaly2 = anomaly2
@@ -185,8 +189,18 @@ class Edge:
             self.times_together = 1
             self.times_apart = 0
             self.weight = self.init_weight(anomaly1, anomaly2)
-
+            #Need to change code above to run alpha calculations
+            #need to find location and metric with alert psid and name (work back)
+            # self.BuildingSimilarity =
 
     def init_weight(self, anomaly1, anomaly2):
         """Initialize weight between nodes."""
         return 0.5
+
+    def findAlpha(self):
+        """Determine Alpha Value for Weight"""
+        a = 0.5
+        a+=self.BuildingSimilarity
+        a+=self.FloorSimilarity
+        a+=self.MetricSimilarity
+        return a
