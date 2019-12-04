@@ -118,7 +118,7 @@ class ML:
                 edge.times_apart += 1
 
             alpha = edge.findAlpha()
-            beta=1-alpha
+            beta = 1 - alpha
             edge.weight = (
                 alpha + beta*(
                         (edge.times_together - edge.times_apart) /
@@ -172,9 +172,9 @@ class Edge:
             self.times_apart = data["Times_Apart"][i]
             self.anomaly1 = None
             self.anomaly2 = None
-            # self.BuildingSimilarity = data["BuildingSimilarity"][i]
-            # self.FloorSimilarity = data["FloorSimilarity"][i]
-            # self.MetricSimilarity = data["MetricSimilarity"][i]
+            self.BuildingSimilarity = data["BuildingSimilarity"][i]
+            self.FloorSimilarity = data["FloorSimilarity"][i]
+            self.MetricSimilarity = data["MetricSimilarity"][i]
         else:
             self.anomaly1 = anomaly1
             self.anomaly2 = anomaly2
@@ -188,19 +188,38 @@ class Edge:
 
             self.times_together = 1
             self.times_apart = 0
+
+            #Building and Floor Comparison
+            if (anomaly1.building == anomaly2.building):
+                self.BuildingSimilarity = 1
+
+                self.FloorSimilarity = 1 -
+                    abs(int(anomaly1.floor)-int(anomaly2.floor))*0.1
+                        #Floor comparison in same building
+                        #Arbitrary 0.1 to know how much we want to decrease
+                        #with each floor of separation
+
+            else:
+                self.BuildingSimilarity = 0 #dif building value
+                self.FloorSimilarity = 0 #dif building floor value
+
+            #Metric Comparison
+            if (anomaly1.alert["metric"] == anomaly2.alert["metric"]):
+                self.MetricSimilarity = 1
+            else:
+                self.MetricSimilarity = 0
+
             self.weight = self.init_weight(anomaly1, anomaly2)
-            #Need to change code above to run alpha calculations
-            #need to find location and metric with alert psid and name (work back)
-            # self.BuildingSimilarity =
 
     def init_weight(self, anomaly1, anomaly2):
         """Initialize weight between nodes."""
-        return 0.5
+        return self.findAlpha()
 
     def findAlpha(self):
         """Determine Alpha Value for Weight"""
         a = 0.5
-        a+=self.BuildingSimilarity
-        a+=self.FloorSimilarity
-        a+=self.MetricSimilarity
+        k = 0.1 #change constant
+        a+= k*self.BuildingSimilarity
+        a+= k*self.FloorSimilarity
+        a+= k*self.MetricSimilarity
         return a
