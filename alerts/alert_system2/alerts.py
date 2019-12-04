@@ -25,6 +25,8 @@ import pandas as pd
 import sys
 from tools import verbose_print
 
+ENERGY_LOGS_LOCATION = "/mnt/bldg/Campus_Power/logs/"
+
 
 class Alerts:
     """Handler for all alerts."""
@@ -79,7 +81,7 @@ class Alerts:
         for i, alert in enumerate(self.par.alert_parameters):
             # Check time conditional to make sure it is the correct
             # time for the alert
-
+            
             verbose_print(
                 self.verbose,
                 f"\nChecking Alert {i}: {alert}\n"
@@ -186,8 +188,12 @@ class Alerts:
                     self.check_time(data, alert, building)
 
             elif "energy_num_buildings" in alert["type"]:
-                pass
-                        
+                log_name = (
+                    ENERGY_LOGS_LOCATION +
+                    datetime.date.today().isoformat() +
+                    ".log"
+                )
+                self.check_energy_num_buildings(log_name, alert)
 
             # TODO all clear
         insert_sql_total = (
@@ -555,6 +561,57 @@ class Alerts:
                 )
             )
         return None
+
+    def check_energy_num_buildings(self, log_name, alert):
+        """Check number of successes in log file."""
+        processed_file_neccessary = int(
+            alert["condition"].split(" ")[-1]
+        )
+        num_processed_files = 0
+        if os.path.isfile(log_name):
+            log_file = open(log_name, "r")
+            log_lines = log_file.readlines()
+            for line in log_lines:
+                if "INFO:Successfully imported data" in line:
+                    num_processed_files += 1
+        
+        send_alert = False
+        if "<" in alert["condition"]:
+            if num_processed_files < processed_file_neccessary:
+                send_alert = True
+        if ">" in alert["condition"]:
+            if num_processed_files > processed_file_neccessary:
+                send_alert = True
+
+        if send_alert:
+            message = self.replace_generic(
+                alert['message'],
+                alert,
+                {
+                    "num_buildings": str(
+                        processed_file_neccessary -
+                        num_processed_files
+                    ),
+                }
+            )
+            eventid = self.assign_event_id(
+                alert, alert["alert_name"], alert["alert_name"]
+            )
+            self.anomalies.append(
+                Anomaly(
+                    message,
+                    alert['metric'],
+                    "CAMPUS",
+                    eventid,
+                    alert['priority'],
+                    f"N/A",
+                    alert["alert_name"],
+                    "CAMPUS"
+                )
+            )
+
+        return None
+        
 
     def num_decom_anomalies(self):
         num = 0
