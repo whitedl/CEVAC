@@ -410,7 +410,7 @@ class Alerts:
                     f"{data['Alias'][i]} ({psid})",
                     alert["alert_name"],
                     self.get_buildingdname(building),
-                    floor=floor,
+                    floor=str(floor),
                 )
             )
         return None
@@ -519,7 +519,7 @@ class Alerts:
                     f"{room_vals['name']} ({psid})",
                     alert["alert_name"],
                     self.get_buildingdname(building),
-                    floor=floor,
+                    floor=str(floor),
                 )
             )
 
