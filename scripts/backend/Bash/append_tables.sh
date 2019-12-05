@@ -1,15 +1,36 @@
 #! /bin/bash
+usage="Usage:
+  -b BuildingSName
+  -m Metric
 
+  -h help
+"
+while getopts b:m:k:u:hycl option; do
+  case "${option}"
+    in
+    b) BuildingSName=${OPTARG};;
+    m) Metric=${OPTARG};;
+    h) echo "$usage" && exit 0 ;;
+  esac
+done
 ! /cevac/scripts/check_lock.sh && exit 1
 /cevac/scripts/lock.sh
 
-/cevac/scripts/seperator.sh
 
 hist_views_query="
 SELECT RTRIM(BuildingSName), RTRIM(Metric), RTRIM(Age)
 FROM CEVAC_TABLES
 WHERE autoCACHE = 1
 "
+if [ ! -z "$BuildingSName" ]; then
+  hist_views_query=$hist_views_query"
+  AND BuildingSName = '"$BuildingSName"'"
+fi
+if [ ! -z "$Metric" ]; then
+  hist_views_query=$hist_views_query"
+  AND Metric = '"$Metric"'"
+fi
+
 /cevac/scripts/exec_sql.sh "$hist_views_query" "hist_views.csv"
 
 echo "Appending HIST_CACHE tables..."
@@ -43,7 +64,6 @@ for t in "${tables_array[@]}"; do
     sql="EXEC CEVAC_CACHE_INIT @tables = '$HIST_VIEW,$DAY_VIEW,$LATEST_FULL,$LATEST,$LATEST_BROKEN'"
   else sql="EXEC CEVAC_CACHE_APPEND @tables = '$HIST_VIEW,$DAY_VIEW,$LATEST_FULL,$LATEST,$LATEST_BROKEN'"
   fi
-  echo "$sql"
   if ! /cevac/scripts/exec_sql.sh "$sql" ; then
     echo "Error. Aborting append"
     /cevac/scripts/log_error.sh "Error executing CEVAC_CACHE_APPEND" "$TableName"

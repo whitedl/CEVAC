@@ -40,7 +40,7 @@ if ! /cevac/scripts/table_to_csv_append.sh "$table" ; then
   /cevac/scripts/log_error.sh "$error" "$table"
   exit 1
 fi
-linecount=`wc -l /cevac/cache/$table.csv`
+linecount=`cat /cevac/cache/$table.csv | wc -l`
 if [ "$linecount" -eq "1" ]; then
   echo "No new data. Canceling..."
   exit 0
