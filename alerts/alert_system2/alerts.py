@@ -25,6 +25,8 @@ import pandas as pd
 import sys
 from tools import verbose_print
 
+ENERGY_LOGS_LOCATION = "/mnt/bldg/Campus_Power/logs/"
+
 
 class Alerts:
     """Handler for all alerts."""
@@ -79,7 +81,7 @@ class Alerts:
         for i, alert in enumerate(self.par.alert_parameters):
             # Check time conditional to make sure it is the correct
             # time for the alert
-
+            
             verbose_print(
                 self.verbose,
                 f"\nChecking Alert {i}: {alert}\n"
@@ -184,6 +186,14 @@ class Alerts:
                     query += self.add_specific_aliases(alert)
                     data = self.safe_data(query)
                     self.check_time(data, alert, building)
+
+            elif "energy_num_buildings" in alert["type"]:
+                log_name = (
+                    ENERGY_LOGS_LOCATION +
+                    datetime.date.today().isoformat() +
+                    ".log"
+                )
+                self.check_energy_num_buildings(log_name, alert)
 
             # TODO all clear
         insert_sql_total = (
@@ -340,12 +350,12 @@ class Alerts:
         xref = f"CEVAC_{bldgsname}_{metric}_XREF"
         if self.table_exists(xref):
             data = pd.read_sql_query(
-                f"SELECT PointSliceID FROM {xref} "
+                f"SELECT PointSliceID, Floor FROM {xref} "
                 f"WHERE ALIAS = '{alias}'",
                 self.conn
             )
-            return data["PointSliceID"][0]
-        return "?"
+            return (data["PointSliceID"][0], data["Floor"][0])
+        return "?", ""
 
     def check_numerical_alias(self, data, i, alert, building):
         """Check numerical alias alert."""
@@ -380,7 +390,7 @@ class Alerts:
             send_alert = (value == compare_value)
 
         if send_alert:
-            psid = self.get_psid_from_alias(
+            psid, floor = self.get_psid_from_alias(
                 data["Alias"][i],
                 building,
                 alert["metric"]
@@ -406,6 +416,7 @@ class Alerts:
                     f"{data['Alias'][i]} ({psid})",
                     alert["alert_name"],
                     self.get_buildingdname(building),
+                    floor=str(floor),
                 )
             )
         return None
@@ -482,7 +493,7 @@ class Alerts:
                         room_vals[Alias_Temp])
 
         if send_alert:
-            psid = self.get_psid_from_alias(
+            psid, floor = self.get_psid_from_alias(
                 room_vals["name"], building, alert['metric']
             )
             message = self.replace_generic(
@@ -514,6 +525,7 @@ class Alerts:
                     f"{room_vals['name']} ({psid})",
                     alert["alert_name"],
                     self.get_buildingdname(building),
+                    floor=str(floor),
                 )
             )
 
@@ -550,6 +562,57 @@ class Alerts:
             )
         return None
 
+    def check_energy_num_buildings(self, log_name, alert):
+        """Check number of successes in log file."""
+        processed_file_neccessary = int(
+            alert["condition"].split(" ")[-1]
+        )
+        num_processed_files = 0
+        if os.path.isfile(log_name):
+            log_file = open(log_name, "r")
+            log_lines = log_file.readlines()
+            for line in log_lines:
+                if "INFO:Successfully imported data" in line:
+                    num_processed_files += 1
+        
+        send_alert = False
+        if "<" in alert["condition"]:
+            if num_processed_files < processed_file_neccessary:
+                send_alert = True
+        if ">" in alert["condition"]:
+            if num_processed_files > processed_file_neccessary:
+                send_alert = True
+
+        if send_alert:
+            message = self.replace_generic(
+                alert['message'],
+                alert,
+                {
+                    "num_buildings": str(
+                        processed_file_neccessary -
+                        num_processed_files
+                    ),
+                }
+            )
+            eventid = self.assign_event_id(
+                alert, alert["alert_name"], alert["alert_name"]
+            )
+            self.anomalies.append(
+                Anomaly(
+                    message,
+                    alert['metric'],
+                    "CAMPUS",
+                    eventid,
+                    alert['priority'],
+                    f"N/A",
+                    alert["alert_name"],
+                    "CAMPUS"
+                )
+            )
+
+        return None
+        
+
     def num_decom_anomalies(self):
         num = 0
         for anomaly in self.anomalies:
@@ -580,7 +643,8 @@ class Alerts:
 
 class Anomaly:
     def __init__(self, message, metric, building, eventid,
-                 priority, aliaspsid, alert_name, buildingdname):
+                 priority, aliaspsid, alert_name, buildingdname,
+                 floor=""):
         self.message = message
         self.metric = metric
         self.building = building
@@ -590,6 +654,9 @@ class Anomaly:
         self.time = datetime.datetime.utcnow()
         self.alert_name = alert_name
         self.buildingdname = buildingdname
+
+        # Optional, not always available
+        self.floor = floor
 
     def send(self, cursor):
         stat = (
@@ -706,12 +773,14 @@ class Parameters:
         self.metric_to_bldgs = self.get_active_buildings(conn)
 
     def type_from_condition(self, condition):
-        if "Time" in condition:
+        if "time" in condition.lower():
             return "time"
-        if "CoolingSP" in condition:
+        if "coolingsp" in condition.lower():
             return "temp"
-        if "HeatingSP" in condition:
+        if "heatingsp" in condition.lower():
             return "temp"
+        if "energy_num_buildings" in condition.lower():
+            return "energy_num_buildings"
         return "numerical"
 
     def get_aliases(self, parameter):

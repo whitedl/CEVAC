@@ -9,14 +9,12 @@ import csv
 import logging
 import pandas as pd
 
-
 ######################################
 # Config Variables
 ######################################
 
 # set up variables
 prefix = "/mnt/bldg/CAMPUS_POWER"
-print(os.listdir("/mnt/bldg"))
 import_dir = prefix
 failed_dir = prefix
 processed_dir = prefix + "/processed"
