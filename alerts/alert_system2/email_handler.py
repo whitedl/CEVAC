@@ -197,16 +197,6 @@ class Email:
 
         for i, metric in enumerate(metrics):
             m = metrics[metric]
-            #fp = open(m["htmlpath"], 'rb')
-            #msgImage = MIMEImage(fp.read())
-            #fp.close()
-            """
-            if self.verbose:
-                print(f"<{m['cid']}>")
-            """
-                
-            #msgImage.add_header('Content-ID', f"<{m['cid']}>")
-            #m_message.attach(msgImage)
 
         # Define the image's ID as referenced above
         m_message.attach(a_msg)
@@ -228,9 +218,6 @@ class Email:
         )]
         real_html += "</div></body></html>"
         html_file.write(real_html)
-        
-
-
 
     def send(self):
         """Do main function."""
