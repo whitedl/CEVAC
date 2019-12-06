@@ -195,13 +195,6 @@ class Alerts:
                 )
                 self.check_energy_num_buildings(log_name, alert)
 
-            # TODO all clear
-        insert_sql_total = (
-            f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW(AlertType,"
-            f"AlertMessage,Metric,UTCDateTime,MessageID) "
-            f"VALUES('All Clear','All Clear','N/A',"
-            f"GETUTCDATE(),'0')"
-        )
         if self.LOG:
             logging.info(
                 f"ALERT SYSTEM FINISHED"
@@ -210,9 +203,30 @@ class Alerts:
 
     def send(self):
         """Send anomalies to sql."""
+
+        # Add alerts for all clear
+        for anomaly in self.anomalies:
+            self.par.alerted_buildings[anomaly.building] = True
+        for building in self.par.alerted_buildings:
+            if self.par.alerted_buildings[building] == False:
+                eventid = self.assign_event_id(
+                    "All Clear", building, 0
+                )
+                self.anomalies.append(
+                    Anomaly(
+                        "All clear (No issues)",
+                        "ALL",
+                        building,
+                        eventid,
+                        0,
+                        building,
+                        "All Clear",
+                        self.get_buildingdname(building),
+                    )
+                )
         
         # Write event IDs
-        self.write_json_generic(self.new_events, self.max_id)  
+        self.write_json_generic(self.new_events, self.max_id) 
 
         # Send each anomaly if it is not a known issue
         cursor = self.conn.cursor()
@@ -327,7 +341,10 @@ class Alerts:
         
     def assign_event_id(self, alert, alias, psid):
         """Assign event id."""
-        key = f"{alias} {psid} {alert['type']}"
+        if str(alert) == "All Clear":
+            key = "f{alias} All Clear"
+        else:
+            key = f"{alias} {psid} {alert['type']}"
         event_id = self.max_id
         if key in self.old_events:
             event_id = self.old_events[key]
@@ -770,7 +787,13 @@ class Parameters:
                     data['Condition'][i]
                 ),
             })
+        self.alerted_buildings = {}
         self.metric_to_bldgs = self.get_active_buildings(conn)
+
+    def alert_parameters_str(self, parameter):
+        return (
+            f""
+        )
 
     def type_from_condition(self, condition):
         if "time" in condition.lower():
@@ -798,6 +821,7 @@ class Parameters:
         for i in range(len(data)):
             metric = data["METRIC"][i]
             bldg = data["BUILDINGSNAME"][i]
+            self.alerted_buildings[bldg] = False
             if metric in metric_to_bldgs:
                 metric_to_bldgs[metric].append(bldg)
             else:
