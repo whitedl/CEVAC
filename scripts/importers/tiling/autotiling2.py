@@ -133,6 +133,13 @@ while keep_running:
         except Exception:
             pass  # Window died after checking for dead windows
 
+#Refresh Pages to Prevent TIMEOUT
+#Find position in reference to screen where mouse is on refresh icon
+#do it for all Dives and for Campus Overview
+#need to do it twice or more (depending on how many buildings we are trying to show)
+#maybe keep  Overview separate.  Think about maybe either include this in the tiling or not.
+
+
 
     # Check keyboard input
     keys_pressed = keyboard.stop_recording()
@@ -152,6 +159,8 @@ while keep_running:
             for key in actual_keys:
                 if key=="space":
                     print("resume")
+                    point=win32gui.GetCursorPos() #to find where refresh is on screen
+                    print(point)
                     max_set=True
                     break
                 elif key == "esc":
