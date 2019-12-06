@@ -179,7 +179,7 @@ class Alerts:
                     if self.UPDATE_CACHE:
                         rebuild_broken_cache(table, self.conn)
                     query = (f"SELECT * FROM {table}_BROKEN_CACHE")
-                    verbose_print(self.verbose, f"QUERY: {query}_BROKEN_CACHE")
+                    verbose_print(self.verbose, f"QUERY: {query}")
                     if not self.table_exists(table+"_BROKEN_CACHE"):
                         verbose_print(self.verbose, f"{table}_BROKEN_CACHE does not exist")
                         continue
