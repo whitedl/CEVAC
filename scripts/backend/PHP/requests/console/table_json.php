@@ -16,24 +16,27 @@ $AliasName = CEVAC_TABLES_value($TableName, 'AliasName');
 $DateTimeName = CEVAC_TABLES_value($TableName, 'DateTimeName');
 $DataName = CEVAC_TABLES_value($TableName, 'DataName');
 
-// $result = get_columns($TableName);
 $j_array = [];
-// while($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)){
-  // $j_array[] = $row;
-// }
-// $output .= "</tr>";
-// $cols = substr($cols, 0, strlen($cols) - 2);
+$keys_query = "
+  SELECT TOP 1 *
+  FROM CEVAC_TABLES
+  WHERE TableName = '$TableName'
+";
+$result = exec_sql($keys_query);
 
+$keys = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC);
+$j_array['keys'] = $keys;
 $query = "
   SELECT *
   FROM $TableName
-  ORDER BY $DateTimeName DESC
+  ORDER BY $DataName DESC
 ";
-// die($query);
 $result = exec_sql($query);
-
+$data_array = [];
 while($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)){
-  $j_array[] = $row;
+  $data_array[] = $row;
 }
+$j_array['data'] = $data_array;
+
 echo json_encode($j_array);
 ?>

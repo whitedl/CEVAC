@@ -3,11 +3,14 @@ function show_hide(id){
   if(element.style.display == "none") element.style.display = "block";
   else element.style.display = "none";
 }
-function show_hide_class(c){
+function show_hide_class(c,exempt=null){
   elements = document.getElementsByClassName(c);
-  for(var i = 0; i < elements.length; i++)
-    if(elements[i].style.visibility == "hidden") elements[i].style.visibility = "visible";
+  for(var i = 0; i < elements.length; i++){
+    if(elements[i].style.visibility == "hidden" || elements[i] == exempt){
+      elements[i].style.visibility = "visible";
+    }
     else elements[i].style.visibility = "hidden";
+  }
 }
 function reset_buttons(active_button = ""){
   // active_button = document.getElementById(active);
@@ -23,6 +26,7 @@ function reset_buttons(active_button = ""){
   view_day_button = document.getElementById('view_day_button');
   document.getElementById('output').innerHTML = '';
   document.getElementById('canvas_div').style.display = "hidden";
+  document.getElementById('iframe_div').style.display = "hidden";
   // console.log('reset');
 
   if(PXREF_button != active_button){
@@ -44,7 +48,6 @@ function reset_buttons(active_button = ""){
   }
 }
 function enable_BuildingKeySearch(){
-  console.log('hm');
   sbutton = document.getElementById('BuildingKeySearch_submit_button');
   dbutton = document.getElementById('BuildingKeySearch_download_button');
   input = document.getElementById('search_BuildingKey');
@@ -58,17 +61,42 @@ function enable_BuildingKeySearch(){
     dbutton.disabled = true;
   }
 }
-
-function plot(data){
+function hide_output(exempt=null){
+  if(!Array.isArray(exempt)){
+    exemptArray = [exempt];
+  }
+  else exemptArray = exempt;
+  elements = document.getElementsByClassName('output_div');
+  console.log(exemptArray);
+  for(var i = 0; i < elements.length; i++){
+    if(exemptArray.includes(elements[i])){
+      elements[i].style.visibility = "visible";
+      elements[i].style.display = 'block';
+    }
+    else{
+      elements[i].style.visibility = "hidden";
+      elements[i].style.display = "none";
+    }
+  }
+}
+function gen_TableName(BuildingSName, Metric, Age){
+  TableName = 'CEVAC_' + BuildingSName + '_' + Metric;
+  if(Age != '') TableName += '_' + Age;
+  return TableName
+}
+function plot(d){
   document.getElementById('canvas_div').innerHTML = "<canvas id='canvas'></canvas>";
   document.getElementById('canvas_div').style.display = 'block';
-  let jsonfile = JSON.parse(data);
-  var labels = jsonfile.map(function(e) {
-     return e.Alias;
+  let jsonfile = JSON.parse(d);
+  console.log(jsonfile);
+  var AliasName = jsonfile['keys']['AliasName'];
+  var DataName = jsonfile['keys']['DataName'];
+  var labels = jsonfile.data.map(function(e) {
+     return e[AliasName];
   });
-  var data = jsonfile.map(function(e) {
-     return e.ActualValue;
-  });;
+  var data = jsonfile.data.map(function(e) {
+     return e[DataName];
+  });
 
   var BuildingSName = document.getElementById('buildings').value;
   var Metric = document.getElementById('metrics').value;

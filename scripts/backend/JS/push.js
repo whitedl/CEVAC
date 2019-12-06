@@ -80,6 +80,10 @@ function push_to_lasr(){
     console.log('disabled');
     console.log(button);
   }
+  BuildingSName = document.getElementById('buildings').value;
+  Metric = document.getElementById('metrics').value;
+  rebuild_csv = false
+
   $.ajax({
     type: 'POST',
     url: 'console/push_to_lasr.php',
