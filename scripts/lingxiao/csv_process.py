@@ -51,19 +51,20 @@ def PSID_xref(filename):
                 break
     '''
     error_rows = core_df[core_df.isnull().values==True]
-    
+    '''
     if(len(error_rows)):
         #print('Null value in row: ',[i+1 for i in error_rows])
         print('Null value in row: ')
         print(error_rows)
         sys.exit()
+    '''
         
     if(len(df[df.duplicated('PointSliceID')])):
         print('duplicated value in PointsliceID: ')
         print(core_df[df.duplicated('PointSliceID')])
         sys.exit()
     
-    '''
+    ''' 
     for i in len(df['PointSliceID']):
         if df['PointSliceID'][i] == 'NULL':
             df = df.drop(i)
@@ -92,7 +93,7 @@ def PSID_xref(filename):
         [ObjectName] [nvarchar](MAX) NOT NULL,\
         [BLG] [nvarchar](50) NOT NULL,\
         [Floor] [nvarchar](50) NULL,\
-        [ReadingType] [nvarchar](50) NOT NULL,\
+        [ReadingType] [nvarchar](50) NULL,\
         [Alias] [nvarchar](MAX) NOT NULL,\
         [Com] [datetime] NULL,\
         [DeCom] [datetime] NULL,\n",\
@@ -155,17 +156,19 @@ def WAP_xref(filename):
     metric_name = (df.name).split('_')[2]
 
     error_rows = df[df.isnull().values==True]
-    
+
     if(len(error_rows)):
         #print('Null value in row: ',[i+1 for i in error_rows])
         print('Null value in row: ')
         print(error_rows)
         sys.exit()
-        
+
+    '''
     if(len(df[df.duplicated('WAP_Name')])):
         print('duplicated value in WAP_Name: ')
         print(df[df.duplicated('WAP_Name')])
         sys.exit()
+    '''
     
     check_query_building = "SELECT DISTINCT BuildingSName FROM CEVAC_WAP_IDS; "
     query_res_b = bsql.Query(check_query_building).json_list

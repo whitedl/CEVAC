@@ -11,14 +11,14 @@ if(!isset($_POST['BuildingSName']) || !isset($_POST['Metric'])) die('missing par
 $tmp_name = $_FILES['file']['tmp_name'];
 $name = strtoupper(clean($_FILES['file']['name'],['_','.']));
 $dest_name = "/cevac/cache/".$name;
-if($name != $pred_filename) die("Wrong file!\n");
+if($name != $pred_filename) die("Filename does not match BuildingSName and Metric. Check the drop down menus.\n");
 
 if(copy($tmp_name, $dest_name)){
   echo "success\n";
 } else echo "failure\n";
 // $script = 'python3 /cevac/CEVAC/scripts/lingxiao/PointSliceID_Xref/csv_process.py';
 // $exec = "sudo -u cevac $script -f $dest_name -b \"$BuildingSName\" -m \"$Metric\" -a \"XREF\"";
-$exec = "sudo -u cevac python3 /cevac/python/csv_process.py $dest_name";
+$exec = "sudo -u cevac python3 /cevac/python/csv_process.py $dest_name 2>&1";
 
 echo "$exec\n";
 echo passthru($exec);

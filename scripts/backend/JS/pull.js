@@ -127,6 +127,18 @@ function get_latest_html(){
     }
   );
 }
+function get_table_html(TableName,editable=false){
+  $.ajax({
+    type: 'GET',
+    url: 'console/table_html.php',
+    data: {TableName:TableName, editable: editable},
+    success: function(data){
+      document.getElementById('sql_output').innerHTML = data;
+      // button.disabled = false;
+      // button.classList.remove('disabled');
+    }
+  });
+}
 function get_day_html(){
   button = document.getElementById('view_day_button');
   button.classList.add('disabled');

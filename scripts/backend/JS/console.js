@@ -18,7 +18,8 @@ function bootstrap(){
 
 function reset_PXREF(){
   table = document.getElementById('sql_output');
-  table.innerHTML = "";
+  table.style.display = 'block';
+  // table.innerHTML = "";
   view = "View PXREF";
   pb = document.getElementById('PXREF_button');
   pb.innerHTML = view;
@@ -59,8 +60,11 @@ function building_info_button_click(){
 }
 
 function show_buttons(){
-  d = document.getElementById('buttons_div');
-  d.style.display = 'block';
+  elements = document.getElementsByClassName('grid-item button');
+  for(let e of elements){
+    e.style.display = 'block';
+    e.style.visibility = 'visible';
+  }
 }
 function success_output(data){
   output = document.getElementById('output');
@@ -157,25 +161,26 @@ function BuildingKey_search_button_click(){
   reset_buttons(button);
 }
 function view_latest_button_click(){
+  hide_output();
   button = document.getElementById('view_latest_button');
   document.getElementById('download_button').innerHTML = 'Download LATEST';
   document.getElementById('download_button_div').style.display = 'block';
   document.getElementById('Age_text').value = 'LATEST';
   reset_buttons(button);
   get_latest_html();
+  exemptArray = [document.getElementById('sql_output_div'),document.getElementById('download_button_div')]
+  hide_output(exemptArray);
 }
 function view_day_button_click(){
+  hide_output();
   button = document.getElementById('view_day_button');
   document.getElementById('download_button').innerHTML = 'Download DAY';
   document.getElementById('download_button_div').style.display = 'block';
   document.getElementById('Age_text').value = 'DAY';
   reset_buttons(button);
   get_day_html();
-}
-function alerts_report_button_click(){
-  button = document.getElementById('alerts_report_button');
-
-  reset_buttons(button);
+  exemptArray = [document.getElementById('sql_output_div'),document.getElementById('download_button_div')]
+  hide_output(exemptArray);
 }
 function test_button_click(){
   console.log('test');
@@ -193,6 +198,7 @@ function test_button_click(){
   });
 }
 function view_stats_button_click(){
+  hide_output(document.getElementById('sql_output_div'));
   button = document.getElementById('view_stats_button');
   // document.getElementById('download_button').innerHTML = 'Download LATEST';
   // document.getElementById('download_button_div').style.display = 'block';
@@ -203,5 +209,51 @@ function view_stats_button_click(){
 function plot_latest_button_click(){
   button = document.getElementById('plot_latest_button');
   document.getElementById('Age_text').value = "LATEST";
+  hide_output(exempt=[document.getElementById('canvas_div')]);
   get_table_json();
+}
+function alerts_report_button_click(){
+  reset_buttons();
+  hide_output(document.getElementById('iframe_div'));
+  // document.getElementById('sql_output_div').style.display = 'none';
+  // document.getElementById('iframe_div').style.display = 'block';
+}
+function alerts_parameters_button_click(){
+  reset_buttons();
+  hide_output(document.getElementById('sql_output_div'));
+  BuildingSName = 'ALERT';
+  Metric = 'PARAMETERS';
+  Age = '';
+  TableName = gen_TableName(BuildingSName, Metric, Age);
+  get_table_html(TableName, editable=true);
+  // document.getElementById('sql_output_div').style.display = 'none';
+  // document.getElementById('iframe_div').style.display = 'block';
+}
+function parse_power_button_click(){
+  hide_output(document.getElementById('output_text_div'));
+  $.ajax({
+    type: 'POST',
+    url: 'console/power_importer.php',
+    data: $('form').serialize(),
+    success: function(data){
+      // document.getElementById('update_cache_button').disabled = false;
+      document.getElementById('output').innerHTML = data;
+    }
+  });
+
+}
+function update_cache_button_click(){
+  hide_output(document.getElementById('output_text_div'));
+  button = document.getElementById('update_cache_button');
+  button.disabled = true;
+  $.ajax({
+    type: 'POST',
+    url: 'console/update_cache.php',
+    data: $('form').serialize(),
+    success: function(data){
+      document.getElementById('update_cache_button').disabled = false;
+      document.getElementById('output').innerHTML = data;
+    }
+  });
+
 }

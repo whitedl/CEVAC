@@ -1,4 +1,5 @@
 <?php
+include_once "../functions.php";
 function buildings_html(){
   global $db;
   $query = "
@@ -63,5 +64,44 @@ function stats_html($BuildingSName, $Metric){
   // $out .= "\n</table>";
   return $out;
 }
+function table_html($TableName,$editable=false){
+  $IDName = CEVAC_TABLES_value($TableName, 'IDName');
+  $AliasName = CEVAC_TABLES_value($TableName, 'AliasName');
+  $DateTimeName = CEVAC_TABLES_value($TableName, 'DateTimeName');
+  $DataName = CEVAC_TABLES_value($TableName, 'DataName');
 
+  $result = get_columns($TableName);
+  $cols = "";
+  $output = "<tr>";
+  while($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_NUMERIC)){
+    $cols .= $row[0].", ";
+    $output .= "<th>".$row[0]."</th>\n";
+  }
+  $output .= "</tr>";
+  $cols = substr($cols, 0, strlen($cols) - 2);
+
+  $query = "
+    SELECT $cols
+    FROM $TableName
+  ";
+  if($DateTimeName != '') $query .= "\nORDER BY $DateTimeName DESC";
+  // die($query);
+  $result = exec_sql($query);
+
+  while($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_NUMERIC)){
+    $output .= "<tr>";
+    foreach($row as &$c){
+      $output .= "<td";
+      if($editable) $output .= " contenteditable='true'";
+      $output .= ">".htmlspecialchars($c)."</td>";
+    }
+    $output .= "</tr>\n";
+  }
+  return $output;
+}
+function gen_TableName($BuildingSName, $Metric, $Age){
+  $TableName = "CEVAC_".$BuildingSName."_".$Metric;
+  if($Age != "") $TableName .= "_".$Age;
+  return $TableName;
+}
 ?>
