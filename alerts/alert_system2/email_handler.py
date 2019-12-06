@@ -227,7 +227,7 @@ class Email:
             "DECLARE @yesterday DATETIME; "
             "SET @yesterday = DATEADD("
             "day, -1, GETDATE()); "
-            "SELECT TOP 100 * FROM "
+            "SELECT * FROM "
             "CEVAC_ALL_ALERTS_EVENTS_LATEST "
             "WHERE ETDateTime >= @yesterday "
             "ORDER BY ETDateTime DESC"
@@ -259,6 +259,8 @@ class Email:
 
         total_msg = ""
         for key in alert_gd:
+            if key.replace(" ","") == "0":
+                continue
             total_msg += f'<h2 class=\"split\">{key.upper()}</h2>'
             for building in alert_gd[key]:
                 total_msg += f"<h4>{building}</h4><table>"
