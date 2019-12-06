@@ -193,8 +193,10 @@ class Edge:
             if (anomaly1.building == anomaly2.building):
                 self.BuildingSimilarity = 1
 
-                self.FloorSimilarity = 1 -
+                self.FloorSimilarity = (
+                    1 -
                     abs(int(anomaly1.floor)-int(anomaly2.floor))*0.1
+                    )
                         #Floor comparison in same building
                         #Arbitrary 0.1 to know how much we want to decrease
                         #with each floor of separation
