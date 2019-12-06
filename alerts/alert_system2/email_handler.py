@@ -197,16 +197,6 @@ class Email:
 
         for i, metric in enumerate(metrics):
             m = metrics[metric]
-            #fp = open(m["htmlpath"], 'rb')
-            #msgImage = MIMEImage(fp.read())
-            #fp.close()
-            """
-            if self.verbose:
-                print(f"<{m['cid']}>")
-            """
-                
-            #msgImage.add_header('Content-ID', f"<{m['cid']}>")
-            #m_message.attach(msgImage)
 
         # Define the image's ID as referenced above
         m_message.attach(a_msg)
@@ -228,9 +218,6 @@ class Email:
         )]
         real_html += "</div></body></html>"
         html_file.write(real_html)
-        
-
-
 
     def send(self):
         """Do main function."""
@@ -240,7 +227,7 @@ class Email:
             "DECLARE @yesterday DATETIME; "
             "SET @yesterday = DATEADD("
             "day, -1, GETDATE()); "
-            "SELECT TOP 100 * FROM "
+            "SELECT * FROM "
             "CEVAC_ALL_ALERTS_EVENTS_LATEST "
             "WHERE ETDateTime >= @yesterday "
             "ORDER BY ETDateTime DESC"
@@ -272,6 +259,8 @@ class Email:
 
         total_msg = ""
         for key in alert_gd:
+            if key.replace(" ","") == "0":
+                continue
             total_msg += f'<h2 class=\"split\">{key.upper()}</h2>'
             for building in alert_gd[key]:
                 total_msg += f"<h4>{building}</h4><table>"
