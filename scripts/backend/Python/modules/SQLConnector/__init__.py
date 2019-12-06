@@ -3,18 +3,25 @@
 # vim:fenc=utf-8
 
 import pyodbc
+import cx_Oracle
 
 class SQLConnector():
     """ Collection of helper methods to query the MS SQL Server database.
     """
 
-    def __init__(self, port=1433):
+    def __init__(self, oracle=False, port=1433):
+        if not oracle:
+            self.init_ms('wficcm','5wattcevacmaint$')
+        else:
+            self.init_oracle('CEVAC','fmocevac2019')
+
+    def init_ms(UID, PWD, PORT=1433, SERVER='130.127.218.11', DATABASE='WFIC-CEVAC'):
         self.PORT = str(port)
         self.DRIVER = '{ODBC Driver 17 for SQL Server}'
-        self.SERVER = '130.127.218.11'
-        self.DATABASE = 'WFIC-CEVAC'
-        self.UID = 'wficcm'
-        self.PWD = '5wattcevacmaint$'
+        self.SERVER = SERVER
+        self.DATABASE = DATABASE
+        self.UID = UID
+        self.PWD = PWD
         conn_str = (
                 'DRIVER=' + self.DRIVER + ';' +
                 'SERVER=' + self.SERVER + ';' +
@@ -26,6 +33,13 @@ class SQLConnector():
 
         self._connection = pyodbc.connect(conn_str)        
         pyodbc.pooling = False
+
+    def init_oracle(self, UID, PWD, SERVER='fmo8b.clemson.edu', PORT=1521, SID='AIM'):
+        conn_str = UID + '/' + PWD + '@'
+        conn_str += "(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(Host=" + SERVER + ")"
+        conn_str += "(Port=" + str(PORT) + "))"
+        conn_str += "(CONNECT_DATA=(SID=" + SID + ")))"
+        self._connection = cx_Oracle.connect(conn_str)
 
     def __enter__(self):
         return self
