@@ -240,7 +240,6 @@ class Alerts:
             self.logging.info(
                 f"ANOMALIES SENT"
             )
-            self.logging.shutdown()
 
     def safe_data(self, query):
         """Return data if prevviously requested.
