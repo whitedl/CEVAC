@@ -887,7 +887,7 @@ if __name__ == "__main__":
     do_commit = input("Commit to DB? ").lower()
     
     if "y" in do_commit and "n" not in do_commit:
-        all_alerts.end()
+        all_alerts.send()
         
     print("FINISHED")
 
