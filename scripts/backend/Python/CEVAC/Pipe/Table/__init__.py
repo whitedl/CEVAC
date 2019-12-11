@@ -5,8 +5,9 @@
 Table
 """
 class Table:
-    from ._attributes import init_attributes
-    def __init__(self, BuildingSName, Metric, Age, connector):
+    from ._attributes import fetch_attributes
+    from ._register import register
+    def __init__(self, BuildingSName, Metric, Age):
         self.BuildingSName = BuildingSName
         self.Metric = Metric
         self.Age = Age
@@ -15,5 +16,8 @@ class Table:
             '_' + self.Metric + 
             '_' + self.Age
         )
-        self.init_attributes(connector)
+        self.SourceTable = self.TableName + "_VIEW"
+        self.CacheTable = self.TableName + "_CACHE"
+        self.Raw_TableName = self.TableName + "_RAW"
+        self.attributes = {}
 
