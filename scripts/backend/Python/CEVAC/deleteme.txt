@@ -1,0 +1,42 @@
+
+    IF NOT EXISTS (SELECT TableName FROM CEVAC_TABLES WHERE TableName = 'CEVAC_FIKE_WIND_LIVE') BEGIN
+        INSERT INTO CEVAC_TABLES (
+    
+        BuildingSName,
+        Metric,
+        Age,
+        TableName,
+        DateTimeName,
+        IDName,
+        AliasName,
+        DataName,
+        isCustom,
+        Definition,
+        Dependencies,
+        customLASR,
+        autoCACHE,
+        autoLASR
+) VALUES (
+        'FIKE',
+        'WIND',
+        'LIVE',
+        'CEVAC_FIKE_WIND_LIVE',
+        'UTCDateTime',
+        'PointSliceID',
+        'Alias',
+        'ActualValue',
+        '0',
+        '
+    IF OBJECT_ID(''CEVAC_FIKE_WIND_XREF'') IS NULL BEGIN
+        CREATE TABLE CEVAC_FIKE_WIND_LIVE_RAW (
+            PointSliceID INT NOT NULL,
+            Alias NVARCHAR(MAX) NOT NULL,
+            UTCDateTime DATETIME NOT NULL,
+            ActualValue FLOAT NOT NULL
+        );
+    END    
+    ',
+        NULL,
+        '0',
+        '0',
+        '0') END
