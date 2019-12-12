@@ -88,7 +88,7 @@ while keep_running:
     keyboard.start_recording()
     run_time= time.time()
     print(run_time - init_time)
-    print(len(apps)/max_windows)
+
 
     # Find "Dive" windows and add to apps and managed_window_handles
     all_windows = pywinauto.findwindows.find_elements(title_re=".*Dive")
@@ -138,21 +138,22 @@ while keep_running:
             pass  # Window died after checking for dead windows
 
 #Refresh Pages to Prevent TIMEOUT
-#Update: It KIND OF works. Refreshes each dive but refreshes bottom 3 twice
-# Maybe change to a while loop and have if statements before that.  while i < max_windows
-# then go through clicking.  Then, for the "if check >", loop through while i < len(apps)-max_windows
-#I think this will work.  Will try to test it Wed or Thurs
-    if run_time - init_time > 20*60: ##if time since refresh is greater than 24 minutes
-        print("Refresh This 6")
+    if run_time - init_time > 20*60: ##if time since refresh is greater than 20 minutes
+        i=0
+        check_refresh = check_refresh + 1
+        #refresh windows 6 at a time
         if (check_refresh < (len(apps)/max_windows)):
+            print("refresh 6")
             while i < max_windows:
                     xmouse = int(positions[i]["x"]+215)
                     ymouse = int(positions[i]["y"]+95)
                     pywinauto.mouse.click(button='left',coords=(xmouse,ymouse))
                     sleep(10)
                     i=i+1
-        check_refresh = check_refresh + 1
+
+        #refresh remaining windows
         if(check_refresh >= (len(apps)/max_windows)):
+            print("Last Refresh Run")
             while i < len(apps)-max_windows:
                 xmouse = int(positions[i]["x"]+215)
                 ymouse = int(positions[i]["y"]+95)
@@ -161,8 +162,9 @@ while keep_running:
                 i=i+1
             pywinauto.mouse.click(button='left',coords=(215,1175))
             print("Refresh Done")
-            init_time = run_time
+            init_time = time.time()
             check_refresh = 0
+
 
 
     # Check keyboard input
@@ -183,7 +185,7 @@ while keep_running:
             for key in actual_keys:
                 if key=="space":
                     print("resume")
-                    point=win32gui.GetCursorPos() #to find where refresh is on screen
+                    point=win32gui.GetCursorPos() #go back and remove this
                     print(point)
                     max_set=True
                     break
