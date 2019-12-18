@@ -37,8 +37,7 @@ def args(connector=None):
         return valid
 
     if args.execute == "live":
-        if require_bsn_and_metric(args):
-            live(args.BuildingSName, args.Metric, connector=connector)
+        live(BuildingSName=args.BuildingSName, Metric=args.Metric, connector=connector)
 
     if args.execute == "bootstrap":
         print('bootstrap')

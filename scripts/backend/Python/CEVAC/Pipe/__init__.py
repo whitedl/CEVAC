@@ -16,11 +16,10 @@ class Pipe:
         self.BuildingSName = BuildingSName
         self.Metric = Metric
         self.XREF = "CEVAC_" + self.BuildingSName + "_" + self.Metric + "_XREF"
-        self.ages = ["HIST","DAY","LATEST","LATEST_FULL",
+        self.PXREF = "CEVAC_" + self.BuildingSName + "_" + self.Metric + "_PXREF"
+        self.ages = ["PXREF","XREF","HIST","DAY","LATEST","LATEST_FULL",
                 "LATEST_BROKEN","OLDEST", "LIVE"]
         self.isCustom = isCustom
-        if not self.isCustom:
-            self.ages.insert(0,"PXREF")
         self.Tables = {}
         for a in self.ages:
             self.Tables[a] = Table(self.BuildingSName, self.Metric, a)

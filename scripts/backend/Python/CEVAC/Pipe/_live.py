@@ -8,6 +8,9 @@
 import copy
 import pandas as pd
 from datetime import datetime
+from multiprocessing import Pool, cpu_count
+from functools import partial
+
 def create_live(self, connector):
     self.Tables['LATEST'].fetch_attributes(connector)
     Raw_TableName = self.Tables['LIVE'].Raw_TableName
@@ -39,26 +42,42 @@ def create_live(self, connector):
 
     self.Tables['LIVE'].register(connector)
 
+def pv(metasys,o_ID):
+    return metasys.presentValue(o_ID)
 
 def update_live(self, connector, metasys):
+    if not self.Tables['LIVE'].exists:
+        self.create_live()
+
+    self.Tables['LIVE'].fetch_attributes(connector)
     IDName = self.Tables['LIVE'].attributes['IDName']
     DataName = self.Tables['LIVE'].attributes['DataName']
     DateTimeName = self.Tables['LIVE'].attributes['DateTimeName']
+    if self.Tables['XREF'].exists(connector):
+        ref = self.XREF
+    else:
+        ref = self.PXREF
 
-    query = """SELECT x.{}, m.ObjectID FROM {} AS x""".format(self.Tables['LIVE'].attributes['IDName'], self.XREF)
-    query += """
-    INNER JOIN CEVAC_PSID_OID_MAP AS m ON m.PointSliceID = x.{}
-    """.format(IDName)
+    query = "SELECT x.{}, m.ObjectID FROM {} AS x".format(self.Tables['LIVE'].attributes['IDName'], ref)
+    query += "\n INNER JOIN CEVAC_PSID_OID_MAP AS m ON m.PointSliceID = x.{}".format(IDName)
+    query += "\n WHERE x.{} IS NOT NULL AND m.ObjectID IS NOT NULL".format(IDName)
     
     psids = connector.exec_sql(query)
     live_df = pd.DataFrame({IDName:[],DateTimeName:[],DataName:[]})
     now = datetime.utcnow()
+    ObjectIDs = psids['ObjectID'].values.tolist()
+    func = partial(pv,metasys)
+
+    p = Pool(cpu_count())
+    result = p.map(func,ObjectIDs)
+    p.close()
+    p.join()
+
     for index, row in psids.iterrows():
         ObjectID = row['ObjectID']
         PointSliceID = row[IDName]
-        pv = metasys.presentValue(ObjectID)
-        df = pd.DataFrame({IDName:[PointSliceID],DateTimeName:[now],DataName:[pv]})
-        print(df)
+        v = result[index]
+        df = pd.DataFrame({IDName:[PointSliceID],DateTimeName:[now],DataName:[v]})
         live_df = live_df.append(df)
     connector.to_sql(live_df,name=self.Tables['LIVE'].Raw_TableName)
 
