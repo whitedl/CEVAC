@@ -6,6 +6,7 @@ Table
 """
 class Table:
     from ._attributes import fetch_attributes
+    from ._attributes import exists
     from ._register import register
     def __init__(self, BuildingSName, Metric, Age):
         self.BuildingSName = BuildingSName

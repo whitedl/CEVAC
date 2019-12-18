@@ -8,6 +8,8 @@ import pandas as pd
 from SQLConnector import SQLConnector
 from Facilities import MetasysConnector
 from Pipe import Pipe
+import time
+from multiprocessing import Process
 
 def build_psid_oid_map():
     wfic_cevac = SQLConnector(flavor='mssql')
@@ -57,14 +59,38 @@ def gen_TableName(BuildingSName, Metric, Age=None):
         TableName += "_" + Age
     return TableName
 
-def live(BuildingSName, Metric, connector=None, metasys=None):
+def live(BuildingSName=None, Metric=None, connector=None, metasys=None):
     if connector == None:
         connector = SQLConnector(flavor='mssql')
     if metasys == None:
         metasys = MetasysConnector()
-    p = Pipe(BuildingSName, Metric)
-    p.create_live(connector)
-    p.update_live(connector,metasys)
 
-#  if __name__ == "__main__":
-    #  build_psid_oid()
+    query = """
+    SELECT DISTINCT BuildingSName, Metric FROM CEVAC_TABLES
+    WHERE TableName LIKE '%HIST_VIEW%'
+    AND isCustom = 0
+    """
+    if BuildingSName != None:
+        query += "\n AND BuildingSName = '{}'".format(BuildingSName)
+    if Metric != None:
+        query += "\n AND Metric = '{}'".format(Metric)
+
+    pipes = connector.exec_sql(query)
+    procs = []
+    for index,row in pipes.iterrows():
+        BuildingSName = row['BuildingSName']
+        Metric = row['Metric']
+        p = Pipe(BuildingSName, Metric)
+        #  p.create_live(connector)
+        #  proc = Process(target=p.update_live,args=(connector,metasys))
+        #  procs.append(proc)
+
+    #  for proc in procs:
+        #  proc.start()
+    #  for proc in procs:
+        #  proc.join()
+        start = time.time()
+        p.update_live(connector,metasys)
+        end = time.time()
+        print('Updating',BuildingSName,Metric,'took',end-start,'seconds')
+

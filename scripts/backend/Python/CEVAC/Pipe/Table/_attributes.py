@@ -13,3 +13,10 @@ def fetch_attributes(self,connector):
         for k in a:
             self.attributes[k] = a[k][0]
 
+def exists(self,connector):
+    query = "IF OBJECT_ID('{}') IS NOT NULL SELECT 'exists' ELSE SELECT 'dne'".format(self.TableName)
+    exists_str = connector.sql_value(query)
+    exists = False
+    if exists_str == "exists":
+        exists = True
+    return exists
