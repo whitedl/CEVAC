@@ -137,10 +137,12 @@ while keep_running:
         except Exception:
             pass  # Window died after checking for dead windows
 
+
 #Refresh Pages to Prevent TIMEOUT
     if run_time - init_time > 20*60: ##if time since refresh is greater than 20 minutes
         i=0
-        check_refresh = check_refresh + 1
+        check_refresh = check_refresh + 1 #Count number of times to cycle through refresh
+
         #refresh windows 6 at a time
         if (check_refresh < (len(apps)/max_windows)):
             print("refresh 6")
@@ -154,14 +156,20 @@ while keep_running:
         #refresh remaining windows
         if(check_refresh >= (len(apps)/max_windows)):
             print("Last Refresh Run")
+
+            #refresh leftover windows less than max window number
             while i < len(apps)-max_windows:
                 xmouse = int(positions[i]["x"]+215)
                 ymouse = int(positions[i]["y"]+95)
                 pywinauto.mouse.click(button='left',coords=(xmouse,ymouse))
                 sleep(10)
                 i=i+1
+
+            #refresh Campus Overview Window
             pywinauto.mouse.click(button='left',coords=(215,1175))
             print("Refresh Done")
+
+            #Reset interval time
             init_time = time.time()
             check_refresh = 0
 
