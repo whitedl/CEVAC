@@ -80,6 +80,15 @@ parser.add_argument(
         "checking alerts"
     )
 )
+
+parser.add_argument(
+    "--queue", "-q", "-Q",
+    default=False, action="store_true",
+    help=(
+        "read queue for alerts instead of all alerts"
+    )
+)
+
 parser.add_argument(
     "--verbose", "-v", "-V",
     default=False,
@@ -113,6 +122,9 @@ UPDATE_WEB = parsed_args.web
 # Determines whether or not to run the ML algorithm
 RUN_ML = parsed_args.machinelearning
 
+# Determines whether or not to use queue
+RUN_QUEUE = parsed_args.queue
+
 # Printing boolean
 VERBOSE = parsed_args.verbose
 
@@ -144,9 +156,11 @@ if __name__ == "__main__":
         )
 
     all_alerts = None
-    if CHECK_ALERTS:
+    if CHECK_ALERTS or RUN_QUEUE:
         all_alerts = alerts.Alerts(logging, UPDATE_CACHE,
-                                   verbose=VERBOSE, conn=conn)
+                                   verbose=VERBOSE, conn=conn,
+                                   queue=RUN_QUEUE
+        )
         all_alerts.alert_system()
         verbose_print(VERBOSE, "CHECK_ALERTS is True")
         verbose_print(VERBOSE,(
@@ -159,6 +173,16 @@ if __name__ == "__main__":
         if all_alerts is not None:
             all_alerts.send()
         verbose_print(VERBOSE, "SEND is True")
+
+    if RUN_QUEUE and SEND:
+        while len(all_alerts.get_queue_buildings()) > 0:
+            all_alerts = alerts.Alerts(
+                logging, UPDATE_CACHE,
+                verbose=VERBOSE, conn=conn,
+                queue=RUN_QUEUE
+            )
+            all_alerts.alert_system()
+            all_alerts.send()
 
     if SEND_EMAIL or UPDATE_WEB:
         email_setup = email_handler.Email(
