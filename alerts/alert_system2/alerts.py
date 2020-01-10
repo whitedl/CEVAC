@@ -32,7 +32,7 @@ class Alerts:
     """Handler for all alerts."""
 
     def __init__(self, logging, UPDATE_CACHE, verbose=False,
-                 conn=None):
+                 conn=None, queue=False):
         """Initialize connection and other objects."""
         self.logging = logging
         self.UPDATE_CACHE = UPDATE_CACHE
@@ -68,6 +68,13 @@ class Alerts:
         self.old_events = {}
         self.parse_json()
 
+        # Queue
+        self.queue = queue
+        self.queue_buildings = []
+        self.remove_qids = set()
+        if self.queue:
+            self.queue_buildings = self.get_queue_buildings()
+
         self.sname_to_dname = self.get_sname_to_dname()
 
     def alert_system(self):
@@ -94,6 +101,13 @@ class Alerts:
                 buildings = self.par.metric_to_bldgs[metric]
                 if "*" not in alert["building"]:
                     buildings = [alert["building"]]
+                if self.queue:
+                    buildings = self.queue_buildings_match(
+                        buildings,
+                        metric,
+                        aggregation
+                    )
+                print("CHECKING {buildings}")
                 for building in buildings:
                     if self.skip_unoccupied(building, alert):
                         continue
@@ -120,6 +134,12 @@ class Alerts:
                 buildings = self.par.metric_to_bldgs[metric]
                 if "*" not in alert["building"]:
                     buildings = [alert["building"]]
+                if self.queue:
+                    buildings = self.queue_buildings_match(
+                        buildings,
+                        metric,
+                        aggregation
+                    )
                 for building in buildings:
                     if self.skip_unoccupied(building, alert):
                         continue
@@ -172,6 +192,12 @@ class Alerts:
                 buildings = self.par.metric_to_bldgs[metric]
                 if "*" not in alert["building"]:
                     buildings = [alert["building"]]
+                if self.queue:
+                    buildings = self.queue_buildings_match(
+                        buildings,
+                        metric,
+                        aggregation
+                    )
                 for building in buildings:
                     if self.skip_unoccupied(building, alert):
                         continue
@@ -226,6 +252,8 @@ class Alerts:
                         self.get_buildingdname(building),
                     )
                 )
+        
+        self.erase_queue()
         
         # Write event IDs
         self.write_json_generic(self.new_events, self.max_id) 
@@ -366,14 +394,19 @@ class Alerts:
     def get_psid_from_alias(self, alias, bldgsname, metric):
         """Return the (most recent) pointsliceid from an alias."""
         xref = f"CEVAC_{bldgsname}_{metric}_XREF"
+        pxref = f"CEVAC_{bldgsname}_{metric}_PXREF"
         if self.table_exists(xref):
             data = pd.read_sql_query(
-                f"SELECT PointSliceID, Floor FROM {xref} "
-                f"WHERE ALIAS = '{alias}'",
+                f"SELECT px.PointSliceID, x.FLOOR "
+                f"FROM {pxref} as px "
+                f"FULL OUTER JOIN {xref} as x "
+                f"ON x.PointSliceID = px.PointSliceID", 
                 self.conn
             )
-            return (data["PointSliceID"][0], data["Floor"][0])
-        return "?", ""
+            # f"SELECT PointSliceID, Floor FROM {xref} "
+            # f"WHERE ALIAS = '{alias}'",
+            return (data["PointSliceID"][0], str(data["FLOOR"][0]))
+        return ("?", "")
 
     def check_numerical_alias(self, data, i, alert, building):
         """Check numerical alias alert."""
@@ -654,9 +687,47 @@ class Alerts:
         """Get building D name from building S name."""
         return self.sname_to_dname.get(buildingsname, buildingsname)
 
+    def get_queue_buildings(self):
+        data = pd.read_sql_query(
+            "SELECT * FROM CEVAC_ALERT_QUEUE",
+            self.conn
+        )
+        return data
+
+    def queue_buildings_match(self, buildings, metric, age):
+        qb = []
+        print(self.queue_buildings)
+        for i in range(len(self.queue_buildings)):
+            if (
+                    self.queue_buildings["Age"][i] == age and
+                    self.queue_buildings["Metric"][i] == metric
+            ):
+                qb.append(self.queue_buildings["BuildingSName"][i])
+                self.remove_qids.add(self.queue_buildings["QID"][i])
+        print(f"QB {qb}")
+        matching_buildings = list(
+            set(qb) & set(buildings)
+        )
+        print(f"Matching Queue Buildings {matching_buildings}")
+        return matching_buildings
+
+    def erase_queue(self):
+        if not self.queue:
+            return None
+        cursor = self.conn.cursor()
+        for QID in self.remove_qids:
+            cursor.execute(
+                f"DELETE FROM CEVAC_ALERT_QUEUE "
+                f"WHERE QID = {QID}"
+            )
+        cursor.commit()
+        cursor.close()
+        return None
+
     def __del__(self):
         """Deconstructor."""
-        self.conn.close()
+        # self.conn.close()
+        return 
 
 
 class Anomaly:
@@ -888,6 +959,8 @@ if __name__ == "__main__":
     
     if "y" in do_commit and "n" not in do_commit:
         all_alerts.send()
+
+    all_alerts.conn.close()
         
     print("FINISHED")
 
