@@ -27,7 +27,7 @@ to_list = {
     "Drewboi": "abemery@g.clemson.edu",
     "Tyler Piel": "tpiel@g.clemson.edu",
     "Tim Howard": "timh@clemson.edu",
-    "Dhruv Jain": "djain@clemson.edu",
+    #  "Dhruv Jain": "djain@clemson.edu",
     "FILE": FILE_FPATH,
 }
 emergency_to_list = {

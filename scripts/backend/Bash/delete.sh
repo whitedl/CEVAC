@@ -81,6 +81,8 @@ for t in "${tables_array[@]}"; do
     /cevac/scripts/log_error.sh "$error" "$t"
     exit 1
   fi
+  ## Continue so that we don't attempt to drop the same table twice
+  [ "$t" == "$t_CACHE" ] && continue
   if ! /cevac/scripts/exec_sql.sh "$c_sql" ; then
     error="Error: Could not drop $t_CACHE"
     /cevac/scripts/log_error.sh "$error" "$t_CACHE"

@@ -78,7 +78,9 @@
             <ul id="table_actions_list">
               <li><a href="#" id="view_stats_button" onclick="view_stats_button_click()">View Latest Statistics</a></li>
               <li><a href="#" id="view_latest_button" onclick="view_latest_button_click()">View Latest</a></li>
+              <li><a href="#" id="view_live_button" onclick="view_live_button_click()">View Live</a></li>
               <li><a href="#" id="plot_latest_button" onclick="plot_latest_button_click()">Plot Latest</a></li>
+              <li><a href="#" id="plot_live_button" onclick="plot_live_button_click()">Plot Live</a></li>
               <li><a href="#" id="view_day_button" onclick="view_day_button_click()">View Last 24 Hours</a></li>
             </ul>
           </div>
