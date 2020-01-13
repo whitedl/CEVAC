@@ -50,7 +50,7 @@ class Alerts:
         self.occ = Occupancy(self.conn)
         self.par = Parameters(self.conn)  
         self.known_issues = Known_Issues(self.conn)
-        self.eid_handler = EventID_Handler()
+        self.eid_handler = EventID_Handler(self.conn)
 
         self.verbose = verbose
         self.anomalies = []
@@ -231,7 +231,8 @@ class Alerts:
             logging.info(
                 f"ALERT SYSTEM FINISHED"
             )
-
+        if self.verbose:
+            print(self.eid_handler.changes())
 
     def send(self):
         """Send anomalies to sql."""
@@ -260,7 +261,9 @@ class Alerts:
         self.erase_queue()
         
         # Write event IDs
-        self.write_json_generic() 
+        #self.write_json_generic()
+        self.eid_handler.commit_removes()
+        self.eid_handler.commit_adds()
 
         # Send each anomaly if it is not a known issue
         cursor = self.conn.cursor()
@@ -419,12 +422,13 @@ class Alerts:
         elif "=" in conditions or "==" in conditions:
             send_alert = (value == compare_value)
 
+        
+        psid, floor = self.get_psid_from_alias(
+            data["Alias"][i],
+            building,
+            alert["metric"]
+        )
         if send_alert:
-            psid, floor = self.get_psid_from_alias(
-                data["Alias"][i],
-                building,
-                alert["metric"]
-            )
             message = self.replace_generic(
                 alert['message'],
                 alert,
@@ -448,6 +452,12 @@ class Alerts:
                     self.get_buildingdname(building),
                     floor=str(floor),
                 )
+            )
+        else:
+            self.eid_handler.remove_event_id(
+                data["Alias"][i],
+                psid,
+                alert,
             )
         return None
 
@@ -522,10 +532,11 @@ class Alerts:
                         room_vals["HeatingSP"] >
                         room_vals[Alias_Temp])
 
+        
+        psid, floor = self.get_psid_from_alias(
+            room_vals["name"], building, alert['metric']
+        )
         if send_alert:
-            psid, floor = self.get_psid_from_alias(
-                room_vals["name"], building, alert['metric']
-            )
             message = self.replace_generic(
                 alert['message'],
                 alert,
@@ -557,6 +568,12 @@ class Alerts:
                     self.get_buildingdname(building),
                     floor=str(floor),
                 )
+            )
+        else:
+            self.eid_handler.remove_event_id(
+                room_vals["name"],
+                psid,
+                alert
             )
 
         return None
@@ -640,8 +657,7 @@ class Alerts:
                 )
             )
 
-        return None
-        
+        return None 
 
     def num_decom_anomalies(self):
         num = 0
@@ -769,7 +785,10 @@ class Occupancy:
 
     def __init__(self, conn):
         """Initialize building_occupied map."""
-        data = pd.read_sql_query("SELECT * FROM CEVAC_OCCUPANCY", conn)
+        data = pd.read_sql_query(
+            "SELECT * FROM CEVAC_OCCUPANCY", conn
+        )
+        
         self.building_occupied = {"*": False}
         for i in range(len(data)):
             crontab = (f"{data['Minutes'][i]} {data['Hour'][i]} "
@@ -902,17 +921,73 @@ class Known_Issues:
 
 class EventID_Handler:
     """Ease use of event IDs."""
-    def __init__(self):
+    def __init__(self, conn):
         self.json_oc = "/cevac/cron/alert_log_oc.json"
         self.json_unoc = "/cevac/cron/alert_log_unoc.json"
         self.json_files = [
             self.json_oc,
             self.json_unoc,
         ]
-        self.max_id = 0
         self.new_events = {}
-        self.old_events = {}
-        self.parse_json()
+        self.conn = conn
+        self.data = pd.read_sql_query(
+            f"SELECT * FROM CEVAC_ALERTS_EVENTS_IDS",
+            self.conn
+        )
+        self.max_id = self.get_max_id()
+        self.event_to_id = self.get_event_to_id(self.data)
+        self.remove_ids = []
+
+    def remove_event_id(self, alias, psid, alert):
+        name = f"{alias} {psid} {alert['type']}"
+        if name in self.event_to_id:
+            self.remove_ids.append(self.event_to_id[name])
+        return None
+
+    def commit_removes(self):
+        cursor = self.conn.cursor()
+        for eid in self.remove_ids:
+            cursor.execute(
+                f"DELETE FROM CEVAC_ALERTS_EVENTS_IDS "
+                f"WHERE EventID = {eid}"
+            )
+            cursor.commit()
+        cursor.close()
+        return None
+
+    def add_event_id(self, name, eid):
+        self.new_events[name] = eid
+        return None
+
+    def commit_adds(self):
+        cursor = self.conn.cursor()
+        for name in self.new_events:
+            eid = self.new_events[name]
+            cursor.execute(
+                f"INSERT INTO CEVAC_ALERTS_EVENTS_IDS "
+                f"(EventName, EventTID) "
+                f"VALUES ('{str(name)}', {int(eid)})"
+            )
+            cursor.commit()
+        cursor.close()
+        return None
+
+    def get_event_to_id(self, data):
+        """Return map of event to id"""
+        d = {}
+        for i in range(len(data)):
+            d[data["EventName"][i]] = data["EventID"][i]
+        return d
+
+    def get_max_id(self):
+        so_far = 1
+        for f in self.json_files:
+            d = json.load(open(f, "r"))
+            nums = [d[key] for key in d]
+            so_far = max(so_far, *nums)
+        for eid in self.data["EventID"]:
+            so_far = max(so_far, eid)
+        return so_far + 1
 
     def assign_event_id(self, alert, alias, psid):
         """Assign event id."""
@@ -920,42 +995,19 @@ class EventID_Handler:
             key = "f{alias} All Clear"
         else:
             key = f"{alias} {psid} {alert['type']}"
-        event_id = self.max_id
-        if key in self.old_events:
-            event_id = self.old_events[key]
-            self.new_events[key] = event_id
+        if key in self.event_to_id:
+            return self.event_to_id[key]
         else:
+            this_id = self.max_id
             self.max_id += 1
-            self.new_events[key] = event_id
-        return event_id
+            self.add_event_id(key, this_id)
+            return this_id
 
-    def write_json_generic(self, new_events, next_id):
-        """Write json independent of time."""
-        new_events["next_id"] = next_id
-        if self.occ.is_occupied():
-            f = open(self.json_oc, "w")
-        else:
-            f = open(self.json_unoc, "w")
-        f.write(json.dumps(new_events))
-        f.close()
-        return None
-
-    def parse_json(self):
-        """Parse json(s) for cron use."""
-        new_json = {}
-        for filename in self.json_files:
-            f = open(filename, "r")
-            line = f.readlines()[0]
-            new_json.update(json.loads(line))
-            nid = new_json["next_id"]
-            self.max_id = max(nid, self.max_id)
-            f.close()
-        self.old_events = new_json
-        return None
-
-    def get_message(self, anomaly):
-        return ""
-
+    def changes(self):
+        mess = "EVENTIDS CHANGES: \n"
+        mess += f"Adding {self.new_events}\n"
+        mess += f"Removing {self.remove_ids}"
+        return mess
 
 def rebuild_broken_cache(table, conn):
     """Rebuild a broken cache."""
