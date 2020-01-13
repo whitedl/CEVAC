@@ -3,10 +3,10 @@
 Main script for CEVAC alert sytem.
 """
 
-from tools import string_to_bool, verbose_print
-import alerts
-import email_handler
-import ml
+from tools.tools import string_to_bool, verbose_print
+from alerts import alerts
+from emails import email_handler
+from machine_learning import ml
 
 import datetime
 import argparse
@@ -22,6 +22,11 @@ parser = argparse.ArgumentParser(
         "via the command line, as opposed to being "
         "burried in scripts."
     )
+)
+parser.add_argument(
+    "--debug", "-D", "-d",
+    default=False, action="store_true",
+    help="Runs script in debug where possible."
 )
 parser.add_argument(
     "--log", "-L", "-l",
@@ -97,6 +102,9 @@ parser.add_argument(
 
 
 parsed_args = parser.parse_args()
+
+# DEBUG argument
+DEBUG = parsed_args.debug
 
 # Determines whether or not to write a log and keep track of event id's
 LOG = string_to_bool(parsed_args.log)
@@ -191,7 +199,7 @@ if __name__ == "__main__":
             conn=conn
         )
         if SEND_EMAIL:
-            email_setup.send()
+            email_setup.send(debug=DEBUG)
         if UPDATE_WEB:
             email_setup.write_to_file()
         verbose_print(VERBOSE, "EMAIL is True")

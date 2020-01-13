@@ -13,7 +13,6 @@ import pandas as pd
 import pyodbc
 import base64
 import sys
-from tools import verbose_print
 
 FILE_FPATH = "/cevac/cron/email/page/issues.html"
 email = "cevac5733@gmail.com"
@@ -35,8 +34,11 @@ emergency_to_list = {
     "Bennett Meares": "bmeares@g.clemson.edu",
     "Tim Howard": "timh@clemson.edu",
 }
+debug_to_list = {
+    "DEBUG Hall": "hchall@g.clemson.edu"
+}
 
-f = open("html/alert_email.html", "r")
+f = open("emails/html/alert_email.html", "r")
 page = Template("".join(f.readlines()))
 
 
@@ -49,7 +51,7 @@ def encode64(image_fpath):
     ).decode('utf-8')
 
 
-pic_path = "pics/"
+pic_path = "emails/pics/"
 hard_html_pic_path = "/cevac_alerts/pics/"
 metrics = {
     "TEMP": {
@@ -220,7 +222,7 @@ class Email:
         real_html += "</div></body></html>"
         html_file.write(real_html)
 
-    def send(self):
+    def send(self, debug=False):
         """Do main function."""
         # Get alerts from the past day
         # self.rebuild_events() TODO?
@@ -277,8 +279,16 @@ class Email:
 
         subject = (f"CEVAC alert log from {yesterday_etc_str} to "
                    f"{now_etc_str}")
-        self.email_message(email, password, to_list,
-                           total_msg, subject)
+        if not debug:
+            self.email_message(
+                email, password, to_list,
+                total_msg, subject
+            )
+        else:
+            self.email_message(
+                email, password, debug_to_list,
+                total_msg, subject
+            )
         
 
     def rebuild_events(self):
@@ -290,7 +300,8 @@ class Email:
         cursor.commit()
         self.conn.commit()
         cursor.close()
-        verbose_print(self.verbose, command)
+        if self.verbose:
+            print(command)
         return None
 
     def email_message(self, email, password, to_list, message, subject):
@@ -445,10 +456,14 @@ class Alert_Log:
 
 
 if __name__ == "__main__":
-    todo = input("email [a]ll, [u]pdate webpage: ").lower()
+    import os
+    print(os.listdir())
+    todo = input("email [a]ll, [d]ebug email, [u]pdate webpage: ").lower()
     email_setup = Email(verbose=True)
     if 'a' in todo:
         email_setup.send()
+    if 'd' in todo:
+        email_setup.send(debug=True)
     if 'u' in todo:
         email_setup.write_to_file()
 

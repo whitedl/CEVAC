@@ -7,6 +7,34 @@ All processes can be run from `main.py` with varying flags.
 ## Executing
 ### Options and Flags
 * Flags are enumerated via `python3 main.py -h`
+```
+usage: main.py [-h] [--log LOG] [--alerts] [--times TIMES] [--send] [--email]
+               [--web] [--emailtime EMAILTIME] [--cache] [--machinelearning]
+               [--queue] [--verbose]
+
+Alert System v2. This alert system is heavily modular, allowing options to be
+passed via the command line, as opposed to being burried in scripts.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --log LOG, -L LOG, -l LOG
+                        set log to True or False
+  --alerts, -a, -A      check alerts currently
+  --times TIMES, -t TIMES, -T TIMES
+                        if set, checks alerts for different time periods where
+                        possible
+  --send, -s, -S        send anomalies to our database
+  --email, -e, -E       send email of anomalies
+  --web, -w, -W         update email as web page (wfic-
+                        cevac1/cevac_alerts/alerts.html)
+  --emailtime EMAILTIME, -et EMAILTIME, -ET EMAILTIME
+                        set hours of anomalies to send via email[Default=24]
+  --cache, -c, -C       update the cache before checking alerts
+  --machinelearning, -ml, -ML
+                        run machine learning algorithm after checking alerts
+  --queue, -q, -Q       read queue for alerts instead of all alerts
+  --verbose, -v, -V     printing
+```
 
 ## About
 ### Checking Anomalies

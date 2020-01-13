@@ -23,7 +23,7 @@ from croniter import croniter
 import pyodbc
 import pandas as pd
 import sys
-from tools import verbose_print
+from tools.tools import verbose_print
 
 ENERGY_LOGS_LOCATION = "/mnt/bldg/Campus_Power/logs/"
 
@@ -50,13 +50,15 @@ class Alerts:
         self.occ = Occupancy(self.conn)
         self.par = Parameters(self.conn)  
         self.known_issues = Known_Issues(self.conn)
+        self.eid_handler = EventID_Handler()
 
         self.verbose = verbose
         self.anomalies = []
         
         # For efficiency, only make each query once
         self.query_to_data = {}
-        
+
+        """
         self.json_oc = "/cevac/cron/alert_log_oc.json"
         self.json_unoc = "/cevac/cron/alert_log_unoc.json"
         self.json_files = [
@@ -67,6 +69,7 @@ class Alerts:
         self.new_events = {}
         self.old_events = {}
         self.parse_json()
+        """
 
         # Queue
         self.queue = queue
@@ -122,6 +125,7 @@ class Alerts:
                         continue
                     query += self.add_specific_aliases(alert)
                     data = self.safe_data(query)
+                    print(data, type(data))
                     for i in range(len(data)):
                         self.check_numerical_alias(
                             data, i, alert, building
@@ -256,7 +260,7 @@ class Alerts:
         self.erase_queue()
         
         # Write event IDs
-        self.write_json_generic(self.new_events, self.max_id) 
+        self.write_json_generic() 
 
         # Send each anomaly if it is not a known issue
         cursor = self.conn.cursor()
@@ -272,13 +276,15 @@ class Alerts:
             )
 
     def safe_data(self, query):
-        """Return data if prevviously requested.
+        """Return data if previously requested.
         
         Must check if table exists prior.
         """
         if query in self.query_to_data:
-            return self.query_to_data
-        return pd.read_sql_query(query, self.conn)
+            return self.query_to_data[query]
+        data = pd.read_sql_query(query, self.conn)
+        self.query_to_data[query] = data
+        return data
 
     def table_exists(self, table):
         cursor = self.conn.cursor()
@@ -288,29 +294,13 @@ class Alerts:
         cursor.close()
         return False
 
-    def write_json_generic(self, new_events, next_id):
+    def write_json_generic(self, new_events):
         """Write json independent of time."""
-        new_events["next_id"] = next_id
-        if self.occ.is_occupied():
-            f = open(self.json_oc, "w")
-        else:
-            f = open(self.json_unoc, "w")
-        f.write(json.dumps(new_events))
-        f.close()
-        return None
+        return self.eid_handler.write_json_generic(new_events, next_id)
 
     def parse_json(self):
         """Parse json(s) for cron use."""
-        new_json = {}
-        for filename in self.json_files:
-            f = open(filename, "r")
-            line = f.readlines()[0]
-            new_json.update(json.loads(line))
-            nid = new_json["next_id"]
-            self.max_id = max(nid, self.max_id)
-            f.close()
-        self.old_events = new_json
-        return None
+        return self.eid_handler.parse_json()
 
     def replace_generic(self, message, alert, context):
         """Return string with $ start at key replaced with replacement.
@@ -370,18 +360,7 @@ class Alerts:
         
     def assign_event_id(self, alert, alias, psid):
         """Assign event id."""
-        if str(alert) == "All Clear":
-            key = "f{alias} All Clear"
-        else:
-            key = f"{alias} {psid} {alert['type']}"
-        event_id = self.max_id
-        if key in self.old_events:
-            event_id = self.old_events[key]
-            self.new_events[key] = event_id
-        else:
-            self.max_id += 1
-            self.new_events[key] = event_id
-        return event_id
+        return self.eid_handler.assign_event_id(alert, alias, psid)
 
     def get_alias_or_psid(self, table_name):
         """Return whether a table uses alias or point slice id."""
@@ -731,9 +710,11 @@ class Alerts:
 
 
 class Anomaly:
-    def __init__(self, message, metric, building, eventid,
-                 priority, aliaspsid, alert_name, buildingdname,
-                 floor=""):
+    def __init__(
+            self, message, metric, building, eventid,
+            priority, aliaspsid, alert_name, buildingdname,
+            floor=""
+    ):
         self.message = message
         self.metric = metric
         self.building = building
@@ -746,6 +727,8 @@ class Anomaly:
 
         # Optional, not always available
         self.floor = floor
+
+        self.original = True
 
     def send(self, cursor):
         stat = (
@@ -916,6 +899,62 @@ class Known_Issues:
 
     def check_aliaspsid(self, aliaspsid):
         return (aliaspsid in self.alias_psid)
+
+class EventID_Handler:
+    """Ease use of event IDs."""
+    def __init__(self):
+        self.json_oc = "/cevac/cron/alert_log_oc.json"
+        self.json_unoc = "/cevac/cron/alert_log_unoc.json"
+        self.json_files = [
+            self.json_oc,
+            self.json_unoc,
+        ]
+        self.max_id = 0
+        self.new_events = {}
+        self.old_events = {}
+        self.parse_json()
+
+    def assign_event_id(self, alert, alias, psid):
+        """Assign event id."""
+        if str(alert) == "All Clear":
+            key = "f{alias} All Clear"
+        else:
+            key = f"{alias} {psid} {alert['type']}"
+        event_id = self.max_id
+        if key in self.old_events:
+            event_id = self.old_events[key]
+            self.new_events[key] = event_id
+        else:
+            self.max_id += 1
+            self.new_events[key] = event_id
+        return event_id
+
+    def write_json_generic(self, new_events, next_id):
+        """Write json independent of time."""
+        new_events["next_id"] = next_id
+        if self.occ.is_occupied():
+            f = open(self.json_oc, "w")
+        else:
+            f = open(self.json_unoc, "w")
+        f.write(json.dumps(new_events))
+        f.close()
+        return None
+
+    def parse_json(self):
+        """Parse json(s) for cron use."""
+        new_json = {}
+        for filename in self.json_files:
+            f = open(filename, "r")
+            line = f.readlines()[0]
+            new_json.update(json.loads(line))
+            nid = new_json["next_id"]
+            self.max_id = max(nid, self.max_id)
+            f.close()
+        self.old_events = new_json
+        return None
+
+    def get_message(self, anomaly):
+        return ""
 
 
 def rebuild_broken_cache(table, conn):
