@@ -1,7 +1,6 @@
 """Machine learning algorithm."""
 import pyodbc
 import pandas as pd
-from tools import verbose_print
 
 
 class ML:
@@ -37,7 +36,6 @@ class ML:
             "SELECT * FROM CEVAC_ALERTS_EDGES",
             self.conn
         )
-        verbose_print(self.verbose, data.columns)
         self.edges_to_update = {}
         for i in range(len(data)):
             if (data["Node1"][i] in self.anomalies or
@@ -52,22 +50,12 @@ class ML:
                 e = Edge(i, data)
                 self.edges_to_update[combined_aliaspsid1] = e
                 self.edges_to_update[combined_aliaspsid2] = e
-        verbose_print(
-            self.verbose,
-            f"NUM EDGES TO UPDATE (SQL): "
-            f"{len(self.edges_to_update)}"
-        )
 
 
     def do_ml(self):
         """Run main ML process."""
         self.add_new_edges()
         self.adjust_weights()
-        verbose_print(
-            self.verbose,
-            f"EDGES TO UPDATE (TOT): "
-            f"{len(self.edges_to_update)}"
-        )
 
     def add_new_edges(self):
         """Manage new nodes from alerts.
