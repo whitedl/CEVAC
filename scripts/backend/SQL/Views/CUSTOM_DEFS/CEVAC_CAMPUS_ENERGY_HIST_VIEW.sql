@@ -22,3 +22,5 @@ change AS (
 	INNER JOIN t_ids AS t2 ON t1.T_ID = t2.T_ID + 1 AND t1.Alias = t2.Alias
 )
  SELECT (Change / hour_offset) AS 'change_over_time',* FROM change
+ --SELECT * FROM LJ_sum
+ ORDER BY ETDateTime DESC

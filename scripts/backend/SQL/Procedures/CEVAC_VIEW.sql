@@ -59,6 +59,8 @@ DECLARE @LATEST NVARCHAR(MAX);
 DECLARE @LATEST_FULL NVARCHAR(MAX);
 DECLARE @LATEST_BROKEN NVARCHAR(MAX);
 DECLARE @OLDEST NVARCHAR(MAX);
+DECLARE @LIVE NVARCHAR(MAX);
+DECLARE @LIVE_RAW NVARCHAR(MAX);
 DECLARE @XREF NVARCHAR(MAX);
 DECLARE @PXREF NVARCHAR(MAX);
 DECLARE @TABLE_CONFIG NVARCHAR(MAX);
@@ -77,7 +79,8 @@ SET @LATEST = 'CEVAC_' + @Building + '_' + @Metric + '_LATEST';
 SET @LATEST_FULL = 'CEVAC_' + @Building + '_' + @Metric + '_LATEST_FULL';
 SET @LATEST_BROKEN = 'CEVAC_' + @Building + '_' + @Metric + '_LATEST_BROKEN';
 SET @OLDEST = 'CEVAC_' + @Building + '_' + @Metric + '_OLDEST';
-
+SET @LIVE = 'CEVAC_' + @Building + '_' + @Metric + '_LIVE';
+SET @LIVE_RAW = 'CEVAC_' + @Building + '_' + @Metric + '_LIVE_RAW';
 -- Set Age to X_VIEW for HIST and DAY tables
 IF @Age = 'HIST' OR @Age = 'DAY' BEGIN
 	SET @Age = @Age + '_VIEW';
@@ -547,6 +550,7 @@ ELSE IF @Age LIKE '%LATEST%' BEGIN
 		';
 		SET @autoLASR = 0;
 	END
+END
 
 --------------------------------------
 -- AGE: OLDEST
@@ -555,8 +559,7 @@ ELSE IF @Age LIKE '%LATEST%' BEGIN
 -- HIST
 --
 --------------------------------------
--- Note: Requires HIST
-END ELSE IF @Age LIKE '%OLDEST%' BEGIN
+ELSE IF @Age LIKE '%OLDEST%' BEGIN
 	SET @Dependencies_list = @HIST;
 	-- Determine data source for _OLDEST
 	DECLARE @Oldest_source NVARCHAR(50);
@@ -580,6 +583,26 @@ END ELSE IF @Age LIKE '%OLDEST%' BEGIN
 	';
 
 END -- end OLDEST
+
+--------------------------------------
+-- AGE: LIVE
+--
+-- Requires:
+-- LIVE_RAW
+--
+--------------------------------------
+ELSE IF @Age LIKE '%LIVE%' BEGIN
+	SET @Dependencies_list = @LIVE_RAW;
+	-- Determine data source for _OLDEST
+
+	SET @Create_View = '
+	CREATE VIEW ' + @Table_name + ' AS
+	SELECT px.' + @RemotePSIDName + ', px.Alias AS Alias, lr.' + @RemoteUTCName + ', dbo.ConvertUTCToLocal(lr.' + @RemoteUTCName + ') AS ETDateTime, lr.' + @RemoteActualValueName + ' 
+	FROM ' + @LIVE_RAW + ' AS lr
+	INNER JOIN ' + @PXREF + ' AS px ON px.' + @RemotePSIDName + ' = lr.' + @RemotePSIDName + '
+	';
+
+END -- end LIVE
 
 --------------------------------------
 -- CUSTOM Tables
