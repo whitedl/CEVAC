@@ -1,15 +1,7 @@
-WITH all_utc AS (
-	SELECT UTCDateTime, COUNT(UTCDateTime) AS UTCCount FROM CEVAC_WATT_POWER_HIST
-	WHERE Alias LIKE 'Building%'
-	GROUP BY UTCDateTime
-), original AS (
-	SELECT UTCDateTime, dbo.ConvertUTCToLocal(UTCDateTime) AS ETDateTime, SUM(ActualValue) AS Total_Usage
-	FROM
-	(SELECT * FROM CEVAC_WATT_POWER_HIST
-	 WHERE Alias LIKE 'Building%'
-	 AND UTCDateTime IN (SELECT UTCDateTime FROM all_utc)
-	 ) AS Building
-	GROUP BY UTCDateTime
-)
-SELECT *
-FROM original
+SELECT UTCDateTime, dbo.ConvertUTCToLocal(UTCDateTime) AS 'ETDateTime', SUM(ActualValue) AS 'Total_Usage'
+FROM CEVAC_WATT_POWER_HIST AS ph
+INNER JOIN CEVAC_WATT_POWER_XREF AS x ON x.PointSliceID = ph.PointSliceID
+INNER JOIN CEVAC_WATT_POWER_QUORUM AS q ON q.agg_name = 'Floor' AND q.agg_key = x.Floor AND ph.UTCDateTime >= q.begin_UTC AND ph.UTCDateTime < q.end_UTC
+WHERE x.Floor = 'Building'
+GROUP BY UTCDateTime, q.PSID_count
+HAVING q.PSID_count <= COUNT(ph.PointSliceID)
