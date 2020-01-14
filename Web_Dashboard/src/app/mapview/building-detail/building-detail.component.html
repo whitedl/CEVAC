@@ -1,0 +1,31 @@
+<mat-expansion-panel expanded="{{ building$ }}" class="scrollableExpansion">
+  <mat-expansion-panel-header class="mat-child-overflow">
+    <mat-panel-title>
+      {{ building$.BLDG_NAME ? building$.BLDG_NAME : building$.Short_Name }}
+    </mat-panel-title>
+  </mat-expansion-panel-header>
+  <ng-template matExpansionPanelContent>
+    <mat-tab-group dynamicHeight>
+      <mat-tab label="General">
+        <a
+          *ngIf="building$.reportlink"
+          href="{{ building$.reportlink }}"
+          target="_blank"
+        >
+          Report Link
+        </a>
+        <div *ngFor="let obj of building$ | keyvalue">
+          {{ obj.key }}: {{ obj.value }}
+        </div>
+      </mat-tab>
+      <mat-tab
+        *ngFor="let tab of building$.metrics | keyvalue"
+        [label]="tab.key"
+      >
+        <ng-container *ngFor="let key of measureFields">
+          <div>{{ key }}: {{ tab.value[key] }}</div>
+        </ng-container>
+      </mat-tab>
+    </mat-tab-group>
+  </ng-template>
+</mat-expansion-panel>
