@@ -5,12 +5,12 @@
 Miscellaneous utilities
 """
 import pandas as pd
-from SQLConnector import SQLConnector
+from CEVAC.SQLConnector import SQLConnector
 from Facilities import MetasysConnector
-from Pipe import Pipe
+from CEVAC.Pipe import Pipe
 import time
 from multiprocessing import Process
-from funcs import *
+from CEVAC.funcs import *
 
 def build_psid_oid_map():
     wfic_cevac = SQLConnector(flavor='mssql')
@@ -83,10 +83,11 @@ def getPipes(BuildingSName=[],Metric=[],params={},connector=None) -> list:
 
     return pipes
  
-def live(BuildingSName=[], Metric=[], connector=None, metasys=None, loop=False):
+def live(BuildingSName=[], Metric=[], connector=None, metasys=None, loop=False, params={}, **kw):
     if connector == None: connector = SQLConnector(flavor='mssql')
     if metasys == None: metasys = MetasysConnector()
-    pipes = getPipes(BuildingSName, Metric, {"isCustom":0}, connector=connector)
+    params.update({'isCustom':0})
+    pipes = getPipes(BuildingSName, Metric, params, connector=connector)
     run = True
     wait = False
     wait_msg, update_msg = "",""
@@ -107,7 +108,7 @@ def live(BuildingSName=[], Metric=[], connector=None, metasys=None, loop=False):
             print(f'\r{update_msg: <{max(len(wait_msg),len(old_update_msg))}}',end="\n")
             run = loop
 
-def trend_samples(BuildingSName=[], Metric=[], connector=None, metasys=None, startTime=None, endTime=None):
+def trend_samples(BuildingSName=[], Metric=[], connector=None, metasys=None, startTime=None, endTime=None, **kw):
     if connector == None: connector = SQLConnector(flavor='mssql')
     if metasys == None: metasys = MetasysConnector()
     BuildingSName, Metric = make_lists(BuildingSName,Metric)
@@ -116,3 +117,20 @@ def trend_samples(BuildingSName=[], Metric=[], connector=None, metasys=None, sta
         p.get_trend_samples(connector=connector,metasys=metasys,
                 startTime=startTime, endTime=endTime)
 
+def lasr_batch(BuildingSName=[], Metric=[], Age=[], connector=None,
+        runsas=False, reset=False, flush=False, params={} 
+        ):
+    if connector == None: connector = SQLConnector(flavor='mssql')
+    BuildingSName, Metric, Age = make_lists(BuildingSName, Metric, Age)
+    pipes = getPipes(BuildingSName, Metric, params)
+    ## append tables
+    ## loop through pipes. if customLASR, run CREATE_VIEW for the HIST_LASR table
+    ##   call lasr_append for the corresponding Age
+    ##   pass runsas, reset, and flush to lasr_append
+
+def lasr_append(BuildingSName=[], Metric=[], Age=[], connector=None,
+        runsas=False, reset=False, flush=False):
+    print('woah')
+
+def bootstrap(**kw):
+    print(kw)

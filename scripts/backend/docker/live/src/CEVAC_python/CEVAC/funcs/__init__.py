@@ -26,4 +26,11 @@ def roundTime(dt=None, dateDelta=datetime.timedelta(minutes=1)):
     rounding = (seconds+roundTo/2) // roundTo * roundTo
     return dt + datetime.timedelta(0,rounding-seconds,-dt.microsecond)
 
-
+def parse_params(s):
+    d = {}
+    for a in s.split(','):
+        vals = a.split(':')
+        key = vals[0]
+        for val in vals[1:]:
+            d[key] = val
+    return d

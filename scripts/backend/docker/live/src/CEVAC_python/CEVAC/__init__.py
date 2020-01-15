@@ -1,3 +1,4 @@
 from .SQLConnector import SQLConnector
-#  from .Table import Table
 from .Pipe import Pipe
+#  from .config import config
+#  import funcs

@@ -4,7 +4,7 @@
 """
 
 """
-from MetasysConnector import MetasysConnector
+from Facilities.MetasysConnector import MetasysConnector
 from urllib import parse
 
 def main():
@@ -13,7 +13,8 @@ def main():
     #  PointName = "ClemsonADX:ACAD-SUCCESS/Field Bus1.VAV-115.ZN-T"
     #  PointName = "ClemsonADX:Hinson-Plant"
     #  PointName = "ClemsonADX:ACAD-SUCCESS"
-    ObjectID = m.fqr_lookup(PointName)
+    #  ObjectID = m.fqr_lookup(PointName)
+    ObjectID = "c94d426d-8c51-523d-a149-1e0d15be5ca2"
     #  ObjectID = 'c72d1a58-3355-57a6-b9f1-e2e2d9c58db5'
     pv = m.presentValue(ObjectID)
     print(pv)
