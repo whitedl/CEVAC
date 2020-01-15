@@ -23,22 +23,29 @@ from croniter import croniter
 import pyodbc
 import pandas as pd
 import sys
-from tools.tools import verbose_print
+from tools import verbose_print
 
 ENERGY_LOGS_LOCATION = "/mnt/bldg/Campus_Power/logs/"
 
 
 class Alerts:
     """Handler for all alerts."""
+    SKIP_STRING = None
 
-    def __init__(self, logging, UPDATE_CACHE, verbose=False,
-                 conn=None, queue=False):
+    def __init__(
+            self, logging, UPDATE_CACHE, verbose=False,
+            conn=None, queue=False, xref_only=True,
+            debug=False
+    ):
         """Initialize connection and other objects."""
         self.logging = logging
         self.UPDATE_CACHE = UPDATE_CACHE
+        self.verbose = verbose
+        self.debug = debug
         self.LOG = True
         if logging is None:
             self.LOG = False
+        self.xref_only = xref_only
             
         self.conn = conn
         if conn is None:
@@ -50,9 +57,10 @@ class Alerts:
         self.occ = Occupancy(self.conn)
         self.par = Parameters(self.conn)  
         self.known_issues = Known_Issues(self.conn)
-        self.eid_handler = EventID_Handler(self.conn)
+        self.eid_handler = EventID_Handler(
+            self.conn, debug=debug, verbose=self.verbose
+        )
 
-        self.verbose = verbose
         self.anomalies = []
         
         # For efficiency, only make each query once
@@ -110,7 +118,6 @@ class Alerts:
                         metric,
                         aggregation
                     )
-                print("CHECKING {buildings}")
                 for building in buildings:
                     if self.skip_unoccupied(building, alert):
                         continue
@@ -125,7 +132,6 @@ class Alerts:
                         continue
                     query += self.add_specific_aliases(alert)
                     data = self.safe_data(query)
-                    print(data, type(data))
                     for i in range(len(data)):
                         self.check_numerical_alias(
                             data, i, alert, building
@@ -375,20 +381,36 @@ class Alerts:
 
     def get_psid_from_alias(self, alias, bldgsname, metric):
         """Return the (most recent) pointsliceid from an alias."""
+        SKIP = (self.SKIP_STRING, self.SKIP_STRING)
         xref = f"CEVAC_{bldgsname}_{metric}_XREF"
         pxref = f"CEVAC_{bldgsname}_{metric}_PXREF"
-        if self.table_exists(xref):
-            data = pd.read_sql_query(
-                f"SELECT px.PointSliceID, x.FLOOR "
-                f"FROM {pxref} as px "
-                f"FULL OUTER JOIN {xref} as x "
-                f"ON x.PointSliceID = px.PointSliceID", 
-                self.conn
-            )
-            # f"SELECT PointSliceID, Floor FROM {xref} "
-            # f"WHERE ALIAS = '{alias}'",
-            return (data["PointSliceID"][0], str(data["FLOOR"][0]))
-        return ("?", "")
+        if not self.xref_only:
+            if self.table_exists(xref):
+                data = self.safe_data(
+                    f"SELECT px.PointSliceID, x.FLOOR "
+                    f"FROM {pxref} as px "
+                    f"FULL OUTER JOIN {xref} as x "
+                    f"ON x.PointSliceID = px.PointSliceID"
+                )
+                return (
+                    data["PointSliceID"][0], str(data["FLOOR"][0])
+                )
+            return SKIP
+        else:
+            if self.table_exists(xref):
+                data = self.safe_data(
+                    f"SELECT PointSliceID, Floor FROM {xref} "
+                    f"WHERE ALIAS = '{alias}'"
+                )
+                if len(data) == 0:
+                    return SKIP
+                return (
+                    data["PointSliceID"][0],
+                    str(data["Floor"][0])
+                )
+            else:
+                return SKIP
+
 
     def check_numerical_alias(self, data, i, alert, building):
         """Check numerical alias alert."""
@@ -428,6 +450,8 @@ class Alerts:
             building,
             alert["metric"]
         )
+        if psid is self.SKIP_STRING or floor is self.SKIP_STRING:
+            return None
         if send_alert:
             message = self.replace_generic(
                 alert['message'],
@@ -536,6 +560,8 @@ class Alerts:
         psid, floor = self.get_psid_from_alias(
             room_vals["name"], building, alert['metric']
         )
+        if psid is self.SKIP_STRING or floor is self.SKIP_STRING:
+            return None
         if send_alert:
             message = self.replace_generic(
                 alert['message'],
@@ -581,7 +607,13 @@ class Alerts:
     def check_time(self, data, alert, building):
         """Check time off since last report."""
         for i in range(len(data)):
-            psid = data["PointSliceID"][i]
+            #psid = data["PointSliceID"][i]
+            psid, floor = self.get_psid_from_alias(
+                data["Alias"][i], building, alert['metric']
+            )
+            if psid == None or floor == None:
+                # We don't care about sensors with no xref
+                continue
             now = datetime.datetime.utcnow()
             days_since = (now - data["UTCDateTime"][i]).days + 1
             message = self.replace_generic(
@@ -748,6 +780,21 @@ class Anomaly:
 
     def send(self, cursor):
         stat = (
+            f"IF EXISTS(SELECT TOP 1 EventID FROM "
+            f"CEVAC_ALL_ALERTS_EVENTS_HIST_RAW WHERE "
+            f"EventID = {self.eventid}) BEGIN "
+            f"UPDATE CEVAC_ALL_ALERTS_EVENTS_HIST_RAW "
+            f"SET AlertMessage = '{self.message}', "
+            f"latest_UTC = GETUTCDATE() "
+            f"WHERE EventID = {self.eventid}; "
+            f"END ELSE BEGIN "
+            f"INSERT INTO CEVAC_ALL_ALERTS_EVENTS_HIST_RAW "
+            f"(EventID, AlertType, AlertMessage, BuildingSName, "
+            f"Metric, latest_UTC) "
+            f"VALUES (?, ?, ?, ?, ?, GETUTCDATE()); END"
+        )
+        """
+        stat = (
             f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW "
             f"(AlertType, AlertMessage, Metric, BuildingSName, "
             f"UTCDateTime, Alias, EventID, BuildingDName) VALUES "
@@ -763,7 +810,17 @@ class Anomaly:
             self.eventid,
             self.buildingdname,
         ])
+        """
+        """
+        cursor.execute(stat, [
+            self.eventid,
+            self.priority,
+            self.message,
+            self.building,
+            self.metric
+        ])
         cursor.commit()
+        """
         
         return None
 
@@ -771,11 +828,11 @@ class Anomaly:
         sstr = (
             f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW"
             f"(AlertType, AlertMessage, Metric, BuildingSName, "
-            f"UTCDateTime, Alias, EventID, BuildingDName) "
+            f"UTCDateTime, Alias, EventID) "
             f"VALUES('{self.priority}', '{self.message}', "
             f"'{self.metric}', "
             f"'{self.building}', '{self.time}', '{self.aliaspsid}', "
-            f"'{self.eventid}', '{self.buildingdname}')"
+            f"'{self.eventid}')"
         )
         return sstr
 
@@ -864,11 +921,6 @@ class Parameters:
         self.alerted_buildings = {}
         self.metric_to_bldgs = self.get_active_buildings(conn)
 
-    def alert_parameters_str(self, parameter):
-        return (
-            f""
-        )
-
     def type_from_condition(self, condition):
         if "time" in condition.lower():
             return "time"
@@ -921,7 +973,10 @@ class Known_Issues:
 
 class EventID_Handler:
     """Ease use of event IDs."""
-    def __init__(self, conn):
+    def __init__(self, conn, debug=False, verbose=False):
+        self.debug = debug
+        self.verbose = verbose
+        
         self.json_oc = "/cevac/cron/alert_log_oc.json"
         self.json_unoc = "/cevac/cron/alert_log_unoc.json"
         self.json_files = [
@@ -947,11 +1002,19 @@ class EventID_Handler:
     def commit_removes(self):
         cursor = self.conn.cursor()
         for eid in self.remove_ids:
-            cursor.execute(
-                f"DELETE FROM CEVAC_ALERTS_EVENTS_IDS "
-                f"WHERE EventID = {eid}"
-            )
-            cursor.commit()
+            if not self.debug:
+                cursor.execute(
+                    f"DELETE FROM CEVAC_ALERTS_EVENTS_IDS "
+                    f"WHERE EventID = {eid}"
+                )
+                cursor.commit()
+            else:
+                verbose_print(
+                    self.verbose,
+                    f"DELETE FROM CEVAC_ALERTS_EVENTS_IDS "
+                    f"WHERE EventID = {eid}"
+                )
+        
         cursor.close()
         return None
 
@@ -963,12 +1026,20 @@ class EventID_Handler:
         cursor = self.conn.cursor()
         for name in self.new_events:
             eid = self.new_events[name]
-            cursor.execute(
-                f"INSERT INTO CEVAC_ALERTS_EVENTS_IDS "
-                f"(EventName, EventTID) "
-                f"VALUES ('{str(name)}', {int(eid)})"
-            )
-            cursor.commit()
+            if not self.debug:
+                cursor.execute(
+                    f"INSERT INTO CEVAC_ALERTS_EVENTS_IDS "
+                    f"(EventName, EventID) "
+                    f"VALUES ('{str(name)}', {int(eid)})"
+                )
+                cursor.commit()
+            else:
+                verbose_print(
+                    self.verbose,
+                    f"INSERT INTO CEVAC_ALERTS_EVENTS_IDS "
+                    f"(EventName, EventID) "
+                    f"VALUES ('{str(name)}', {int(eid)})"
+                )
         cursor.close()
         return None
 

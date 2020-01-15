@@ -30,7 +30,7 @@ parser.add_argument(
 )
 parser.add_argument(
     "--log", "-L", "-l",
-    default=True, action="store",
+    default=False, action="store",
     help="set log to True or False"
 )
 parser.add_argument(
@@ -167,7 +167,7 @@ if __name__ == "__main__":
     if CHECK_ALERTS or RUN_QUEUE:
         all_alerts = alerts.Alerts(logging, UPDATE_CACHE,
                                    verbose=VERBOSE, conn=conn,
-                                   queue=RUN_QUEUE
+                                   queue=RUN_QUEUE, debug=DEBUG
         )
         all_alerts.alert_system()
         verbose_print(VERBOSE, "CHECK_ALERTS is True")
