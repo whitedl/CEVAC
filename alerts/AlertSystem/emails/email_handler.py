@@ -111,6 +111,17 @@ metrics = {
     }
 }
 
+priority = {
+    "-1": "CEVAC",
+    -1 : "CEVAC",
+    "0": "N/A",
+    0 : "N/A",
+    "1": "Low",
+    1 : "Low",
+    "2": "High",
+    2 : "High",
+}
+
 
 class Email:
     """OO manage email."""
@@ -140,9 +151,9 @@ class Email:
             "SET @yesterday = DATEADD("
             "day, -1, GETDATE()); "
             "SELECT * FROM "
-            "CEVAC_ALL_ALERTS_EVENTS_LATEST "
-            "WHERE ETDateTime >= @yesterday "
-            "ORDER BY ETDateTime DESC"
+            "CEVAC_ALL_ALERTS_EVENTS_HIST_RAW "
+            "WHERE latest_UTC >= @yesterday "
+            "ORDER BY latest_UTC DESC"
         )
         alerts = pd.read_sql_query(
             query,
@@ -171,7 +182,8 @@ class Email:
 
         total_msg = ""
         for key in alert_gd:
-            total_msg += f'<h2 class=\"split\">{key.upper()}</h2>'
+            p = str(priority.get(key, key))
+            total_msg += f'<h2 class=\"split\">{p}</h2>'
             for building in alert_gd[key]:
                 total_msg += f"<h4>{building}</h4><table>"
                 for al in alert_gd[key][building]:
@@ -231,9 +243,9 @@ class Email:
             "SET @yesterday = DATEADD("
             "day, -1, GETDATE()); "
             "SELECT * FROM "
-            "CEVAC_ALL_ALERTS_EVENTS_LATEST "
-            "WHERE ETDateTime >= @yesterday "
-            "ORDER BY ETDateTime DESC"
+            "CEVAC_ALL_ALERTS_EVENTS_HIST_RAW "
+            "WHERE latest_UTC >= @yesterday "
+            "ORDER BY latest_UTC DESC"
         )
         alerts = pd.read_sql_query(
             query,
@@ -262,9 +274,10 @@ class Email:
 
         total_msg = ""
         for key in alert_gd:
-            if key.replace(" ","") == "0":
+            if key == 0:
                 continue
-            total_msg += f'<h2 class=\"split\">{key.upper()}</h2>'
+            p = str(priority.get(key, key))
+            total_msg += f'<h2 class=\"split\">{p}</h2>'
             for building in alert_gd[key]:
                 total_msg += f"<h4>{building}</h4><table>"
                 for al in alert_gd[key][building]:
@@ -383,14 +396,14 @@ class Alert_Log:
 
     def __init__(self, alerts, i):
         """Init."""
-        self.type = alerts["AlertType"][i].strip()
+        self.type = alerts["AlertType"][i]
         self.message = alerts["AlertMessage"][i].strip()
         self.metric = metrics["UNKNOWN"]["key"]
         if alerts["Metric"][i].strip() in metrics:
             self.metric = metrics[alerts["Metric"][i].strip()]["key"]
-        self.building = alerts["BuildingDName"][i].strip()
+        self.building = alerts["BuildingSName"][i].strip()
         self.acknowledged = alerts["Acknowledged"][i]
-        self.etc = alerts["ETDateTime"][i]  # self.time_of_sql(alert[7])
+        self.etc = alerts["latest_UTC"][i]  
         self.etc_str = self.etc.strftime("%m/%d/%y %I:%M %p")
         return None
 
