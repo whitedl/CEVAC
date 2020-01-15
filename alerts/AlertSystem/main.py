@@ -5,7 +5,7 @@ Main script for CEVAC alert sytem.
 
 from tools.tools import string_to_bool, verbose_print
 from alerts import alerts
-from emails import email_handler
+from emails import Email
 from machine_learning import ml
 
 import datetime
@@ -193,7 +193,7 @@ if __name__ == "__main__":
             all_alerts.send()
 
     if SEND_EMAIL or UPDATE_WEB:
-        email_setup = email_handler.Email(
+        email_setup = Email(
             hours=EMAIL_TIME,
             verbose=VERBOSE,
             conn=conn
