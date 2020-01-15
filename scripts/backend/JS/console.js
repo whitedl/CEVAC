@@ -171,6 +171,18 @@ function view_latest_button_click(){
   exemptArray = [document.getElementById('sql_output_div'),document.getElementById('download_button_div')]
   hide_output(exemptArray);
 }
+function view_live_button_click(){
+  hide_output();
+  button = document.getElementById('view_live_button');
+  document.getElementById('download_button').innerHTML = 'Download LIVE';
+  document.getElementById('download_button_div').style.display = 'block';
+  document.getElementById('Age_text').value = 'LIVE';
+  reset_buttons(button);
+  TableName = doc_TableName();
+  get_table_html(TableName);
+  exemptArray = [document.getElementById('sql_output_div'),document.getElementById('download_button_div')]
+  hide_output(exemptArray);
+}
 function view_day_button_click(){
   hide_output();
   button = document.getElementById('view_day_button');
@@ -209,6 +221,12 @@ function view_stats_button_click(){
 function plot_latest_button_click(){
   button = document.getElementById('plot_latest_button');
   document.getElementById('Age_text').value = "LATEST";
+  hide_output(exempt=[document.getElementById('canvas_div')]);
+  get_table_json();
+}
+function plot_live_button_click(){
+  button = document.getElementById('plot_live_button');
+  document.getElementById('Age_text').value = "LIVE";
   hide_output(exempt=[document.getElementById('canvas_div')]);
   get_table_json();
 }

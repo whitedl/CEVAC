@@ -8,6 +8,7 @@ table = argv[-1].replace("\n","")
 name_to_shortened = {
     "CEVAC" : "C",
     "LASR" : "",
+    "LIVE" : "LAT"
 }
 
 words = table.split("_")

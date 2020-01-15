@@ -79,6 +79,12 @@ function hide_output(exempt=null){
     }
   }
 }
+function doc_TableName(){
+  BuildingSName = document.getElementById('buildings').value;
+  Metric = document.getElementById('metrics').value;
+  Age = document.getElementById('Age_text').value;
+  return gen_TableName(BuildingSName,Metric,Age);
+}
 function gen_TableName(BuildingSName, Metric, Age){
   TableName = 'CEVAC_' + BuildingSName + '_' + Metric;
   if(Age != '') TableName += '_' + Age;
