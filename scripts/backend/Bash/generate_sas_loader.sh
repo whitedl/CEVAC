@@ -261,7 +261,7 @@ for l in "${array[@]}"; do
 done
 # echo "$script" > /cevac/cache/sas_scripts/$TableName.sas
 # if ! rsync -vh --progress /cevac/cache/sas_scripts/$TableName.sas CEVAC@wfic-sas-im-hd.clemson.edu:~/scripts/$TableName.sas; then
-if ! rsync -vh --progress /cevac/cache/sas_scripts/$TableName.sas sas@wfic-sas-im-hd.clemson.edu:~/CEVAC/$TableName.sas; then
+# if ! rsync -vh --progress /cevac/cache/sas_scripts/$TableName.sas sas@wfic-sas-im-hd.clemson.edu:~/CEVAC/$TableName.sas; then
 # if ! rsync -vh --progress /cevac/cache/sas_scripts/$TableName.sas CEVAC@wfic-sas-meta.clemson.edu:~/scripts/$TableName.sas; then
-  echo "error"
-fi
+  # echo "error"
+# fi

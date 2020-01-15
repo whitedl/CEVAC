@@ -62,7 +62,9 @@ for t in "${tables_array[@]}"; do
   if [ ! -z "$compare" ] || [ ! -z "$pred" ]; then # always recache COMPARE and PRED tables
     # sql="EXEC CEVAC_CACHE_INIT @tables = '"$HIST_VIEW"'; EXEC CEVAC_CACHE_INIT @tables = '$DAY_VIEW'"
     sql="EXEC CEVAC_CACHE_INIT @tables = '$HIST_VIEW,$DAY_VIEW,$LATEST_FULL,$LATEST,$LATEST_BROKEN'"
-  else sql="EXEC CEVAC_CACHE_APPEND @tables = '$HIST_VIEW,$DAY_VIEW,$LATEST_FULL,$LATEST,$LATEST_BROKEN'"
+  else
+    sql="EXEC CEVAC_CACHE_APPEND @tables = '$HIST_VIEW';
+    EXEC CEVAC_CACHE_INIT @tables = '$DAY_VIEW,$LATEST_FULL,$LATEST,$LATEST_BROKEN'"
   fi
   if ! /cevac/scripts/exec_sql.sh "$sql" ; then
     echo "Error. Aborting append"

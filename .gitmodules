@@ -1,0 +1,7 @@
+
+[submodule "Facilities_python"]
+	path = Facilities_python
+	url = git@fmo14:/srv/git/Facilities_python.git
+[submodule "CEVAC_python"]
+	path = CEVAC_python
+	url = https://github.com/bmeares/CEVAC_python.git

@@ -33,5 +33,3 @@ SELECT begins.PointSliceID, begins.Alias, begins.ETDateTime AS begin_ET, ends.ET
 FROM ends
 INNER JOIN begins ON DATEPART(MONTH, begins.ETDateTime) = DATEPART(MONTH, ends.ETDateTime) AND begins.PointSliceID = ends.PointSliceID AND DATEPART(YEAR, begins.ETDateTime) = DATEPART(YEAR, ends.ETDateTime)
 WHERE DATEDIFF(DAY, begins.ETDateTime, ends.ETDateTime) > 25
-
-
