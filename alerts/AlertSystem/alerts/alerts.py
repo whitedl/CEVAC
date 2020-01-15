@@ -66,19 +66,6 @@ class Alerts:
         # For efficiency, only make each query once
         self.query_to_data = {}
 
-        """
-        self.json_oc = "/cevac/cron/alert_log_oc.json"
-        self.json_unoc = "/cevac/cron/alert_log_unoc.json"
-        self.json_files = [
-            self.json_oc,
-            self.json_unoc,
-        ]
-        self.max_id = 0
-        self.new_events = {}
-        self.old_events = {}
-        self.parse_json()
-        """
-
         # Queue
         self.queue = queue
         self.queue_buildings = []
@@ -99,6 +86,8 @@ class Alerts:
         for i, alert in enumerate(self.par.alert_parameters):
             # Check time conditional to make sure it is the correct
             # time for the alert
+            if alert["aggregation"] == "LIVE":
+                continue
             
             verbose_print(
                 self.verbose,
@@ -785,7 +774,8 @@ class Anomaly:
             f"EventID = {self.eventid}) BEGIN "
             f"UPDATE CEVAC_ALL_ALERTS_EVENTS_HIST_RAW "
             f"SET AlertMessage = '{self.message}', "
-            f"latest_UTC = GETUTCDATE() "
+            f"latest_UTC = GETUTCDATE(), "
+            f"AlertType = '{self.priority}'"
             f"WHERE EventID = {self.eventid}; "
             f"END ELSE BEGIN "
             f"INSERT INTO CEVAC_ALL_ALERTS_EVENTS_HIST_RAW "
@@ -793,25 +783,7 @@ class Anomaly:
             f"Metric, latest_UTC) "
             f"VALUES (?, ?, ?, ?, ?, GETUTCDATE()); END"
         )
-        """
-        stat = (
-            f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW "
-            f"(AlertType, AlertMessage, Metric, BuildingSName, "
-            f"UTCDateTime, Alias, EventID, BuildingDName) VALUES "
-            f"(?, ?, ?, ?, ?, ?, ?, ?);"
-        )
-        cursor.execute(stat, [
-            self.priority,
-            self.message,
-            self.metric,
-            self.building,
-            self.time,
-            self.aliaspsid,
-            self.eventid,
-            self.buildingdname,
-        ])
-        """
-        """
+        
         cursor.execute(stat, [
             self.eventid,
             self.priority,
@@ -820,7 +792,6 @@ class Anomaly:
             self.metric
         ])
         cursor.commit()
-        """
         
         return None
 
@@ -1063,7 +1034,7 @@ class EventID_Handler:
     def assign_event_id(self, alert, alias, psid):
         """Assign event id."""
         if str(alert) == "All Clear":
-            key = "f{alias} All Clear"
+            key = f"{alias} All Clear"
         else:
             key = f"{alias} {psid} {alert['type']}"
         if key in self.event_to_id:
