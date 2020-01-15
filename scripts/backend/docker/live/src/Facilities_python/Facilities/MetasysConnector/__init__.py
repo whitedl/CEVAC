@@ -5,7 +5,7 @@
 
 """
 from datetime import datetime
-from config import config as cf
+from Facilities.config import config as cf
 
 class MetasysConnector:
     from ._login import login

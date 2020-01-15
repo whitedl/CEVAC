@@ -243,7 +243,7 @@ else # csv exists
 
   # Get columns and data
   if ! /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$append_query" -W -o "/cevac/cache/$table.csv" -s"," -w 700 ; then
-    error="Failed to get columns..."
+    error="Failed to get columns and data..."
     /cevac/scripts/log_error.sh "$error" "$table"
     exit 1
   fi

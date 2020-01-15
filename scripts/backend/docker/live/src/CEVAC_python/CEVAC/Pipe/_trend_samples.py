@@ -7,10 +7,10 @@
 
 import pandas as pd
 from Facilities import MetasysConnector
-from SQLConnector import SQLConnector
+from CEVAC.SQLConnector import SQLConnector
 import dateutil.parser
 import datetime
-from funcs import *
+from CEVAC.funcs import *
 from functools import partial
 from multiprocessing import Pool, cpu_count
 

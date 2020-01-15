@@ -11,7 +11,7 @@ import datetime
 from multiprocessing import Pool, cpu_count
 from functools import partial
 import subprocess as sub
-from funcs import *
+from CEVAC.funcs import *
 
 def pv(metasys,o_ID):
     return metasys.presentValue(o_ID)

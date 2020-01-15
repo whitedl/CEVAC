@@ -6,7 +6,7 @@ import pyodbc
 import sqlalchemy
 import cx_Oracle
 import urllib.parse
-from config import config as cf
+from CEVAC.config import config as cf
 
 class SQLConnector():
     from ._cursor import cursor
@@ -40,12 +40,12 @@ class SQLConnector():
                 self.database = self.sid
             except:
                 print('sid not set in config.yaml')
-        else:
+        elif self.flavor != "sqlite":
             engine_driver = self.flavor
         engine_str = (
             f"{engine_driver}://{self.username}:{urllib.parse.quote_plus(self.password)}"
             f"@{self.host}:{self.port}/{self.database}"
-            )
+        )
         if hasattr(self,'driver'): engine_str += f"?driver={urllib.parse.quote_plus(self.driver)}"
         if self.flavor == "sqlite": engine_str = "sqlite:///{self.database}.sqlite"
         self.engine = sqlalchemy.create_engine(engine_str)

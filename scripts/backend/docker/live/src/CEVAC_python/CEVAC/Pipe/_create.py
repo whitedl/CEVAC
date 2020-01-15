@@ -6,7 +6,7 @@
 
 """
 import copy
-from funcs import *
+from CEVAC.funcs import *
 def create_table(self,Age,templateAge='HIST',connector=None,has_raw=True,standard=True):
     if len(self.Tables[templateAge].attributes) == 0: self.Tables[templateAge].fetch_attributes(connector)
     if connector is None: connector = SQLConnector(flavor='mssql')

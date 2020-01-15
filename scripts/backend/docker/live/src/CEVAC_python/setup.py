@@ -9,11 +9,11 @@
 from setuptools import setup
 import setuptools
 
-with open("README", 'r') as f:
+with open("README.md", 'r') as f:
     long_description = f.read()
 
 setup(name='CEVAC',
-        version='0.0.1',
+        version='0.1.1',
         description='The main CEVAC Python library',
         url='#',
         author='Bennett Meares',
@@ -21,5 +21,8 @@ setup(name='CEVAC',
         license='MIT',
         packages=setuptools.find_packages(),
         zip_safe=False,
+        package_data={
+            '':['*.yaml','*.yml']
+            },
         python_requires='>=3.6'
         )

@@ -45,6 +45,12 @@ def register(self, connector, attributes=None):
         connector.exec_only(query)
         self.fetch_attributes(connector)
 
+def update_attributes(self, connector):
+    if self.exists(connector):
+        query = """
+        UPDATE CEVAC_TABLES
+        """
+
 def create(self, connector):
     if not self.exists(connector,check=['dbo']):
         try:
