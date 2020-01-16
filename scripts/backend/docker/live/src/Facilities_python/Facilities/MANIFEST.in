@@ -1,0 +1,2 @@
+recursive-include Facilities *.yaml *.yml
+include Facilities/config.yaml
