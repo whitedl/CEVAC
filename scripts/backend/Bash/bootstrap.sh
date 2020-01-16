@@ -94,7 +94,7 @@ else
 fi
 
 ## isCustom is set, therefore exists in CEVAC_TABLES
-if [ "$isCustom" == "0" ] || [ "$isCustom" != "1" ]; then
+if [ "$isCustom" == "0" ] || [ "$isCustom" == "1" ]; then
   IDName=`/cevac/scripts/sql_value.sh "SELECT IDName FROM CEVAC_TABLES WHERE TableName = '$HIST_VIEW'"`
   AliasName=`/cevac/scripts/sql_value.sh "SELECT AliasName FROM CEVAC_TABLES WHERE TableName = '$HIST_VIEW'"`
   DataName=`/cevac/scripts/sql_value.sh "SELECT DataName FROM CEVAC_TABLES WHERE TableName = '$HIST_VIEW'"`
@@ -128,8 +128,9 @@ if [ "$isCustom" == "0" ] || [ "$isCustom" != "1" ]; then
       exit 1
     fi
   
-  else # isCustom 0 or NULL, therefore standard table
-    echo "Standard table detected"
+  else # isCustom 0 or NULL
+    echo "isCustom: $isCustom"
+    read t
     # if ! /cevac/scripts/exec_sql.sh "DELETE FROM CEVAC_TABLES WHERE BuildingSName = '$BuildingSName' AND Metric = '$Metric'" ; then
       # error="Error: could not delete $BuildingSName""_""$Metric from CEVAC_TABLES. Aborting bootstrap..."
       # /cevac/scripts/log_error.sh "$error"
@@ -188,12 +189,21 @@ fi
 ###
 /cevac/scripts/seperator.sh
 echo "Phase: 2 create new views"
+## if it is an ALL_[Metric]_LATEST Pipe
+if [ "$BuildingSName" == "ALL" ] && [ "`echo "$Metric" | grep "LATEST"`" != "" ]; then
+  rootMetric="`echo "$Metric" | sed 's/LATEST//g' | sed 's/_//g'`"
+
+  if ! /cevac/scripts/CREATE_ALL_LATEST.sh "$rootMetric"; then
+    error="Failed to create ALL_LATEST"
+    /cevac/scripts/log_error.sh "$error"
+    exit 1
+  fi
+fi
 if ! /cevac/scripts/CREATE_ALL_VIEWS.sh "$BuildingSName" "$Metric" "$keys_list" "$unitOfMeasureID" ; then
   error="Failed to create views. Aborting bootstrap"
   /cevac/scripts/log_error.sh "$error"
   exit 1
 fi
-
 echo "CHECKPOINT 1"
 /cevac/scripts/exec_sql.sh "CHECKPOINT"
 
