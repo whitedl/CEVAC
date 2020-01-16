@@ -13,22 +13,22 @@ DECLARE @ProcessName NVARCHAR(MAX);
 SET @ProcessName = OBJECT_NAME(@@PROCID);
 EXEC CEVAC_ACTIVITY @TableName = @tables, @ProcessName = @ProcessName;
 
-DECLARE @name NVARCHAR(300);
-DECLARE @name_CACHE NVARCHAR(300);
-DECLARE @Alias_or_PSID NVARCHAR(50);
+DECLARE @name NVARCHAR(MAX);
+DECLARE @name_CACHE NVARCHAR(MAX);
+DECLARE @Alias_or_PSID NVARCHAR(MAX);
 DECLARE @select_query NVARCHAR(MAX);
 DECLARE @i INT;
-DECLARE @IDName NVARCHAR(50);
-DECLARE @AliasName NVARCHAR(50);
-DECLARE @DataName NVARCHAR(50);
-DECLARE @DateTimeName NVARCHAR(50);
-DECLARE @cevac_app_data NVARCHAR(300);
+DECLARE @IDName NVARCHAR(MAX);
+DECLARE @AliasName NVARCHAR(MAX);
+DECLARE @DataName NVARCHAR(MAX);
+DECLARE @DateTimeName NVARCHAR(MAX);
+DECLARE @cevac_app_data NVARCHAR(MAX);
 DECLARE @create_app_data NVARCHAR(MAX);
 DECLARE @drop_app_data NVARCHAR(MAX);
 DECLARE @row_count INT;
 DECLARE @rows_transferred INT;
 DECLARE @params_rc INT;
-DECLARE @cevac_params TABLE(P NVARCHAR(100));
+DECLARE @cevac_params TABLE(P NVARCHAR(MAX));
 
 
 SET @cevac_app_data = 'CEVAC_APPEND_DATA';
@@ -74,7 +74,7 @@ WHILE (EXISTS(SELECT 1 FROM @cevac_params) AND @i > 0) BEGIN
 		SET @name_CACHE = REPLACE(@name, '_VIEW', '');
 		SET @name_CACHE = @name_CACHE + '_CACHE';
 	END
-	PRINT @name_CACHE;
+	PRINT 'Appending ' + @name_CACHE;
 
 	EXEC CEVAC_ALIAS_OR_PSID_OUTPUT @table = @name, @Alias_or_PSID_out = @Alias_or_PSID OUTPUT;
 	SET @DateTimeName = ISNULL((SELECT TOP 1 RTRIM(DateTimeName) FROM CEVAC_TABLES WHERE TableName = @name), 'UTCDateTime');
