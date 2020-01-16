@@ -1,0 +1,76 @@
+WAP Name,Room,Floor,Alias
+c-cooper-4-bridge-ne-ap2702e-43,Bridge,4th Floor,Bridge North East
+c-cooper-4-bridge-nw-ap2702e-41,Bridge,4th Floor,Bridge North West
+c-cooper-4-patio-nw-ap2702e-42,Patio,4th Floor,Patio North West
+c-cooper-5-500b-sw-ap2802i-52,500,5th Floor,500B South West
+c-cooper-4-patio-w-ap2702e-45,Patio,4th Floor,Patio West
+c-cooper-4-patio-e-ap2702e-46,Corridor,4th Floor,Corridor
+c-cooper-3-300a-se-ap2802i-71,300,3rd Floor,300A South East
+c-cooper-5-500b-nw-ap2802i-51,500,5th Floor,500B North West
+c-cooper-1-100-nw-ap2802i-48,100,1st Floor,100 North West
+c-cooper-4-400a-s-ap2802i-32,400,4th Floor,400S South
+c-cooper-2-200b-n-ap2802i-54,200,2nd Floor,200B North
+c-cooper-3-300a-s-ap2802i-70,300,3rd Floor,300A South
+c-cooper-3-300a-e-ap2802i-68,300,3rd Floor,300A East
+c-cooper-5-510-nw-ap2802i-82,510,5th Floor,510 North West
+c-cooper-4-400a-n-ap2802i-30,400,4th Floor,400A North
+c-cooper-4-400b-w-ap2802i-34,400,4th Floor,400B West
+c-cooper-2-201-ne-ap2802i-59,201,2th Floor,201 North 
+c-cooper-5-500-se-ap2802i-49,500,5th Floor,500 South East
+c-cooper-3-300a-n-ap2802i-69,300,3th Floor,300A North
+c-cooper-6-505-nw-ap2802i-62,505,5th Floor,505 North West
+c-cooper-2-200a-s-ap2802i-52,200,2th Floor,200A South
+c-cooper-6-600a-n-ap2802i-59,600,6th Floor,600A North
+c-cooper-6-600b-s-ap2802i-60,600,6th Floor,600B South
+c-cooper-5-510-ne-ap2802i-83,510,5th Floor,510 North East
+c-cooper-2-201-se-ap2802i-60,201,2th Floor,201 South East
+c-cooper-6-600b-n-ap2802i-61,600,6th Floor,600B North
+c-cooper-2-200a-n-ap2802i-51,200,2th Floor,200A North
+c-cooper-4-400a-e-ap2802i-31,400,4th Floor,400A East
+c-cooper-3-300a-w-ap2802i-72,300,3th Floor,300A West
+c-cooper-5-500a-e-ap2802i-50,500,5th Floor,500A East
+c-cooper-5-500-sw-ap2802i-48,500,5th Floor,500 South West
+c-cooper-5-505-se-ap2802i-55,505,5th Floor,505 South East
+c-cooper-2-200a-e-ap2802i-50,200,2th Floor,200A East
+c-cooper-4-400b-n-ap2802i-33,400,4th Floor,400B North
+c-cooper-6-600a-s-ap2802i-58,600,6th Floor,600A South
+c-cooper-1-100-sw-ap2802i-49,100,1th Floor,100 South West
+c-cooper-2-200b-s-ap2802i-55,200,2th Floor,200B South
+c-cooper-5-500-n-ap2802i-47,500,5th Floor,500 North
+c-cooper-4-416-e-ap2802i-39,416,4th Floor,416 East
+c-cooper-4-416-w-ap2802i-40,416,4th Floor,416 West
+c-cooper-2-201-w-ap2802i-61,201,2th Floor,201 West
+c-cooper-1-100-e-ap2802i-47,100,1th Floor,100 East
+c-cooper-2-201b-ap2802i-57,201,2th Floor,201B
+c-cooper-5-500k-ap2802i-53,500,5th Floor,500K
+c-cooper-3-301b-ap2802i-75,301,3th Floor,301B
+c-cooper-2-201e-ap2802i-58,201,2th Floor,201E
+c-cooper-2-201a-ap2802i-56,201,2th Floor,201A
+c-cooper-3-301a-ap2802i-74,301,3th Floor,301A
+c-cooper-4-406a-ap2802i-36,406,4th Floor,406A
+c-cooper-4-401b-ap2802i-35,401,4th Floor,401B
+c-cooper-2-201g-ap1815w-84,201,2th Floor,201G
+c-cooper-3-300h-ap2802i-73,300,3th Floor,300H
+c-cooper-2-200b-ap2802i-53,200,2th Floor,200B
+c-cooper-5-500d-ap2802i-54,500,5th Floor,500D
+c-cooper-1-109-ap2802i-45,109,1th Floor,109
+c-cooper-4-409-ap2802i-37,409,4th Floor,409
+c-cooper-1-104-ap2802i-41,104,1th Floor,104
+c-cooper-3-300-ap2802i-67,300,3th Floor,300
+c-cooper-3-311-ap2802i-81,311,3th Floor,311
+c-cooper-3-303-ap2802i-76,303,3th Floor,303
+c-cooper-1-105-ap2802i-42,105,1th Floor,105
+c-cooper-2-205-ap2802i-63,205,2th Floor,205
+c-cooper-3-308-ap2802i-79,308,3th Floor,308
+c-cooper-3-309-ap2802i-80,309,3th Floor,309
+c-cooper-4-412-ap2802i-38,412,4th Floor,412
+c-cooper-2-213-ap2802i-66,213,2th Floor,213
+c-cooper-1-106-ap2802i-43,106,1th Floor,106
+c-cooper-2-212-ap2802i-65,212,2th Floor,212
+c-cooper-3-305-ap2802i-77,305,3th Floor,305
+c-cooper-2-207-ap2802i-64,207,2th Floor,207
+c-cooper-1-108-ap2802i-44,108,1th Floor,108
+c-cooper-1-110-ap2802i-46,110,1th Floor,110
+c-cooper-3-307-ap2802i-78,307,3th Floor,307
+c-cooper-2-204-ap2802i-62,204,2th Floor,204
+c-cooper-1-102-ap2802i-40,102,1th Floor,102
