@@ -11,7 +11,7 @@ Age="HIST"
 
 echo "Usage: $0 {customLASR} {runsas} {reset} {Age}"
 
-if [ ! -z "$1" ]; then
+if [ "$1" == "1" ]; then
   echo "customLASR detected: Will only load HIST_LASR tables"
   customLASR="$1"
 fi
@@ -39,7 +39,7 @@ if [ "$Age" == "HIST" ]; then
   time if ! /cevac/scripts/append_tables.sh ; then
     error="Error updating HIST_CACHE tables"
     /cevac/scripts/log_error.sh "$error"
-    exit 1
+    # exit 1
   fi
 fi
 
