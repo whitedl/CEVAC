@@ -1,6 +1,6 @@
 IF EXISTS(SELECT 1 FROM sys.procedures WHERE Name = 'CEVAC_WAP') DROP PROCEDURE CEVAC_WAP;
 GO
-CREATE PROCEDURE CEVAC_WAP @BuildingSName NVARCHAR(MAX), @Metric NVARCHAR(MAX), @execute BIT = 1
+CREATE PROCEDURE CEVAC_WAP @BuildingSName NVARCHAR(MAX), @Metric NVARCHAR(MAX), @Age NVARCHAR(MAX) = 'HIST', @execute BIT = 1, @main BIT = 1
 AS
 
 DECLARE @error NVARCHAR(MAX);
@@ -162,7 +162,7 @@ DELETE FROM CEVAC_TABLES WHERE TableName = @HIST_VIEW;
 INSERT INTO CEVAC_TABLES(BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, isCustom, Definition, Dependencies, customLASR, autoCACHE, autoLASR) VALUES (
         @BuildingSName,
         @Metric,
-        'HIST',
+        'HIST_VIEW',
         @HIST_VIEW,
         @DateTimeName,
         @IDName,
@@ -178,12 +178,13 @@ INSERT INTO CEVAC_TABLES(BuildingSName, Metric, Age, TableName, DateTimeName, ID
 
 IF @execute = 1 BEGIN
     EXEC(@Create_RAW);
-    IF OBJECT_ID(@HIST_VIEW) IS NOT NULL BEGIN
-        EXEC('DROP VIEW ' + @HIST_VIEW);
-    END
+	IF @Age LIKE '%HIST%' BEGIN
+		IF OBJECT_ID(@HIST_VIEW) IS NOT NULL EXEC('DROP VIEW ' + @HIST_VIEW);
+		EXEC CEVAC_CUSTOM_HIST @BuildingSName = @BuildingSName, @Metric = @Metric;
+	END
 
-    EXEC CEVAC_CUSTOM_HIST @BuildingSName = @BuildingSName, @Metric = @Metric;
-    EXEC CEVAC_VIEW @Building = @BuildingSName, @Metric = @Metric, @Age = 'HIST';
-    EXEC CEVAC_VIEW @Building = @BuildingSName, @Metric = @Metric, @Age = 'DAY';
-    EXEC CEVAC_VIEW @Building = @BuildingSName, @Metric = @Metric, @Age = 'LATEST';
+    IF @main = 1 BEGIN
+		PRINT(@Age);
+		EXEC CEVAC_VIEW @Building = @BuildingSName, @Metric = @Metric, @Age = @Age;
+	END
 END
