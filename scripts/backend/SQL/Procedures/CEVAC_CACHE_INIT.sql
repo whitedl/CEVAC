@@ -4,12 +4,12 @@ SET ANSI_NULLS, QUOTED_IDENTIFIER ON;
 GO
 CREATE PROCEDURE CEVAC_CACHE_INIT
 	@tables NVARCHAR(MAX),
-	@destTableName NVARCHAR(300) = NULL,
+	@destTableName NVARCHAR(MAX) = NULL,
 	@execute BIT = 1
 AS
 
-DECLARE @name NVARCHAR(100);
-DECLARE @name_CACHE NVARCHAR(100);
+DECLARE @name NVARCHAR(MAX);
+DECLARE @name_CACHE NVARCHAR(MAX);
 DECLARE @i INT;
 DECLARE @params_rc INT;
 DECLARE @error NVARCHAR(MAX);
@@ -31,7 +31,7 @@ END
 DECLARE @cevac_params TABLE(TableName NVARCHAR(MAX));
 
 SET @i = 100;
-IF OBJECT_ID('dbo.#cevac_params', 'U') IS NOT NULL DROP TABLE #cevac_params;
+-- IF OBJECT_ID('dbo.#cevac_params', 'U') IS NOT NULL DROP TABLE #cevac_params;
 INSERT INTO @cevac_params SELECT * FROM ListTable(@tables);
 
 SET @params_rc = @@ROWCOUNT;
@@ -44,24 +44,26 @@ END
 
 WHILE (EXISTS(SELECT 1 FROM @cevac_params) AND @i > 0) BEGIN
 	SET @i = @i - 1;
-	SET @name = (SELECT TOP 1 TableName FROM @cevac_params);
-	DELETE TOP(1) FROM @cevac_params;
+	SET @name = (SELECT TOP 1 TableName FROM @cevac_params ORDER BY TableName ASC);
+	WITH del AS (SELECT TOP 1 TableName FROM @cevac_params ORDER BY TableName ASC) DELETE FROM del;
+	PRINT('name: ' + @name);
 
-	IF @custom = 0 AND @name_CACHE IS NULL BEGIN
+	IF @custom = 0 BEGIN
 		-- Replace _VIEW with _CACHE, else append _CACHE
 		SET @name_CACHE = REPLACE(@name, '_VIEW', '');
 		SET @name_CACHE = @name_CACHE + '_CACHE';
 	END
 	
 	-- drop cache tables
-	IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME=@name_CACHE) BEGIN
+	IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME=@name_CACHE) BEGIN
 		DECLARE @ExecSQL NVARCHAR(MAX);
 		SET @ExecSQL = CONCAT('DROP TABLE ', @name_CACHE);
 		EXEC(@ExecSQL);
+		PRINT(@name_CACHE + ' has been dropped.');
+	END ELSE BEGIN
+		PRINT('Not found: ' + @name_CACHE)
 	END;
-
-
-
+	
 END
 DECLARE @CEVAC_CACHE_APPEND NVARCHAR(MAX);
 
@@ -77,5 +79,5 @@ IF @tables LIKE '%HIST_LASR%' AND @params_rc = 1 BEGIN
 END ELSE BEGIN
 	SET @CEVAC_CACHE_APPEND = 'EXEC CEVAC_CACHE_APPEND @tables = ''' + @tables + '''';
 END
-RAISERROR('CACHE has been dropped. Calling CEVAC_CACHE_APPEND...', 0, 1) WITH NOWAIT;
+RAISERROR('Finished INIT. Calling CEVAC_CACHE_APPEND...', 0, 1) WITH NOWAIT;
 EXEC CEVAC_CACHE_APPEND @tables = @tables, @execute = @execute
