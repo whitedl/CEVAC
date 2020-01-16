@@ -18,5 +18,5 @@ if ! /cevac/scripts/exec_sql.sh "$query" ; then
   /cevac/scripts/log_error.sh "$error"
   exit 1
 fi
-
+query=""
 /cevac/scripts/unlock.sh

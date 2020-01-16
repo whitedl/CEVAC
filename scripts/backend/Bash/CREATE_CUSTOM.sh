@@ -60,7 +60,7 @@ INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, I
   VALUES (
     '$BuildingSName',
     '$Metric',
-    'HIST',
+    'HIST_VIEW',
     '$HIST_VIEW',
     '$DateTimeName',
     '$IDName',

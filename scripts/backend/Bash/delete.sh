@@ -21,7 +21,6 @@ done
 IFS=',' # comma is set as delimiter
 read -ra exclude_array <<< "$exclude_string" # str is read into an array as tokens separated by IFS
 IFS=' ' # reset to default value after usage
-
 error=""
 [ -z "$BuildingSName" ] && echo "BuildingSName  (e.g. WATT): " && read BuildingSName
 [ -z "$Metric" ] && echo "Metric  (e.g. TEMP): " && read Metric
@@ -56,7 +55,8 @@ done
 
 tables_query="
 SELECT RTRIM(TableName) FROM CEVAC_TABLES
-WHERE BuildingSName = '$BuildingSName' AND Metric = '$Metric' "$exclude_query"
+WHERE BuildingSName = '$BuildingSName' AND Metric = '$Metric'
+$exclude_query
 "
 echo "$tables_query"
 /cevac/scripts/exec_sql.sh "$tables_query" "tables_temp.csv"
@@ -98,12 +98,13 @@ if ! /cevac/scripts/exec_sql.sh "$sql"; then
 fi
 
 # Delete all from CEVAC_TABLES
-if ! /cevac/scripts/exec_sql.sh "DELETE FROM CEVAC_TABLES WHERE BuildingSName = '$BuildingSName' AND Metric = '$Metric'""$exclude_query" ; then
-  error="Error: Could not delete $BuildingSName"_$Metric" from CEVAC_TABLES"
-  /cevac/scripts/log_error.sh "$error"
-  exit 1
+if [ "$spare_cevac_tables" != "true" ]; then
+  if ! /cevac/scripts/exec_sql.sh "DELETE FROM CEVAC_TABLES WHERE BuildingSName = '$BuildingSName' AND Metric = '$Metric'"" $exclude_query" ; then
+    error="Error: Could not delete $BuildingSName"_$Metric" from CEVAC_TABLES"
+    /cevac/scripts/log_error.sh "$error"
+    exit 1
+  fi
 fi
-
 # Delete /srv/csv/_HIST.scv
 rm -f /srv/csv/$HIST.csv
 rm -f /srv/csv/$HIST_LASR.csv

@@ -14,12 +14,14 @@ from Facilities import MetasysConnector
 def main():
     #  m = MetasysConnector()
     #  fmo8b = SQLConnector(flavor='oracle')
-    #  wfic_cevac = SQLConnector(flavor='mssql')
-    sas = SASConnector()
-    sas.execute('touch deleteme.txt')
-    #  p = Pipe('FIKE','HUM')
-    #  print(p.Tables['XREF'].exists(wfic_cevac))
-    #  p.delete()
+    wfic_cevac = SQLConnector(flavor='mssql')
+    #  sas = SASConnector()
+    #  sas.execute('touch deleteme.txt')
+    p = Pipe('FIKE','WIND')
+    p.fetch_attributes(wfic_cevac)
+    print(p.attributes)
+    p['HIST'].register(wfic_cevac,update=True)
+    
 
 if __name__ == "__main__":
     main()
