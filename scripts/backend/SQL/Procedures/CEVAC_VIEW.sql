@@ -208,11 +208,11 @@ SET @isCustom = 0;                 -- DEFAULT
 -- Grab AliasName, DateTimeName, and isCustom from HIST
 -------------------------------------------------------
 IF @Age != 'XREF' AND EXISTS (SELECT TOP 1 * FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age NOT LIKE '%XREF%') BEGIN
-	SET @DateTimeName = RTRIM((SELECT TOP 1 DateTimeName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age LIKE '%HIST%'));
-	SET @IDName = RTRIM((SELECT TOP 1 IDName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age LIKE '%HIST%'));
-	SET @AliasName = RTRIM((SELECT TOP 1 AliasName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age LIKE '%HIST%'));
-	SET @DataName = RTRIM((SELECT TOP 1 DataName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age LIKE '%HIST%'));
-	SET @isCustom = (SELECT TOP 1 isCustom FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age LIKE '%HIST%');
+	SET @DateTimeName = RTRIM((SELECT TOP 1 DateTimeName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age LIKE '%HIST_VIEW%'));
+	SET @IDName = RTRIM((SELECT TOP 1 IDName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age LIKE '%HIST_VIEW%'));
+	SET @AliasName = RTRIM((SELECT TOP 1 AliasName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age LIKE '%HIST_VIEW%'));
+	SET @DataName = RTRIM((SELECT TOP 1 DataName FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age LIKE '%HIST_VIEW%'));
+	SET @isCustom = (SELECT TOP 1 isCustom FROM CEVAC_TABLES WHERE BuildingSName = @Building AND Metric = @Metric AND Age LIKE '%HIST_VIEW%');
 
 	DECLARE @loop TABLE(VALUE NVARCHAR(200));
 	INSERT INTO @loop SELECT COLUMN_NAME FROM @CEVAC_TABLES_config;
@@ -278,7 +278,12 @@ IF @Age LIKE 'LATEST_BROKEN' BEGIN
 	END
 END
 
-
+-----------------------------------------------
+-- WAP (Custom CEVAC_VIEW)
+-----------------------------------------------
+IF @Metric LIKE '%WAP%' BEGIN
+	EXEC CEVAC_WAP @BuildingSName = @Building, @Metric = @Metric, @Age = @Age, @main = 0;
+END
 
 -----------------------------------------------
 -- Age: PXREF (standard)
@@ -421,8 +426,7 @@ IF @Age LIKE '%PXREF%' BEGIN
 			)
 		END -- END of insert	
 	END
-END
-
+END -- END PXREF
 
 ------------------------------------------------------------
 -- Age: HIST_VIEW (standard)
@@ -432,7 +436,6 @@ END
 -- Note: Dependencies left NULL for non-standard HIST tables
 ------------------------------------------------------------
 ELSE IF @Age LIKE '%HIST%' BEGIN
-
 	DECLARE @xref_source NVARCHAR(300);
 	IF @XREF_or_PXREF = 'XREF' SET @xref_source = @XREF;
 	ELSE IF @XREF_or_PXREF = 'PXREF' SET @xref_source = @PXREF;
@@ -611,7 +614,7 @@ END -- end LIVE
 -- CREATE_CUSTOM.sh must have
 -- been run at least once per table
 --------------------------------------
-IF EXISTS(SELECT * FROM CEVAC_TABLES WHERE TableName = @Table_name) AND @isCustom = 1 AND @Age LIKE '%HIST%' BEGIN
+IF EXISTS(SELECT * FROM CEVAC_TABLES WHERE TableName = @HIST_VIEW) AND @isCustom = 1 AND @Age LIKE '%HIST%' BEGIN
 	SELECT 'Custom' AS 'Custom';
 	SET @Dependencies_list = (SELECT TOP 1 Dependencies FROM CEVAC_TABLES WHERE TableName = @Table_name);
 	DECLARE @createTableName NVARCHAR(MAX);
