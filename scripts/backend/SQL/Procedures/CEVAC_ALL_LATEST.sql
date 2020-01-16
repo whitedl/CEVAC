@@ -104,7 +104,7 @@ IF @execute = 1 BEGIN
 	VALUES (
 		'ALL',
 		@Metric,
-		'HIST',
+		'HIST_VIEW',
 		@HIST_VIEW,
 		@DateTimeName,
 		@IDName,
