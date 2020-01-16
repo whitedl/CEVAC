@@ -12,7 +12,7 @@ usage="Usage:
   -h help
   -y run without asking
 "
-while getopts b:m:k:u:hycl option; do
+while getopts b:m:k:u:hyclp option; do
   case "${option}"
     in
     b) BuildingSName=${OPTARG};;
@@ -23,10 +23,11 @@ while getopts b:m:k:u:hycl option; do
     y) yes="yes";;
     l) autoLASR="true";;
     c) autoCACHE="true";;
+    p) preserve="true";;
   esac
 done
-! /cevac/scripts/check_lock.sh && exit 1
-/cevac/scripts/lock.sh
+# ! /cevac/scripts/check_lock.sh && exit 1
+# /cevac/scripts/lock.sh
 [ -z "$BuildingSName" ] && echo "BuildingSName (e.g. WATT): " && read BuildingSName
 [ -z "$Metric" ] && echo "Metric (e.g. TEMP): " && read Metric
 if [ -z "$yes" ]; then
@@ -54,6 +55,11 @@ XREF="CEVAC_"$BuildingSName"_"$Metric"_XREF"
 error=""
 
 isCustom=`/cevac/scripts/sql_value.sh "SELECT isCustom FROM CEVAC_TABLES WHERE TableName = '$HIST_VIEW'"`
+if [ "$isCustom" != "1" ]; then
+  if [ -f "/cevac/CUSTOM_DEFS/$HIST_VIEW.sql" ]; then
+    isCustom=""
+  fi
+fi
 customLASR=`/cevac/scripts/sql_value.sh "SELECT customLASR FROM CEVAC_TABLES WHERE TableName = '$HIST_VIEW'"`
 checkXREF=`/cevac/scripts/sql_value.sh "EXEC CHECK_XREF @BuildingSName = '$BuildingSName', @Metric = '$Metric'"`
 
@@ -88,7 +94,7 @@ else
 fi
 
 ## isCustom is set, therefore exists in CEVAC_TABLES
-if [ ! -z "$isCustom" ]; then
+if [ "$isCustom" == "0" ] || [ "$isCustom" != "1" ]; then
   IDName=`/cevac/scripts/sql_value.sh "SELECT IDName FROM CEVAC_TABLES WHERE TableName = '$HIST_VIEW'"`
   AliasName=`/cevac/scripts/sql_value.sh "SELECT AliasName FROM CEVAC_TABLES WHERE TableName = '$HIST_VIEW'"`
   DataName=`/cevac/scripts/sql_value.sh "SELECT DataName FROM CEVAC_TABLES WHERE TableName = '$HIST_VIEW'"`
@@ -97,7 +103,7 @@ if [ ! -z "$isCustom" ]; then
   if [ "$isCustom" == "1" ]; then
     echo "Custom table detected. Please choose:"
     echo $'   1: Reuse previous table structure (no change) (empty to default)'
-    echo $'   2: New table structure\n   (/cevac/CUSTOM_DEFS/'"$HIST_VIEW"' has changed)'
+    echo $'   2: New table structure\n   (/cevac/CUSTOM_DEFS/'"$HIST_VIEW"'.sql has changed)'
     if [ -z "$yes" ]; then
       read choice
     else
@@ -144,11 +150,17 @@ else ## isCustom does not exist therefore not in CEVAC_TABLES
     fi
     if [ "$choice" == "1" ] || [ "$choice" == "" ]; then # rebuild custom
       echo "Executing CREATE_CUSTOM.sh"
+      isCustom="1"
       if ! /cevac/scripts/CREATE_CUSTOM.sh "$BuildingSName" "$Metric" ; then
         error="Error: Could not create $HIST_VIEW as a custom table. Aborting bootstrap..."
         /cevac/scripts/log_error.sh "$error"
         exit 1
       fi
+      IDName=`/cevac/scripts/sql_value.sh "SELECT IDName FROM CEVAC_TABLES WHERE TableName = '$HIST_VIEW'"`
+      AliasName=`/cevac/scripts/sql_value.sh "SELECT AliasName FROM CEVAC_TABLES WHERE TableName = '$HIST_VIEW'"`
+      DataName=`/cevac/scripts/sql_value.sh "SELECT DataName FROM CEVAC_TABLES WHERE TableName = '$HIST_VIEW'"`
+      DateTimeName=`/cevac/scripts/sql_value.sh "SELECT DateTimeName FROM CEVAC_TABLES WHERE TableName = '$HIST_VIEW'"`
+      Dependencies=`/cevac/scripts/sql_value.sh "SELECT Dependencies FROM CEVAC_TABLES WHERE TableName = '$HIST_VIEW'"`
     elif [ "$choice" == "2" ]; then
       continue
     fi
@@ -159,17 +171,18 @@ fi
 ###
 # Phase 1: Drop caches
 ###
-/cevac/scripts/seperator.sh
-echo "Phase 1: Delete everything"
-exclude=""
-[ "$isCustom" == "1" ] && exclude="HIST"
-# Delete everything
-if ! /cevac/scripts/delete.sh -b "$BuildingSName" -m "$Metric" -e "$exclude" -y ; then
-  error="Error: could not delete $BuildingSName""_$Metric tables. Aborting bootstrap..."
-  /cevac/scripts/log_error.sh "$error"
-  exit 1
+if [ "$preserve" != "true" ]; then
+  /cevac/scripts/seperator.sh
+  echo "Phase 1: Delete everything"
+  exclude=""
+  [ "$isCustom" == "1" ] && exclude="HIST_VIEW"
+  # Delete everything
+  if ! /cevac/scripts/delete.sh -b "$BuildingSName" -m "$Metric" -e "$exclude" -y ; then
+    error="Error: could not delete $BuildingSName""_$Metric tables. Aborting bootstrap..."
+    /cevac/scripts/log_error.sh "$error"
+    exit 1
+  fi
 fi
-
 ###
 # Phase 2: Create CEVAC tables system
 ###

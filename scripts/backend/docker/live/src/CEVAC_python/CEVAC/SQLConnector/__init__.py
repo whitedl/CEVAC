@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # vim:fenc=utf-8
 
-import pyodbc
+#  import pyodbc
 import sqlalchemy
 import cx_Oracle
 import urllib.parse
