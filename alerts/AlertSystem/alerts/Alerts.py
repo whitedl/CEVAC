@@ -30,7 +30,7 @@ ENERGY_LOGS_LOCATION = "/mnt/bldg/Campus_Power/logs/"
 
 class Alerts:
     """Handler for all alerts."""
-    SKIP_STRING = None
+    SKIP_STRING = None  # Constant for determining skipping
 
     def __init__(
             self,
@@ -210,7 +210,7 @@ class Alerts:
                         continue
                     table = f"CEVAC_{building}_{metric}_{aggregation}"
                     if self.UPDATE_CACHE:
-                        rebuild_broken_cache(table, self.conn)
+                        self.rebuild_broken_cache(table)
                     query = (f"SELECT * FROM {table}_BROKEN_CACHE")
                     verbose_print(self.verbose, f"QUERY: {query}")
                     if not self.table_exists(table+"_BROKEN_CACHE"):
@@ -828,6 +828,15 @@ if __name__ == "__main__":
         
     print("FINISHED")
 
+    def rebuild_broken_cache(self, table : str) -> None:
+        """Rebuild a broken cache"""
+        cursor = self.conn.cursor()
+        cursor.execute(
+            "EXEC CEVAC_CACHE_INIT @tables='{table}_BROKEN'"
+        )
+        cursor.commit()
+        cursor.close()
+        return None
 
 """
       /##.*/

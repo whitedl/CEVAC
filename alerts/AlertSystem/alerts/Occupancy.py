@@ -51,7 +51,7 @@ class Occupancy:
                         data[bsn][i]] = data[occstr][i]
 
     def building_is_occupied(self, building : str) -> bool:
-        """Return True if in occupied time."""
+        """Return True if in generic occupied time."""
         if building not in self.building_occupied:
             return self.building_occupied["*"]
         else:
