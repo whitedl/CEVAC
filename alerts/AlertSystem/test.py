@@ -24,7 +24,6 @@ class TestOccupancy(unittest.TestCase):
 
     def test_length(self):
         occ = Occupancy(conn)
-        print(occ)
         self.assertTrue(len(occ) > 1)
         # If error, means occupancy table
         # isn't being read correctly, it should
@@ -33,7 +32,7 @@ class TestOccupancy(unittest.TestCase):
     def test_current_occupancy(self):
         occ = Occupancy(conn)
         hour = datetime.datetime.now().hour
-        if hour > 8 and hour < 5:
+        if hour > 8 and hour < 17:
             self.assertTrue(occ.is_occupied())
         else:
             self.assertFalse(occ.is_occupied())
