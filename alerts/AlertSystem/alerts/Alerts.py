@@ -13,17 +13,17 @@ are cited as a known issue and are located in
 `CEVAC_KNOWN_ISSUES`.
 """
 
-import os
-import json
+from os import path
 import datetime
-import pytz
-import logging
-from copy import deepcopy
-from croniter import croniter
 import pyodbc
 import pandas as pd
-import sys
 from tools import verbose_print
+
+from .EventIDHandler import EventIDHandler
+from .KnownIssues import KnownIssues
+from .Parameters import Parameters
+from .Occupancy import Occupancy
+from .Anomaly import Anomaly
 
 ENERGY_LOGS_LOCATION = "/mnt/bldg/Campus_Power/logs/"
 
@@ -33,8 +33,13 @@ class Alerts:
     SKIP_STRING = None
 
     def __init__(
-            self, logging, UPDATE_CACHE, verbose=False,
-            conn=None, queue=False, xref_only=True,
+            self,
+            logging : "logging",
+            UPDATE_CACHE : bool,
+            verbose=False,
+            conn=None,
+            queue=False,
+            xref_only=True,
             debug=False
     ):
         """Initialize connection and other objects."""
@@ -56,8 +61,8 @@ class Alerts:
             )
         self.occ = Occupancy(self.conn)
         self.par = Parameters(self.conn)  
-        self.known_issues = Known_Issues(self.conn)
-        self.eid_handler = EventID_Handler(
+        self.known_issues = KnownIssues(self.conn)
+        self.eid_handler = EventIDHandler(
             self.conn, debug=debug, verbose=self.verbose
         )
 
@@ -75,7 +80,10 @@ class Alerts:
 
         self.sname_to_dname = self.get_sname_to_dname()
 
-    def alert_system(self):
+    def __call__(self) -> None:
+        return self.alert_system()
+
+    def alert_system(self) -> None:
         """Find and catalog all anomalies."""
         if self.LOG:
             logging.info(
@@ -227,9 +235,10 @@ class Alerts:
                 f"ALERT SYSTEM FINISHED"
             )
         if self.verbose:
-            print(self.eid_handler.changes())
+            print(self.eid_handler)
+        return None
 
-    def send(self):
+    def send(self) -> None:
         """Send anomalies to sql."""
 
         # Add alerts for all clear
@@ -256,14 +265,13 @@ class Alerts:
         self.erase_queue()
         
         # Write event IDs
-        #self.write_json_generic()
         self.eid_handler.commit_removes()
         self.eid_handler.commit_adds()
 
         # Send each anomaly if it is not a known issue
         cursor = self.conn.cursor()
         for anomaly in self.anomalies:
-            if anomaly.aliaspsid not in self.known_issues.alias_psid:
+            if anomaly.aliaspsid not in self.known_issues:
                 anomaly.send(cursor)
         self.conn.commit()
         cursor.close()
@@ -273,7 +281,7 @@ class Alerts:
                 f"ANOMALIES SENT"
             )
 
-    def safe_data(self, query):
+    def safe_data(self, query : str) -> pd.DataFrame:
         """Return data if previously requested.
         
         Must check if table exists prior.
@@ -284,7 +292,7 @@ class Alerts:
         self.query_to_data[query] = data
         return data
 
-    def table_exists(self, table):
+    def table_exists(self, table : str) -> bool:
         cursor = self.conn.cursor()
         if cursor.tables(table=table).fetchone():
             cursor.close()
@@ -292,16 +300,14 @@ class Alerts:
         cursor.close()
         return False
 
-    def write_json_generic(self, new_events):
-        """Write json independent of time."""
-        return self.eid_handler.write_json_generic(new_events, next_id)
-
-    def parse_json(self):
-        """Parse json(s) for cron use."""
-        return self.eid_handler.parse_json()
-
-    def replace_generic(self, message, alert, context):
-        """Return string with $ start at key replaced with replacement.
+    def replace_generic(
+            self,
+            message : str,
+            alert : dict,
+            context : dict
+    ) -> str:
+        """Return string with $ start at key replaced with 
+        replacement.
         
         alert and context must have all keys be strings. 
         """
@@ -334,7 +340,7 @@ class Alerts:
                         
         return " ".join(regex_list)
                 
-    def skip_unoccupied(self, building, alert):
+    def skip_unoccupied(self, building : str, alert : dict) -> bool:
         """
         Return whether or not to skip the building based on 
         occupancy.
@@ -356,11 +362,16 @@ class Alerts:
                 return False
         return False
         
-    def assign_event_id(self, alert, alias, psid):
+    def assign_event_id(
+            self,
+            alert : dict,
+            alias : str,
+            psid : int
+    ) -> int:
         """Assign event id."""
         return self.eid_handler.assign_event_id(alert, alias, psid)
 
-    def get_alias_or_psid(self, table_name):
+    def get_alias_or_psid(self, table_name : str) -> str:
         """Return whether a table uses alias or point slice id."""
         request_str = (
             f"EXEC CEVAC_ALIAS_OR_PSID @table = '{table_name}'"
@@ -368,7 +379,12 @@ class Alerts:
         sol = pd.read_sql_query(request_str, self.conn)
         return sol[''][0]
 
-    def get_psid_from_alias(self, alias, bldgsname, metric):
+    def get_psid_from_alias(
+            self,
+            alias : str,
+            bldgsname : str,
+            metric : str
+    ) -> int:
         """Return the (most recent) pointsliceid from an alias."""
         SKIP = (self.SKIP_STRING, self.SKIP_STRING)
         xref = f"CEVAC_{bldgsname}_{metric}_XREF"
@@ -401,7 +417,13 @@ class Alerts:
                 return SKIP
 
 
-    def check_numerical_alias(self, data, i, alert, building):
+    def check_numerical_alias(
+            self,
+            data : pd.DataFrame,
+            i : int,
+            alert : dict,
+            building : str
+    ) -> None:
         """Check numerical alias alert."""
         conditions = alert["condition"].split(" ")
         
@@ -433,7 +455,10 @@ class Alerts:
         elif "=" in conditions or "==" in conditions:
             send_alert = (value == compare_value)
 
-        
+        #input(data.columns)
+
+        if "Alias" not in data:
+            return None
         psid, floor = self.get_psid_from_alias(
             data["Alias"][i],
             building,
@@ -474,14 +499,17 @@ class Alerts:
             )
         return None
 
-    def valid_temp_alias(self, alias):
+    def valid_temp_alias(self, alias : str) -> bool:
         """Return True if alias is valid for air temperatures."""
         valid = False
         if "RM" in alias:
             valid = True
         return valid
 
-    def add_specific_aliases(self, alert):
+    def add_specific_aliases(
+            self,
+            alert : dict
+    ) -> str:
         """Add where statement if applicable"""
         if "*" not in alert["aliaspsid"]:
             alias = alert["aliaspsid"].split(" ")
@@ -493,7 +521,13 @@ class Alerts:
             return f" WHERE Alias = '{new_alias}'"
         return ""
 
-    def check_temp(self, temps, room, alert, building):
+    def check_temp(
+            self,
+            temps : dict,
+            room : str,
+            alert : dict,
+            building : str
+    ) -> None:
         """Check relative temperature values."""
         Alias_Temp = "Temp"
         if ("Temp" not in temps[room] or
@@ -593,7 +627,12 @@ class Alerts:
 
         return None
 
-    def check_time(self, data, alert, building):
+    def check_time(
+            self,
+            data : pd.DataFrame,
+            alert : dict,
+            building : str
+    ) -> None:
         """Check time off since last report."""
         for i in range(len(data)):
             #psid = data["PointSliceID"][i]
@@ -630,13 +669,17 @@ class Alerts:
             )
         return None
 
-    def check_energy_num_buildings(self, log_name, alert):
+    def check_energy_num_buildings(
+            self,
+            log_name : str,
+            alert : dict
+    ) -> None:
         """Check number of successes in log file."""
         processed_file_neccessary = int(
             alert["condition"].split(" ")[-1]
         )
         num_processed_files = 0
-        if os.path.isfile(log_name):
+        if path.isfile(log_name):
             log_file = open(log_name, "r")
             log_lines = log_file.readlines()
             for line in log_lines:
@@ -680,14 +723,14 @@ class Alerts:
 
         return None 
 
-    def num_decom_anomalies(self):
+    def num_decom_anomalies(self) -> int:
         num = 0
         for anomaly in self.anomalies:
-            if anomaly.aliaspsid in self.known_issues.alias_psid:
+            if anomaly.aliaspsid in self.known_issues:
                 num += 1
         return num
 
-    def get_sname_to_dname(self):
+    def get_sname_to_dname(self) -> dict:
         """Get map of sname to dname."""
         data = pd.read_sql_query(
             "SELECT BuildingSName, BuildingDName "
@@ -699,18 +742,27 @@ class Alerts:
             a2b[data["BuildingSName"][i]] = data["BuildingDName"][i]
         return a2b
 
-    def get_buildingdname(self, buildingsname):
+    def get_buildingdname(self, buildingsname : str) -> str:
         """Get building D name from building S name."""
         return self.sname_to_dname.get(buildingsname, buildingsname)
 
-    def get_queue_buildings(self):
+    def get_queue_buildings(self) -> pd.DataFrame:
         data = pd.read_sql_query(
             "SELECT * FROM CEVAC_ALERT_QUEUE",
             self.conn
         )
         return data
 
-    def queue_buildings_match(self, buildings, metric, age):
+    def queue_buildings_match(
+            self,
+            buildings : list,
+            metric : str,
+            age : int
+    ) -> list:
+        """
+        Returns list of buildings that should be checked and
+        are in the queue.
+        """
         qb = []
         print(self.queue_buildings)
         for i in range(len(self.queue_buildings)):
@@ -727,7 +779,7 @@ class Alerts:
         print(f"Matching Queue Buildings {matching_buildings}")
         return matching_buildings
 
-    def erase_queue(self):
+    def erase_queue(self) -> None:
         if not self.queue:
             return None
         cursor = self.conn.cursor()
@@ -739,327 +791,6 @@ class Alerts:
         cursor.commit()
         cursor.close()
         return None
-
-    def __del__(self):
-        """Deconstructor."""
-        # self.conn.close()
-        return 
-
-
-class Anomaly:
-    def __init__(
-            self, message, metric, building, eventid,
-            priority, aliaspsid, alert_name, buildingdname,
-            floor=""
-    ):
-        self.message = message
-        self.metric = metric
-        self.building = building
-        self.eventid = int(eventid)
-        self.priority = str(priority)
-        self.aliaspsid = aliaspsid
-        self.time = datetime.datetime.utcnow()
-        self.alert_name = alert_name
-        self.buildingdname = buildingdname
-
-        # Optional, not always available
-        self.floor = floor
-
-        self.original = True
-
-    def send(self, cursor):
-        stat = (
-            f"IF EXISTS(SELECT TOP 1 EventID FROM "
-            f"CEVAC_ALL_ALERTS_EVENTS_HIST_RAW WHERE "
-            f"EventID = {self.eventid}) BEGIN "
-            f"UPDATE CEVAC_ALL_ALERTS_EVENTS_HIST_RAW "
-            f"SET AlertMessage = '{self.message}', "
-            f"latest_UTC = GETUTCDATE(), "
-            f"AlertType = '{self.priority}'"
-            f"WHERE EventID = {self.eventid}; "
-            f"END ELSE BEGIN "
-            f"INSERT INTO CEVAC_ALL_ALERTS_EVENTS_HIST_RAW "
-            f"(EventID, AlertType, AlertMessage, BuildingSName, "
-            f"Metric, latest_UTC) "
-            f"VALUES (?, ?, ?, ?, ?, GETUTCDATE()); END"
-        )
-        
-        cursor.execute(stat, [
-            self.eventid,
-            self.priority,
-            self.message,
-            self.building,
-            self.metric
-        ])
-        cursor.commit()
-        
-        return None
-
-    def __str__(self):
-        sstr = (
-            f"INSERT INTO CEVAC_ALL_ALERTS_HIST_RAW"
-            f"(AlertType, AlertMessage, Metric, BuildingSName, "
-            f"UTCDateTime, Alias, EventID) "
-            f"VALUES('{self.priority}', '{self.message}', "
-            f"'{self.metric}', "
-            f"'{self.building}', '{self.time}', '{self.aliaspsid}', "
-            f"'{self.eventid}')"
-        )
-        return sstr
-
-
-class Occupancy:
-    """Simple singleton to maintain occupancy data."""
-
-    def __init__(self, conn):
-        """Initialize building_occupied map."""
-        data = pd.read_sql_query(
-            "SELECT * FROM CEVAC_OCCUPANCY", conn
-        )
-        
-        self.building_occupied = {"*": False}
-        for i in range(len(data)):
-            crontab = (f"{data['Minutes'][i]} {data['Hour'][i]} "
-                       f"{data['Day_month'][i]} "
-                       f"{data['Month'][i]} {data['Day_week'][i]}")
-            bsn = "BuildingSName"
-            occstr = "Occupied"
-            if data['Cron_Occupancy'][i]:
-                if not self.cron_is_now(crontab):
-                    continue
-                if "*" in data[bsn][i]:
-                    for item in self.building_occupied:
-                        self.building_occupied[item] = data[occstr][i]
-                    self.building_occupied["*"] = data[occstr][i]
-                else:
-                    self.building_occupied[
-                        data[bsn][i]] = data[occstr][i]
-
-    def building_is_occupied(self, building):
-        """Return True if in occupied time."""
-        if building not in self.building_occupied:
-            return self.building_occupied["*"]
-        else:
-            return self.building_occupied[building]
-
-    def is_occupied(self):
-        """Return True if in occupied time."""
-        now = datetime.datetime.now()
-        day = now.isoweekday()
-        hour = now.hour
-        correct_day = (day >= 1 and day <= 5)
-        correct_hour = (hour >= 8 and hour < 17)
-        if (correct_day and correct_hour):
-            return True
-        return False
-
-    def cron_is_now(self, cron, offset=5):
-        """Return True if cron is within 5 minutes of now."""
-        now = datetime.datetime.utcnow()
-        c = croniter(cron)
-        td = (now - c.get_next(datetime.datetime))
-        td_min = abs(td.total_seconds()/60)
-        if td_min < offset:
-            return True
-        return False
-
-
-class Parameters:
-    """Represents alert parameters."""
-    
-    def __init__(self, conn):
-        """Initialize parameters."""
-        data = pd.read_sql_query(
-            "SELECT * FROM CEVAC_ALERT_PARAMETERS",
-            conn
-        )
-        self.alert_parameters = []
-        for i in range(len(data)):
-            self.alert_parameters.append({
-                "alert_name": data['alert_name'][i],
-                "metric": data['Metric'][i],
-                "condition": data['Condition'][i],
-                "message": data['message'][i],
-                "occupancy": data['occupancy'][i],
-                "building": data['BuildingSName'][i],
-                "aggregation": data['aggregation'][i],
-                "priority": data['Priority'][i],
-                "aliaspsid": data["Alias_PSID"][i],
-                "type": self.type_from_condition(
-                    data['Condition'][i]
-                ),
-            })
-        self.alerted_buildings = {}
-        self.metric_to_bldgs = self.get_active_buildings(conn)
-
-    def type_from_condition(self, condition):
-        if "time" in condition.lower():
-            return "time"
-        if "coolingsp" in condition.lower():
-            return "temp"
-        if "heatingsp" in condition.lower():
-            return "temp"
-        if "energy_num_buildings" in condition.lower():
-            return "energy_num_buildings"
-        return "numerical"
-
-    def get_aliases(self, parameter):
-        if "*" in parameter["aliaspsid"]:
-            return ["*"]
-
-    def get_active_buildings(self, conn):
-        data = pd.read_sql_query(
-            "SELECT DISTINCT BUILDINGSNAME, METRIC "
-            "FROM CEVAC_TABLES WHERE TABLENAME "
-            "LIKE '%HIST_VIEW%'",
-            conn
-        )
-        metric_to_bldgs = {}
-        for i in range(len(data)):
-            metric = data["METRIC"][i]
-            bldg = data["BUILDINGSNAME"][i]
-            self.alerted_buildings[bldg] = False
-            if metric in metric_to_bldgs:
-                metric_to_bldgs[metric].append(bldg)
-            else:
-                metric_to_bldgs[metric] = [bldg]
-        return metric_to_bldgs
-
-class Known_Issues:
-    """Represents known issues to ignore."""
-    
-    def __init__(self, conn):
-        """Initialize known issues."""
-        data = pd.read_sql_query(
-            "SELECT * FROM CEVAC_KNOWN_ISSUES",
-            conn
-        )
-        self.alias_psid = {}
-        for i in range(len(data)):
-            if 'decomissioned' in data['Code'][i].lower():
-                self.alias_psid[data['PSID_Alias'][i]] = None
-
-    def check_aliaspsid(self, aliaspsid):
-        return (aliaspsid in self.alias_psid)
-
-class EventID_Handler:
-    """Ease use of event IDs."""
-    def __init__(self, conn, debug=False, verbose=False):
-        self.debug = debug
-        self.verbose = verbose
-        
-        self.json_oc = "/cevac/cron/alert_log_oc.json"
-        self.json_unoc = "/cevac/cron/alert_log_unoc.json"
-        self.json_files = [
-            self.json_oc,
-            self.json_unoc,
-        ]
-        self.new_events = {}
-        self.conn = conn
-        self.data = pd.read_sql_query(
-            f"SELECT * FROM CEVAC_ALERTS_EVENTS_IDS",
-            self.conn
-        )
-        self.max_id = self.get_max_id()
-        self.event_to_id = self.get_event_to_id(self.data)
-        self.remove_ids = []
-
-    def remove_event_id(self, alias, psid, alert):
-        name = f"{alias} {psid} {alert['type']}"
-        if name in self.event_to_id:
-            self.remove_ids.append(self.event_to_id[name])
-        return None
-
-    def commit_removes(self):
-        cursor = self.conn.cursor()
-        for eid in self.remove_ids:
-            if not self.debug:
-                cursor.execute(
-                    f"DELETE FROM CEVAC_ALERTS_EVENTS_IDS "
-                    f"WHERE EventID = {eid}"
-                )
-                cursor.commit()
-            else:
-                verbose_print(
-                    self.verbose,
-                    f"DELETE FROM CEVAC_ALERTS_EVENTS_IDS "
-                    f"WHERE EventID = {eid}"
-                )
-        
-        cursor.close()
-        return None
-
-    def add_event_id(self, name, eid):
-        self.new_events[name] = eid
-        return None
-
-    def commit_adds(self):
-        cursor = self.conn.cursor()
-        for name in self.new_events:
-            eid = self.new_events[name]
-            if not self.debug:
-                cursor.execute(
-                    f"INSERT INTO CEVAC_ALERTS_EVENTS_IDS "
-                    f"(EventName, EventID) "
-                    f"VALUES ('{str(name)}', {int(eid)})"
-                )
-                cursor.commit()
-            else:
-                verbose_print(
-                    self.verbose,
-                    f"INSERT INTO CEVAC_ALERTS_EVENTS_IDS "
-                    f"(EventName, EventID) "
-                    f"VALUES ('{str(name)}', {int(eid)})"
-                )
-        cursor.close()
-        return None
-
-    def get_event_to_id(self, data):
-        """Return map of event to id"""
-        d = {}
-        for i in range(len(data)):
-            d[data["EventName"][i]] = data["EventID"][i]
-        return d
-
-    def get_max_id(self):
-        so_far = 1
-        for f in self.json_files:
-            d = json.load(open(f, "r"))
-            nums = [d[key] for key in d]
-            so_far = max(so_far, *nums)
-        for eid in self.data["EventID"]:
-            so_far = max(so_far, eid)
-        return so_far + 1
-
-    def assign_event_id(self, alert, alias, psid):
-        """Assign event id."""
-        if str(alert) == "All Clear":
-            key = f"{alias} All Clear"
-        else:
-            key = f"{alias} {psid} {alert['type']}"
-        if key in self.event_to_id:
-            return self.event_to_id[key]
-        else:
-            this_id = self.max_id
-            self.max_id += 1
-            self.add_event_id(key, this_id)
-            return this_id
-
-    def changes(self):
-        mess = "EVENTIDS CHANGES: \n"
-        mess += f"Adding {self.new_events}\n"
-        mess += f"Removing {self.remove_ids}"
-        return mess
-
-def rebuild_broken_cache(table, conn):
-    """Rebuild a broken cache."""
-    cursor = conn.cursor()
-    cursor.execute("EXEC CEVAC_CACHE_INIT @tables = '{table}_BROKEN'")
-    cursor.commit()
-    conn.commit()
-    cursor.close()
-    return None
-
 
 # For debugging
 if __name__ == "__main__":
@@ -1080,7 +811,7 @@ if __name__ == "__main__":
     all_alerts.alert_system()
 
     for a in all_alerts.anomalies:
-        if a.aliaspsid in all_alerts.known_issues.alias_psid:
+        if a.aliaspsid in all_alerts.known_issues:
             continue
         print(str(a))
     print(

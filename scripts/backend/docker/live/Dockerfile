@@ -13,4 +13,4 @@ RUN pip install /root/src/CEVAC_python
 WORKDIR /root/src/CEVAC_python/
 # WORKDIR /mnt/src/CEVAC_python/CEVAC/
 # ENTRYPOINT ["/bin/bash"]
-CMD ["python3.7","-m","CEVAC","-x","live"]
+CMD ["python3.7","-m","CEVAC","-x","live", "--loop"]
