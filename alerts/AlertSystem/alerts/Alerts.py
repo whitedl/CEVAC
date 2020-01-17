@@ -780,6 +780,9 @@ class Alerts:
         return matching_buildings
 
     def erase_queue(self) -> None:
+        """
+        Erase QIDs from queue.
+        """
         if not self.queue:
             return None
         cursor = self.conn.cursor()
@@ -788,6 +791,16 @@ class Alerts:
                 f"DELETE FROM CEVAC_ALERT_QUEUE "
                 f"WHERE QID = {QID}"
             )
+        cursor.commit()
+        cursor.close()
+        return None
+    
+    def rebuild_broken_cache(self, table : str) -> None:
+        """Rebuild a broken cache"""
+        cursor = self.conn.cursor()
+        cursor.execute(
+            "EXEC CEVAC_CACHE_INIT @tables='{table}_BROKEN'"
+        )
         cursor.commit()
         cursor.close()
         return None
@@ -828,15 +841,7 @@ if __name__ == "__main__":
         
     print("FINISHED")
 
-    def rebuild_broken_cache(self, table : str) -> None:
-        """Rebuild a broken cache"""
-        cursor = self.conn.cursor()
-        cursor.execute(
-            "EXEC CEVAC_CACHE_INIT @tables='{table}_BROKEN'"
-        )
-        cursor.commit()
-        cursor.close()
-        return None
+
 
 """
       /##.*/
