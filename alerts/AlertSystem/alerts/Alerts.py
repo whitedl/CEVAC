@@ -48,7 +48,7 @@ class Alerts:
         self.verbose = verbose
         self.debug = debug
         self.LOG = True
-        if logging is None:
+        if self.logging is None:
             self.LOG = False
         self.xref_only = xref_only
             
@@ -86,7 +86,7 @@ class Alerts:
     def alert_system(self) -> None:
         """Find and catalog all anomalies."""
         if self.LOG:
-            logging.info(
+            self.logging.info(
                 f"ALERT SYSTEM RUNNING"
             )
 
@@ -231,7 +231,7 @@ class Alerts:
                 self.check_energy_num_buildings(log_name, alert)
 
         if self.LOG:
-            logging.info(
+            self.logging.info(
                 f"ALERT SYSTEM FINISHED"
             )
         if self.verbose:
