@@ -1,5 +1,6 @@
 """
-Tools for testing alert sytem.
+utest.py
+Tools for unit testing alert sytem.
 
 If something breaks, find the line number and
 read the corresponding comment to debug.
@@ -24,7 +25,6 @@ class TestOccupancy(unittest.TestCase):
 
     def test_length(self):
         occ = Occupancy(conn)
-        print(occ)
         self.assertTrue(len(occ) > 1)
         # If error, means occupancy table
         # isn't being read correctly, it should
@@ -33,14 +33,13 @@ class TestOccupancy(unittest.TestCase):
     def test_current_occupancy(self):
         occ = Occupancy(conn)
         hour = datetime.datetime.now().hour
-        if hour > 8 and hour < 5:
+        day = datetime.datetime.now().isoweekday()
+        if hour > 8 and hour < 17 and day >= 1 and day <= 5:
             self.assertTrue(occ.is_occupied())
         else:
             self.assertFalse(occ.is_occupied())
         # If error, means croniter parsing is
         # broken
-        
-
 
 class TestEventIDHandler(unittest.TestCase):
 
@@ -153,7 +152,52 @@ class TestAnomaly(unittest.TestCase):
         self.assertTrue(a1 == a2)
         # If error, equality is broken
 
-        
+
+class TestAlertSystem(unittest.TestCase):
+
+    def test_variable_creation(self):
+        return
+
+    def test_main_call(self):
+        return
+
+    def test_numerical(self):
+        return
+
+    def test_temp(self):
+        return
+
+    def test_time(self):
+        return
+
+    def test_nrg_num_bldgs(self):
+        return
+
+    def test_table_exists(self):
+        return
+
+    def test_replace_generic(self):
+        return
+
+    def test_skip_unoc(self):
+        return
+
+    def test_assign_eventid(self):
+        return
+
+    def test_get_alias_or_psid(self):
+        return
+
+    def test_sname_to_dname(self):
+        return
+
+    def test_queue(self):
+        return
+
+    def test_whole_system(self):
+        return
+
+
 if __name__ == "__main__":
     conn = pyodbc.connect(
         "DRIVER={ODBC Driver 17 for SQL Server};"
