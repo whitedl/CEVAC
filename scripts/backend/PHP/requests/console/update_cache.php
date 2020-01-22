@@ -17,9 +17,9 @@ foreach($_POST['attributes'] as $a){
   $a = clean($a);
   if($a == "autoLASR"){
     $lasr_script = "/cevac/scripts/lasr_append.sh $BuildingSName $Metric HIST";
-    $exec .= " && $lasr_script";
+    $exec .= " && sudo -u cevac $lasr_script";
     $lasr_script = "/cevac/scripts/lasr_append.sh $BuildingSName $Metric LATEST";
-    $exec .= " && $lasr_script";
+    $exec .= " && sudo -u cevac $lasr_script";
   }
 }
 $exec .= "\n";

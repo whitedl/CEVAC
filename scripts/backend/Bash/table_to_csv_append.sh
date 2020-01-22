@@ -206,7 +206,9 @@ if [ ! -f /srv/csv/$table.csv ]; then
   fi
   echo "Generating $table.csv..."
    # get columns
+  rm -f /cevac/cache/cols_$table.csv
   /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$cols_query" -W -o "/cevac/cache/cols_$table.csv" -h-1 -s"," -w 700
+  chmod 777 /cevac/cache/cols_$table.csv
   tr '\n' ',' < /cevac/cache/cols_$table.csv > /cevac/cache/temp_cols_$table.csv && mv /cevac/cache/temp_cols_$table.csv /cevac/cache/cols_$table.csv
   truncate -s-1 /cevac/cache/cols_$table.csv
   echo "" >> /cevac/cache/cols_$table.csv
@@ -214,11 +216,13 @@ if [ ! -f /srv/csv/$table.csv ]; then
   echo Executing query:
   echo "$query"
   # get data
+  rm -f /cevac/cache/$table.csv
   if ! /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$query" -W -o "/cevac/cache/$table.csv" -h-1 -s"," -w 700 ; then
     error="Failed generating $table.csv"
     /cevac/scripts/log_error.sh "$error" "$table"
     exit 1
   fi
+  chmod 777 /cevac/cache/$table.csv
   if [ ! -z "$hist" ]; then
     # create _CSV if a HIST table
     if ! /cevac/scripts/exec_sql.sh "$csv_utc_query"; then
@@ -241,11 +245,13 @@ else # csv exists
   echo "$append_query"
 
   # Get columns and data
+  rm -f /cevac/cache/$table.csv
   if ! /opt/mssql-tools/bin/sqlcmd -S $h -U $u -d $db -P $p -Q "$append_query" -W -o "/cevac/cache/$table.csv" -s"," -w 700 ; then
     error="Failed to get columns and data..."
     /cevac/scripts/log_error.sh "$error" "$table"
     exit 1
   fi
+  chmod 777 /cevac/cache/$table.csv
   # remove separator
   sed 2d -i /cevac/cache/$table.csv
 
@@ -267,6 +273,7 @@ else # csv exists
   # Replace NULL with period for LASR
   sed -i 's/NULL/./g' /cevac/cache/$table.csv
   cat /cevac/cache/$table.csv /srv/csv/$table.csv | sponge /srv/csv/$table.csv
+  chmod 777 /srv/csv/$table.csv
   echo "Done appending."
 
 fi

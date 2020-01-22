@@ -84,7 +84,7 @@ for t in "${tables_array[@]}"; do
   fi
 done
 # wait
-echo "All _HIST tables have been loaded."
+echo "All $Age tables have been loaded."
 if [ "$runsas" != "norun" ]; then
   echo "Executing runsas.sh..."
   time /cevac/scripts/runsas.sh
