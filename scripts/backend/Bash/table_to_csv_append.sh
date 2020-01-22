@@ -60,14 +60,14 @@ SELECT name FROM sys.columns WHERE object_id = OBJECT_ID('dbo.$table')"
 
 cevac_tables_query="
 IF EXISTS (SELECT TableName FROM CEVAC_TABLES WHERE TableName = '$table') AND OBJECT_ID('$table_CSV') IS NOT NULL BEGIN
-	DECLARE @BuildingSName NVARCHAR(100);
-	DECLARE @Metric NVARCHAR(100);
-	DECLARE @Age NVARCHAR(100);
-	DECLARE @TableName NVARCHAR(100);
-  DECLARE @DateTimeName NVARCHAR(50);
-  DECLARE @AliasName NVARCHAR(50);
-  DECLARE @IDName NVARCHAR(50);
-  DECLARE @DataName NVARCHAR(50);
+	DECLARE @BuildingSName NVARCHAR(MAX);
+	DECLARE @Metric NVARCHAR(MAX);
+	DECLARE @Age NVARCHAR(MAX);
+	DECLARE @TableName NVARCHAR(MAX);
+  DECLARE @DateTimeName NVARCHAR(MAX);
+  DECLARE @AliasName NVARCHAR(MAX);
+  DECLARE @IDName NVARCHAR(MAX);
+  DECLARE @DataName NVARCHAR(MAX);
   DECLARE @isCustom BIT;
   DECLARE @customLASR BIT;
 	SET @BuildingSName = (SELECT TOP 1 BuildingSName FROM CEVAC_TABLES WHERE TableName = '$table');
@@ -97,7 +97,6 @@ IF EXISTS (SELECT TableName FROM CEVAC_TABLES WHERE TableName = '$table') AND OB
       @customLASR
 		)
 END
-
 "
 
 if [ "$UTCDateTime" != "$IDName" ]; then

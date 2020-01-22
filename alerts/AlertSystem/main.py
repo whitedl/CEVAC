@@ -4,7 +4,7 @@ Main script for CEVAC alert sytem.
 """
 
 from tools.tools import string_to_bool, verbose_print
-from alerts import alerts
+from alerts import Alerts
 from emails import Email
 from machine_learning import ml
 
@@ -165,11 +165,11 @@ if __name__ == "__main__":
 
     all_alerts = None
     if CHECK_ALERTS or RUN_QUEUE:
-        all_alerts = alerts.Alerts(logging, UPDATE_CACHE,
+        all_alerts = Alerts.Alerts(logging, UPDATE_CACHE,
                                    verbose=VERBOSE, conn=conn,
                                    queue=RUN_QUEUE, debug=DEBUG
         )
-        all_alerts.alert_system()
+        all_alerts()  # Run the alert system
         verbose_print(VERBOSE, "CHECK_ALERTS is True")
         verbose_print(VERBOSE,(
             f"Anomalies: {len(all_alerts.anomalies)}\n"
@@ -189,7 +189,7 @@ if __name__ == "__main__":
                 verbose=VERBOSE, conn=conn,
                 queue=RUN_QUEUE
             )
-            all_alerts.alert_system()
+            all_alerts()
             all_alerts.send()
 
     if SEND_EMAIL or UPDATE_WEB:

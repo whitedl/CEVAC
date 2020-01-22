@@ -18,7 +18,7 @@ done
 
 
 hist_views_query="
-SELECT RTRIM(BuildingSName), RTRIM(Metric), RTRIM(Age)
+SELECT DISTINCT RTRIM(BuildingSName), RTRIM(Metric), RTRIM(Age)
 FROM CEVAC_TABLES
 WHERE autoCACHE = 1
 "
