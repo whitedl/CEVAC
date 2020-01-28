@@ -2302,11 +2302,7 @@
         "ADDRESS": "216 South Palmetto Boulevard",
         "Shape_Leng": 321.45497763,
         "Shape_Area": 3267.68297626,
-<<<<<<< HEAD
         "BLDG_Class": "ACADEMICS",
-=======
-        "BLDG_Class": "E_G",
->>>>>>> 67d23dc0f61aac988e07402db83e24a1149d6537
         "Floors": 4,
         "Rooms": 261,
         "Status": "Active",
