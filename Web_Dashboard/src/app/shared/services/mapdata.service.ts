@@ -167,6 +167,10 @@ export class MapdataService {
       }
     }
     this.legend.addTo(this.map);
+<<<<<<< HEAD
+=======
+    this.getBuilding('WATT');
+>>>>>>> 67d23dc0f61aac988e07402db83e24a1149d6537
     return this.map;
   };
 
