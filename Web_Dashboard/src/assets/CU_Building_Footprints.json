@@ -2302,7 +2302,7 @@
         "ADDRESS": "216 South Palmetto Boulevard",
         "Shape_Leng": 321.45497763,
         "Shape_Area": 3267.68297626,
-        "BLDG_Class": "E_G",
+        "BLDG_Class": "ACADEMICS",
         "Floors": 4,
         "Rooms": 261,
         "Status": "Active",
@@ -3429,7 +3429,7 @@
         "Short_Name": "Rhodes",
         "ADDRESS": "118 Engineering Service Drive",
         "Status": "Active",
-        "BLDG_Class": "E_G",
+        "BLDG_Class": "ACADEMICS",
         "Shape_Leng": 156.298280137,
         "Shape_Area": 972.397740916
       }
@@ -3536,7 +3536,7 @@
         "ADDRESS": "433 Calhoun Drive",
         "Shape_Leng": 269.735285681,
         "Shape_Area": 1530.75022235,
-        "BLDG_Class": "E_G",
+        "BLDG_Class": "ACADEMICS",
         "Floors": 5,
         "Rooms": 194,
         "Status": "Active",
@@ -4129,7 +4129,7 @@
         "ADDRESS": "110 Heisman Street",
         "Shape_Leng": 509.416436278,
         "Shape_Area": 9957.90121387,
-        "BLDG_Class": "E_G",
+        "BLDG_Class": "ACADEMICS",
         "Floors": 6,
         "Rooms": 202,
         "Status": "Active",
@@ -5368,7 +5368,7 @@
         "ADDRESS": "116 Sigma Drive",
         "Shape_Leng": 254.456291019,
         "Shape_Area": 4046.74953452,
-        "BLDG_Class": "E_G",
+        "BLDG_Class": "ACADEMICS",
         "Floors": 7,
         "Rooms": 248,
         "Status": "Active",
@@ -5636,7 +5636,7 @@
         "Short_Name": "BROOKS",
         "ADDRESS": "141 Jersey Lane",
         "Status": "Active",
-        "BLDG_Class": "E_G",
+        "BLDG_Class": "ACADEMICS",
         "Shape_Leng": 475.484066852,
         "Shape_Area": 4400.26019931
       }
@@ -9308,7 +9308,7 @@
         "Shape_Leng": 209.013533359,
         "Shape_Area": 1498.51842292,
         "Status": "Active",
-        "BLDG_Class": "E_G"
+        "BLDG_Class": "ACADEMICS"
       }
     },
     {
@@ -9547,7 +9547,7 @@
         "Short_Name": "HARDIN",
         "ADDRESS": "403 Calhoun Drive",
         "Status": "Active",
-        "BLDG_Class": "E_G",
+        "BLDG_Class": "ACADEMICS",
         "Shape_Leng": 210.492849997,
         "Shape_Area": 1305.24873767
       }
@@ -9596,7 +9596,7 @@
         "Shape_Leng": 299.700962661,
         "Shape_Area": 1957.59191122,
         "Status": "Active",
-        "BLDG_Class": "E_G"
+        "BLDG_Class": "ACADEMICS"
       }
     },
     {
@@ -9957,7 +9957,7 @@
         "Short_Name": "POOLE",
         "ADDRESS": "130 McGinty Court",
         "Status": "Active",
-        "BLDG_Class": "E_G",
+        "BLDG_Class": "ACADEMICS",
         "Shape_Leng": 341.225632728,
         "Shape_Area": 6365.65994316
       }
@@ -10654,7 +10654,7 @@
         "ADDRESS": " ",
         "Shape_Leng": 266.975233121,
         "Shape_Area": 1204.77794794,
-        "BLDG_Class": "E_G",
+        "BLDG_Class": "ACADEMICS",
         "Floors": 3,
         "Rooms": 103,
         "Status": "Active",
@@ -10685,7 +10685,7 @@
         "ADDRESS": " ",
         "Shape_Leng": 254.600534824,
         "Shape_Area": 3803.73013662,
-        "BLDG_Class": "E_G",
+        "BLDG_Class": "ACADEMICS",
         "Floors": 3,
         "Rooms": 107,
         "Status": "Active",
@@ -11182,7 +11182,7 @@
         "ADDRESS": " ",
         "Shape_Leng": 224.919721995,
         "Shape_Area": 2467.1112962,
-        "BLDG_Class": "E_G",
+        "BLDG_Class": "ACADEMICS",
         "Floors": 5,
         "Rooms": 143,
         "Status": "Active",
