@@ -3429,11 +3429,7 @@
         "Short_Name": "Rhodes",
         "ADDRESS": "118 Engineering Service Drive",
         "Status": "Active",
-<<<<<<< HEAD
         "BLDG_Class": "ACADEMICS",
-=======
-        "BLDG_Class": "E_G",
->>>>>>> 67d23dc0f61aac988e07402db83e24a1149d6537
         "Shape_Leng": 156.298280137,
         "Shape_Area": 972.397740916
       }
