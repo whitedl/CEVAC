@@ -19,6 +19,7 @@ from alerts.EventIDHandler import EventIDHandler
 from alerts.KnownIssues import KnownIssues
 from alerts.Parameters import Parameters
 from alerts.Anomaly import Anomaly
+from alerts.Alerts import Alerts
 
 
 class TestOccupancy(unittest.TestCase):
@@ -180,21 +181,69 @@ class TestAlertSystem(unittest.TestCase):
         return
 
     def test_skip_unoc(self):
-        return
+        d = {
+            "WATT": {
+                "occupancy": True
+            }
+            "COOPER": {
+                "occupancy": True
+            }
+        }
+        hour = datetime.datetime.now().hour
+        day = datetime.datetime.now().isoweekday()
+        if day >= 1 and day <= 5:
+            as_reuse.skip_unnocupied("WATT", )
 
     def test_assign_eventid(self):
-        return
+        eid = as_reuse.assign_event_id(
+            {
+                "type": "TEST"
+            },
+            "Test_Alias",
+            -2
+        )
+        self.assertTrue(eid > 500)
+        # If false, not reading table correctly
 
     def test_get_alias_or_psid(self):
-        return
+        table_to_aop = {
+            "CEVAC_WATT_TEMP_LATEST": "Alias",
+            "CEVAC_ASC_CO2_LATEST": "Alias",
+            "CEVAC_HENDRIX_HUM_DAY": "Alias",
+        }
+        for table, aop in table_to_aop.items():
+            """
+            print(
+                f"{table}, {aop}, "
+                f"{as_reuse.get_alias_or_psid(table)}"
+            )
+            """
+            self.assertTrue(
+                aop == as_reuse.get_alias_or_psid(table)
+            )
+        # If error, tables aren't being matched with alias
+        # correctly.
 
     def test_sname_to_dname(self):
-        return
+        snames = [
+            "WATT",
+            "ASC",
+            "LEE_III",
+            "FLUOR"
+        ]
+        dnames = [
+            "Watt Family Innovation Center",
+            "Academic Success Center",
+            "Lee III Hall",
+            "Fluor Daniel Engineering Innovation Building"
+        ]
+        for i, (sname, dname) in enumerate(zip(snames, dnames)):
+            self.assertTrue(
+                dname == as_reuse.sname_to_dname[sname].strip()
+            )
+        # If error, snames and dnames may have changed.
 
     def test_queue(self):
-        return
-
-    def test_whole_system(self):
         return
 
 
@@ -206,6 +255,7 @@ if __name__ == "__main__":
         "UID=wficcm;"
         "PWD=5wattcevacmaint$"
     )
+    as_reuse = Alerts(None, False, conn=conn)
     unittest.main()
     conn.close()
 

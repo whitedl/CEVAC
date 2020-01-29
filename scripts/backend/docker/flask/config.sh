@@ -1,4 +1,4 @@
 #! /bin/sh
 
-image="cevac:base"
+image="cevac:admin"
 filename=$(echo "$image" | sed -e "s/:/_/g")".tar"

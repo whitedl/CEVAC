@@ -27,6 +27,8 @@ function reset_PXREF(){
   document.getElementById('download_button_div').style.display = 'none';
 }
 function PXREF_button_click(){
+  exemptArray = [document.getElementById('sql_output_div'),document.getElementById('PXREF_div')]
+  hide_output(exemptArray);
   pb = document.getElementById('PXREF_button');
   document.getElementById('Age_text').value = 'PXREF';
   view = "View PXREF";
@@ -52,10 +54,10 @@ function building_info_button_click(){
   if(button.innerHTML == view){
     get_BUILDING_INFO_html();
     reset_buttons(button);
-    button.innerHTML = update;
+    // button.innerHTML = update;
   } else{
     // update_aliases();
-    button.innerHTML = view;
+    // button.innerHTML = view;
   }
 }
 
@@ -183,6 +185,13 @@ function view_live_button_click(){
   exemptArray = [document.getElementById('sql_output_div'),document.getElementById('download_button_div')]
   hide_output(exemptArray);
 }
+function view_age_button_click(Age){
+  document.getElementById('Age_text').value = Age;
+  TableName = doc_TableName();
+  get_table_html(TableName);
+  exemptArray = [document.getElementById('sql_output_div'),document.getElementById('download_button_div')]
+  hide_output(exemptArray);
+}
 function view_day_button_click(){
   hide_output();
   button = document.getElementById('view_day_button');
@@ -190,7 +199,11 @@ function view_day_button_click(){
   document.getElementById('download_button_div').style.display = 'block';
   document.getElementById('Age_text').value = 'DAY';
   reset_buttons(button);
-  get_day_html();
+  BuildingSName = document.getElementById('buildings').value;
+  Metric = document.getElementById('metrics').value;
+  TableName = gen_TableName(BuildingSName, Metric, 'DAY');
+  get_table_html(TableName);
+  // get_day_html();
   exemptArray = [document.getElementById('sql_output_div'),document.getElementById('download_button_div')]
   hide_output(exemptArray);
 }
@@ -238,14 +251,19 @@ function alerts_report_button_click(){
 }
 function alerts_parameters_button_click(){
   reset_buttons();
-  hide_output(document.getElementById('sql_output_div'));
+  exempt_array = [document.getElementById('sql_output_div'), document.getElementById('commit_button_div')]
+  hide_output(exempt_array);
   BuildingSName = 'ALERT';
   Metric = 'PARAMETERS';
   Age = '';
   TableName = gen_TableName(BuildingSName, Metric, Age);
-  get_table_html(TableName, editable=true);
+  get_table_html(TableName, editable=true, order_by="Priority ASC, ParameterID ASC");
   // document.getElementById('sql_output_div').style.display = 'none';
   // document.getElementById('iframe_div').style.display = 'block';
+}
+function commit_button_click(){
+  TableName = document.getElementById('TableName').value = 'CEVAC_ALERT_PARAMETERS';
+  submit_table(TableName);
 }
 function parse_power_button_click(){
   hide_output(document.getElementById('output_text_div'));
@@ -255,6 +273,7 @@ function parse_power_button_click(){
     data: $('form').serialize(),
     success: function(data){
       // document.getElementById('update_cache_button').disabled = false;
+      // hide_output(document.getElementById('output'));
       document.getElementById('output').innerHTML = data;
     }
   });
@@ -270,8 +289,30 @@ function update_cache_button_click(){
     data: $('form').serialize(),
     success: function(data){
       document.getElementById('update_cache_button').disabled = false;
+      // hide_output(document.getElementById('output'));
       document.getElementById('output').innerHTML = data;
     }
   });
 
+}
+function view_definition_button_click(){
+  BuildingSName = document.getElementById('buildings').value;
+  Metric = document.getElementById('metrics').value;
+   document.getElementById('Age_text').value = 'HIST_VIEW';
+  Age = document.getElementById('Age_text').value;
+  hide_output(document.getElementById('output_text_div'));
+  $.ajax({
+    type: 'GET',
+    url: 'console/CEVAC_TABLES_cell.php',
+    data: {
+      BuildingSName: BuildingSName,
+      Metric: Metric,
+      Age: Age,
+      column: 'definition'
+    },
+    success: function(data){
+      console.log(data);
+      document.getElementById('output').innerHTML = data;
+    }
+  });
 }

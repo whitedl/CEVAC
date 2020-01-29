@@ -19,8 +19,10 @@ error=""
 [ "$4" == "runsas" ] && runsas="runsas"
 
 is_latest=`echo "$age" | grep "LATEST"`
-if [ ! -z "$is_latest"  ]; then
-  echo "Latest detected. Removing /srv/csv/$table.csv"
+is_live=`echo "$age" | grep "LIVE"`
+is_events=`echo "$age" | grep "EVENTS"`
+if [ ! -z "$is_latest"  ] || [ ! -z "$is_live" ] || [ ! -z "$is_events" ]; then
+  echo "Latest or Live or Events detected. Removing /srv/csv/$table.csv"
   rm -f /srv/csv/$table.csv
 fi
 

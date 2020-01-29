@@ -11,7 +11,7 @@ $XREF = "CEVAC_$BuildingSName"."_$Metric"."_XREF";
 if(!isset($_GET['BuildingSName']) || !isset($_GET['Metric'])) die('missing params');
 
 $exists = table_exists($LATEST);
-if($exists == "DNE"){ die("$LATEST does not exist. Click Rebuild PXREF to create the table."); }
+if(!$exists){ die("$LATEST does not exist. Click Rebuild PXREF to create the table."); }
 
 $IDName = CEVAC_TABLES_value($LATEST, 'IDName');
 $AliasName = CEVAC_TABLES_value($LATEST, 'AliasName');

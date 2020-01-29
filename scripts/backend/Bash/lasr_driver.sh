@@ -1,7 +1,7 @@
 #! /bin/bash
 
 ! /cevac/scripts/check_lock.sh && exit 1
-/cevac/scripts/lock.sh
+# /cevac/scripts/lock.sh
 
 runsas="norun"
 reset="append"
@@ -9,29 +9,32 @@ customLASR="0"
 error=""
 Age="HIST"
 
-echo "Usage: $0 {customLASR} {runsas} {reset} {Age}"
+usage="Usage:
+  -b BuildingSName
+  -m Metric
+  -l customLASR
+  -s run SAS
+  -r reset csv cache
 
-if [ "$1" == "1" ]; then
-  echo "customLASR detected: Will only load HIST_LASR tables"
-  customLASR="$1"
-fi
-if [ ! -z "$2" ]; then
-  runsas="$2"
-fi
-if [ ! -z "$3" ]; then
-  reset="$3"
-fi
-if [ ! -z "$4" ]; then
-  Age="$4"
-fi
+  -h help
+"
+while getopts b:m:a:lsrh option; do
+  case "${option}"
+    in
+    b) BuildingSName=${OPTARG};;
+    m) Metric=${OPTARG};;
+    a) Age=${OPTARG};;
+    l) customLASR="1";;
+    s) runsas="runsas";;
+    r) reset="reset";;
+    h) echo "$usage" && /cevac/scripts/unlock.sh && exit 1 ;;
+  esac
+done
+
 if [ "$reset" == "reset" ]; then
   echo "Note: Reset detected. Loading entire HIST CSVs caches into LASR"
   echo "If you wish to rebuild CSV cache, delete everything in /srv/csv/"
   echo "If you wish to rebuild SQL cache, run ./init_tables.sh"
-fi
-if [ "$runsas" == "runsas" ]; then
-  echo "Note: runsas detected. Every table will trigger runsas.sh."
-  echo "This may harm performance. Omit or use norun for argument 2 to only upload to LASR"
 fi
 
 # update HIST_CACHE tables
@@ -44,7 +47,7 @@ if [ "$Age" == "HIST" ]; then
 fi
 
 hist_views_query="
-SELECT RTRIM(BuildingSName), RTRIM(Metric), RTRIM(Age) FROM CEVAC_TABLES
+SELECT DISTINCT RTRIM(BuildingSName), RTRIM(Metric), RTRIM(Age) FROM CEVAC_TABLES
 WHERE autoLASR = 1
 AND Age LIKE '%$Age%'
 AND customLASR = $customLASR
@@ -74,9 +77,27 @@ for t in "${tables_array[@]}"; do
       # exit 1
     fi
   fi
+  if [ "$A" == "LATEST" ]; then
+    if ! /cevac/scripts/exec_sql.sh "EXEC CEVAC_LATEST_OR_LIVE @BuildingSName = '$B', @Metric = '$M'" ; then
+      /cevac/scripts/log_error.sh "Failed to exec CEVAC_LATEST_OR_LIVE" "CEVAC_STATS_DT_INT"
+      /cevac/scripts/unlock.sh
+      exit 1
+    fi
+    q="SELECT TOP 1 newer_Age from CEVAC_STATS_DT_INT WHERE BuildingSName = '$B' AND Metric = '$M'"
+    newer_Age=$(/cevac/scripts/sql_value.sh "$q")
+    if [ "$newer_Age" != "$A" ] && [ ! -z "$newer_Age" ]; then
+      echo "$newer_Age is newer than $A. Continue with $newer_Age instead? [Y/n] "
+      # read answer
+      answer="y"
+      if [ "$answer" == "y" ] || [ "$answer" == "Y" ] || [ -z "$answer" ]; then
+        A="$newer_Age"
+        echo "Using $newer_Age instead of $A"
+      fi
+    fi
+  fi
 
   /cevac/scripts/seperator.sh
-  time if ! /cevac/scripts/lasr_append.sh $B $M $A $runsas $reset ; then
+  time if ! /cevac/scripts/lasr_append.sh $B $M $A "norun" $reset ; then
     error="Error uploading CEVAC_$B""_$M""_$A to LASR";
     /cevac/scripts/log_error.sh "$error"
     continue
@@ -84,8 +105,8 @@ for t in "${tables_array[@]}"; do
   fi
 done
 # wait
-echo "All _HIST tables have been loaded."
-if [ "$runsas" != "norun" ]; then
+echo "All $Age tables have been loaded."
+if [ "$runsas" == "runsas" ]; then
   echo "Executing runsas.sh..."
   time /cevac/scripts/runsas.sh
 else
