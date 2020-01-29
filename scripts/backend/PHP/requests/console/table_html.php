@@ -6,6 +6,7 @@ enforce_login();
 $BuildingSName = clean($_GET['BuildingSName']);
 $Metric = clean($_GET['Metric']);
 $Age = clean($_GET['Age']);
+$order_by = clean($_GET['order_by'], $except=[' ',',']);
 $XREF = "CEVAC_$BuildingSName"."_$Metric"."_XREF";
 if(!isset($_GET['TableName'])){
   if(!isset($_GET['BuildingSName']) ||
@@ -23,8 +24,8 @@ if(isset($_GET['editable']))
     $editable = true;
 
 $exists = table_exists($TableName);
-if($exists == "DNE"){ die("$TableName does not exist. Click Rebuild PXREF to create the table."); }
-$output = table_html($TableName,$editable=$editable);
+if(!$exists){ die("$TableName does not exist. Click Rebuild PXREF to create the table."); }
+$output = table_html($TableName,$editable=$editable,$order_by=$order_by);
 
 echo $output;
 ?>

@@ -2,5 +2,5 @@
 . ./config.sh
 rm -rf src/*
 cp -r ~/mnt/* src/
-docker build . -t "$image"
+docker build --no-cache . -t "$image"
 rm -rf src/*

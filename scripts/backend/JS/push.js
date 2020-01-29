@@ -7,7 +7,7 @@ function form_request(script){
     success: success_output
   });
 }
-function update_aliases(){
+function submit_table(TableName){
   table = document.getElementById('sql_output');
   headers = [];
   tdata = [];
@@ -20,20 +20,21 @@ function update_aliases(){
     }
     tdata.push(row);
   }
-  send_xref(headers, tdata);
-}
-function send_xref(l,t){
-  console.log('sending request');
-  u = 'console/update_XREF.php';
+  u = 'console/html_to_table.php';
   fd = $('form').serializeArray();
   $.ajax({
     type: 'POST',
     url: u,
-    data: { headers: l, tdata: t , fd: fd},
-    success: success_output
+    data: { headers: headers, tdata: tdata , fd: fd, TableName: TableName},
+    success: function(data){
+      alert(data);
+      // console.log(data);
+    }
   });
 }
 function rebuild_PXREF_click(){
+  exemptArray = [document.getElementById('output_text_div')];
+  hide_output(exemptArray);
   form_request('rebuild_PXREF.php');
   reset_buttons();
   // get_PXREF_html();

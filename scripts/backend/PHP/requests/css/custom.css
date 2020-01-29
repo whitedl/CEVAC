@@ -119,6 +119,9 @@
 #download_button_div{
   display: none;
 }
+#commit_button_div{
+  display: none;
+}
 #Age_text{
   display: none;
 }
@@ -173,4 +176,7 @@
 }
 .grid-item.button {
   visibility: hidden;
+}
+#TableName {
+  display: none;
 }

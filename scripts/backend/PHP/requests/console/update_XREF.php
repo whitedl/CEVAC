@@ -74,7 +74,6 @@ for($i = 0; $i < sizeof($_POST['tdata']); $i++){
     );
   END
   ";
-
 }
 // echo "$query";
 exec_sql($query);

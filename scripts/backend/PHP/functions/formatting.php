@@ -64,7 +64,7 @@ function stats_html($BuildingSName, $Metric){
   // $out .= "\n</table>";
   return $out;
 }
-function table_html($TableName,$editable=false){
+function table_html($TableName,$editable=false, $order_by=""){
   $IDName = CEVAC_TABLES_value($TableName, 'IDName');
   $AliasName = CEVAC_TABLES_value($TableName, 'AliasName');
   $DateTimeName = CEVAC_TABLES_value($TableName, 'DateTimeName');
@@ -84,7 +84,11 @@ function table_html($TableName,$editable=false){
     SELECT $cols
     FROM $TableName
   ";
-  if($DateTimeName != '') $query .= "\nORDER BY $DateTimeName DESC";
+  if($DateTimeName != ''){
+    $order_by = "$DateTimeName DESC";
+    // $query .= "\nORDER BY $DateTimeName DESC";
+  }
+  if ($order_by != "") $query .= "ORDER BY $order_by";
   // die($query);
   $result = exec_sql($query);
 

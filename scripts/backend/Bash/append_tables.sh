@@ -59,7 +59,8 @@ for t in "${tables_array[@]}"; do
   LATEST="CEVAC_$B""_$M""_LATEST"
   compare=$(echo "$TableName" | grep "COMPARE")
   pred=$(echo "$TableName" | grep "PRED")
-  if [ ! -z "$compare" ] || [ ! -z "$pred" ]; then # always recache COMPARE and PRED tables
+  events=$(echo "$TableName" | grep "EVENTS")
+  if [ ! -z "$compare" ] || [ ! -z "$pred" ] || [ ! -z "$events" ]; then # always recache COMPARE and PRED tables
     # sql="EXEC CEVAC_CACHE_INIT @tables = '"$HIST_VIEW"'; EXEC CEVAC_CACHE_INIT @tables = '$DAY_VIEW'"
     sql="EXEC CEVAC_CACHE_INIT @tables = '$HIST_VIEW,$DAY_VIEW,$LATEST_FULL,$LATEST,$LATEST_BROKEN'"
   else

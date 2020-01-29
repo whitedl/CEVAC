@@ -4,12 +4,13 @@
 /cevac/scripts/lock.sh
 
 echo "Updating HIST"
-if ! /cevac/scripts/lasr_hist_driver.sh "0" "norun" "append" "HIST"; then
+if ! /cevac/scripts/lasr_driver.sh -a "HIST"; then
   /cevac/scripts/log_error.sh "Failed updating HIST tables"
   exit 1
 fi
+
 echo "Updating LATEST"
-if ! /cevac/scripts/lasr_hist_driver.sh "0" "norun" "append" "LATEST"; then
+if ! /cevac/scripts/lasr_driver.sh -a "LATEST"; then
   /cevac/scripts/log_error.sh "Failed updating LATEST tables"
   exit 1
 fi

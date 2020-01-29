@@ -60,19 +60,19 @@ SELECT name FROM sys.columns WHERE object_id = OBJECT_ID('dbo.$table')"
 
 cevac_tables_query="
 IF EXISTS (SELECT TableName FROM CEVAC_TABLES WHERE TableName = '$table') AND OBJECT_ID('$table_CSV') IS NOT NULL BEGIN
-	DECLARE @BuildingSName NVARCHAR(MAX);
-	DECLARE @Metric NVARCHAR(MAX);
-	DECLARE @Age NVARCHAR(MAX);
-	DECLARE @TableName NVARCHAR(MAX);
+  DECLARE @BuildingSName NVARCHAR(MAX);
+  DECLARE @Metric NVARCHAR(MAX);
+  DECLARE @Age NVARCHAR(MAX);
+  DECLARE @TableName NVARCHAR(MAX);
   DECLARE @DateTimeName NVARCHAR(MAX);
   DECLARE @AliasName NVARCHAR(MAX);
   DECLARE @IDName NVARCHAR(MAX);
   DECLARE @DataName NVARCHAR(MAX);
   DECLARE @isCustom BIT;
   DECLARE @customLASR BIT;
-	SET @BuildingSName = (SELECT TOP 1 BuildingSName FROM CEVAC_TABLES WHERE TableName = '$table');
-	SET @Metric = (SELECT TOP 1 Metric FROM CEVAC_TABLES WHERE TableName = '$table');
-	SET @Age = (SELECT TOP 1 Age FROM CEVAC_TABLES WHERE TableName = '$table');
+  SET @BuildingSName = (SELECT TOP 1 BuildingSName FROM CEVAC_TABLES WHERE TableName = '$table');
+  SET @Metric = (SELECT TOP 1 Metric FROM CEVAC_TABLES WHERE TableName = '$table');
+  SET @Age = (SELECT TOP 1 Age FROM CEVAC_TABLES WHERE TableName = '$table');
   SET @DateTimeName = (SELECT TOP 1 DateTimeName FROM CEVAC_TABLES WHERE TableName = '$table');
   SET @IDName = (SELECT TOP 1 IDName FROM CEVAC_TABLES WHERE TableName = '$table');
   SET @AliasName = (SELECT TOP 1 AliasName FROM CEVAC_TABLES WHERE TableName = '$table');
@@ -81,13 +81,13 @@ IF EXISTS (SELECT TableName FROM CEVAC_TABLES WHERE TableName = '$table') AND OB
   SET @customLASR = (SELECT TOP 1 customLASR FROM CEVAC_TABLES WHERE TableName = '$table');
   
 
-	DELETE FROM CEVAC_TABLES WHERE TableName = '$table_CSV';
-	INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, isCustom, Dependencies, customLASR)
-		VALUES (
-			@BuildingSName,
-			@Metric,
-			@Age,
-			'$table_CSV',
+  DELETE FROM CEVAC_TABLES WHERE TableName = '$table_CSV';
+  INSERT INTO CEVAC_TABLES (BuildingSName, Metric, Age, TableName, DateTimeName, IDName, AliasName, DataName, isCustom, Dependencies, customLASR)
+    VALUES (
+      @BuildingSName,
+      @Metric,
+      @Age,
+      '$table_CSV',
       '$UTCDateTime',
       '$IDName',
       '$Alias',
@@ -95,7 +95,7 @@ IF EXISTS (SELECT TableName FROM CEVAC_TABLES WHERE TableName = '$table') AND OB
       @isCustom,
       '$table',
       @customLASR
-		)
+    )
 END
 "
 
@@ -181,12 +181,14 @@ p="$SQL_PASS"
 
 hist=$(echo "$table" | grep "HIST")
 latest=$(echo "$table" | grep "LATEST")
+live=$(echo "$table" | grep "LIVE")
+events=$(echo "$table" | grep "EVENTS")
 xref=$(echo "$table" | grep "XREF")
 issues=$(echo "$table" | grep "ISSUES")
 compare=$(echo "$table" | grep "COMPARE")
 lasr=$(echo "$table" | grep "LASR")
-if [ ! -z "$latest" ] || [ ! -z "$xref" ] || [ ! -z "$compare"  ] || [ ! -z "$issues" ]; then
-  echo LATEST, XREF, COMPARE, or ISSUES detected. Will overwrite $table.csv
+if [ ! -z "$latest" ] || [ ! -z "$xref" ] || [ ! -z "$compare"  ] || [ ! -z "$issues" ] || [ ! -z "$live" ] || [ ! -z "$events" ]; then
+  echo LATEST, LIVE, XREF, COMPARE, or ISSUES detected. Will overwrite $table.csv
   rm -f /srv/csv/$table.csv
   echo "Dropping $table_CSV"
   if ! /cevac/scripts/exec_sql.sh "IF OBJECT_ID('$table_CSV') IS NOT NULL DROP TABLE $table_CSV" ; then

@@ -127,11 +127,12 @@ function get_latest_html(){
     }
   );
 }
-function get_table_html(TableName,editable=false){
+function get_table_html(TableName,editable=false, order_by=""){
+  console.log(TableName);
   $.ajax({
     type: 'GET',
     url: 'console/table_html.php',
-    data: {TableName:TableName, editable: editable},
+    data: {TableName:TableName, editable: editable, order_by: order_by},
     success: function(data){
       document.getElementById('sql_output').innerHTML = data;
       // button.disabled = false;

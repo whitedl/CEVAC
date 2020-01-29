@@ -67,7 +67,6 @@ function hide_output(exempt=null){
   }
   else exemptArray = exempt;
   elements = document.getElementsByClassName('output_div');
-  console.log(exemptArray);
   for(var i = 0; i < elements.length; i++){
     if(exemptArray.includes(elements[i])){
       elements[i].style.visibility = "visible";
@@ -94,7 +93,6 @@ function plot(d){
   document.getElementById('canvas_div').innerHTML = "<canvas id='canvas'></canvas>";
   document.getElementById('canvas_div').style.display = 'block';
   let jsonfile = JSON.parse(d);
-  console.log(jsonfile);
   var AliasName = jsonfile['keys']['AliasName'];
   var DataName = jsonfile['keys']['DataName'];
   var labels = jsonfile.data.map(function(e) {

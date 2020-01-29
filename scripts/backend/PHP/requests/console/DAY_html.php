@@ -10,7 +10,7 @@ $XREF = "CEVAC_$BuildingSName"."_$Metric"."_XREF";
 if(!isset($_GET['BuildingSName']) || !isset($_GET['Metric'])) die('missing params');
 
 $exists = table_exists($DAY);
-if($exists == "DNE"){ die("$DAY does not exist."); }
+if(!$exists){ die("$DAY does not exist."); }
 
 $IDName = CEVAC_TABLES_value($DAY, 'IDName');
 $AliasName = CEVAC_TABLES_value($DAY, 'AliasName');

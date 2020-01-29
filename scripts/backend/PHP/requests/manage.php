@@ -32,7 +32,8 @@
 					<input type="radio" name="actions_select" value="new" onchange="get_Metrics_html()">
 					<span class="checkmark"></span>
 				</label>
-        <input type="text" id="Age_text" name="Age">
+        <input type="text" id="Age_text" name="Age" value="HIST_VIEW">
+        <input type="text" id="TableName" name="TableName" value="">
         <input type="file" name="upload_xref" id="upload_xref" />
         <div id="select_options_div">
           <?php echo buildings_html(); ?>
@@ -77,11 +78,12 @@
             <h5>Table Actions</h5>
             <ul id="table_actions_list">
               <li><a href="#" id="view_stats_button" onclick="view_stats_button_click()">View Latest Statistics</a></li>
-              <li><a href="#" id="view_latest_button" onclick="view_latest_button_click()">View Latest</a></li>
-              <li><a href="#" id="view_live_button" onclick="view_live_button_click()">View Live</a></li>
+              <li><a href="#" id="view_latest_button" onclick="view_age_button_click('LATEST')">View Latest</a></li>
+              <li><a href="#" id="view_live_button" onclick="view_age_button_click('LIVE')">View Live</a></li>
               <li><a href="#" id="plot_latest_button" onclick="plot_latest_button_click()">Plot Latest</a></li>
               <li><a href="#" id="plot_live_button" onclick="plot_live_button_click()">Plot Live</a></li>
-              <li><a href="#" id="view_day_button" onclick="view_day_button_click()">View Last 24 Hours</a></li>
+              <li><a href="#" id="view_day_button" onclick="view_age_button_click('DAY')">View Last 24 Hours</a></li>
+              <li><a href="#" id="view_definition_button" onclick="view_definition_button_click()">View Definition</a></li>
             </ul>
           </div>
           <div class="grid-item advanced">
@@ -130,6 +132,9 @@
       <div id="download_button_div" class="output_div">
         <button type="button"  onclick='download_button_click()' id="download_button">Download</button>
       </div>
+      <div id="commit_button_div" class="output_div">
+        <button type="button"  onclick='commit_button_click()' id="commit_button">Commit</button>
+      </div>
       <div id="add_building_div">
         <form id="add_building_form">
           <input placeholder="BuildingSName" type="text" id="new_BuildingSName" name="new_BuildingSName"/>
@@ -145,6 +150,8 @@
         <iframe id="iframe_output" src="/cevac_alerts/alerts.html" frameborder="0"></iframe>
       </div>
       <div id="sql_output_div" class="output_div">
+<!--        <h3 id='sql_output_TableName'></h3>
+-->
         <table id="sql_output"></table>
       </div>
       <div id="canvas_div" class="output_div">
