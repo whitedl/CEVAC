@@ -1,3 +1,3 @@
-[submodule "CEVAC_python"]
-	path = CEVAC_python
-	url = https://github.com/bmeares/CEVAC_python.git
+[submodule "scripts/backend/docker/base/src/CEVAC_python"]
+	path = scripts/backend/docker/base/src/CEVAC_python
+	url = https://gitlab.clemson.edu/cevac/CEVAC_python.git

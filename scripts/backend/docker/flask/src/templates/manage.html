@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+	<head>
+    <meta charset="utf-8"/>
+    <title>CEVAC Database Management</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/har.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/custom.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/slider.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/radio.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.4.1.min.js"></script>
+    <script src="{{ url_for('static', filename='JS/console.js') }}"></script>
+    <script src="{{ url_for('static', filename='JS/format.js') }}"></script>
+    <script src="{{ url_for('static', filename='JS/pull.js') }}"></script>
+    <script src="{{ url_for('static', filename='JS/push.js') }}"></script>
+		<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+	</head>
+	<body onload="get_buildings_select_html(); enable_BuildingKeySearch()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+    <h2>CEVAC Administrative Console</h2>
+    <!-- <a onclick="show_hide_class('advanced');" href="#">Advanced options</a><br><br> -->
+    <div id="body_left">
+      <form method="post" id="toggle" onSubmit="search();return false;" action="">
+				<label class="container">Existing
+					<input type="radio" checked="checked" name="actions_select" value="existing" onchange="get_Metrics_html()">
+					<span class="checkmark"></span>
+				</label>
+				<label class="container">New
+					<input type="radio" name="actions_select" value="new" onchange="get_Metrics_html()">
+					<span class="checkmark"></span>
+				</label>
+        <input type="text" id="Age_text" name="Age" value="HIST_VIEW">
+        <input type="text" id="TableName" name="TableName" value="">
+        <input type="file" name="upload_xref" id="upload_xref" />
+        <div id="select_options_div" onload="get_buildings_select_html()">
+          <select name="BuildingSName" id="buildings" onchange="get_Metrics_html()"></select>
+          <select name="Metric" id="metrics" style="display: block"></select><br>
+        </div>
+        <div class="grid-container">
+          <div class="grid-item">
+            <div id="autoCACHE_div">
+              <p>autoCACHE</p>
+              <label for="autoCACHE" id="autoCACHE_label" class="switch">
+              <input type="checkbox" name="attributes[]" value="autoCACHE" id='autoCACHE' onclick="toggle()">
+              <span class="slider round"></span>
+              </label>
+            </div>
+          </div> <!-- End of Grid item 1 -->
+          <div class="grid-item">
+            <div id="autoLASR_div">
+              <p>autoLASR</p>
+              <label for="autoLASR" id="autoLASR_label" class="switch">
+                <input type="checkbox" name="attributes[]" value="autoLASR" id='autoLASR' onclick="toggle()">
+                <span class="slider round"></span>
+              </label>
+            </div>
+          </div> <!-- End of Grid item 2 -->
+          <div class="grid-item">
+            <button type="button" class="action_button" name="update_cache_button" id="update_cache_button" onclick="update_cache_button_click()">Update Cache</button>
+          </div>
+          <div class="grid-item button">
+            <button type="button" class="action_button" name="bootstrap_button" id="bootstrap_button" onclick="bootstrap()">Build Pipeline</button>
+          </div>
+          <div class="grid-item button">
+            <div><button type="button" class="action_button" name="push_to_lasr_button" id="push_to_lasr_button" onclick="push_to_lasr()">Push to LASR</button></div>
+            <div>
+                <input type="checkbox" name="rebuild_csv_check" id="rebuild_csv_check"/>
+                <label for="rebuild_csv_check">Rebuild CSV</label>
+            </div>
+          </div>
+          <div class="grid-item button">
+            <button type="button" class="action_button" name="delete_button" id="delete_button" onclick="del()">Delete</button>
+          </div>
+          <div class="grid-item advanced">
+            <h5>Table Actions</h5>
+            <ul id="table_actions_list">
+              <li><a href="#" id="view_stats_button" onclick="view_stats_button_click()">View Latest Statistics</a></li>
+              <li><a href="#" id="view_latest_button" onclick="view_age_button_click('LATEST')">View Latest</a></li>
+              <li><a href="#" id="view_live_button" onclick="view_age_button_click('LIVE')">View Live</a></li>
+              <li><a href="#" id="plot_latest_button" onclick="plot_latest_button_click()">Plot Latest</a></li>
+              <li><a href="#" id="plot_live_button" onclick="plot_live_button_click()">Plot Live</a></li>
+              <li><a href="#" id="view_day_button" onclick="view_age_button_click('DAY')">View Last 24 Hours</a></li>
+              <li><a href="#" id="view_definition_button" onclick="view_definition_button_click()">View Definition</a></li>
+            </ul>
+          </div>
+          <div class="grid-item advanced">
+            <h5>XREF Actions</h5>
+            <ul id="XREF_list">
+              <li><a href="#" id="PXREF_button" onclick="PXREF_button_click()">View PXREF</a></li>
+              <li><a href="#" name="rebuild_PXREF_button" id="rebuild_PXREF_button" onclick="rebuild_PXREF_click()">Rebuild PXREF</a></li>
+              <li><a href="#" name="upload_xref_button" id="upload_xref_button" onclick="upload_xref_button_click()">Upload XREF</a></li>
+            </ul>
+          </div>
+          <div class="grid-item advanced">
+            <h5>Building Actions</h5>
+            <ul id="building_info_list">
+              <li><a href="#" name="building_info_button" id="building_info_button" onclick="building_info_button_click()">View Buildings</a></li>
+              <li><a href="#" name="BuildingKey_search_button" id="BuildingKey_search_button" onclick="BuildingKey_search_button_click()">Search BuildingKeys</a></li>
+            </ul>
+          </div>
+          <div class="grid-item advanced">
+            <h5>Alerts Actions</h5>
+             <ul id="alerts_list">
+              <li><a href="#" name="alerts_report_button" id="alerts_report_button" onclick="alerts_report_button_click()">View Alerts Report</a></li>
+              <li><a href="#" name="alerts_parameters_button" id="alerts_parameters_button" onclick="alerts_parameters_button_click()">Edit Alerts Parameters</a></li>
+             </ul>
+          </div>
+          <div class="grid-item advanced">
+            <h5>Power Actions</h5>
+             <ul id="power_list">
+              <li><a href="#" name="parse_power_button" id="parse_power_button" onclick="parse_power_button_click()">Parse Power Data Files</a></li>
+             </ul>
+
+          </div>
+
+        </div> <!-- End of Grid -->
+      </form>
+    </div> <!-- End of Body Left -->
+    <div id="body_right">
+      <div id="BuildingKey_search_div">
+        <input placeholder="BuildingKey" type="text" id="search_BuildingKey" oninput="enable_BuildingKeySearch()">
+        <button type="button" onclick="get_BuildingKeySearch_html()" id="BuildingKeySearch_submit_button">Search</button>
+        <button type="button" onclick="download_BuildingKeySearch_click()" id="BuildingKeySearch_download_button">Download</button>
+      </div>
+      <div id="PXREF_div">
+        <button type="button" onclick='download_PXREF_click()' id="download_PXREF_button">Download PXREF</button>
+        <button type="button"  onclick='download_XREF_click()' id="download_XREF_button">Download XREF</button>
+      </div>
+      <div id="download_button_div" class="output_div">
+        <button type="button"  onclick='download_button_click()' id="download_button">Download</button>
+      </div>
+      <div id="commit_button_div" class="output_div">
+        <button type="button"  onclick='commit_button_click()' id="commit_button">Commit</button>
+      </div>
+      <div id="add_building_div">
+        <form id="add_building_form">
+          <input placeholder="BuildingSName" type="text" id="new_BuildingSName" name="new_BuildingSName"/>
+          <input placeholder="BuildingDName" type="text" id="new_BuildingDName" name="new_BuildingDName"/>
+          <input placeholder="BuildingKey" type="text" id="new_BuildingKey" name="new_BuildingKey"/>
+        </form>
+        <button type="button" id="add_building_button" onclick="add_building_click()">Add Building</button>
+      </div>
+      <div id="output_text_div" class="output_div">
+        <pre id="output"></pre>
+      </div>
+      <div id="iframe_div" class="output_div">
+        <iframe id="iframe_output" src="/cevac_alerts/alerts.html" frameborder="0"></iframe>
+      </div>
+      <div id="sql_output_div" class="output_div">
+<!--        <h3 id='sql_output_TableName'></h3>
+-->
+        <table id="sql_output"></table>
+      </div>
+      <div id="canvas_div" class="output_div">
+        <canvas id="canvas" width="200" height="200"></canvas>
+      </div>
+    </div>
+	</body>
+</html>
