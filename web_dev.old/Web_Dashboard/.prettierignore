@@ -1,8 +1,0 @@
-package.json
-package-lock.json
-dist
-build
-e2e
-node_modules
-.angulardoc.json
-.vscode/*

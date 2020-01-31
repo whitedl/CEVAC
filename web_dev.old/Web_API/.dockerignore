@@ -1,7 +1,0 @@
-node_modules
-npm-debug.log
-/dist
-.vscode
-.pm2
-.config
-
